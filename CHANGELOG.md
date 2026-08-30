@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.237.8] - 2026-08-30
+
+### Corrigé
+- **L'entrée de menu « Calculatrice taxes QC » (icône 💰) menait vers `/outils/simulateur-fiscal` plutôt que vers la calculatrice de taxes annoncée par son propre libellé.** Signalé par le fondateur : le sous-titre affiché sous ce libellé était « Simulateur fiscal Québec » - un doute légitime sur ce qui était réellement faux (le lien, ou le sous-titre). Vérification en base (`Tool::whereIn('slug', ['calculatrice-taxes', 'simulateur-fiscal'])`) : les DEUX outils existent réellement, actifs (`is_active = true`), avec chacun sa propre vue complète (`calculatrice-taxes.blade.php`, 44 Ko ; `simulateur-fiscal.blade.php`, 57 Ko) et sa propre route publique (`/outils/{slug}` générique, `PublicToolController::show`). Le vrai défaut n'était donc ni un lien inversé ni un sous-titre mal collé pris isolément : une seule entrée de menu conflait deux outils distincts, et la calculatrice de taxes (Tool #8) n'avait purement et simplement AUCUNE entrée à elle dans le menu - le simulateur (Tool #15) usurpait son libellé.
+- Corrigé dans les trois zones du menu où l'entrée conflictuelle vivait réellement (`Modules/FrontTheme/resources/views/partials/header.blade.php`) : le mega-menu desktop « Outils › Pratique », son repli `<ul class="sub-menu">` pour mobile, et le widget « Outils » de la barre latérale mobile (hamburger). Chacune affiche désormais deux entrées distinctes et correctement reliées : 💰 Calculatrice taxes QC → `/outils/calculatrice-taxes` (« TPS et TVQ en un clic ») et 📊 Simulateur fiscal Québec → `/outils/simulateur-fiscal` (« Impôts et graphiques »). Le bloc de menu « Jouer » (`#181`), qui contenait la même paire fautive, est resté intentionnellement hors périmètre : mort de chez mort, encadré par `@if(false)` depuis la fusion `#200` (jamais rendu, aucun utilisateur ne peut l'atteindre).
+- Traductions anglaises ajoutées pour les deux nouveaux sous-titres (`lang/en.json`) : « Impôts et graphiques » → « Taxes and charts », « TPS et TVQ en un clic » → « GST and QST in one click ».
+- Régression couverte par un nouveau test (`Modules/FrontTheme/tests/Feature/HeaderToolsMenuLinksTest.php`, 5 cas, 41 assertions) qui isole chaque zone vivante du menu et vérifie, pour chaque lien `/outils/{slug}`, que le libellé affiché immédiatement après correspond au bon outil - jamais à l'autre. Rouge confirmé sur le code d'avant correctif (5 échecs : lien manquant vers la calculatrice dans les trois zones, libellé de la calculatrice affiché sur le lien du simulateur, signature exacte du bug historique détectée) ; vert confirmé après restauration du correctif (5 tests, 41 assertions).
+
 ## [1.237.7] - 2026-08-30
 
 ### Corrigé

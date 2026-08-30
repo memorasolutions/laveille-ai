@@ -131,9 +131,16 @@
                                         {{-- Pratique --}}
                                         <div>
                                             <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">⚙️ {{ __('Pratique') }}</div>
-                                            <a href="{{ url('/outils/simulateur-fiscal') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                            {{-- #v1.237.8 : deux outils fiscaux DISTINCTS (Tool#8 calculatrice-taxes, Tool#15 simulateur-fiscal) —
+                                                 une seule entrée conflait les deux (libellé calculatrice, lien simulateur), laissant la
+                                                 calculatrice sans entrée de menu propre. Voir docs/HISTORIQUE-VERSIONS.md. --}}
+                                            <a href="{{ url('/outils/calculatrice-taxes') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
                                                 <span style="font-size:18px;line-height:1;">💰</span>
-                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Calculatrice taxes QC') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Simulateur fiscal Québec') }}</div></div>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Calculatrice taxes QC') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('TPS et TVQ en un clic') }}</div></div>
+                                            </a>
+                                            <a href="{{ url('/outils/simulateur-fiscal') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
+                                                <span style="font-size:18px;line-height:1;">📊</span>
+                                                <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Simulateur fiscal Québec') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Impôts et graphiques') }}</div></div>
                                             </a>
                                             @if(Route::has('tools.quest.index') && config('tools.quest.enabled', false))
                                             <a href="{{ route('tools.quest.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'" role="menuitem">
@@ -157,8 +164,9 @@
                                     @if(Route::has('directory.compare-by-ids'))<li><a href="{{ route('directory.compare-by-ids') }}">🆚 {{ __("Comparateur d'outils IA") }}</a></li>@endif
                                     <li><a href="{{ url('/outils/mots-croises') }}">🔤 {{ __('Mots croisés') }}</a></li>
                                     <li><a href="{{ url('/outils/sudoku') }}">🧩 {{ __('Sudoku') }}</a></li>
+                                    <li><a href="{{ url('/outils/calculatrice-taxes') }}">💰 {{ __('Calculatrice taxes QC') }}</a></li>
+                                    <li><a href="{{ url('/outils/simulateur-fiscal') }}">📊 {{ __('Simulateur fiscal Québec') }}</a></li>
                                     <li><a href="{{ url('/outils/qt') }}">🧠 {{ __('QT : Quotient Techno') }}</a></li>
-                                    <li><a href="{{ url('/outils/simulateur-fiscal') }}">💰 {{ __('Calculatrice taxes QC') }}</a></li>
                                     @if(Route::has('tools.quest.index') && config('tools.quest.enabled', false))<li><a href="{{ route('tools.quest.index') }}">🎮 {{ __('Quête narrative') }}</a></li>@endif
                                     @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}">→ {{ __('Tous les outils') }}</a></li>@endif
                                 </ul>
@@ -607,7 +615,8 @@
                                                 <li><a href="{{ url('/outils/qt') }}">🧠 {{ __('QT : Quotient Techno') }}</a></li>
                                                 <li><a href="{{ url('/jeumc') }}">🎯 {{ __('Grilles partagées') }}</a></li>
                                                 @if(Route::has('shorturl.create'))<li><a href="{{ route('shorturl.create') }}">🔗 {{ __('Raccourcir un lien') }}</a></li>@endif
-                                                <li><a href="{{ url('/outils/simulateur-fiscal') }}">💰 {{ __('Calculatrice taxes QC') }}</a></li>
+                                                <li><a href="{{ url('/outils/calculatrice-taxes') }}">💰 {{ __('Calculatrice taxes QC') }}</a></li>
+                                                <li><a href="{{ url('/outils/simulateur-fiscal') }}">📊 {{ __('Simulateur fiscal Québec') }}</a></li>
                                                 @if(Route::has('tools.quest.index') && config('tools.quest.enabled', false))<li><a href="{{ route('tools.quest.index') }}">🎮 {{ __('Quête narrative') }}</a></li>@endif
                                                 @if(Route::has('tools.index'))<li><a href="{{ route('tools.index') }}"><strong>→ {{ __('Voir tous les outils') }}</strong></a></li>@endif
                                             </ul>
