@@ -15,8 +15,11 @@ declare(strict_types=1);
  * Laravel UNE fois, puis exécute la commande demandée en paramètre GET `cmd` - contre la liste
  * blanche COMMANDES_AUTORISEES ci-dessous, un jeton valide ne suffit pas à tout permettre - avec
  * ses arguments/options en JSON dans le paramètre `args` (une option porte son préfixe `--` DANS
- * la clé, ex. `{"article":"38306","--publish":true}`), et écrit sa sortie telle quelle dans la
- * réponse HTTP.
+ * la clé, ex. `{"article":"38306","--publish":true}`), chaque clé revalidée contre
+ * ARGUMENTS_AUTORISES de SA commande : jeton valide et commande autorisée ne suffisent pas non
+ * plus à tout permettre, une clé non déclarée est un refus pur et simple (403), jamais un
+ * filtrage silencieux qui continuerait avec le sous-ensemble reconnu. Écrit sa sortie telle
+ * quelle dans la réponse HTTP.
  *
  * Auto-suppression, dans cet ordre STRICT : (1) expiration testée EN TOUT PREMIER, avant même la
  * lecture du jeton - un jeton perdu ou une commande mal formée ne doit JAMAIS rendre ce fichier
@@ -60,6 +63,25 @@ if (! is_string($providedToken) || $providedToken === '' || ! hash_equals($expec
 // la famille /actu2 réellement exécutées par ce runner sont acceptées ici.
 const COMMANDES_AUTORISEES = ['news:brief', 'news:source', 'news:apply', 'news:create-draft'];
 
+// ACTION : liste blanche des arguments/options, CETTE FOIS PAR COMMANDE - une commande autorisée
+// ne suffit pas non plus à tout permettre. Reflète exactement le $signature de chaque classe sous
+// Modules/News/app/Console/ (une option porte son préfixe `--` dans la clé, comme dans $args plus
+// bas). Brancher une commande hors /actu2 (ex. un traitement ponctuel) exige SA ligne ICI en plus
+// de COMMANDES_AUTORISEES - une commande présente sans son entrée ci-dessous est refusée en bloc,
+// jamais exécutée sans contrat déclaré.
+// MCP: SELF (<5 lignes utiles, le reste est la liste elle-même)
+// RAISON: le JSON `args` est arbitraire depuis la requête - sans cette liste, un mode forcé ou une
+// sélection explicite d'identifiants restent constructibles depuis l'URL pour n'IMPORTE QUELLE
+// commande dès qu'elle est dans COMMANDES_AUTORISEES (mesuré : un runner généré depuis ce même
+// gabarit pour news:regenerate-fallback-images laissait passer --force/--ids sans que rien dans ce
+// fichier ne les nomme).
+const ARGUMENTS_AUTORISES = [
+    'news:brief' => ['article'],
+    'news:source' => ['article', 'url', '--replace'],
+    'news:apply' => ['article', '--payload', '--image', '--credit', '--publish', '--enrich'],
+    'news:create-draft' => ['url', '--title'],
+];
+
 $commande = $_GET['cmd'] ?? null;
 
 if (! is_string($commande) || ! in_array($commande, COMMANDES_AUTORISEES, true)) {
@@ -69,6 +91,31 @@ if (! is_string($commande) || ! in_array($commande, COMMANDES_AUTORISEES, true))
     exit(1);
 }
 
+// Décodé et validé AVANT d'amorcer Laravel : une clé hors contrat n'a pas besoin du framework pour
+// être rejetée - même philosophie que l'expiration testée avant le jeton plus haut.
+$args = json_decode(is_string($_GET['args'] ?? null) ? $_GET['args'] : '{}', true);
+$args = is_array($args) ? $args : [];
+
+$argumentsAutorisesCommande = ARGUMENTS_AUTORISES[$commande] ?? null;
+
+if ($argumentsAutorisesCommande === null) {
+    // Commande listée dans COMMANDES_AUTORISEES mais oubliée ci-dessus : bogue de configuration de
+    // CE fichier, pas une tentative d'abus - refusée quand même, jamais exécutée sans contrat.
+    http_response_code(500);
+    echo "configuration incomplète : aucun ARGUMENTS_AUTORISES pour cette commande\n";
+
+    exit(1);
+}
+
+foreach (array_keys($args) as $cle) {
+    if (! in_array($cle, $argumentsAutorisesCommande, true)) {
+        http_response_code(403);
+        echo "argument hors liste blanche : {$cle}\n";
+
+        exit(1);
+    }
+}
+
 require __DIR__.'/../vendor/autoload.php';
 $app = require __DIR__.'/../bootstrap/app.php';
 /** @var \Illuminate\Contracts\Console\Kernel $kernel */
@@ -76,10 +123,8 @@ $kernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
 // `{{STORAGE}}` dans une valeur d'argument ne peut être résolu qu'ICI, une fois Laravel amorcé
-// (storage_path() n'existe pas avant) - remplacé dans chaque valeur texte de $args.
-$args = json_decode(is_string($_GET['args'] ?? null) ? $_GET['args'] : '{}', true);
-$args = is_array($args) ? $args : [];
-
+// (storage_path() n'existe pas avant) - remplacé dans chaque valeur texte de $args, déjà validées
+// ci-dessus.
 $storage = storage_path('app/oneshot-uploads');
 foreach ($args as $cle => $valeur) {
     if (is_string($valeur)) {

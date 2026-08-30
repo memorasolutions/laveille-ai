@@ -15,7 +15,7 @@
 # CE SCRIPT NE TOUCHE JAMAIS À LA PRODUCTION LUI-MÊME et NE DÉTIENT AUCUN SECRET/IDENTIFIANT :
 # il GÉNÈRE localement (i) le fichier one-shot prêt à déposer et (ii), le cas échéant, la
 # correspondance fichier local -> chemin prod pour --payload/--image, PUIS affiche les étapes
-# exactes que le superviseur Claude exécute lui-même avec ses propres outils (MCP cpanel pour le
+# exactes que le superviseur exécute lui-même avec ses propres outils (MCP cpanel pour le
 # dépôt, curl pour le déclenchement et la vérification du 404).
 #
 # Usage :
@@ -159,6 +159,56 @@ for arg in "$@"; do
             ;;
     esac
 done
+
+# ── Liste blanche des arguments/options : source unique de vérité = ARGUMENTS_AUTORISES du
+#    squelette (le runner déployé revalide la MÊME liste à l'exécution - défense en profondeur,
+#    cf. squelette). Échoue ICI, localement, avant tout dépôt - plutôt que de découvrir un 403
+#    après upload. Tableau vide = rien à vérifier (bash 3.2 de macOS lève "unbound variable" sur
+#    l'expansion d'un tableau vide sous `set -u`, donc on l'évite plutôt que de la garder). ──
+ARGS_KEYS_ONLY=()
+for ((i = 0; i < ${#ARGS_PAIRS[@]}; i += 2)); do
+    ARGS_KEYS_ONLY+=("${ARGS_PAIRS[$i]}")
+done
+
+if [ "${#ARGS_KEYS_ONLY[@]}" -gt 0 ]; then
+    set +e
+    php -r '
+    $tpl = file_get_contents($argv[1]);
+    if (! preg_match("/const\s+ARGUMENTS_AUTORISES\s*=\s*(\[[^;]*\]);/s", $tpl, $m)) {
+        fwrite(STDERR, "ARGUMENTS_AUTORISES introuvable dans le squelette\n");
+        exit(2);
+    }
+    $parCommande = eval("return {$m[1]};");
+    $commande = $argv[2];
+    if (! array_key_exists($commande, $parCommande)) {
+        fwrite(STDERR, "aucune entree ARGUMENTS_AUTORISES pour {$commande}\n");
+        exit(2);
+    }
+    $autorisees = $parCommande[$commande];
+    $horsListe = [];
+    for ($i = 3; $i < count($argv); $i++) {
+        if (! in_array($argv[$i], $autorisees, true)) {
+            $horsListe[] = $argv[$i];
+        }
+    }
+    if ($horsListe) {
+        fwrite(STDERR, "hors liste : ".implode(", ", $horsListe)."\n");
+    }
+    exit($horsListe ? 1 : 0);
+    ' "$TEMPLATE_PATH" "$ARTISAN_COMMAND" "${ARGS_KEYS_ONLY[@]}"
+    ARGS_WHITELIST_STATUS=$?
+    set -e
+else
+    ARGS_WHITELIST_STATUS=0
+fi
+
+if [ "$ARGS_WHITELIST_STATUS" -eq 2 ]; then
+    echo "Squelette invalide ou incomplet : ARGUMENTS_AUTORISES ne couvre pas ${ARTISAN_COMMAND} dans $TEMPLATE_PATH" >&2
+    exit 1
+elif [ "$ARGS_WHITELIST_STATUS" -ne 0 ]; then
+    echo "Argument(s) hors liste blanche (ARGUMENTS_AUTORISES de $TEMPLATE_PATH) pour ${ARTISAN_COMMAND}." >&2
+    exit 1
+fi
 
 # ── Construit l'objet JSON `args` via PHP (pas de bricolage d'échappement bash) : le marqueur
 #    BOOL_MARK devient `true`, toute autre valeur reste une chaîne. ──
