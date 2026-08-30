@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.237.7] - 2026-08-30
+
+### Corrigé
+- **Le plafond `timeout-minutes: 30` posé sur le job `tests` par le correctif précédent (v1.237.6) était trop court : il a tué le job par timeout, pas par un échec de test, sur le tout premier push réel qui l'a exercé.** Preuve directe, `gh run view` sur le run réel `33310111060` (push `999549a5` sur `master`) : annotation `The job has exceeded the maximum execution time of 30m0s`, conclusion `cancelled`. Or la suite complète mesure `2204,87 s` (36,7 minutes) sur ce même runner (mesuré sur la branche diagnostique, run complet non interrompu) - un plafond de 30 minutes ne pouvait que couper la mesure elle-même, jamais la laisser aboutir à un vrai verdict.
+- Relevé aussi à cette occasion, sans y toucher : `concurrency: cancel-in-progress: true` (préexistant, pas ajouté par ce correctif) annule un run de `tests` dès qu'un push plus récent arrive sur la même branche pendant son exécution de 30 à 50 minutes - comportement correct et voulu (évite de payer deux fois pour un code déjà remplacé), mais qui signifie qu'en période de pushes rapprochés, seul le DERNIER push d'une rafale obtient un verdict complet sur `tests`. Sans effet sur `code-quality`/`security` (quelques dizaines de secondes à ~2 minutes chacun, terminent presque toujours avant le push suivant).
+- Plafond porté à 50 minutes (marge réelle au-dessus des 36,7 minutes mesurées, plutôt qu'un chiffre qui frôle la valeur réelle) - vérifié sur le push de ce correctif lui-même : le job dépasse la 30e minute sans être tué.
+
 ## [1.237.6] - 2026-08-30
 
 ### Corrigé

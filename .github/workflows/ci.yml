@@ -40,7 +40,10 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 50 min, pas 30 : un premier plafond de 30 a tue le job par timeout (pas par un echec de
+    # test) sur un run reel du 2026-08-30 - la suite complete mesure 2204,87 s (36,7 min) sur ce
+    # runner. 50 min laisse une marge reelle plutot qu'un plafond qui coupe la mesure elle-meme.
+    timeout-minutes: 50
     continue-on-error: true
 
     # Pas de service MySQL ici : phpunit.xml force DB_CONNECTION=sqlite (:memory:) pour la suite
