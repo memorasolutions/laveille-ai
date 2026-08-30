@@ -118,3 +118,51 @@ function ctRenderConstructeur(): string
 
     return view('tools::public.tools.constructeur-prompts', ['tool' => $tool])->render();
 }
+
+/*
+ * Isole lang_path() par worker Paratest - même mécanisme, même remède que le cache des vues
+ * compilées (tests/bootstrap.php, TEST_TOKEN) : course RÉELLE mesurée le 2026-08-30 entre
+ * tests/Feature/Phase155Test.php et Modules/Translation/tests/Feature/TranslationModuleTest.php,
+ * les deux SEULS fichiers qui ÉCRIVENT (File::put) dans le vrai lang/fr.json et lang/en.json, que
+ * `php artisan test --parallel` fait tourner en processus concurrents partageant ces mêmes
+ * fichiers sur disque. Les ~30 autres fichiers qui LISENT lang_path() (Phase162-165Test,
+ * TranslationTest, Modules/Tools/tests/Feature/RoundXXAdversarialFixesTest...) n'écrivent jamais :
+ * protégés gratuitement dès que les deux écrivains ci-dessus n'écrivent plus dans le vrai fichier.
+ *
+ * Contrairement à VIEW_COMPILED_PATH (lu directement par le framework via env(), voir
+ * tests/bootstrap.php), lang_path() n'est PAS piloté par variable d'environnement - il faut
+ * appeler explicitement $app->useLangPath() APRÈS le boot de l'application, d'où ce helper appelé
+ * en beforeEach() plutôt qu'un ajout dans tests/bootstrap.php (qui tourne avant que $app existe).
+ * Inactif hors --parallel (TEST_TOKEN absent) : comportement inchangé en local/série.
+ */
+function testsIsolatedLangPath(): ?string
+{
+    $token = getenv('TEST_TOKEN');
+    if ($token === false || $token === '') {
+        return null;
+    }
+
+    // Même assainissement que tests/bootstrap.php avant de mettre le jeton dans un chemin.
+    $token = preg_replace('/[^a-zA-Z0-9]/', '', $token);
+    if ($token === '') {
+        return null;
+    }
+
+    $path = __DIR__.'/../storage/framework/testing/lang-paratest-'.$token;
+
+    if (! is_dir($path) && ! @mkdir($path, 0775, true) && ! is_dir($path)) {
+        throw new RuntimeException('Impossible de créer le lang_path isolé du worker : '.$path);
+    }
+
+    // Copié une seule fois par worker (premier test qui le demande, détecté par l'absence de
+    // fr.json) : les écrivains mutent ensuite CETTE copie, jamais le vrai lang/fr.json.
+    if (! file_exists($path.'/fr.json')) {
+        copy(__DIR__.'/../lang/fr.json', $path.'/fr.json');
+        copy(__DIR__.'/../lang/en.json', $path.'/en.json');
+        // Reproduit le symlink réel (fr_CA.json -> fr.json, migration Québec 2026-03) : la
+        // dédup par realpath() de TranslationService::getLocales() en dépend.
+        @symlink($path.'/fr.json', $path.'/fr_CA.json');
+    }
+
+    return $path;
+}

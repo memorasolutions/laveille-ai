@@ -28,6 +28,13 @@ function makeAuthorS110(): AuthorProfile
 it('AuthorsSitemapService generates valid sitemap XML with authors and posts', function () {
     config(['app.url' => 'https://laveille.ai']);
     app('url')->forceRootUrl('https://laveille.ai');
+    // Cause établie 2026-08-30 : forceRootUrl() seul ne suffit pas. Sans requête HTTP réelle
+    // (contexte console/test), Illuminate\Routing\UrlGenerator::formatRoot() recalcule le schéma
+    // depuis la requête ambiante (http par défaut hors HTTPS explicite) et RÉÉCRIT le préfixe de
+    // $forcedRoot avec ce schéma recalculé - la racine forcée passait donc de https:// à http://
+    // au moment de générer le XML. Vérifié : url('/@test') rendait http://laveille.ai/@test tant
+    // que forceScheme() n'était pas ALSO posé, jamais https://laveille.ai/@test.
+    app('url')->forceScheme('https');
 
     $author = makeAuthorS110();
     AuthorPost::create([

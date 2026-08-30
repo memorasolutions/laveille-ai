@@ -19,6 +19,14 @@ declare(strict_types=1);
  *      légitimes pour certaines fiches, ex. MemoryCustodian → dépôt GitHub).
  *   3. cleanUrl() retire aussi app_id. ToolNameCleanerService signale les titres qui sont en
  *      réalité des commandes shell (flux hnrss.org/show) ; ingest() les rejette entièrement.
+ *
+ * Correctif CI 2026-08-30 (6 échecs Linux, cause établie par isolement - voir CHANGELOG) : les six
+ * assertions qui comptaient Tool::count() en VALEUR ABSOLUE (toBe(0), toBe(1)) supposaient une
+ * table directory_tools vide au départ. La migration 2026_08_30_140000_add_canirun_ai_directory_tool
+ * (tâche #1910, une fiche RÉELLE insérée en donnée de migration, pas un seeder de test) tourne
+ * comme toute autre migration sous RefreshDatabase et fait déjà partir le compte à 1. Corrigé en
+ * mesurant un $before juste avant l'action et en comparant le DELTA, jamais la valeur absolue -
+ * immunisé contre CETTE migration et contre toute future migration du même genre.
  */
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -104,6 +112,7 @@ it('refuse une redirection qui reste sur producthunt.com après 3 sauts, journal
     ]);
 
     $service = new ToolDiscoveryService();
+    $before = Tool::count();
     $resolved = $service->resolveProductHuntUrl('https://www.producthunt.com/r/p/333330');
 
     expect($resolved)->toBeNull();
@@ -126,7 +135,7 @@ it('refuse une redirection qui reste sur producthunt.com après 3 sauts, journal
     ]);
 
     expect($tool)->toBeNull();
-    expect(Tool::count())->toBe(0);
+    expect(Tool::count())->toBe($before);
 });
 
 it('refuse une redirection ProductHunt en cas d\'exception réseau, journalise, et n\'enregistre aucune URL de suivi', function () {
@@ -178,6 +187,7 @@ it('refuse d\'enregistrer une fiche dont l\'hôte final est producthunt.com, et 
     Log::shouldReceive('channel')->with('directory_discovery')->andReturnSelf();
 
     $service = new ToolDiscoveryService();
+    $before = Tool::count();
     $tool = $service->ingest([
         'name' => 'Produit Non Résolu',
         'url' => 'https://www.producthunt.com/posts/produit-non-resolu',
@@ -185,7 +195,7 @@ it('refuse d\'enregistrer une fiche dont l\'hôte final est producthunt.com, et 
     ]);
 
     expect($tool)->toBeNull();
-    expect(Tool::count())->toBe(0);
+    expect(Tool::count())->toBe($before);
 
     Log::shouldHaveReceived('warning')
         ->once()
@@ -251,6 +261,7 @@ it('rejette entièrement une fiche dont le titre est une commande npm (décision
     Log::shouldReceive('channel')->with('directory_discovery')->andReturnSelf();
 
     $service = new ToolDiscoveryService();
+    $before = Tool::count();
     $tool = $service->ingest([
         'name' => 'npm i -g hotcell',
         'url' => 'https://hotcell.example.com',
@@ -258,7 +269,7 @@ it('rejette entièrement une fiche dont le titre est une commande npm (décision
     ]);
 
     expect($tool)->toBeNull();
-    expect(Tool::count())->toBe(0);
+    expect(Tool::count())->toBe($before);
 
     Log::shouldHaveReceived('warning')
         ->once()
@@ -482,12 +493,14 @@ it('finition 2026-08-22 : motif "agregateur" - le message affiché nomme la vrai
         ], 200),
     ]);
 
+    $before = Tool::count();
+
     $this->artisan('tools:discover-new', ['--source' => 'producthunt', '--force' => true])
         ->expectsOutputToContain('Hôte agrégateur, ignoré.')
         ->doesntExpectOutputToContain('Doublon, ignoré.')
         ->assertSuccessful();
 
-    expect(Tool::count())->toBe(0);
+    expect(Tool::count())->toBe($before);
 });
 
 it('finition 2026-08-22 : motif "titre_commande" - le message affiché nomme la vraie raison, jamais « Doublon »', function () {
@@ -506,12 +519,14 @@ it('finition 2026-08-22 : motif "titre_commande" - le message affiché nomme la 
         ], 200),
     ]);
 
+    $before = Tool::count();
+
     $this->artisan('tools:discover-new', ['--source' => 'producthunt', '--force' => true])
         ->expectsOutputToContain('Titre ressemblant à une commande, ignoré.')
         ->doesntExpectOutputToContain('Doublon, ignoré.')
         ->assertSuccessful();
 
-    expect(Tool::count())->toBe(0);
+    expect(Tool::count())->toBe($before);
 });
 
 it('finition 2026-08-22 : motif "doublon" - le message affiché reste « Doublon, ignoré. » quand c\'en est vraiment un', function () {
@@ -522,6 +537,7 @@ it('finition 2026-08-22 : motif "doublon" - le message affiché reste « Doublon
         'source' => 'rss:test',
     ]);
     expect($existing)->not->toBeNull();
+    $before = Tool::count();
 
     config(['directory.producthunt_token' => 'jeton-test-motifs']);
 
@@ -544,6 +560,7 @@ it('finition 2026-08-22 : motif "doublon" - le message affiché reste « Doublon
         ->doesntExpectOutputToContain('Titre ressemblant à une commande, ignoré.')
         ->assertSuccessful();
 
-    // 1 seule fiche en base : l'existante. Le candidat découvert a bien été refusé, pas inséré.
-    expect(Tool::count())->toBe(1);
+    // Le compte n'a pas bougé depuis $before (capturé juste après la création de $existing) : le
+    // candidat découvert a bien été refusé, pas inséré.
+    expect(Tool::count())->toBe($before);
 });

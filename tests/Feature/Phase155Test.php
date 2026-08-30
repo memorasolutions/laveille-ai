@@ -18,6 +18,14 @@ use Spatie\Permission\Models\Role;
 uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
+    // Course RÉELLE mesurée le 2026-08-30 entre ce fichier et TranslationModuleTest.php (mêmes
+    // lang/fr.json et lang/en.json RÉELS, partagés entre workers Paratest) - voir testsIsolatedLangPath()
+    // dans tests/Pest.php pour le détail. Doit être la toute première ligne : tout ce qui suit
+    // (backup, fixtures) doit déjà lire/écrire dans le chemin isolé, jamais le vrai lang_path().
+    if ($isolatedLangPath = testsIsolatedLangPath()) {
+        $this->app->useLangPath($isolatedLangPath);
+    }
+
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
 
     $this->admin = User::factory()->create();

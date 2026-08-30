@@ -12,6 +12,15 @@ use Modules\Translation\Services\TranslationService;
 
 uses(Tests\TestCase::class);
 
+beforeEach(function () {
+    // Course RÉELLE mesurée le 2026-08-30 entre ce fichier et tests/Feature/Phase155Test.php
+    // (mêmes lang/fr.json et lang/en.json RÉELS, partagés entre workers Paratest) - voir
+    // testsIsolatedLangPath() dans tests/Pest.php pour le détail.
+    if ($isolatedLangPath = testsIsolatedLangPath()) {
+        $this->app->useLangPath($isolatedLangPath);
+    }
+});
+
 test('translation service is registered as singleton', function () {
     $service1 = app(TranslationService::class);
     $service2 = app(TranslationService::class);
