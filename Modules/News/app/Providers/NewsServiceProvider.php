@@ -97,6 +97,10 @@ class NewsServiceProvider extends ServiceProvider
             // synchrone de l'écran de composition, voir docblock de la classe et le plafond
             // retiré dans NewsCompositionController::candidates().
             \Modules\News\Console\TranslateTitlesCommand::class,
+            // Opération de masse distincte annoncée hors périmètre par le correctif v1.237.5
+            // (image de repli bakant le mauvais titre) - jamais planifiée, voir docblock de la
+            // classe pour les gardes (curatée/idempotence/backup).
+            \Modules\News\Console\RegenerateFallbackImagesCommand::class,
         ]);
     }
 

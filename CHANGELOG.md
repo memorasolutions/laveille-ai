@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.241.0] - 2026-08-30
+
+### Ajouté
+- **Commande `news:regenerate-fallback-images`, outil de l'opération de masse annoncée hors périmètre par le correctif v1.237.5** (image de repli des actualités bakant le mauvais titre - 4491/4613 fiches publiées vivantes concernées, dont 1912 depuis une source non francophone). Ne fait QUE chiffrer/exécuter par lot borné ; ne déroule jamais la totalité en un seul appel. Garde-fou absolu tenu par le CODE (`NewsArticle::hasCuratedImage()`, image_credit rempli) - exclusion à la sélection ET défense en profondeur juste avant l'écriture, même si l'id est passé explicitement via `--ids` : une photo curatée n'est jamais régénérée. Backup horodaté (jamais écrasé) des `.webp`/`.jpg` existants sous `storage/app/news-image-regen/backups/` avant toute écriture - `storage/` n'est pas touché par le rsync de déploiement, ce dossier survit aux déploiements suivants. Idempotent via `storage/app/news-image-regen/manifest.json` (titre réellement baké par fiche) : un id déjà à jour est sauté au passage suivant, sauf `--force`. Options : `--ids`, `--non-french-only` (cible le lot prioritaire du mandat), `--limit` (défaut 25, volontairement modeste - serveur mutualisé, 79 domaines), `--after-id` (reprise), `--dry-run`, `--work-dir` (isole un lot pilote ou les tests du manifest réel). Mesure et rapporte le coût par image (ms horloge + ms CPU via `getrusage()`, octets avant/après) à chaque lot.
+- Tests : `Modules/News/tests/Feature/RegenerateFallbackImagesCommandTest.php` (8 tests, 28 assertions) - sélection (curatée/publiée/retirée/langue source), garde en défense en profondeur même via `--ids`, idempotence par manifest et `--force`, dry-run sans aucune écriture, et un test d'intégration réel (Imagick) prouvant backup + manifest + cache-bust (`updated_at`, dont dépend `versionedImageUrl()`) sur un article réel.
+
 ## [1.240.1] - 2026-08-30
 
 ### Corrigé
