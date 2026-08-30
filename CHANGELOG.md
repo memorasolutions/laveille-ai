@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.242.0] - 2026-08-30
+
+### Corrigé
+- **Chaque mention de « Mistral » au sens de l'ÉDITEUR ou de sa famille de modèles renvoyait le lecteur vers la fiche de son seul produit de clavardage.** Mesuré sur 24 pages ciblées (8 actualités au slug « mistral », les 2 pages annuaire du produit, 12 fiches glossaire/hub adjacentes) : 13 pages sur 24 portaient le défaut, 53 insertions de lien au total, quasi toutes au sens éditeur ou famille de modèles (« Mistral Small/Medium/Large », « Magistral », « la famille Mistral », « fondateur de Mistral »), jamais spécifiquement le produit Le Chat.
+- **Variante inédite du défaut « Gemini (Google) » corrigé le 2026-08-23, pas un doublon exact.** Le nom de la fiche existante est « Mistral (Le Chat) » : `GlossaryLinkifier::extractQualifierAliases()` ajoute la BASE d'un nom « X (Y) » de façon inconditionnelle, et `QUALIFIER_ORGANISATION` (le correctif du 2026-08-23) ne protège que le QUALIFIER entre parenthèses, jamais la base. Dans le cas Gemini/Google, le fabricant était en position qualifier (protégé) ; ici il est en position base (non protégé) - l'inverse exact, lu et confirmé dans le code réel (`extractQualifierAliases('Mistral (Le Chat)')` renvoie bien `['Mistral']`).
+- **Corrigé par le mécanisme déjà en place, `ALIAS_NEVER_AUTO`** (`cnn`, `dos`, `requête`, `requêtes`, `témoin`), qui bloque un alias DÉRIVÉ quelle que soit son origine sans jamais toucher le nom PRINCIPAL d'une fiche. `mistral` y est ajouté pour deux raisons cumulées : (1) il bloque l'alias dérivé de la base de « Mistral (Le Chat) » ; (2) la nouvelle fiche « Mistral » (l'éditeur, voir Ajouté) dérive elle-même, via `extractMorphologicalAliases()`, une variante minuscule « mistral » qui aurait hérité de sa `match_strategy` `case_sensitive` - or « mistral » est aussi un nom commun français (le vent du sud de la France, l'origine revendiquée du nom de l'entreprise), toujours écrit minuscule. Un seul ajout neutralise les deux chemins.
+- Bump de cache `glossary.terms.v14` → `v15`. Corrigé au passage : la clé `v13` avait été omise du `flushCache()` lors du bump précédent (v13→v14, 2026-08-29) - même lacune déjà nommée pour `v11` dans le code, comblée ici plutôt que laissée pour la prochaine fois.
+
+### Ajouté
+- **Fiche de glossaire « Mistral »** (`/glossaire/mistral`) : l'éditeur français d'intelligence artificielle (fondé le 28 avril 2023 à Paris par Arthur Mensch, Guillaume Lample et Timothée Lacroix) et sa famille de modèles ouverts (Mistral 7B, Mixtral, Small/Medium/Large, Magistral) - jamais le produit Le Chat, qui reste intégralement sur sa fiche existante `mistral-le-chat`, désormais reliée en `broader_slugs`. Alias curé « Mistral AI », qui corrige au passage une fragmentation visible sur les pages testées (« Mistral » lié seul, puis « AI » relié séparément à l'acronyme) en captant la locution complète en un seul lien. `match_strategy=case_sensitive`, pour la même raison que la fiche « Anthropic » du 2026-08-27 (collision avec un mot du français courant).
+- Recherche croisée (Wikipédia FR, page officielle mistral.ai/about, registre officiel français data.gouv.fr pour la fondation ; annonce officielle mistral.ai pour Mistral 7B/Apache 2.0 ; communiqué ASML + EU-Startups, datés et concordants, pour la série C de 1,7 milliard d'euros et la valorisation à 11,7 milliards d'euros).
+
+### Tests
+- `Modules/Dictionary/tests/Feature/HomographAliasNeverAutoTest.php` : 4 cas neufs (« Cas 5 ») - aucun lien quand seul le produit existe (reproduit le défaut mesuré), lien vers l'éditeur quand les deux fiches coexistent (jamais vers le produit), aucun lien sur « mistral » minuscule (le vent), lien de « Mistral AI » en un seul bloc.
+- Suite ciblée complète des modules Core + Dictionary (module touché par ce correctif) : **229 tests, 690 assertions, zéro échec** - inclut les protections déjà en place (Node.js, Z.ai, jan.ai, Anthropic/anthropique, xAI, CNN, dos, témoin, requête) vérifiées non régressées par cet ajout.
+
 ## [1.241.2] - 2026-08-30
 
 ### Sécurité

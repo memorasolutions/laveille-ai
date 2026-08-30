@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v14.'; // 2026-08-29 bump v14 : ALIAS_NEVER_AUTO (+ « dos », mesuré 3 faux sur 3) - sans ce bump, un cache v12 déjà chaud servirait 1h de plus des entrées SANS cette exclusion, donc les mêmes faux liens
+    public const CACHE_KEY = 'glossary.terms.v15.'; // 2026-08-30 bump v15 : ALIAS_NEVER_AUTO (+ « mistral », voir docblock) - sans ce bump, un cache v14 déjà chaud servirait 1h de plus l'alias dérivé SANS cette exclusion, donc les mêmes faux liens
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -671,7 +671,25 @@ class GlossaryLinkifier
     // Coût assumé : isNeverAutoAlias() compare en minuscule, donc ceci bloque AUSSI l'alias
     // dérivé « DoS ». Aucun « DoS » correct n'a été lié dans l'échantillon, et la fiche reste
     // atteignable par son nom principal et par la recherche interne.
-    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin'];
+    //
+    // 2026-08-30 : « mistral » couvre DEUX défauts par le même ajout. (1) Le terme existant
+    // « Mistral (Le Chat) » a sa base « Mistral » extraite par extractQualifierAliases() de façon
+    // INCONDITIONNELLE - cette fonction ajoute toujours la base d'un nom « X (Y) », et
+    // QUALIFIER_ORGANISATION ne protège que le qualifier Y, jamais la base X. Or ici la base EST
+    // le nom du fabricant (l'inverse du cas « Gemini (Google) » du 2026-08-23, où le fabricant
+    // était en position qualifier, donc déjà couvert). Mesuré sur 24 pages de production le
+    // 2026-08-30 : 13 pages, 53 liens « Mistral » vers /glossaire/mistral-le-chat, quasi tous au
+    // sens ÉDITEUR/famille de modèles (« Mistral Small/Medium/Large », « fondateur de Mistral »),
+    // jamais le produit Le Chat spécifiquement. (2) La nouvelle fiche « Mistral » (l'éditeur,
+    // slug "mistral") dérive elle-même, via extractMorphologicalAliases(), une forme minuscule
+    // « mistral » qui HÉRITE de sa match_strategy case_sensitive (escalateStrategyIfStopList()
+    // renvoie la stratégie telle quelle dès qu'elle est déjà case_sensitive) - or « mistral » est
+    // aussi un nom commun français (le vent du sud de la France), toujours écrit minuscule. Sans
+    // cette entrée, la fiche capterait ce nom commun partout où il apparaîtrait en tête de phrase.
+    // Un seul ajout neutralise les deux chemins : ni l'alias dérivé de l'ancienne fiche, ni la
+    // variante morphologique de la nouvelle, n'entrent dans $terms - mais le nom PRINCIPAL de
+    // CHAQUE fiche (« Mistral (Le Chat) » comme « Mistral ») reste, lui, pleinement trouvable.
+    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral'];
 
     /**
      * 2026-08-29 : vrai si cette chaîne (alias curé, qualifier dérivé, ou variante morphologique)
@@ -884,6 +902,14 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-08-30 : v14 ajoutée ici en même temps que le bump v15 (ALIAS_NEVER_AUTO +
+            // « mistral ») - même raison que les notes précédentes : sans elle, une clé v14 déjà
+            // chaude resterait servie jusqu'à l'expiration de son TTL après un flush explicite.
+            // v13 profite du même correctif au passage : elle avait été omise lors du bump
+            // v13→v14 du 2026-08-29 (même lacune déjà nommée pour v11 juste en dessous), écart
+            // repéré en ajoutant v14 ici, comblé plutôt que laissé pour la prochaine fois.
+            Cache::forget('glossary.terms.v14.'.$loc);
+            Cache::forget('glossary.terms.v13.'.$loc);
             // 2026-08-29 : v12 ajoutée ici en même temps que le bump v13 (ALIAS_NEVER_AUTO) - même
             // raison que la note 2026-08-21 ci-dessous : sans elle, une clé v12 resterait servie
             // jusqu'à l'expiration de son TTL après un flush explicite. v11 profite du même

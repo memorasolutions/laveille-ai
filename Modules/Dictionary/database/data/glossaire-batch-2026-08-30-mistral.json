@@ -1,0 +1,61 @@
+[
+  {
+    "slug": "mistral",
+    "name": "Mistral",
+    "definition": "Mistral est une entreprise française d'intelligence artificielle générative, fondée le 28 avril 2023 à Paris par Arthur Mensch, Guillaume Lample et Timothée Lacroix, respectivement passés par Google DeepMind et Meta AI. Son nom reprend celui du mistral, le vent puissant qui souffle sur le sud de la France, une image que l'entreprise revendique pour des modèles voulus rapides et efficaces. Dès septembre 2023, Mistral se fait connaître en publiant Mistral 7B sous licence Apache 2.0, l'un des premiers modèles de langage performants à poids ouverts, puis la famille Mixtral (mélange d'experts). L'entreprise décline aujourd'hui plusieurs tailles de modèles (Small, Medium, Large) ainsi que Magistral, spécialisé dans le raisonnement, sous un mélange de licences ouvertes et commerciales selon les versions. Présentée comme le principal représentant européen face aux laboratoires américains, elle revendique une intelligence artificielle plus souveraine, personnalisable et déployable chez le client, jusque dans des environnements fermés. Son produit grand public, l'assistant conversationnel Le Chat, fait l'objet d'une fiche distincte du glossaire.",
+    "analogy": "Comme un fabricant européen d'outils qui publierait certains plans librement, tout en vendant aussi, à côté, des versions clés en main.",
+    "example": "En septembre 2025, Mistral lève 1,7 milliard d'euros lors d'une série C menée par ASML, qui en devient le premier actionnaire et fait presque doubler sa valorisation, à 11,7 milliards d'euros.",
+    "did_you_know": "Le nom « Mistral » reprend le vent du sud de la France, connu pour sa vitesse - une image reprise pour des modèles voulus rapides, même en petite taille.",
+    "one_sentence_answer": "Mistral est une entreprise française d'intelligence artificielle fondée à Paris en 2023, connue pour ses modèles à poids ouverts (Mistral 7B, Mixtral) et pour défendre une intelligence artificielle européenne, souveraine et personnalisable.",
+    "faq": [
+      {
+        "question": "Mistral et Mistral Le Chat, est-ce la même chose?",
+        "answer": "Non. Mistral est l'entreprise qui conçoit les modèles; Le Chat est son assistant conversationnel grand public, l'une de ses applications commerciales parmi d'autres (API, outils pour développeurs, offres entreprise)."
+      },
+      {
+        "question": "Les modèles de Mistral sont-ils tous ouverts?",
+        "answer": "Non. Certains, comme Mistral 7B ou Mixtral, sont publiés à poids ouverts sous licence Apache 2.0; d'autres, dont plusieurs versions Medium et Large, restent proposés surtout par API commerciale."
+      },
+      {
+        "question": "Pourquoi présente-t-on souvent Mistral comme un symbole de souveraineté numérique européenne?",
+        "answer": "Parce que c'est l'un des rares laboratoires d'intelligence artificielle de pointe basés en Europe, à Paris, souvent cité en alternative aux géants américains - un positionnement renforcé par l'entrée d'ASML à son capital en 2025."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Mistral AI - Announcing Mistral 7B",
+        "url": "https://mistral.ai/news/announcing-mistral-7b/",
+        "year": 2023,
+        "author": "Mistral AI"
+      },
+      {
+        "label": "EU-Startups - Europe's AI bet: Paris-based Mistral secures €1.7 billion, doubling its valuation to €11.7 billion",
+        "url": "https://www.eu-startups.com/2025/09/europes-ai-bet-paris-based-mistral-wins-e1-7-billion-doubling-valuation-to-e11-7-billion/",
+        "year": 2025,
+        "author": "EU-Startups"
+      },
+      {
+        "label": "ASML - ASML and Mistral AI enter strategic partnership",
+        "url": "https://www.asml.com/en/news/press-releases/2025/asml-mistral-ai-enter-strategic-partnership",
+        "year": 2025,
+        "author": "ASML"
+      }
+    ],
+    "aliases": [
+      "Mistral AI"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [
+      "mistral-le-chat"
+    ],
+    "difficulty": "beginner",
+    "icon": "🌬️",
+    "type": "organisation",
+    "acronym_full": null,
+    "cat_slug": "intelligence-artificielle",
+    "has_image": true,
+    "reference_url": "https://mistral.ai/about/",
+    "reference_label": "Site officiel de Mistral - À propos",
+    "match_strategy": "case_sensitive"
+  }
+]

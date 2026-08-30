@@ -40,6 +40,21 @@ declare(strict_types=1);
  * propre docblock : la comparaison insensible à la casse bloque aussi l'alias dérivé « DoS »
  * (qualifier de « Déni de service (DoS) », extractQualifierAliases()) - seule la base « déni de
  * service », vérifiée ci-dessous, reste un point d'entrée automatique vers la fiche.
+ *
+ * Cas 5, ajouté le 2026-08-30 : variante INÉDITE du même défaut, cette fois sur la BASE d'un
+ * qualifier plutôt que sur le qualifier lui-même. La fiche réelle « Mistral (Le Chat) » (produit
+ * de clavardage) dérive sa base « Mistral » de façon INCONDITIONNELLE via
+ * extractQualifierAliases() - QUALIFIER_ORGANISATION (voir son docblock, correctif du
+ * 2026-08-23 pour « Gemini (Google) ») ne protège QUE le qualifier entre parenthèses, jamais la
+ * base. Ici la base EST le nom du fabricant : chaque mention de « Mistral » au sens de
+ * l'entreprise ou de sa famille de modèles se retrouvait donc liée vers la fiche du seul produit
+ * Le Chat (mesuré sur 24 pages de production : 13 pages, 53 liens, quasi tous au sens éditeur).
+ * Une fiche « Mistral » (l'éditeur) a été créée séparément avec « Mistral » comme nom PRINCIPAL -
+ * mais son propre nom, une fois passé par extractMorphologicalAliases(), dérive à son tour une
+ * variante minuscule « mistral » qui hérite de la même match_strategy (case_sensitive) : sans
+ * blocage, cette variante aurait pu lier tout « mistral » minuscule du site, y compris le nom
+ * commun français (le vent du sud de la France) que l'entreprise revendique comme origine de son
+ * propre nom. Un seul ajout à ALIAS_NEVER_AUTO neutralise les deux chemins.
  */
 
 use Modules\Core\Services\GlossaryLinkifier;
@@ -177,4 +192,44 @@ it('lie toujours "déni de service" (la base, sans DoS) dans un vrai texte de cy
 
     expect($html)->toContain('glossary-link')
         ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+// ── Cas 5 : Mistral (éditeur) vs base dérivée de Mistral (Le Chat), et vs le vent du même nom ──
+
+it('ne lie PAS "Mistral" quand seul le produit "Mistral (Le Chat)" existe - reproduit le défaut mesuré en production', function () {
+    hanTerm('Mistral (Le Chat)', 'mistral-le-chat-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Mistral a annoncé une nouvelle levée de fonds menée par ASML.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/mistral-le-chat');
+});
+
+it('lie "Mistral" vers la fiche ÉDITEUR (nom principal) quand les deux fiches coexistent, jamais vers le produit', function () {
+    hanTerm('Mistral (Le Chat)', 'mistral-le-chat-test');
+    $editeur = hanTerm('Mistral', 'mistral-test', aliases: ['Mistral AI'], matchStrategy: 'case_sensitive');
+
+    $html = GlossaryLinkifier::linkify('<p>Mistral a annoncé une nouvelle levée de fonds menée par ASML.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$editeur->slug)
+        ->and($html)->not->toContain('/glossaire/mistral-le-chat-test')
+        ->and($html)->toContain('>Mistral</a>');
+});
+
+it('ne lie PAS "mistral" minuscule (le vent du sud de la France) même quand la fiche éditeur existe', function () {
+    hanTerm('Mistral', 'mistral-test', aliases: ['Mistral AI'], matchStrategy: 'case_sensitive');
+
+    $html = GlossaryLinkifier::linkify('<p>Un mistral soufflait fort sur la Provence ce jour-là.</p>');
+
+    expect($html)->not->toContain('glossary-link');
+});
+
+it('lie toujours "Mistral AI" en entier (alias curé), jamais fragmenté avec un lien "AI" séparé', function () {
+    $editeur = hanTerm('Mistral', 'mistral-test', aliases: ['Mistral AI'], matchStrategy: 'case_sensitive');
+
+    $html = GlossaryLinkifier::linkify('<p>Mistral AI a levé 1,7 milliard d\'euros en 2025.</p>');
+
+    expect($html)->toContain('>Mistral AI</a>')
+        ->and($html)->toContain('/glossaire/'.$editeur->slug);
 });
