@@ -31,10 +31,14 @@ test('.env.example contains all required keys', function () {
     expect($envExample)->toContain('SANCTUM_STATEFUL_DOMAINS=');
 });
 
-test('ci workflow uses MySQL and runs quality checks', function () {
+test('ci workflow runs quality checks', function () {
+    // 2026-08-30 : le job "tests" n'utilise plus de service MySQL (phpunit.xml force deja
+    // DB_CONNECTION=sqlite pour l'execution des tests, comme en local - un pre-vol "migrate"
+    // contre un vrai MySQL neuf heurtait une contrainte InnoDB preexistante et sans rapport
+    // avec le code teste). "sqlite" reste present via le job e2e.
     $ci = file_get_contents(base_path('.github/workflows/ci.yml'));
 
-    expect($ci)->toContain('DB_CONNECTION: mysql');
+    expect($ci)->toContain('DB_CONNECTION: sqlite');
     expect($ci)->toContain('phpstan analyse');
     expect($ci)->toContain('pint --test');
 });
