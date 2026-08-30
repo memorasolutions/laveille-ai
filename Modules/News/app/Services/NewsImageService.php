@@ -39,7 +39,7 @@ class NewsImageService
         // ré-héberge PLUS aucune image de source (presse). On génère une image de marque libre à la place.
         // Le code de téléchargement ci-dessous est volontairement neutralisé (conservé pour rollback rapide).
         $article = \Modules\News\Models\NewsArticle::find($articleId);
-        return self::generateFallbackImage($articleId, (string) ($article?->title ?? 'La veille IA'), $article?->category_tag ?? null);
+        return self::generateFallbackImage($articleId, self::resolveFallbackTitle($article), $article?->category_tag ?? null);
 
         $maxBytes = 5 * 1024 * 1024; // 5 MB
         $maxPixels = 4000;
@@ -202,6 +202,24 @@ class NewsImageService
     }
 
     /**
+     * ACTION : résout le titre à baker dans la carte-titre de repli - seo_title PRIORITAIRE
+     * (le titre réellement publié partout ailleurs sur la fiche : show.blade.php, la carte
+     * d'article, la balise <title>, searchableResultTitle()... tous lisent déjà
+     * `$article->seo_title ?? $article->title`), jamais le title brut de la source. Centralise
+     * la règle déjà appliquée CORRECTEMENT par le second appel de generateFallbackImage() dans
+     * RssFetcherService::run() (branche "aucune image trouvée") - seule source de vérité
+     * désormais, réutilisée aussi par processFromUrl() ci-dessous qui l'ignorait.
+     * MCP: SELF (<5 lignes)
+     * RAISON: bug mesuré le 2026-08-30 - sur 4493 fiches vivantes en repli non curaté, 4491
+     * bakaient un titre différent de celui affiché partout ailleurs sur la même page, 1912
+     * provenant d'une source non francophone (donc un titre anglais visible sur l'image).
+     */
+    public static function resolveFallbackTitle(?\Modules\News\Models\NewsArticle $article, string $default = 'La veille IA'): string
+    {
+        return (string) ($article?->seo_title ?? $article?->title ?? $default);
+    }
+
+    /**
      * Génère une image OG 1200x630 avec gradient, vrai logo SVG et titre.
      * Utilise Imagick pour le rendu SVG natif.
      */
@@ -214,6 +232,21 @@ class NewsImageService
         }
 
         try {
+            // ACTION : tiret cadratin retiré AVANT toute mesure/découpe/dessin - réutilise
+            // lv_strip_em_dash() (app/Helpers/typo.php), l'utilitaire DÉDIÉ du projet pour cette
+            // règle précise (CLAUDE.md #10), plutôt que d'écrire une seconde règle ici. Un titre
+            // d'actualité n'est jamais une citation verbatim (contrairement à
+            // composed_summary.quote) : rien n'empêche de lui appliquer cette fonction. Mesuré le
+            // 2026-08-30 : 38 fiches vivantes bakaient un cadratin venu du titre brut de la
+            // source dans cette même image - même défaut que celui corrigé ailleurs sur le site
+            // en v1.233.1, jamais recouvert pour cette image précise.
+            // MCP: SELF (<5 lignes)
+            // RAISON: mandat explicite - réutiliser l'utilitaire existant plutôt que dupliquer.
+            $title = lv_strip_em_dash($title);
+            if ($categoryTag !== null) {
+                $categoryTag = lv_strip_em_dash($categoryTag);
+            }
+
             $w = 1200;
             $h = 630;
 

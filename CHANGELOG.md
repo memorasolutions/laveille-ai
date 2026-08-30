@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.237.5] - 2026-08-30
+
+### Corrigé
+- **L'image de repli des actualités bakait le titre anglais brut de la source, jamais le titre français réellement publié.** Mécanisme trouvé dans `Modules/News/app/Services/NewsImageService.php` : `processFromUrl()` (ligne 42) appelle toujours `generateFallbackImage()`, quel que soit le résultat du téléchargement réel (désactivé depuis le 2026-06-09, incident PicRights) - mais passait `$article->title` seul, en ignorant `seo_title`, alors que `show.blade.php`, la carte d'article et `searchableResultTitle()` lisent tous déjà `$article->seo_title ?? $article->title`. Mesuré en production avant correctif (requête figée, lecture seule, sur les fiches vivantes) : 4 613 fiches publiées, 4 493 (97,4 %) servent cette image générée plutôt qu'une photo curatée, et parmi elles 4 491 (99,96 %) bakaient un titre différent de celui affiché partout ailleurs sur la même page - 1 912 provenant d'une source non francophone (donc un titre anglais visible sur l'image), 38 avec un tiret cadratin baké dans les pixels. Un échantillon de 40 fichiers `.jpg` de repli (63 536 à 92 584 octets, avant et après le 2026-06-09) confirme que même les plus anciens sont déjà des cartes générées, pas des photos réelles.
+- Corrigé à la racine par `NewsImageService::resolveFallbackTitle()`, nouvelle méthode statique qui centralise `seo_title ?? title ?? défaut` - seule source de vérité désormais, réutilisée par `processFromUrl()` (qui l'ignorait) ET par `RssFetcherService::run()` (qui l'appliquait déjà correctement dans sa branche « aucune image trouvée », mais en dupliquant l'expression au lieu de partager une fonction).
+- Le tiret cadratin est retiré du titre et de la catégorie avant tout mesurage/découpe/dessin, par `lv_strip_em_dash()` (`app/Helpers/typo.php`) - l'utilitaire dédié du projet pour cette règle précise (CLAUDE.md, jamais de tiret cadratin dans un texte visiteur), réutilisé tel quel plutôt que dupliqué une seconde fois dans ce service.
+- Preuve avant/après : test `Modules/News/tests/Feature/NewsImageFallbackTitleTest.php` cassé puis restauré (rouge : `Failed asserting that two strings are identical. -'OpenAI dévoile un nouveau modèle' +'OpenAI unveils new model'` ; vert : 4 tests, 5 assertions) ; régression complète du module actualités et des utilitaires de typographie : 616 tests, 2 030 assertions, zéro échec. Preuve visuelle : image de repli régénérée pour l'article réel #28137, dont le titre source anglais porte lui-même un tiret cadratin - avant : titre anglais avec cadratin baké dans les pixels ; après : « Patreon bloque les bots d'IA pour protéger les créateurs », sans cadratin, vérifiée à l'œil.
+- Régénération des 4 493 images déjà en ligne HORS PÉRIMÈTRE de ce correctif (opération de masse distincte, à chiffrer et exécuter séparément) : ce correctif change le mécanisme pour toute nouvelle image générée, il ne retraite pas rétroactivement celles déjà servies.
+
 ## [1.237.4] - 2026-08-30
 
 ### Corrigé

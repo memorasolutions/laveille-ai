@@ -173,11 +173,14 @@ class RssFetcherService
                 if ($imageUrl) {
                     $localPath = app(NewsImageService::class)->processFromUrl($imageUrl, $article->id);
                 }
-                // Fallback : générer image OG avec logo + titre si pas d'image
+                // Fallback : générer image OG avec logo + titre si pas d'image. Titre résolu par
+                // NewsImageService::resolveFallbackTitle() (DRY, 2026-08-30) - seo_title
+                // prioritaire, même règle que processFromUrl() ci-dessus et que tout le reste
+                // du site (show.blade.php, article-card, meta title...).
                 if (! $localPath) {
                     $localPath = NewsImageService::generateFallbackImage(
                         $article->id,
-                        $article->seo_title ?? $article->title,
+                        NewsImageService::resolveFallbackTitle($article),
                         $article->category_tag
                     );
                 }
