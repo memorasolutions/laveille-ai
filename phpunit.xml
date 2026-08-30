@@ -52,6 +52,14 @@
     <php>
         <ini name="memory_limit" value="2G"/>
         <env name="APP_ENV" value="testing"/>
+        <!-- .env.example porte le placeholder Laravel de base ("Laravel"), jamais le vrai nom du
+             site - seul le vrai .env non versionne le corrige en local. Sur CI (cp .env.example ->
+             .env), config('app.name') restait donc a "Laravel", ce que S111EnhancementsTest
+             (manifest PWA, config/pwa.php:15 = env('APP_NAME', 'Laravel')) detectait a coup sur.
+             Verifie sans risque : aucun test du depot n'attend la valeur par defaut "Laravel" pour
+             config('app.name') (les 4 occurrences litterales de "Laravel" ailleurs sont des
+             donnees de fixture - noms de categorie/article - sans rapport avec APP_NAME). -->
+        <env name="APP_NAME" value="La veille"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
@@ -73,5 +81,17 @@
              Modules/Health/tests/Feature/OpenRouterCreditCheckTest.php, qui l'instancie
              directement avec Http::fake. -->
         <env name="HEALTH_OPENROUTER_ENABLED" value="false"/>
+        <!-- Cle FACTICE, jamais une vraie credential : de nombreux tests News (AiSummaryService,
+             Http::fake sur openrouter.ai/*) lisent config('services.openrouter.api_key') et
+             retournent null SANS appeler Http si elle est vide (garde legitime du service).
+             En local, le vrai .env non versionne porte une vraie cle -> ces tests passent.
+             Sur CI, cp .env.example -> .env ne definit jamais OPENROUTER_API_KEY (absente du
+             gabarit) -> la garde coupait l'appel avant meme Http::fake, et Http::assertSent()
+             echouait a coup sur (aucune requete envoyee). Meme valeur factice deja utilisee au
+             cas par cas dans CompositionCandidatesDuJourTest ('cle-de-test') ; ceci ne fait que
+             la fournir par defaut aux tests qui l'ont simplement omise. Un test qui doit prouver
+             le comportement "cle absente" peut toujours l'ecraser localement via
+             config()->set('services.openrouter.api_key', null). -->
+        <env name="OPENROUTER_API_KEY" value="cle-de-test"/>
     </php>
 </phpunit>

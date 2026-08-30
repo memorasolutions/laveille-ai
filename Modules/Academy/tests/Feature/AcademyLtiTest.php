@@ -50,6 +50,13 @@ beforeEach(function (): void {
 
     // Défaut EXPLICITE : chaque test active le drapeau lui-même quand nécessaire.
     config(['academy.lti_enabled' => false]);
+
+    // Gate « en construction » : par défaut à true (config('academy.under_construction')),
+    // rempli à false en local par le vrai .env non versionné. Sur CI, cp .env.example -> .env
+    // ne définit pas ACADEMY_UNDER_CONSTRUCTION, donc chaque route publique renvoyait 503 et
+    // faisait échouer TOUTE cette suite (jamais un bug LTI lui-même). Même convention que les
+    // ~90 autres tests Academy qui posent déjà cette ligne (ex. CompetencyGraphTest).
+    config(['academy.under_construction' => false]);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

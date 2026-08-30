@@ -29,6 +29,15 @@ use Modules\Decido\Models\PollVote;
 uses(Tests\TestCase::class);
 uses(RefreshDatabase::class);
 
+beforeEach(function (): void {
+    // Gate « en construction » : config('decido.under_construction') vaut true par défaut
+    // (env DECIDO_UNDER_CONSTRUCTION absente de .env.example) - rempli à false en local
+    // uniquement par le vrai .env non versionné. Sans cette ligne, les 2 tests qui passent
+    // par une vraie route HTTP (bascule de l'interrupteur) recevaient 503 au lieu du
+    // redirect/403 attendu. Même convention que DecidoPollTest.php (config par test).
+    config(['decido.under_construction' => false]);
+});
+
 function activityCreatePoll(array $overrides = []): Poll
 {
     $poll = new Poll;
