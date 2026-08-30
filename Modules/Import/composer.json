@@ -3,7 +3,8 @@
     "autoload": {
         "psr-4": {
             "Modules\\Import\\": "app/",
-            "Modules\\Import\\Database\\": "database/",
+            "Modules\\Import\\Database\\Factories\\": "database/factories/",
+            "Modules\\Import\\Database\\Seeders\\": "database/seeders/",
             "Modules\\Import\\Tests\\": "tests/"
         }
     }

@@ -3,7 +3,8 @@
     "autoload": {
         "psr-4": {
             "Modules\\CustomFields\\": "app/",
-            "Modules\\CustomFields\\Database\\": "database/",
+            "Modules\\CustomFields\\Database\\Factories\\": "database/factories/",
+            "Modules\\CustomFields\\Database\\Seeders\\": "database/seeders/",
             "Modules\\CustomFields\\Tests\\": "tests/"
         }
     }

@@ -3,7 +3,8 @@
     "autoload": {
         "psr-4": {
             "Modules\\ABTest\\": "app/",
-            "Modules\\ABTest\\Database\\": "database/",
+            "Modules\\ABTest\\Database\\Factories\\": "database/factories/",
+            "Modules\\ABTest\\Database\\Seeders\\": "database/seeders/",
             "Modules\\ABTest\\Tests\\": "tests/"
         }
     }

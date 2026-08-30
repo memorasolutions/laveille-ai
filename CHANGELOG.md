@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.238.8] - 2026-08-30
+
+### Corrigé
+- **Généralisation du correctif PSR-4 validé par le pilote v1.238.1 (module `Privacy`) à un premier lot de 5 des 10 modules restants : `ABTest`, `CustomFields`, `Faq`, `FormBuilder`, `Import`.** Même défaut partout : le `composer.json` du module ne déclarait qu'une règle PSR-4 générique (`"Modules\\X\\Database\\": "database/"`) alors que les classes vivent dans des dossiers en minuscules (`database/factories/`, `database/seeders/`) - conforme sous macOS (insensible à la casse), rejeté par l'autoloader Composer sous Linux (`does not comply with psr-4 autoloading standard ... Skipping`).
+- **Les 5 modules vérifiés un par un avant édition, aucun gabarit déroulé à l'aveugle** : chacun porte réellement des fichiers sous `database/seeders/` et `database/factories/` (confirmé par inventaire du système de fichiers, pas supposé), et aucun ne portait de règle PSR-4 partielle préexistante - les cinq avaient donc le défaut complet, sans exception ni cas particulier.
+- **Correctif strictement identique au pilote, module par module** : remplacement de la ligne générique par les deux règles explicites (`Database\\Factories\\` -> `database/factories/`, `Database\\Seeders\\` -> `database/seeders/`), dans `Modules/{ABTest,CustomFields,Faq,FormBuilder,Import}/composer.json` uniquement. Aucun fichier renommé, aucun dossier renommé, aucun `namespace` PHP modifié - zéro exposition au piège de renommage casse-seule sous git/macOS. Le bloc `Tests` de chaque module n'a pas été déplacé vers `autoload-dev` (le pilote avait déjà noté que `Privacy` s'en écarte aussi sans que ce soit dans le périmètre de ce défaut).
+- **11 fichiers concernés dans ce lot** (comptés sur l'avertissement Composer réel de chacun, pas sur une estimation) : `ABTest` (3 : `ExperimentFactory`, `ABParticipationFactory`, `ABTestDatabaseSeeder`) ; `CustomFields` (1 : `CustomFieldsDatabaseSeeder` - son dossier `factories/` existe mais est vide) ; `Faq` (2 : `FaqFactory`, `FaqDatabaseSeeder`) ; `FormBuilder` (4 : `FormSubmissionFactory`, `FormFactory`, `FormFieldFactory`, `FormBuilderDatabaseSeeder`) ; `Import` (1 : `ImportDatabaseSeeder` - son dossier `factories/` existe mais est vide également).
+- **Hors périmètre de ce lot, signalé sans être touché** : les 5 modules restants du même défaut (`Menu`, `ShortUrl`, `Team`, `Testimonials`, `Widget` - deuxième lot séparé, après verdict CI de celui-ci) et deux fichiers qui partagent la même famille de défaut PSR-4 sans être couverts par un correctif de `composer.json` de module, puisqu'ils ne vivent pas dans un module : `StubSource` (`tests/Feature/PricingAuditTest.php`, racine du dépôt) et `TenantTestModel` (`Modules/Tenancy/tests/Feature/TenantScopeTest.php`, module `Tenancy` mais fichier de test, pas seeder/factory).
+
+### Note de méthode
+- **Ligne de base « avant » mesurée sur un run Linux CI réel et complet, pas sur une supposition** : `gh run view 33318159336 --log` (run de v1.238.3, seul run complet et non annulé disponible après le pilote), jobs `tests`/`security`/`code-quality`, chacun listant les 11 avertissements ci-dessus pour ces 5 modules, à l'identique dans les trois jobs.
+- **Preuve « après » nécessairement différée à un run Linux CI de ce commit précis** : macOS est insensible à la casse et ne peut pas reproduire ce défaut ; `composer validate` (les 5 fichiers passent, seul avertissement générique préexistant « No license specified », déjà présent avant ce correctif sur tous les modules du dépôt, y compris ceux jamais concernés) et `json_decode` confirment seulement la syntaxe, pas l'autoloading réel. Le verdict Linux littéral sera rapporté dans le prochain commit (lot 2), avant de généraliser davantage.
+- La CI de ce projet tourne en mode signalement (`continue-on-error`, dette préexistante indépendante de ce correctif) : « CI verte » n'est jamais l'affirmation faite ici.
+
 ## [1.238.7] - 2026-08-30
 
 ### Corrigé

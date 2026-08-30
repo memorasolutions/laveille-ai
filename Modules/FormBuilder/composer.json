@@ -3,7 +3,8 @@
     "autoload": {
         "psr-4": {
             "Modules\\FormBuilder\\": "app/",
-            "Modules\\FormBuilder\\Database\\": "database/",
+            "Modules\\FormBuilder\\Database\\Factories\\": "database/factories/",
+            "Modules\\FormBuilder\\Database\\Seeders\\": "database/seeders/",
             "Modules\\FormBuilder\\Tests\\": "tests/"
         }
     }
