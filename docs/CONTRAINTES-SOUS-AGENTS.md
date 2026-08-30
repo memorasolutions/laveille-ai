@@ -119,6 +119,43 @@ consignes à chaque tâche. Tout ce qui suit est acquis, permanent, et non négo
 - **Le texte alternatif décrit l'image**, il ne contient pas de mots-clés - le bourrage dégrade
   l'accessibilité sans bénéfice.
 
+## 6 bis. TU N'ES JAMAIS RÉVEILLÉ PAR UN SIGNAL - tu lis un fichier
+
+Mesuré TROIS fois dans la même soirée, le 2026-08-29, sur trois agents indépendants qui ont tous
+gelé de la même façon : « j'attends la notification de la tâche de fond », « j'attends que le
+Monitor me réveille », « je reprendrai quand le résultat arrivera ».
+
+**Ce réveil n'arrive jamais.** Une notification de fin de tâche de fond remonte à la boucle
+principale, pas à un agent délégué. Un Monitor armé depuis un sous-agent ne le sort pas non plus de
+son attente. L'agent reste suspendu jusqu'à ce qu'un humain ou le superviseur le relance - du temps
+perdu, à chaque fois.
+
+**La règle : une tâche de fond écrit son résultat dans un FICHIER. On lit le fichier.**
+
+    tail -40 <chemin/du/fichier.output>
+
+Le chemin t'est donné au moment où tu lances la commande. Interroge-le, à intervalles si besoin.
+Ne reste jamais suspendu à un signal.
+
+**Ce qui reste bon, et qu'il ne faut PAS relâcher** : refuser de déployer avant d'avoir la preuve,
+et ne lancer qu'une suite de tests à la fois. Ces exigences sont justes. Seule la façon d'attendre
+était fausse.
+
+**Trois lectures possibles du fichier, trois suites :**
+1. *Terminé et vert* → tu enchaînes, sans demander la permission.
+2. *Terminé et rouge* → tu colles la sortie d'échec et tu établis si elle vient de TON changement
+   ou d'une dette préexistante. Tu ne contournes pas, tu ne devines pas la cause.
+3. *Toujours en cours* → tu réinterroges. Et si ça dépasse largement le temps attendu, **soupçonne
+   ton propre délai d'attente avant d'accuser la commande** : le 2026-08-28, des lots de tests
+   réputés « morts » avaient simplement été coupés par le timeout de l'appelant.
+
+**Piège voisin, mesuré le même soir** : deux suites de tests lancées en même temps se font
+mutuellement échouer, parce que `modules_statuses.json` est un fichier RÉEL partagé (hors base
+`:memory:`) que plusieurs modules de test écrivent. Symptôme : `FileActivator::readJson(): Return
+value must be of type array, null returned`. Avant de conclure à une régression, vérifie qu'aucune
+autre suite ne tourne, et relance le test SEUL.
+
+
 ## 7. CE QU'ON ATTEND D'UN RAPPORT
 
 - Court, factuel, sans embellissement.
