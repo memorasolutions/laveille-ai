@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.238.4] - 2026-08-30
+
+### Corrigé
+- **Audit DRY de la livraison v1.237.1-v1.238.3 (mandat explicite du fondateur) : le plafond de liens glossaire des actualités était recopié 15 fois dans le même fichier.** `Modules/News/resources/views/public/show.blade.php` porte 15 appels `@glossarize()`, et le correctif de v1.237.3 avait ajouté `['max_occ' => 1]` littéralement sur chacun des 15 pour corriger un terme lié 5 fois sur une seule fiche (fiche 39486). La connaissance encodée - « une fiche actualité ne lie jamais un terme plus d'une fois, sur toute la page » - est UNE seule règle recopiée 15 fois : la changer demandait 15 modifications, et en oublier une aurait ramené le défaut en partie.
+- **Diagnostic tranché avant correctif : la fragmentation en 15 appels est l'architecture normale de cette vue (une section = un appel), l'anomalie est la RÉPÉTITION DE LA VALEUR, pas la fragmentation elle-même.** Comparé au glossaire (`Dictionary/show.blade.php`) et au blog (`FrontTheme/blog/show.blade.php`), qui n'ont qu'UN SEUL appel chacun : ce n'est PAS la même connaissance dupliquée entre ces trois fichiers (contenus différents, raisons d'évoluer différentes - un changement du plafond des actualités n'a aucune raison de toucher le blog), donc PAS fusionnée avec eux (règle DRY du projet : la connaissance, jamais la ressemblance de forme). C'est UNIQUEMENT la répétition INTRA-fichier (15 fois la même valeur pour la même règle, dans le même fichier) qui constituait un risque réel de divergence.
+- **Correctif retenu : une variable de vue, déclarée une seule fois.** `$glossOpts = ['max_occ' => 1];` posée dans le bloc `@php` déjà présent en tête de la zone concernée, puis référencée par les 15 appels (`@glossarize(e($texte), $glossOpts)`) au lieu du littéral recopié. Aucune nouvelle abstraction (pas de composant Blade, pas de service) : Blade compile une variable exactement comme un littéral dans l'appel du helper `GlossaryLinkifier::linkify()`, donc comportement rigoureusement identique - seule la source de vérité de la VALEUR change, de 15 emplacements à 1.
+
+### Tests
+- Comportement inchangé, confirmé par `Modules/News/tests/Feature/GlossaryLinkDensityTest.php` (2 tests, 9 assertions) : vert avant ET après ce refactor - un refactor sans changement de comportement n'a pas de « rouge » à produire par construction, la preuve correcte est l'identité du résultat, pas une régression provoquée artificiellement.
+- Suite complète du module actualités : 602 tests, 2002 assertions, zéro échec.
+
+### Note de méthode
+- Correctif de pure forme (DRY), sans changement de comportement observable - confirmé par lecture du diff (seule la source de la valeur change) et par la suite de tests inchangée.
+
 ## [1.238.3] - 2026-08-30
 
 ### Corrigé
