@@ -228,7 +228,16 @@ class TranslationService
                 $traduits = [];
                 foreach ($lignes as $i => $ligne) {
                     $sansNumero = preg_replace('/^\s*\d+\s*[.)]\s*/u', '', $ligne) ?? $ligne;
-                    $sansNumero = trim(str_replace('—', '-', $sansNumero));
+                    // #P0-audit 2026-08-30 : réutilise lv_strip_em_dash() (app/Helpers/typo.php),
+                    // l'utilitaire DÉDIÉ du projet pour cette règle (CLAUDE.md #10) - remplaçait
+                    // avant une TROISIÈME copie manuelle de exactement la même ligne
+                    // (str_replace('—', '-', ...)), trouvée en auditant les livraisons v1.237-
+                    // v1.238 qui avaient déjà consolidé les deux autres (voir NewsImageService::
+                    // generateFallbackImage(), v1.237.5). $consigne ci-dessus interdit déjà le
+                    // cadratin au modèle ; ce filtre est le filet de sécurité côté serveur si le
+                    // modèle en produit un quand même - un titre traduit n'est jamais une citation
+                    // verbatim, donc jamais le cas d'exclusion documenté dans lv_strip_em_dash().
+                    $sansNumero = trim(lv_strip_em_dash($sansNumero));
                     $traduits[] = $sansNumero !== '' ? $sansNumero : $textes[$i];
                 }
 

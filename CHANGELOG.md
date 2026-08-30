@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.238.6] - 2026-08-30
+
+### Corrigé
+- **Une troisième copie manuelle du retrait du tiret cadratin, trouvée en auditant la livraison v1.237.1-v1.238.3 (mandat du fondateur, point 3).** `lv_strip_em_dash()` (`app/Helpers/typo.php`) est l'utilitaire dédié du projet pour cette règle (CLAUDE.md #10) - déjà réutilisé par `NewsImageService::generateFallbackImage()` (v1.237.5). `Modules/Core/app/Services/TranslationService.php::translateBatch()` en portait une troisième copie manuelle, indépendante : un `str_replace()` du caractère cadratin (U+2014) vers un trait d'union, ligne pour ligne identique à l'implémentation de `lv_strip_em_dash()`.
+- **Recherche exhaustive avant correctif** (grep de `str_replace`/`preg_replace`/`strtr` ciblant le caractère cadratin U+2014, sur tout `app/`, `Modules/`, `resources/`, `public/`, PHP et JS) : exactement une seule occurrence trouvée en dehors de `typo.php` et de son utilisation déjà consolidée dans `NewsImageService`. Aucune quatrième copie.
+- **Pas un bug de comportement - un risque de divergence future.** Les deux implémentations faisaient rigoureusement la même chose (vérifié par test identique passé contre les deux versions du code). Le risque n'est pas dans le résultat actuel mais dans l'évolution : une correction future apportée à `lv_strip_em_dash()` (ex. gérer un cas limite de citation, ou le tiret demi-cadratin) n'aurait jamais atteint cette copie oubliée dans `TranslationService`.
+- Remplacé par `trim(lv_strip_em_dash($sansNumero))` - le `trim()` externe est conservé (règle de nettoyage d'espaces distincte, sans rapport avec le cadratin).
+
+### Tests
+- `Modules/Core/tests/Feature/TranslationServiceEmDashTest.php` (1 test neuf, 3 assertions) : passe identiquement contre le code d'avant ET d'après ce correctif - preuve directe qu'il s'agit d'un refactor de pure duplication, pas d'une correction de comportement. Suite complète du module Core : 193 tests, 586 assertions, zéro échec.
+
 ## [1.238.5] - 2026-08-30
 
 ### Corrigé
