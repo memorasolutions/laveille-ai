@@ -389,10 +389,21 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    // Construire URL deep-link (#15 + #16 v3 + #P0-audit choix de base du pourboire)
+    // Construire URL deep-link (#15 + #16 v3 + #P0-audit choix de base du pourboire).
+    // #P2-lien-enorme (2026-08-30, signalement du fondateur "le lien est énorme") : repart
+    // TOUJOURS d'une URL canonique propre (origine + chemin), jamais d'un clonage de l'URL
+    // courante. Avant ce correctif, new URL(window.location.href) copiait TOUT ce qui se trouvait
+    // déjà dans la barre d'adresse et ne retirait que les 6 clés connues de l'outil - si la
+    // personne était elle-même arrivée via un lien de campagne (utm_source/utm_medium/
+    // utm_campaign/fbclid/gclid...), ces paramètres de traçage, sans aucun rapport avec le calcul,
+    // repartaient tels quels dans le lien "partagé". Mesuré en navigateur réel (Chromium, même
+    // calcul Québec 100 $ + pourboire 15 %) : 61 caractères sur un atterrissage propre, 233 avec
+    // des paramètres de traçage réalistes sur la page de départ - la totalité du gonflement venait
+    // de ce clonage, pas de l'état du calcul (3 valeurs seulement). Le lien ne transporte plus que
+    // ce qui reconstitue fidèlement le calcul, quel que soit le chemin par lequel la personne qui
+    // partage est elle-même arrivée sur la page.
     function buildShareUrl(data) {
-        var url = new URL(window.location.href);
-        ['p','a','m','t','s','tb'].forEach(function(k) { url.searchParams.delete(k); });
+        var url = new URL(window.location.origin + window.location.pathname);
         if (data.province) url.searchParams.set('p', data.province);
         if (data.amount) url.searchParams.set('a', data.amount);
         if (data.source === 'after') url.searchParams.set('s', 'after');
