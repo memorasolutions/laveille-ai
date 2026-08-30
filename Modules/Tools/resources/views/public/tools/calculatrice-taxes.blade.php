@@ -34,7 +34,7 @@
     .calculator-app .tax-display-group { padding: 0.75rem !important; margin: 0 !important; }
     .calculator-app .section-divider { margin: 0.5rem 0 !important; }
     .calculator-app .tip-section, .calculator-app .split-section, .calculator-app .actions-section { margin-top: 0 !important; padding-top: 0 !important; }
-    .calculator-app .split-section h3 { margin-top: 0; font-size: 1rem; }
+    .calculator-app .split-section h2 { margin-top: 0; font-size: 1rem; }
     .calculator-app .card-body { padding: 1.5rem !important; }
     @media (max-width: 576px) {
         .calculator-app .tax-display-group { flex-direction: row !important; }
@@ -42,7 +42,10 @@
         .calculator-app .card-body { padding: 1rem !important; }
         .quick-amounts { justify-content: center; gap: 0.25rem !important; margin-bottom: 0.5rem !important; }
         .quick-amounts span { display: none !important; }
-        .quick-amt-btn { padding: 3px 10px !important; font-size: 0.8rem !important; }
+        /* #P0-audit 2026-08-30 : min-height 44px conservé même à 390px - la cible tactile WCAG 2.2
+           AAA (44x44 px) ne se rétrécit pas sous prétexte de manque de place ; on réduit le
+           padding horizontal, jamais la hauteur. */
+        .quick-amt-btn { padding: 3px 10px !important; font-size: 0.8rem !important; min-height: 44px !important; }
     }
 </style>
 @endpush
@@ -94,18 +97,18 @@
                                     </div>
 
                                     {{-- #16 S84 v3 : Bidirectionnel natif — saisi dans n'importe quel champ → autre se calcule automatiquement --}}
-                                    <p style="font-size: 0.85rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0; padding: 0.5rem 0.75rem; background: #f1f3f5; border-radius: 8px; border-left: 3px solid var(--c-primary, #064E5A);">
+                                    <p style="font-size: 0.85rem; color: var(--c-text-muted, #52586a); margin: 0 0 0.75rem 0; padding: 0.5rem 0.75rem; background: #f1f3f5; border-radius: 8px; border-left: 3px solid var(--c-primary, #064E5A); max-width: 65ch;">
                                         💡 Saisissez le montant <strong>avant</strong> OU <strong>avec taxes</strong> – l'autre champ se calcule automatiquement.
                                     </p>
 
                                     {{-- Montants rapides --}}
                     <div class="quick-amounts" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
                         <span style="font-size: 0.85rem; color: var(--c-text-muted, #52586a); align-self: center;">{{ __('Montants rapides :') }}</span>
-                        <button type="button" class="quick-amt-btn" data-amount="10" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">10 $</button>
-                        <button type="button" class="quick-amt-btn" data-amount="25" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">25 $</button>
-                        <button type="button" class="quick-amt-btn" data-amount="50" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">50 $</button>
-                        <button type="button" class="quick-amt-btn" data-amount="100" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">100 $</button>
-                        <button type="button" class="quick-amt-btn" data-amount="500" style="padding: 4px 12px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">500 $</button>
+                        <button type="button" class="quick-amt-btn" data-amount="10" style="padding: 4px 12px; min-height: 44px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">10 $</button>
+                        <button type="button" class="quick-amt-btn" data-amount="25" style="padding: 4px 12px; min-height: 44px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">25 $</button>
+                        <button type="button" class="quick-amt-btn" data-amount="50" style="padding: 4px 12px; min-height: 44px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">50 $</button>
+                        <button type="button" class="quick-amt-btn" data-amount="100" style="padding: 4px 12px; min-height: 44px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">100 $</button>
+                        <button type="button" class="quick-amt-btn" data-amount="500" style="padding: 4px 12px; min-height: 44px; border: 1px solid #ddd; border-radius: 20px; background: #fff; cursor: pointer; font-size: 0.85rem;">500 $</button>
                     </div>
 
                     <div class="calculator-grid">
@@ -116,7 +119,11 @@
                                             </label>
                                             <div class="input-wrapper">
                                                 <span class="currency-symbol">$</span>
-                                                <input type="number" id="amount-before-tax" aria-label="Montant avant taxes" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input">
+                                                {{-- #P0-audit 2026-08-30 : type="text" + inputmode="decimal", jamais type="number". Un
+                                                     <input type="number"> REJETTE la virgule française au clavier - confirmé par frappe
+                                                     réelle : taper "12,50" au clavier donne une valeur DOM "1250" (la virgule est avalée en
+                                                     silence, 100x l'erreur). window.CalcParseAmount (défini plus bas) gère virgule/point. --}}
+                                                <input type="text" id="amount-before-tax" aria-label="Montant avant taxes" placeholder="0,00" inputmode="decimal" autocomplete="off" class="amount-input">
                                             </div>
                                         </div>
 
@@ -128,14 +135,14 @@
                                                 <label id="tax1-label">TPS (5 %)</label>
                                                 <div class="input-wrapper">
                                                     <span class="currency-symbol">$</span>
-                                                    <input type="text" id="tax1-amount" readonly class="readonly-input" value="0.00">
+                                                    <input type="text" id="tax1-amount" readonly class="readonly-input" value="0,00" aria-labelledby="tax1-label">
                                                 </div>
                                             </div>
                                             <div class="form-group" id="tax2-group">
                                                 <label id="tax2-label">TVQ (9,975 %)</label>
                                                 <div class="input-wrapper">
                                                     <span class="currency-symbol">$</span>
-                                                    <input type="text" id="tax2-amount" readonly class="readonly-input" value="0.00">
+                                                    <input type="text" id="tax2-amount" readonly class="readonly-input" value="0,00" aria-labelledby="tax2-label">
                                                 </div>
                                             </div>
                                         </div>
@@ -147,14 +154,14 @@
                                             </label>
                                             <div class="input-wrapper">
                                                 <span class="currency-symbol">$</span>
-                                                <input type="number" id="amount-after-tax" aria-label="Montant après taxes" placeholder="0.00" step="0.01" min="0" inputmode="decimal" class="amount-input total-amount">
+                                                <input type="text" id="amount-after-tax" aria-label="Montant après taxes" placeholder="0,00" inputmode="decimal" autocomplete="off" class="amount-input total-amount">
                                             </div>
                                         </div>
                                     </div>
 
                                     {{-- #16 S84 v3 : Toggle pourboire toujours visible — actif si user saisit dans 'Montant avec taxes' --}}
                                     <div class="ct-tip-toggle-wrapper" id="ct-tip-toggle-wrapper" style="margin-bottom: 0.5rem;">
-                                        <button type="button" id="ct-tip-toggle-btn" class="ct-btn ct-btn-outline" aria-expanded="false" aria-controls="ct-tip-options" style="width: 100%; text-align: left; padding: 0.6rem 0.9rem; display: flex; justify-content: space-between; align-items: center;">
+                                        <button type="button" id="ct-tip-toggle-btn" class="ct-btn ct-btn-outline" aria-expanded="false" aria-controls="ct-tip-options" style="width: 100%; text-align: left; padding: 0.6rem 0.9rem; min-height: 44px; display: flex; justify-content: space-between; align-items: center;">
                                             <span>🍽️ Avec pourboire</span>
                                             <span id="ct-tip-toggle-arrow" style="transition: transform 0.2s; font-size: 0.9rem;">▼</span>
                                         </button>
@@ -162,19 +169,36 @@
                                             <div class="form-group" style="margin-bottom: 0;">
                                                 <label for="rt-tip-percent" style="margin-bottom: 0.5rem;">{{ __('Pourcentage du pourboire') }}</label>
                                                 <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
-                                                    <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="10" style="padding: 4px 12px; font-size: 0.85rem; min-width: 44px; min-height: 32px;">10 %</button>
-                                                    <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="15" style="padding: 4px 12px; font-size: 0.85rem; min-width: 44px; min-height: 32px;">15 %</button>
-                                                    <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="18" style="padding: 4px 12px; font-size: 0.85rem; min-width: 44px; min-height: 32px;">18 %</button>
-                                                    <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="20" style="padding: 4px 12px; font-size: 0.85rem; min-width: 44px; min-height: 32px;">20 %</button>
+                                                    <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="10" style="padding: 4px 12px; font-size: 0.85rem; min-width: 44px; min-height: 44px;">10 %</button>
+                                                    <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="15" style="padding: 4px 12px; font-size: 0.85rem; min-width: 44px; min-height: 44px;">15 %</button>
+                                                    <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="18" style="padding: 4px 12px; font-size: 0.85rem; min-width: 44px; min-height: 44px;">18 %</button>
+                                                    <button type="button" class="rt-tip-preset ct-btn ct-btn-outline" data-tip="20" style="padding: 4px 12px; font-size: 0.85rem; min-width: 44px; min-height: 44px;">20 %</button>
                                                     <div class="input-wrapper" style="flex: 1; min-width: 100px; position: relative;">
-                                                        <input type="number" id="rt-tip-percent" aria-label="Pourcentage personnalisé" placeholder="{{ __('Personnalisé') }}" step="0.5" min="0" max="100" inputmode="decimal" class="amount-input" style="padding-right: 2rem;">
+                                                        <input type="text" id="rt-tip-percent" aria-label="Pourcentage personnalisé" placeholder="{{ __('Personnalisé') }}" inputmode="decimal" autocomplete="off" class="amount-input" style="padding-right: 2rem;">
                                                         <span style="position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); color: var(--c-text-muted, #52586a);">%</span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div id="rt-result" style="display: none; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #e2e6ea; font-size: 0.9rem;">
-                                                <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span>{{ __('Pourboire') }} (<span id="rt-result-tip-pct">0</span>%)</span><strong id="rt-result-tip-amount">0.00 $</strong></div>
-                                                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-top: 1px solid #e2e6ea; margin-top: 5px;"><span id="rt-result-final-label" style="font-weight: 700;">{{ __('Total payé') }}</span><strong id="rt-result-final" style="color: var(--c-primary, #064E5A); font-size: 1.05rem;">0.00 $</strong></div>
+                                            {{-- #16 P0-audit 2026-08-30 : choix explicite de la BASE du pourboire, demandé par le
+                                                 fondateur - jusqu'ici l'outil devinait selon le champ actif (souvent "après taxes", à
+                                                 l'encontre de l'usage québécois). Défaut = avant taxes (usage local). Vrais boutons
+                                                 radio (fieldset/legend) : sémantique native, navigables au clavier sans JS additionnel. --}}
+                                            <fieldset style="margin: 0.75rem 0 0 0; padding: 0; border: none;">
+                                                <legend style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: #555; margin-bottom: 0.4rem;">{{ __('Pourboire calculé sur') }}</legend>
+                                                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                                    <label style="display: flex; align-items: center; gap: 0.4rem; min-height: 44px; cursor: pointer; font-size: 0.9rem; font-weight: 400; text-transform: none; letter-spacing: normal;">
+                                                        <input type="radio" name="ct-tip-base" id="ct-tip-base-before" value="before" checked style="width: 20px; height: 20px; accent-color: var(--c-primary, #064E5A);">
+                                                        {{ __('Montant avant taxes (usage courant au Québec)') }}
+                                                    </label>
+                                                    <label style="display: flex; align-items: center; gap: 0.4rem; min-height: 44px; cursor: pointer; font-size: 0.9rem; font-weight: 400; text-transform: none; letter-spacing: normal;">
+                                                        <input type="radio" name="ct-tip-base" id="ct-tip-base-after" value="after" style="width: 20px; height: 20px; accent-color: var(--c-primary, #064E5A);">
+                                                        {{ __('Montant avec taxes') }}
+                                                    </label>
+                                                </div>
+                                            </fieldset>
+                                            <div id="rt-result" style="display: none; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #e2e6ea; font-size: 0.9rem;" aria-live="polite">
+                                                <div style="display: flex; justify-content: space-between; padding: 3px 0;"><span>{{ __('Pourboire') }} (<span id="rt-result-tip-pct">0</span> % <span id="rt-result-base-desc">{{ __('du montant avant taxes') }}</span>)</span><strong id="rt-result-tip-amount">0,00 $</strong></div>
+                                                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-top: 1px solid #e2e6ea; margin-top: 5px;"><span id="rt-result-final-label" style="font-weight: 700;">{{ __('Total à payer (avec pourboire)') }}</span><strong id="rt-result-final" style="color: var(--c-primary, #064E5A); font-size: 1.05rem;">0,00 $</strong></div>
                                             </div>
                                         </div>
                                     </div>
@@ -184,7 +208,7 @@
                                     <div class="section-divider" id="split-divider" style="display: none;"></div>
 
                                     <div class="split-section" id="split-section" style="display: none;">
-                                        <h3>{{ __('Diviser la facture') }}</h3>
+                                        <h2>{{ __('Diviser la facture') }}</h2>
                                         <div class="form-group">
                                             <label for="people">{{ __('Nombre de personnes') }}</label>
                                             <div class="range-wrapper">
@@ -195,7 +219,7 @@
                                         <div class="split-result" style="display: none;">
                                             <div class="per-person" data-people="1">
                                                 <span>{{ __('Par personne') }}</span>
-                                                <span class="per-person-amount">$0.00</span>
+                                                <span class="per-person-amount">0,00 $</span>
                                             </div>
                                         </div>
                                     </div>
@@ -259,12 +283,60 @@
             'body' => '<p>Le montant <strong>avec taxes</strong> (TTC) est le total final que vous payez, <strong>incluant</strong> toutes les taxes applicables.</p>'
                     . '<p><strong>Exemple Québec :</strong> vous payez 114,98 $ à la caisse. La calculatrice décompose : 100 $ avant taxes + 5 $ TPS + 9,98 $ TVQ.</p>'
                     . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">💡 Saisissez ce montant pour faire le calcul inversé – l\'autre champ se calcule automatiquement.</p>'
-                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">🍽️ Si vous avez ajouté un pourboire à ce montant, cochez « Le total inclut un pourboire » pour décomposer pourboire, taxes et sous-total.</p>',
+                    . '<p style="font-size:0.85rem; color: var(--c-text-muted, #52586a);">🍽️ Le pourboire (section « Avec pourboire ») s\'ajoute toujours EN PLUS de ce montant – il ne fait jamais partie du montant que vous saisissez ici.</p>',
         ],
     ];
 @endphp
 <script>
     window.HELP_CONTENT = {!! json_encode($calcHelp, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
+
+    // #P0-audit 2026-08-30 : normalisation de saisie numérique partagée, PLACÉE ICI (avant les
+    // scripts de l'outil) pour être réutilisable par d'autres outils de la même famille - aucun
+    // utilitaire équivalent n'existait ailleurs dans le projet (vérifié par grep sur public/tools
+    // et public/js avant d'écrire celui-ci, conformément à la règle DRY du projet).
+    //
+    // window.CalcParseAmount(brut) -> nombre JS ou NaN. Gère, dans cet ordre :
+    //  - espaces (normaux ET insécables U+00A0/U+202F) utilisés comme séparateur de milliers,
+    //    supprimés uniquement s'ils ne sont PAS suivis d'exactement 2 chiffres (sinon ce serait
+    //    un espace décimal, cas non standard - on ne devine pas, cf. "1,234.56" plus bas) ;
+    //  - un SEUL séparateur décimal, virgule OU point, désigné explicitement (jamais deviné) :
+    //    c'est le DERNIER "," ou "." de la chaîne qui fait foi si un chiffre le suit ; tout
+    //    séparateur antérieur est alors traité comme un séparateur de milliers et retiré. Couvre
+    //    "12,50", "12.50", "1 234,56", "1 234,56" (espace insécable), "1,234.56" (anglais) ET
+    //    "1.234,56" (européen) sans ambiguïté puisque c'est la POSITION (dernier séparateur) qui
+    //    tranche, jamais une supposition sur la locale ;
+    //  - saisie partielle pendant la frappe ("12," ou "12,0") : NE JAMAIS vider ni rejeter, on
+    //    complète mentalement le nombre déjà tapé (parseFloat s'arrête proprement).
+    window.CalcParseAmount = function (raw) {
+        if (raw === null || raw === undefined) return NaN;
+        var s = raw.toString().trim();
+        if (s === '') return NaN;
+        s = s.replace(/[  ]/g, ' '); // espaces insécables -> espace normal
+        s = s.replace(/\s/g, ''); // espaces (milliers) retirés - jamais un séparateur décimal en fr/en
+        var lastComma = s.lastIndexOf(',');
+        var lastDot = s.lastIndexOf('.');
+        var lastSep = Math.max(lastComma, lastDot);
+        if (lastSep === -1) {
+            var n0 = parseFloat(s);
+            return isNaN(n0) ? NaN : n0;
+        }
+        var intPart = s.slice(0, lastSep).replace(/[.,]/g, '') || '0';
+        var decPart = s.slice(lastSep + 1).replace(/[^0-9]/g, '');
+        var n = parseFloat(intPart + '.' + (decPart === '' ? '0' : decPart));
+        return isNaN(n) ? NaN : n;
+    };
+
+    // window.CalcMoney(nombre, {withSymbol}) -> chaîne fr-CA : virgule décimale, espace insécable
+    // avant le symbole "$" QUAND il est demandé. withSymbol=false pour les champs qui affichent
+    // déjà un "$" séparé (span .currency-symbol du gabarit) - évite le double symbole constaté
+    // (capture réelle : "$5.00$") quand le "$" du prefix ET celui du formatteur coexistaient.
+    window.CalcMoney = function (n, opts) {
+        opts = opts || {};
+        if (typeof n !== 'number' || isNaN(n)) n = 0;
+        var out = n.toFixed(2).replace('.', ',');
+        return opts.withSymbol === false ? out : out + ' $';
+    };
+
     window.taxConfig = {
         tax_rates: {
             AB: {name: 'Alberta', gst: 5, pst: 0, total: 5},
@@ -315,7 +387,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return st && st.activeField ? st.activeField : 'before';
     }
 
-    // Helper DRY : extrait données calcul actuel du DOM (mode-aware #16 S84 v2)
+    // Helper DRY : extrait données calcul actuel du DOM. Modèle UNIFIÉ (#P0-audit 2026-08-30) :
+    // sous-total, taxes, TTC et pourboire sont TOUJOURS cohérents simultanément - fini le
+    // branchement "extraction" qui pouvait les contredire (ancien bug : le pourboire faisait
+    // baisser le sous-total affiché, cf. CHANGELOG).
     function getCalculationData() {
         var province = document.getElementById('province');
         var before = document.getElementById('amount-before-tax');
@@ -324,64 +399,41 @@ document.addEventListener('DOMContentLoaded', function() {
         var after = document.getElementById('amount-after-tax');
         var t1Label = document.getElementById('tax1-label');
         var t2Label = document.getElementById('tax2-label');
-        var rtPct = document.getElementById('rt-tip-percent');
-        var rtTipAmt = document.getElementById('rt-result-tip-amount');
-        var rtAfter = document.getElementById('rt-result-after-tax');
-        var rtSub = document.getElementById('rt-result-subtotal');
         var lines = [];
-        if (province && province.value) lines.push('Province: ' + province.options[province.selectedIndex].text);
+        if (province && province.value) lines.push('Province : ' + province.options[province.selectedIndex].text);
+        if (before && before.value) lines.push('Avant taxes : ' + before.value + ' $');
+        if (t1Label && tax1 && tax1.value) lines.push(t1Label.textContent + ' : ' + tax1.value + ' $');
+        if (t2Label && tax2 && tax2.value && tax2.value !== '0,00' && tax2.value !== '0.00') lines.push(t2Label.textContent + ' : ' + tax2.value + ' $');
+        if (after && after.value) lines.push('Total (avec taxes) : ' + after.value + ' $');
+        var tipShown = isTipOpen() && rtResult && rtResult.style.display !== 'none';
+        var tipPctEl = document.getElementById('rt-result-tip-pct');
+        var tipAmtEl = document.getElementById('rt-result-tip-amount');
+        var finalEl = document.getElementById('rt-result-final');
+        if (tipShown && tipPctEl && tipAmtEl) lines.push('Pourboire (' + tipPctEl.textContent + ' %, ' + (getTipBase() === 'after' ? 'sur le montant avec taxes' : 'sur le montant avant taxes') + ') : ' + tipAmtEl.textContent);
+        if (tipShown && finalEl) lines.push('Total à payer (avec pourboire) : ' + finalEl.textContent);
 
         var activeField = getActiveField();
-        if (activeField === 'after' && tipIncluded && rtPct && rtPct.value) {
-            if (after && after.value) lines.push('Total payé (incl. pourboire): ' + after.value + ' $');
-            lines.push('Pourboire: ' + rtPct.value + ' % (' + (rtTipAmt ? rtTipAmt.textContent : '0') + ')');
-            if (rtAfter) lines.push('Total avant pourboire (avec taxes): ' + rtAfter.textContent);
-            if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
-            if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
-            if (rtSub) lines.push('Sous-total avant taxes: ' + rtSub.textContent);
-            return {
-                text: lines.join('\n'),
-                source: 'after',
-                province: province ? province.value : '',
-                amount: after ? after.value : '',
-                tip: rtPct.value,
-                hasData: !!(province && province.value && after && after.value)
-            };
-        }
-        if (activeField === 'after') {
-            if (after && after.value) lines.push('Avec taxes (saisi): ' + after.value + ' $');
-            if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
-            if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
-            if (before && before.value) lines.push('Avant taxes (calculé): ' + before.value + ' $');
-            return {
-                text: lines.join('\n'),
-                source: 'after',
-                province: province ? province.value : '',
-                amount: after ? after.value : '',
-                hasData: !!(province && province.value && after && after.value)
-            };
-        }
-        if (before && before.value) lines.push('Avant taxes: ' + before.value + ' $');
-        if (t1Label && tax1) lines.push(t1Label.textContent + ': ' + tax1.value + ' $');
-        if (t2Label && tax2 && tax2.value !== '0.00') lines.push(t2Label.textContent + ': ' + tax2.value + ' $');
-        if (after && after.value) lines.push('Total: ' + after.value + ' $');
+        var sourceAmount = activeField === 'after' ? (after ? after.value : '') : (before ? before.value : '');
         return {
             text: lines.join('\n'),
-            source: 'before',
+            source: activeField,
             province: province ? province.value : '',
-            amount: before ? before.value : '',
-            hasData: !!(province && province.value && before && before.value)
+            amount: sourceAmount,
+            tip: (tipShown && rtPctEl) ? rtPctEl.value : '',
+            tipBase: getTipBase(),
+            hasData: !!(province && province.value && sourceAmount)
         };
     }
 
-    // Construire URL deep-link (#15 + #16 v3)
+    // Construire URL deep-link (#15 + #16 v3 + #P0-audit choix de base du pourboire)
     function buildShareUrl(data) {
         var url = new URL(window.location.href);
-        ['p','a','m','t','s'].forEach(function(k) { url.searchParams.delete(k); });
+        ['p','a','m','t','s','tb'].forEach(function(k) { url.searchParams.delete(k); });
         if (data.province) url.searchParams.set('p', data.province);
         if (data.amount) url.searchParams.set('a', data.amount);
         if (data.source === 'after') url.searchParams.set('s', 'after');
         if (data.tip) url.searchParams.set('t', data.tip);
+        if (data.tip && data.tipBase === 'after') url.searchParams.set('tb', 'after');
         return url.toString();
     }
 
@@ -446,13 +498,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // #16 S84 v3 : Bidirectionnel natif. Toggle pourboire toujours visible.
+    // #P0-audit 2026-08-30 : refonte complète du pourboire (mandat du fondateur - "à reprendre
+    // en entier, pas à rafistoler"). L'ancien système DEVINAIT une direction ('before'/'after') et
+    // EXTRAYAIT (divisait) le pourboire d'un montant "avec taxes" déjà saisi, même quand ce montant
+    // ne contenait PAS encore de pourboire - ce qui faisait BAISSER le sous-total affiché dès qu'un
+    // pourcentage était choisi (P0, reproduit : Québec, 114,98 $ avec taxes saisi SANS pourboire ->
+    // "avant taxes" affiche correctement 100,00 $ -> clic sur "15 %" -> "avant taxes" TOMBE à
+    // 86,96 $ sans que l'utilisateur ait changé son montant). Le nouveau système est TOUJOURS
+    // additif : le pourboire s'ajoute au total, jamais ne s'en extrait, et ne touche JAMAIS les
+    // champs "avant taxes"/"avec taxes"/taxes - il ne fait que lire leur valeur courante.
     var tipToggleBtn = document.getElementById('ct-tip-toggle-btn');
     var tipOptions = document.getElementById('ct-tip-options');
     var tipArrow = document.getElementById('ct-tip-toggle-arrow');
     var rtPctEl = document.getElementById('rt-tip-percent');
     var rtPresetBtns = document.querySelectorAll('.rt-tip-preset');
     var rtResult = document.getElementById('rt-result');
+    var tipBaseRadios = document.querySelectorAll('input[name="ct-tip-base"]');
+    var TIP_BASE_STORAGE_KEY = 'ct_tip_base_pref';
+    var IS_AUTHENTICATED = {{ auth()->check() ? 'true' : 'false' }};
 
     function getProvinceRates() {
         var sel = document.getElementById('province');
@@ -460,64 +523,123 @@ document.addEventListener('DOMContentLoaded', function() {
         return (window.taxConfig && window.taxConfig.tax_rates) ? window.taxConfig.tax_rates[sel.value] : null;
     }
 
-    // Override unifié : ajoute pourboire selon activeField (forward = ajoute au TTC, reverse = décompose du TTC saisi)
-    function recalcReverseTipOverride() {
-        var rates = getProvinceRates();
+    function isTipOpen() {
+        return !!(tipToggleBtn && tipToggleBtn.getAttribute('aria-expanded') === 'true');
+    }
+
+    function getTipBase() {
+        for (var i = 0; i < tipBaseRadios.length; i++) {
+            if (tipBaseRadios[i].checked) return tipBaseRadios[i].value;
+        }
+        return 'before';
+    }
+
+    function round2(n) {
+        // Même correctif Number.EPSILON que le moteur principal (calculator-simple.js _round) -
+        // une seule règle d'arrondi dans tout l'outil.
+        return Math.round((n + Number.EPSILON) * 100) / 100;
+    }
+
+    // Formate un POURCENTAGE (pas un montant) : virgule française, jamais de zéro inutile
+    // (15 plutôt que 15,00 ; 12,5 plutôt que 12,50).
+    function formatPercent(n) {
+        var rounded = Math.round((n + Number.EPSILON) * 100) / 100;
+        return rounded.toString().replace('.', ',');
+    }
+
+    function updateBaseDesc() {
+        var desc = document.getElementById('rt-result-base-desc');
+        if (desc) desc.textContent = (getTipBase() === 'after') ? '{{ __("du montant avec taxes") }}' : '{{ __("du montant avant taxes") }}';
+    }
+
+    // Calcul du pourboire - TOUJOURS additif, TOUJOURS relu depuis le DOM (aucun état interne
+    // séparé à désynchroniser). base = sous-total (avant taxes) ou TTC (avec taxes) selon le choix
+    // explicite de l'utilisateur (fieldset radio, défaut = avant taxes = usage québécois).
+    function recalcTip() {
         var beforeEl = document.getElementById('amount-before-tax');
         var afterEl = document.getElementById('amount-after-tax');
-        var tipPct = parseFloat((rtPctEl && rtPctEl.value || '').replace(',', '.'));
-        if (!tipIncluded || !rates || isNaN(tipPct) || tipPct < 0) {
+        var subtotal = window.CalcParseAmount(beforeEl ? beforeEl.value : '');
+        var total = window.CalcParseAmount(afterEl ? afterEl.value : '');
+        var pct = window.CalcParseAmount(rtPctEl ? rtPctEl.value : '');
+        var base = getTipBase();
+        var baseAmount = (base === 'after') ? total : subtotal;
+        var ready = isTipOpen() && !isNaN(pct) && pct >= 0 && !isNaN(total) && total > 0 && !isNaN(baseAmount) && baseAmount > 0;
+
+        if (!ready) {
             if (rtResult) rtResult.style.display = 'none';
+            if (window.simpleCalculator && window.simpleCalculator.state) {
+                window.simpleCalculator.state.tipCalculation = null;
+            }
             return;
         }
-        var direction = getActiveField();
-        var tipAmount = 0, finalAmount = 0, finalLabel = '';
-        var fmt = function(n) { return n.toFixed(2) + ' $'; };
-        if (direction === 'before') {
-            // Forward + pourboire : HT saisi → TTC + pourboire = total payé
-            var subtotal = parseFloat((beforeEl && beforeEl.value || '').replace(',', '.'));
-            if (isNaN(subtotal) || subtotal <= 0) { if (rtResult) rtResult.style.display = 'none'; return; }
-            var subtotalWithTax = subtotal * (1 + rates.total / 100);
-            tipAmount = subtotalWithTax * tipPct / 100;
-            finalAmount = subtotalWithTax + tipAmount;
-            finalLabel = 'Total payé (avec pourboire)';
-        } else {
-            // Reverse + pourboire : TTC saisi inclut pourboire → décompose vers sous-total HT
-            var total = parseFloat((afterEl && afterEl.value || '').replace(',', '.'));
-            if (isNaN(total) || total <= 0) { if (rtResult) rtResult.style.display = 'none'; return; }
-            var subtotalWithTaxRev = total / (1 + tipPct / 100);
-            tipAmount = total - subtotalWithTaxRev;
-            var subtotalRev = subtotalWithTaxRev / (1 + rates.total / 100);
-            finalAmount = subtotalRev;
-            finalLabel = 'Sous-total avant taxes';
 
-            // Override champs principaux pour cohérence : avant taxes = vrai HT, taxes décomposées
-            var tax1Label = '', tax1Amount = 0, tax2Label = '', tax2Amount = 0;
-            if (rates.hst) {
-                tax1Label = 'TVH/HST (' + rates.hst + ' %)';
-                tax1Amount = subtotalRev * rates.hst / 100;
-            } else {
-                if (rates.gst) { tax1Label = 'TPS/GST (' + rates.gst + ' %)'; tax1Amount = subtotalRev * rates.gst / 100; }
-                if (rates.qst) { tax2Label = 'TVQ/QST (' + rates.qst + ' %)'; tax2Amount = subtotalRev * rates.qst / 100; }
-                else if (rates.pst) { tax2Label = 'TVP/PST (' + rates.pst + ' %)'; tax2Amount = subtotalRev * rates.pst / 100; }
-            }
-            var t1Display = document.getElementById('tax1-amount');
-            var t2Display = document.getElementById('tax2-amount');
-            var t1LabelEl = document.getElementById('tax1-label');
-            var t2LabelEl = document.getElementById('tax2-label');
-            if (beforeEl) beforeEl.value = subtotalRev.toFixed(2);
-            if (t1Display) t1Display.value = tax1Amount.toFixed(2);
-            if (t2Display) t2Display.value = tax2Amount.toFixed(2);
-            if (t1LabelEl && tax1Label) t1LabelEl.textContent = tax1Label;
-            if (t2LabelEl && tax2Label) t2LabelEl.textContent = tax2Label;
-        }
+        var tipAmount = round2(baseAmount * pct / 100);
+        var grandTotal = round2(total + tipAmount);
 
-        document.getElementById('rt-result-tip-pct').textContent = tipPct;
-        document.getElementById('rt-result-tip-amount').textContent = fmt(tipAmount);
-        document.getElementById('rt-result-final-label').textContent = finalLabel;
-        document.getElementById('rt-result-final').textContent = fmt(finalAmount);
+        updateBaseDesc();
+        document.getElementById('rt-result-tip-pct').textContent = formatPercent(pct);
+        document.getElementById('rt-result-tip-amount').textContent = window.CalcMoney(tipAmount);
+        document.getElementById('rt-result-final-label').textContent = '{{ __("Total à payer (avec pourboire)") }}';
+        document.getElementById('rt-result-final').textContent = window.CalcMoney(grandTotal);
         if (rtResult) rtResult.style.display = 'block';
+
+        // Pont DRY vers "Diviser la facture" (calculator-simple.js._updateSplitCalculation lit déjà
+        // state.tipCalculation.totalWithTip en priorité) : le pourboire actif se répercute donc
+        // automatiquement dans le montant par personne, sans dupliquer la logique de répartition.
+        if (window.simpleCalculator && window.simpleCalculator.state) {
+            window.simpleCalculator.state.tipCalculation = { totalWithTip: grandTotal };
+        }
     }
+
+    // Préférence "base du pourboire" - réutilise le mécanisme existant des autres outils
+    // (Modules/Tools/app/Http/Controllers/ToolPreferenceController.php, déjà utilisé par le
+    // minuteur visuel et le constructeur de prompts) pour les visiteurs connectés, complété par
+    // localStorage (déjà la convention de CE fichier pour tax_calc_history) pour tout le monde -
+    // le défaut reste "avant taxes" tant qu'aucune préférence n'est trouvée.
+    function applyTipBase(value) {
+        var beforeRadio = document.getElementById('ct-tip-base-before');
+        var afterRadio = document.getElementById('ct-tip-base-after');
+        if (value === 'after' && afterRadio) afterRadio.checked = true;
+        else if (beforeRadio) beforeRadio.checked = true;
+        updateBaseDesc();
+    }
+    function saveTipBasePreference(value) {
+        try { localStorage.setItem(TIP_BASE_STORAGE_KEY, value); } catch (e) { /* stockage indisponible - tant pis, silencieux */ }
+        if (!IS_AUTHENTICATED) return;
+        var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        fetch('/api/tool-preferences/calculatrice-taxes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfMeta ? csrfMeta.content : ''
+            },
+            body: JSON.stringify({ key: 'tip_base', value: value })
+        }).catch(function () { /* anonyme ou hors-ligne : localStorage suffit déjà */ });
+    }
+    function loadTipBasePreference() {
+        try {
+            var local = localStorage.getItem(TIP_BASE_STORAGE_KEY);
+            if (local === 'after' || local === 'before') applyTipBase(local);
+        } catch (e) { /* silencieux */ }
+        if (!IS_AUTHENTICATED) return;
+        fetch('/api/tool-preferences/calculatrice-taxes', { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                var v = data && data.preferences && data.preferences.tip_base;
+                if (v === 'after' || v === 'before') applyTipBase(v);
+            })
+            .catch(function () { /* silencieux - localStorage a déjà fait de son mieux */ });
+    }
+    loadTipBasePreference();
+
+    tipBaseRadios.forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            if (!this.checked) return;
+            saveTipBasePreference(this.value);
+            recalcTip();
+        });
+    });
 
     // Toggle pourboire ouvrir/fermer
     if (tipToggleBtn) {
@@ -528,22 +650,24 @@ document.addEventListener('DOMContentLoaded', function() {
             if (tipOptions) tipOptions.style.display = newOpen ? 'block' : 'none';
             if (tipArrow) tipArrow.style.transform = newOpen ? 'rotate(180deg)' : 'rotate(0deg)';
             if (!newOpen) {
-                // Fermeture : reset pourboire et redéclenche calcul de base selon activeField
-                tipIncluded = false;
+                // Fermeture : reset pourboire. Plus besoin de "réparer" les champs principaux -
+                // le nouveau calcul ne les a jamais touchés.
                 if (rtResult) rtResult.style.display = 'none';
                 rtPresetBtns.forEach(function(b) { b.style.background = ''; b.style.color = ''; });
                 if (rtPctEl) rtPctEl.value = '';
-                var src = (getActiveField() === 'after') ? document.getElementById('amount-after-tax') : document.getElementById('amount-before-tax');
-                if (src && src.value) src.dispatchEvent(new Event('input', {bubbles: true}));
+                if (window.simpleCalculator && window.simpleCalculator.state) {
+                    window.simpleCalculator.state.tipCalculation = null;
+                }
+            } else {
+                recalcTip();
             }
         });
     }
 
-    // Tip% input → active tipIncluded + override calc
+    // Tip% input → recalcul additif (jamais d'extraction)
     if (rtPctEl) {
         rtPctEl.addEventListener('input', function() {
-            tipIncluded = !!(this.value && parseFloat(this.value) > 0);
-            recalcReverseTipOverride();
+            setTimeout(recalcTip, 0);
         });
     }
 
@@ -553,8 +677,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var v = this.getAttribute('data-tip');
             if (rtPctEl) {
                 rtPctEl.value = v;
-                tipIncluded = true;
-                recalcReverseTipOverride();
+                recalcTip();
             }
             rtPresetBtns.forEach(function(b) { b.style.background = ''; b.style.color = ''; });
             this.style.background = 'var(--c-primary, #064E5A)';
@@ -562,29 +685,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Override déclenché si user saisit dans amount-after-tax avec tipIncluded
+    // Recalcul du pourboire quand les montants principaux changent (le moteur principal a déjà
+    // mis à jour le champ miroir de façon synchrone à ce stade - cf. calculator-simple.js)
     var afterInputEl = document.getElementById('amount-after-tax');
     if (afterInputEl) {
         afterInputEl.addEventListener('input', function() {
-            if (tipIncluded) setTimeout(recalcReverseTipOverride, 0);
+            setTimeout(recalcTip, 0);
         });
     }
     var beforeInputEl = document.getElementById('amount-before-tax');
     if (beforeInputEl) {
         beforeInputEl.addEventListener('input', function() {
-            if (tipIncluded) setTimeout(recalcReverseTipOverride, 0);
-            else if (rtResult) rtResult.style.display = 'none';
+            setTimeout(recalcTip, 0);
         });
     }
 
     var provSel = document.getElementById('province');
     if (provSel) {
         provSel.addEventListener('change', function() {
-            if (tipIncluded) setTimeout(recalcReverseTipOverride, 0);
+            setTimeout(recalcTip, 0);
         });
     }
 
-    // #15 + #16 v3 : Init au load — lire ?p, ?a, ?s (source 'after' ou rien), ?t. Rétrocompat ?m=reverse|reverse_tip
+    // #15 + #16 v3 + #P0-audit : Init au load - lire ?p, ?a, ?s (source 'after' ou rien), ?t,
+    // ?tb (base du pourboire, 'after' sinon 'before' par défaut). Rétrocompat ?m=reverse|reverse_tip
     (function initFromUrl() {
         try {
             var params = new URLSearchParams(window.location.search);
@@ -593,6 +717,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var m = params.get('m');
             var s = params.get('s');
             var t = params.get('t');
+            var tb = params.get('tb');
             if (p) {
                 var sel = document.getElementById('province');
                 if (sel) {
@@ -610,7 +735,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     amountInput.dispatchEvent(new Event('input', {bubbles: true}));
                 }
             }
-            if (t && useAfter) {
+            if (tb === 'after') applyTipBase('after');
+            if (t) {
                 if (tipToggleBtn) {
                     tipToggleBtn.setAttribute('aria-expanded', 'true');
                     if (tipOptions) tipOptions.style.display = 'block';
@@ -618,8 +744,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (rtPctEl) {
                     rtPctEl.value = t;
-                    tipIncluded = true;
-                    setTimeout(recalcReverseTipOverride, 50);
+                    setTimeout(recalcTip, 50);
                 }
             }
         } catch (e) { /* silent fail */ }

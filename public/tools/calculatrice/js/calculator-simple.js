@@ -241,8 +241,12 @@
             };
         },
         
+        // Number.EPSILON corrige l'arrondi binaire IEEE754 : sans lui, 2.90 * 5 / 100 = 0.145 est
+        // stocké en mémoire comme 0.14499999999999999..., et Math.round(14.499999...) = 14 au lieu
+        // de 15 - un cas réel et vérifié (2,90 $ avant taxes, TPS 5 % -> 0,14 $ au lieu de 0,15 $,
+        // total 3,33 $ au lieu de 3,34 $). Confirmé le 2026-08-30 par un balayage de 1 $ à 5000 $.
         _round(number) {
-            return Math.round(number * 100) / 100;
+            return Math.round((number + Number.EPSILON) * 100) / 100;
         }
     };
 
@@ -379,7 +383,17 @@
         _setupStateObservers() {
             // Observer les changements d'état et mettre à jour l'UI
             this.state.observe('selectedProvince', (province) => {
-                this._recalculate();
+                // #P0-audit 2026-08-30 : appelait TOUJOURS _recalculate() (mode "avant taxes"), qui
+                // se garde sur state.amountBefore. En mode "avec taxes" actif, amountBefore reste à
+                // 0 (jamais mis à jour par _updateAmountFields, qui n'écrit que le DOM) -> la garde
+                // bloquait tout recalcul et l'écran gardait figés les montants/taxes de l'ANCIENNE
+                // province après un changement. Confirmé par capture réelle (T4 : QC 114,98 $ avec
+                // taxes -> bascule Ontario -> "avant taxes" et TPS/TVQ restaient ceux du Québec).
+                if (this.state.activeField === 'after') {
+                    this._recalculateReverse();
+                } else {
+                    this._recalculate();
+                }
                 this._updateVisibility();
             });
             
@@ -441,13 +455,19 @@
             if (!calculation) return;
             
             this.isUpdating = true;
-            
+
             if (this.state.activeField === 'before' && this.elements.amountAfter) {
                 this.elements.amountAfter.value = this._formatNumber(calculation.total);
+                // #P0-audit 2026-08-30 : synchronise aussi l'état réactif du champ PASSIF, pas
+                // seulement le DOM. Sans ça, state.amountAfter reste à sa valeur d'avant (souvent 0),
+                // et tout code qui lit l'état (changement de province, module pourboire) travaille
+                // sur une donnée périmée alors que l'écran affiche déjà le bon chiffre.
+                this.state.amountAfter = calculation.total;
             } else if (this.state.activeField === 'after' && this.elements.amountBefore) {
                 this.elements.amountBefore.value = this._formatNumber(calculation.subtotal);
+                this.state.amountBefore = calculation.subtotal;
             }
-            
+
             this.isUpdating = false;
         }
         
@@ -482,7 +502,10 @@
             if (group && labelEl && amountEl) {
                 group.style.display = 'block';
                 labelEl.textContent = label;
-                amountEl.value = this._formatCurrency(amount);
+                // _formatNumber (pas _formatCurrency) : ce champ a déjà un "$" préfixe séparé
+                // dans le gabarit (span .currency-symbol) - _formatCurrency ajouterait un second
+                // symbole (le bug "$5.00$" corrigé le 2026-08-30).
+                amountEl.value = this._formatNumber(amount);
             }
         }
         
@@ -692,21 +715,30 @@
             this._updateVisibility();
         }
         
-        // Utilitaires
+        // Utilitaires - délégués à window.CalcParseAmount/CalcMoney (définis dans le <script> de la
+        // vue AVANT le chargement de ce fichier) pour une seule source de vérité, réutilisable par
+        // les autres outils. Repli local si jamais chargé hors de cette page (defense en profondeur).
         _parseNumber(value) {
+            if (window.CalcParseAmount) return window.CalcParseAmount(value);
             if (!value || value === '') return 0;
-            // Support virgule française
             const cleaned = value.toString().replace(',', '.');
             const parsed = parseFloat(cleaned);
             return isNaN(parsed) ? 0 : parsed;
         }
-        
+
         _formatNumber(number) {
-            return number.toFixed(2);
+            // Champ éditable (avant/avec taxes) : virgule décimale française, sans symbole (le
+            // symbole "$" est déjà affiché par le span préfixe .currency-symbol du gabarit).
+            return window.CalcMoney ? window.CalcMoney(number, { withSymbol: false }) : number.toFixed(2);
         }
-        
+
         _formatCurrency(number) {
-            return `${number.toFixed(2)}$`;
+            // Avec symbole "$" inclus (virgule française + espace insécable) - pour les éléments
+            // SANS span préfixe séparé (ex. .per-person-amount de "Diviser la facture", où le "$"
+            // fait partie du texte lui-même). Ne pas utiliser sur tax1/tax2-amount, qui ont déjà
+            // leur propre préfixe .currency-symbol - utiliser _formatNumber pour ceux-là (le bug
+            // "$5.00$" à deux symboles, corrigé le 2026-08-30, venait exactement de cette confusion).
+            return window.CalcMoney ? window.CalcMoney(number) : number.toFixed(2) + '$';
         }
     }
 

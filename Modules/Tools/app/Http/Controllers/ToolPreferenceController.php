@@ -51,6 +51,8 @@ class ToolPreferenceController
             $value = $this->sanitizePromptProfile($value);
         } elseif ($key === 'custom_cards') {
             $value = $this->sanitizeCustomCards($value);
+        } elseif ($key === 'tip_base') {
+            $value = $this->sanitizeTipBase($value);
         } elseif (strlen(json_encode($value) ?: '') > 2000) {
             throw ValidationException::withMessages(['value' => __('Trop volumineux.')]);
         }
@@ -119,6 +121,16 @@ class ToolPreferenceController
         }
 
         return ['green' => $green, 'yellow' => $yellow];
+    }
+
+    /**
+     * Base du pourboire de la calculatrice de taxes (#P0-audit 2026-08-30) : "before" (montant
+     * avant taxes, usage courant au Québec) ou "after" (montant avec taxes). Whitelist stricte
+     * plutôt que le repli générique < 2000 octets - seules deux valeurs ont un sens.
+     */
+    private function sanitizeTipBase(mixed $value): string
+    {
+        return in_array($value, ['before', 'after'], true) ? $value : 'before';
     }
 
     private function sanitizeSingleColor(mixed $value): string
