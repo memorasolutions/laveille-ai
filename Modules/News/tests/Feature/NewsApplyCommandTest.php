@@ -1395,3 +1395,148 @@ it('related_article_slugs refuse un second article différent quand la fiche en 
     expect($restants)->toHaveCount(1)
         ->and((int) $restants->first()->id)->toBe($premier->id);
 });
+
+// ── Tiret cadratin : retiré de la prose composée par le site, JAMAIS de la citation verbatim
+// (fiche freecore, 2026-08-30 - le HTML servi portait 8 lignes de cadratin, dont la moitié
+// était la citation anglaise « I maintain FreeCORE... model—FreeBSD...WebUI—but need... »,
+// rendue deux fois - blockquote visible + articleBody JSON-LD. Aucun mécanisme ne nettoyait la
+// prose composée AVANT cette clé : ni au rendu (show.blade.php ne traverse pas lv_typo_fr sur
+// structured_summary), ni à l'écriture (aucune des normalizeComposed*() ne le faisait). Le
+// rattrapage v1.233.1 n'avait touché QUE le code source statique (vues/PHP/lang), jamais les
+// données. lv_strip_em_dash() (app/Helpers/typo.php) ferme ce trou à la SEULE porte d'écriture
+// de composed_summary - jamais branchée sur normalizeComposedQuote(), qui reste intacte. ────
+
+it('composed_summary : un cadratin dans hook/why_important/key_number/angle_qc_ca/action_concrete devient un trait d\'union en base', function () {
+    $sourceText = 'Texte source pour le retrait du cadratin en prose composée.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'composed_summary' => [
+            'hook' => 'Le projet reprend le code là où il a été laissé — sans lien avec l’éditeur.',
+            'why_important' => 'Les utilisateurs gratuits — plusieurs milliers — restaient sans correctif.',
+            'key_number' => 'Deux versions majeures — 13.3 à 15.1 — en une seule mise à jour.',
+            'angle_qc_ca' => 'Un cas fréquent ici — petites entreprises sur du matériel amorti.',
+            'action_concrete' => 'Sauvegarder la configuration — étape obligatoire — avant la mise à niveau.',
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $summary = $article->fresh()->structured_summary;
+    expect($summary['hook'])->toBe('Le projet reprend le code là où il a été laissé - sans lien avec l’éditeur.')
+        ->and($summary['why_important'])->toBe('Les utilisateurs gratuits - plusieurs milliers - restaient sans correctif.')
+        ->and($summary['key_number'])->toBe('Deux versions majeures - 13.3 à 15.1 - en une seule mise à jour.')
+        ->and($summary['angle_qc_ca'])->toBe('Un cas fréquent ici - petites entreprises sur du matériel amorti.')
+        ->and($summary['action_concrete'])->toBe('Sauvegarder la configuration - étape obligatoire - avant la mise à niveau.');
+
+    foreach (['hook', 'why_important', 'key_number', 'angle_qc_ca', 'action_concrete'] as $key) {
+        expect($summary[$key])->not->toContain('—');
+    }
+});
+
+it('composed_summary.key_points : un cadratin dans une puce devient un trait d\'union en base', function () {
+    $sourceText = 'Texte source pour le retrait du cadratin dans key_points.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'composed_summary' => [
+            'key_points' => [
+                'FreeCORE fait passer FreeBSD 13.3 à 15.1 — deux versions majeures d’un coup.',
+                'La télémétrie est retirée — ainsi que les fonctions Entreprise.',
+            ],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $points = $article->fresh()->structured_summary['key_points'];
+    expect($points[0])->toBe('FreeCORE fait passer FreeBSD 13.3 à 15.1 - deux versions majeures d’un coup.')
+        ->and($points[1])->toBe('La télémétrie est retirée - ainsi que les fonctions Entreprise.')
+        ->and($points[0])->not->toContain('—')
+        ->and($points[1])->not->toContain('—');
+});
+
+it('composed_summary.reperes_dates : un cadratin dans texte ou date devient un trait d\'union en base', function () {
+    $sourceText = 'Texte source pour le retrait du cadratin dans reperes_dates.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'composed_summary' => [
+            'reperes_dates' => [
+                ['date' => '13 août 2024', 'texte' => 'Maintenance minimale — sustaining engineering.'],
+            ],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $repere = $article->fresh()->structured_summary['reperes_dates'][0];
+    expect($repere['texte'])->toBe('Maintenance minimale - sustaining engineering.')
+        ->and($repere['texte'])->not->toContain('—');
+});
+
+it('composed_summary.quote : le cadratin d\'une citation verbatim n\'est JAMAIS retiré (régression critique)', function () {
+    $sourceText = 'Texte source pour la non-régression sur la citation verbatim.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $citationExacte = 'I maintain FreeCORE, an independent continuation of TrueNAS CORE 13.3. '
+        .'I started it because there are still users who want the CORE appliance model—FreeBSD, '
+        .'OpenZFS, iocage jails, bhyve, and the familiar middleware/WebUI—but need a maintained '
+        .'path beyond the point where upstream CORE development ended.';
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'composed_summary' => [
+            'quote' => ['text' => $citationExacte, 'author' => 'Mainteneur du projet FreeCORE'],
+        ],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    // Byte pour byte : la citation traverse news:apply SANS AUCUNE modification, cadratins
+    // compris - contrairement à hook/why_important/etc. ci-dessus, ce champ ne passe JAMAIS
+    // par lv_strip_em_dash(). Un seul octet différent falsifierait une source anglophone.
+    $quote = $article->fresh()->structured_summary['quote'];
+    expect($quote['text'])->toBe($citationExacte)
+        ->and(substr_count($quote['text'], '—'))->toBe(2);
+});
+
+it('title/seo_title/summary : un cadratin devient un trait d\'union en base', function () {
+    $sourceText = 'Texte source pour le retrait du cadratin dans title/seo_title/summary.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'title' => 'FreeCORE — la communauté reprend TrueNAS CORE',
+        'seo_title' => 'FreeCORE — reprise communautaire de TrueNAS CORE',
+        'summary' => 'Un projet communautaire — sans lien avec iXsystems — reprend le code.',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    expect($article->title)->toBe('FreeCORE - la communauté reprend TrueNAS CORE')
+        ->and($article->seo_title)->toBe('FreeCORE - reprise communautaire de TrueNAS CORE')
+        ->and($article->summary)->toBe('Un projet communautaire - sans lien avec iXsystems - reprend le code.')
+        ->and($article->title)->not->toContain('—')
+        ->and($article->seo_title)->not->toContain('—')
+        ->and($article->summary)->not->toContain('—');
+});

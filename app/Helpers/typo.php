@@ -15,6 +15,11 @@ declare(strict_types=1);
  *   2. NBSP après : « (guillemet ouvrant FR)
  *   3. NBSP entre chiffre et unité : 25 % | 4 € | 35 M$ | 20 M€ | 200 k€ | 21 °C
  *
+ * NOTE : le retrait du tiret cadratin (—) vit dans sa PROPRE fonction, lv_strip_em_dash()
+ * plus bas dans ce même fichier (pas ici) - une citation verbatim peut légitimement porter
+ * un cadratin qu'il ne faut jamais retirer, alors que les règles ci-dessous s'appliquent sans
+ * distinction à tout texte visiteur. Deux connaissances distinctes, deux fonctions.
+ *
  * Préservation :
  *   - HTML : segmentation à 3 voies — balises (<...>) / entités HTML
  *     (`&rsquo;`, `&#039;`, `&#x27;`, `&amp;`, `&nbsp;`, etc.) / texte pur.
@@ -143,6 +148,39 @@ if (! function_exists('lv_typo_fr')) {
         }
 
         return lv_typo_fr_apply_to_html($text);
+    }
+}
+
+if (! function_exists('lv_strip_em_dash')) {
+    /**
+     * Retire le tiret cadratin (—, U+2014) d'un texte de prose FRANÇAISE composée par le site
+     * (accroche, « pourquoi ça compte », action concrète, etc.) — règle CLAUDE.md #10 : « jamais
+     * de tiret cadratin (utilise le trait d'union - ou le point-virgule) ».
+     *
+     * JAMAIS À BRANCHER SUR UNE CITATION VERBATIM (composed_summary.quote,
+     * editorial_proof_pairs, original_post) : un cadratin issu d'une source anglophone dans UNE
+     * CITATION EXACTE doit rester intact — le retirer falsifierait la citation. Cette fonction ne
+     * distingue pas une citation d'une prose : c'est à l'appelant de ne jamais la brancher sur un
+     * champ de citation (voir NewsApplyCommand::normalizeComposedSummary(), qui l'applique à
+     * hook/why_important/key_number/angle_qc_ca/action_concrete/key_points/reperes_dates, jamais
+     * à quote).
+     *
+     * Substitution caractère pour caractère, sans jugement sémantique (contrairement au
+     * rattrapage manuel v1.233.1 sur le code existant, qui avait choisi chaque remplacement au
+     * cas par cas selon le sens — voir CHANGELOG) : seul le cadratin est remplacé par un trait
+     * d'union, tout espacement déjà présent autour (ou son absence) reste inchangé de part et
+     * d'autre. Idempotent. Ne touche ni au trait d'union simple ni au tiret demi-cadratin
+     * (–, U+2013).
+     *
+     * Usage : lv_strip_em_dash($text) avant écriture en base, sur la prose composée uniquement.
+     */
+    function lv_strip_em_dash(?string $text): string
+    {
+        if ($text === null || $text === '') {
+            return $text ?? '';
+        }
+
+        return str_replace('—', '-', $text);
     }
 }
 

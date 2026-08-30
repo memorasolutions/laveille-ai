@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.237.4] - 2026-08-30
+
+### Corrigé
+- **Le rattrapage du tiret cadratin (v1.233.1) n'avait jamais touché aux données, seulement au code.** Mesuré sur la fiche freecore (`/actualites/freecore-la-communaute-reprend-le-systeme-de-stockage-gratuit-que-ixsystems-a-cesse-de-developper`) : le HTML servi portait 10 cadratins sur 8 LIGNES (`grep -c` compte des lignes, pas des occurrences - deux lignes en portaient 2 chacune). Aucun n'était un défaut une fois classé : la moitié est la citation anglaise verbatim du mainteneur du projet, rendue deux fois (bloc de citation visible + `articleBody` du JSON-LD), et la falsifier aurait été pire que le défaut d'origine ; l'autre moitié vit dans des commentaires CSS/JS/HTML du gabarit partagé (bandeau de cookies, piège de focus clavier, calcul de contraste WCAG), jamais montrée à un visiteur - exactement la même exemption que celle déjà posée par v1.233.1 pour le code non visiteur.
+- **La cause structurelle, plus importante que cette fiche : aucun mécanisme ne nettoyait la prose composée d'une fiche, ni à l'écriture ni au rendu.** `lv_typo_fr()` / `Str::typoFr()` / `@typo` (`app/Helpers/typo.php`) n'ont jamais eu de rapport avec le cadratin : ils posent l'espace insécable française, rien d'autre. Le rattrapage v1.233.1 avait corrigé 559 occurrences dans 204 fichiers de CODE SOURCE (vues Blade, classes PHP, fichiers de langue) - jamais une ligne de base de données. La seule protection restante était une phrase du prompt de composition (`_composition_prompt_template.blade.php`, règle 5 : « jamais de tiret cadratin ») : une instruction en langue naturelle, sans verrou déterministe si le modèle qui compose l'ignore.
+- Nouvelle fonction `lv_strip_em_dash()` (`app/Helpers/typo.php`, sœur de `lv_typo_fr()` mais délibérément séparée dans son propre bloc - une citation verbatim doit pouvoir garder un cadratin, une NBSP n'a pas cette contrainte), branchée à la seule porte d'écriture de la prose composée d'une fiche (`Modules\News\Console\NewsApplyCommand`) : `title`, `seo_title`, `summary`, et les sept sous-clés de `composed_summary` qui sont la rédaction du site - `hook`, `why_important`, `key_number`, `angle_qc_ca`, `action_concrete`, `key_points`, `reperes_dates`. `composed_summary.quote` (ainsi que `editorial_proof_pairs` et `original_post`) restent délibérément hors de portée de cette fonction, dans une branche de code séparée qui ne l'appelle jamais.
+
+### Note de méthode
+- Zéro correction appliquée à la fiche freecore elle-même : ses deux seuls cadratins réellement lus par un visiteur appartiennent à une citation verbatim intouchable, le reste est du code que personne ne lit. Corriger une fiche sans défaut aurait été cosmétique, pas une correction.
+- Rouge avant / vert après : 4 tests échouaient avant le correctif (`composed_summary.*`, `title`/`seo_title`/`summary` conservaient le cadratin), 1 passait déjà (la garde de non-régression sur `quote`, qui validait le comportement correct déjà en place). Les 5 passent après. Suite complète du fichier touché : 66 passed (214 assertions). Suite complète du module News : 579 passed (1951 assertions), zéro régression.
+
 ## [1.237.3] - 2026-08-30
 
 ### Corrigé

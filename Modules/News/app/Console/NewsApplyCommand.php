@@ -348,7 +348,12 @@ class NewsApplyCommand extends Command
 
                 return self::FAILURE;
             }
-            $updates['title'] = trim($decoded['title']);
+            // ACTION : tiret cadratin retiré AVANT génération du slug (fiche freecore, 2026-08-30)
+            // - lv_strip_em_dash() (app/Helpers/typo.php), jamais lv_typo_fr() (règle NBSP, pas de
+            // rapport). title n'est jamais une citation verbatim : rien n'empêche de le nettoyer.
+            // MCP: SELF (<5 lignes)
+            // RAISON: CLAUDE.md #10 - « jamais de tiret cadratin » - structural, pas ponctuel.
+            $updates['title'] = lv_strip_em_dash(trim($decoded['title']));
             if (! $this->option('enrich')) {
                 $updates['slug'] = NewsArticle::generateUniqueSlug($updates['title'], $article->id);
             }
@@ -360,7 +365,7 @@ class NewsApplyCommand extends Command
 
                 return self::FAILURE;
             }
-            $updates['seo_title'] = $decoded['seo_title'];
+            $updates['seo_title'] = lv_strip_em_dash($decoded['seo_title']);
         }
 
         if (array_key_exists('summary', $decoded)) {
@@ -369,7 +374,7 @@ class NewsApplyCommand extends Command
 
                 return self::FAILURE;
             }
-            $updates['summary'] = $decoded['summary'];
+            $updates['summary'] = lv_strip_em_dash($decoded['summary']);
         }
 
         if (array_key_exists('editorial_proof_pairs', $decoded)) {
@@ -1526,7 +1531,15 @@ class NewsApplyCommand extends Command
 
                 return null;
             }
-            $normalized[$key] = $input[$key];
+            // ACTION : tiret cadratin retiré (fiche freecore, 2026-08-30) - ces cinq sous-clés
+            // sont TOUJOURS de la prose composée par le site (accroche, pourquoi ça compte,
+            // chiffre-clé, angle QC/CA, action concrète), jamais une citation. `quote` (plus bas,
+            // normalizeComposedQuote()) reste délibérément HORS de cette boucle : voir le
+            // docblock de lv_strip_em_dash().
+            // MCP: SELF (<5 lignes)
+            // RAISON: CLAUDE.md #10 - structural, pas ponctuel (aucun mécanisme existant ne
+            //         nettoyait composed_summary, ni à l'écriture ni au rendu).
+            $normalized[$key] = lv_strip_em_dash($input[$key]);
         }
 
         if (array_key_exists('key_points', $input)) {
@@ -1643,7 +1656,10 @@ class NewsApplyCommand extends Command
 
                 return null;
             }
-            $normalized[] = $point;
+            // ACTION : tiret cadratin retiré (fiche freecore, 2026-08-30) - une puce « à retenir »
+            // est de la prose composée par le site, jamais une citation. Voir normalizeComposedSummary().
+            // MCP: SELF (<5 lignes) / RAISON: CLAUDE.md #10, même correctif structurel.
+            $normalized[] = lv_strip_em_dash($point);
         }
 
         return $normalized;
@@ -1747,7 +1763,11 @@ class NewsApplyCommand extends Command
                 return null;
             }
 
-            $entry = ['date' => $repere['date'], 'texte' => $repere['texte']];
+            // ACTION : tiret cadratin retiré (fiche freecore, 2026-08-30) - un jalon de
+            // chronologie est de la prose composée par le site (date + description factuelle),
+            // jamais une citation. Voir normalizeComposedSummary().
+            // MCP: SELF (<5 lignes) / RAISON: CLAUDE.md #10, même correctif structurel.
+            $entry = ['date' => lv_strip_em_dash($repere['date']), 'texte' => lv_strip_em_dash($repere['texte'])];
 
             if (array_key_exists('url', $repere)) {
                 $url = is_string($repere['url']) ? trim($repere['url']) : '';
