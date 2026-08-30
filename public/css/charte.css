@@ -1301,8 +1301,14 @@ article h3 {
     flex-shrink: 0;
     transition: background 0.15s ease, color 0.15s ease;
 }
-/* Zone cliquable invisible agrandie à 40px (AAA cible tactile) sans agrandir
-   le cercle visuel - utile pour les usages compacts (22-24px). */
+/* Zone cliquable invisible agrandie à 44×44px (AAA cible tactile, WCAG 2.5.5)
+   sans agrandir le cercle visuel - utile pour les usages compacts (22-24px).
+   CARRÉ, pas cercle (fix 2026-08-30) : un `border-radius:50%` ici réduit la
+   zone de clic réelle à un cercle inscrit de 44px de DIAMÈTRE (aire ≈1521px²,
+   sous les 1936px² d'un vrai carré 44×44) - mesuré par clic réel en coin sur
+   calculatrice-taxes.blade.php : le coin de la zone nominale retombait sur le
+   <select> voisin plutôt que d'ouvrir la modale d'aide. Un carré couvre les
+   quatre coins et ferme cet écart. */
 .ct-help-btn::after {
     content: "";
     position: absolute;
@@ -1311,7 +1317,6 @@ article h3 {
     width: 44px;
     height: 44px;
     transform: translate(-50%, -50%);
-    border-radius: 50%;
 }
 .ct-help-btn:hover,
 .ct-help-btn:focus-visible {
@@ -1517,6 +1522,13 @@ article h3 {
   --sys-text-default: var(--c-dark);
   --sys-text-secondary: var(--c-text-secondary);
   --sys-text-muted: var(--c-text-muted);
+  /* --sys-text-muted (#52586a) échoue l'AAA (6,77:1) sur --sys-surface-raised
+     (#F8FAFB) - mesuré mcp__wcag-mcp__wcag_check_contrast, 2026-08-30. Ce
+     second jeton sert les petits caractères sur fond clair/blanc quand l'AAA
+     (7:1) est requis ; #4b5563 = 7,22:1 sur #F8FAFB et 7,56:1 sur blanc. Déjà
+     la teinte utilisée en dur à plusieurs dizaines d'endroits du site pour ce
+     même besoin (non retouchés ici, hors périmètre de ce correctif). */
+  --sys-text-muted-aaa: #4b5563;
   --sys-text-on-accent: #FFFFFF;
   --sys-text-link: var(--c-primary);
   --sys-text-link-hover: var(--c-primary-hover);
