@@ -122,33 +122,13 @@ function visCourseOwner(Course $course): User
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1. Caractérisation des bugs (AVANT fix) — skippés par défaut
-//    Activer le skip pour confirmer le bug AVANT le fix.
-// ─────────────────────────────────────────────────────────────────────────────
-
-test('BUG-001 caractérisation — inscrit sur cours private reçoit 404 sur la leçon (état AVANT fix)', function (): void {
-    $course  = visCourse('private');
-    $lesson  = visLesson($course);
-    $student = visEnrolledStudent($course);
-
-    $this->actingAs($student)
-        ->get(route('academy.lessons.show', [$course, $lesson]))
-        ->assertStatus(404);  // c'est le bug : un inscrit ne devrait PAS recevoir 404
-})->skip('Caractérisation BUG-001 — désactiver le skip pour confirmer le bug AVANT fix.');
-
-test('BUG-002 caractérisation — inscrit sur cours private reçoit 404 sur la page cours (état AVANT fix)', function (): void {
-    $course  = visCourse('private');
-    $student = visEnrolledStudent($course);
-
-    $this->actingAs($student)
-        ->get(route('academy.courses.show', $course))
-        ->assertStatus(404);  // c'est le bug : un inscrit ne devrait PAS recevoir 404
-})->skip('Caractérisation BUG-002 — désactiver le skip pour confirmer le bug AVANT fix.');
-
-// ─────────────────────────────────────────────────────────────────────────────
 // 2. BUG-001 — Leçon : accès par visibilité × rôle
 // ─────────────────────────────────────────────────────────────────────────────
 
+// BUG-001 (P0, corrigé) : un étudiant inscrit sur un cours private recevait un 404 sur la
+// leçon au lieu d'y accéder. Vérifié le 2026-08-30 : le test de caractérisation (retiré,
+// il assertait ce 404 et échouait par construction depuis le correctif) confirmait le bug ;
+// le test ci-dessous verrouille le comportement correct.
 test('BUG-001 — inscrit sur cours private accède à la leçon (200)', function (): void {
     $course  = visCourse('private');
     $lesson  = visLesson($course);
@@ -224,6 +204,10 @@ test('BUG-001 non-régression — inscrit sur cours public accède à la leçon 
 // 3. BUG-002 — Page cours : accès par visibilité × rôle
 // ─────────────────────────────────────────────────────────────────────────────
 
+// BUG-002 (P1, corrigé) : un étudiant inscrit sur un cours private recevait un 404 sur la
+// page du cours au lieu d'y accéder. Vérifié le 2026-08-30 : le test de caractérisation
+// (retiré, il assertait ce 404 et échouait par construction depuis le correctif) confirmait
+// le bug ; le test ci-dessous verrouille le comportement correct.
 test('BUG-002 — inscrit sur cours private accède à la page cours (200)', function (): void {
     $course  = visCourse('private');
     $student = visEnrolledStudent($course);

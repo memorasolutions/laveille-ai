@@ -77,7 +77,20 @@ it('keeps the free-tier model away from test generation (routing invariant)', fu
         return;
     }
 
-    $config = yaml_parse_file($routage) ?: null;
+    // L'extension PECL yaml n'est pas installée sur ce projet (composer show le confirme, comme
+    // pour orchestra/testbench dans AutomationAlertServiceTest) : yaml_parse_file() est donc
+    // TOUJOURS indisponible ici, et le garder aurait fait sauter ce test en silence pour de bon.
+    // symfony/yaml, lui, est déjà présent dans vendor/ (tiré transitivement par laravel/sail) et
+    // lit exactement le même fichier - substitut réel, pas une extension du périmètre du test.
+    if (! class_exists(\Symfony\Component\Yaml\Yaml::class)) {
+        $this->markTestSkipped('Ni ext-yaml ni symfony/yaml disponibles pour lire routing.yaml.');
+    }
+
+    try {
+        $config = \Symfony\Component\Yaml\Yaml::parseFile($routage);
+    } catch (\Symfony\Component\Yaml\Exception\ParseException) {
+        $config = null;
+    }
 
     if (! is_array($config) || ! isset($config['tiers']['test'])) {
         expect(true)->toBeTrue();
@@ -95,4 +108,4 @@ it('keeps the free-tier model away from test generation (routing invariant)', fu
             "Un endpoint gratuit ({$modele}) est routé sur la génération de tests."
         );
     }
-})->skip(! function_exists('yaml_parse_file'), 'extension yaml absente');
+});

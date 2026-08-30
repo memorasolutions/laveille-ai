@@ -73,12 +73,11 @@ it('notifications table composant Livewire répond à loadMore', function () {
 // --- TagsTable ---
 
 it('tags table composant Livewire répond à loadMore', function () {
-    // La table tags est créée par une migration Blog qui n'existe pas en SQLite :memory:
-    // (limitation connue pré-existante du module Blog en environnement de test).
-    if (! \Illuminate\Support\Facades\Schema::hasTable('tags')) {
-        $this->markTestSkipped('Table tags absente en SQLite : limitation Blog connue.');
-    }
-
+    // Correctif 2026-08-30 : la garde ci-dessous affirmait la table 'tags' absente en SQLite
+    // :memory:, mais Modules/Blog/database/migrations/2026_02_27_400001_create_tags_table.php
+    // (créée le 2026-02-27) n'utilise que le Schema Builder portable (aucune syntaxe MySQL) - la
+    // table existe bel et bien ici. La garde date du 2026-06-29, quatre mois APRÈS la migration :
+    // elle n'a jamais été vraie sur ce dépôt et sautait ce test en silence pour de bon.
     $this->actingAs($this->admin);
 
     Livewire::test(TagsTable::class)

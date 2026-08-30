@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.237.2] - 2026-08-30
+
+### Corrigé
+- **Trois tests vestigiaux caractérisaient des bugs déjà corrigés en assertant leur propre échec ; deux supprimés, leur trace archéologique reportée en commentaire.** Dans `AcademyCourseVisibilityTest`, `BUG-001` et `BUG-002` (caractérisation) affirmaient un 404 pour un étudiant inscrit sur un cours `private` - le bug d'origine. Vérifié empiriquement avant suppression (désactivation temporaire de `->skip()`, exécution isolée du test seul, retour à l'état initial par `git checkout`) : les deux échouent bel et bien par construction contre le code actuel (404 attendu, 200 reçu), et leur pendant corrigé existait déjà, non ignoré, dans le même fichier. Supprimés ; l'identifiant du bug et son comportement d'origine vivent désormais en commentaire juste au-dessus du test qui verrouille le comportement correct.
+- `yaml_parse_file()` (extension PECL absente sur ce projet) remplacé par `Symfony\Component\Yaml\Yaml::parseFile()`, déjà présent dans `vendor/` : `TestGenerationContextIntegrityTest` ne saute plus silencieusement pour de bon.
+- Garde « table `tags` absente en SQLite » retirée de `InfiniteScrollPhase2Test` : fausse depuis toujours, la migration du 2026-02-27 n'emploie que le Schema Builder portable.
+
+### Note de méthode
+- **Le troisième test vestigial mandaté n'a pas été supprimé : la vérification empirique a contredit la prémisse.** `AcademyLessonAuthTest` contient un test `B01` caractérisant comme un bug le fait qu'un guest reçoive 200 sur un cours `public`. Désactivé temporairement puis exécuté seul, il PASSE (200 attendu, 200 reçu) au lieu d'échouer par construction : la réconciliation B01+BUG-001 du 2026-07-01 (voir `Modules/Academy/routes/web.php`) a restreint le vrai bug aux cours `private`/`unlisted` ; ce test utilise un cours `public`, jamais concerné. Laissé tel quel, toujours ignoré - une prémisse non vérifiée ne justifie pas une suppression.
+
 ## [1.237.1] - 2026-08-29
 
 ### Corrigé
