@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.237.1] - 2026-08-29
+
+### Corrigé
+- **Un quatrième alias homographe mesuré en production : « dos ».** Sur 900 pages, l'alias curé « dos » de la fiche « Déni de service (DoS) » avait posé 3 liens, les trois faux (un sac à dos, une vue de dos, un objet porté sur le dos - aucun rapport avec la cybersécurité). Ajouté à `GlossaryLinkifier::ALIAS_NEVER_AUTO`, même mécanisme que CNN, requête et témoin (v1.237.0) : la comparaison insensible à la casse bloque au passage l'alias dérivé « DoS », coût assumé puisqu'aucun cas correct n'était présent dans l'échantillon et que la fiche reste atteignable par son nom principal. Clé de cache incrémentée (`v13` vers `v14`) pour ne pas laisser un cache déjà chaud servir une heure de plus les faux liens.
+- Quatre tests neufs dans `HomographAliasNeverAutoTest.php`, reproduisant les trois phrases réelles à l'origine des faux liens, plus la non-régression : « déni de service », la base sans le sigle, garde son auto-lien.
+
 ## [1.237.0] - 2026-08-29
 
 ### Corrigé

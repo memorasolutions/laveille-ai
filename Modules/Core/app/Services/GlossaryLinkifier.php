@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v13.'; // 2026-08-29 bump : ALIAS_NEVER_AUTO (CNN, requête, témoin) - sans ce bump, un cache v12 déjà chaud servirait 1h de plus des entrées SANS cette exclusion, donc les mêmes faux liens
+    public const CACHE_KEY = 'glossary.terms.v14.'; // 2026-08-29 bump v14 : ALIAS_NEVER_AUTO (+ « dos », mesuré 3 faux sur 3) - sans ce bump, un cache v12 déjà chaud servirait 1h de plus des entrées SANS cette exclusion, donc les mêmes faux liens
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -662,7 +662,16 @@ class GlossaryLinkifier
      * seul un alias supplémentaire est assez accessoire pour être sacrifié. Comparaison insensible
      * à la casse (voir isNeverAutoAlias()).
      */
-    public const ALIAS_NEVER_AUTO = ['cnn', 'requête', 'requêtes', 'témoin'];
+    // 2026-08-29, MESURÉ : « dos » a posé 3 liens sur 900 pages de production, et les TROIS
+    // sont faux (une vue « de dos » d'un personnage 3D, un « sac à dos transparent » dans une
+    // fiche pour enfants, un skieur qui porte quelque chose « sur son dos »). Zéro lien vrai.
+    // La sensibilité à la casse ne peut RIEN ici, contrairement à l'intuition : l'alias curé est
+    // stocké en minuscule, donc case_sensitive le rendrait sensible à sa propre casse minuscule
+    // et laisserait passer les trois mêmes cas.
+    // Coût assumé : isNeverAutoAlias() compare en minuscule, donc ceci bloque AUSSI l'alias
+    // dérivé « DoS ». Aucun « DoS » correct n'a été lié dans l'échantillon, et la fiche reste
+    // atteignable par son nom principal et par la recherche interne.
+    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin'];
 
     /**
      * 2026-08-29 : vrai si cette chaîne (alias curé, qualifier dérivé, ou variante morphologique)

@@ -32,6 +32,14 @@ declare(strict_types=1);
  * exclusion casse silencieusement les termes voisins (mesuré sur ce projet le 2026-08-27) - CNN
  * doit rester bloqué SEUL, ni son propre terme de base, ni un sigle acronyme voisin (GAN), ni le
  * mot « prompt » lui-même ne doivent perdre leur auto-lien légitime.
+ *
+ * Cas 4, ajouté le 2026-08-29 (mesure distincte, sur 900 pages de production) : l'alias curé
+ * « dos » de la fiche « Déni de service (DoS) » a posé 3 liens, les trois faux (sac à dos, vue de
+ * dos, objet porté sur le dos - trois usages ordinaires du mot français, aucun rapport avec la
+ * cybersécurité). Bloqué par le même ALIAS_NEVER_AUTO, avec un coût assumé et documenté dans son
+ * propre docblock : la comparaison insensible à la casse bloque aussi l'alias dérivé « DoS »
+ * (qualifier de « Déni de service (DoS) », extractQualifierAliases()) - seule la base « déni de
+ * service », vérifiée ci-dessous, reste un point d'entrée automatique vers la fiche.
  */
 
 use Modules\Core\Services\GlossaryLinkifier;
@@ -128,6 +136,44 @@ it('lie toujours "cookie" - le mot technique reste un alias valide du même term
     $terme = hanTerm('Témoin de connexion (cookie)', 'cookie-test', aliases: ['cookie', 'cookies', 'témoin', 'témoin de connexion']);
 
     $html = GlossaryLinkifier::linkify('<p>Ce site dépose un cookie pour mémoriser vos préférences de langue.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+// ── Cas 4 : dos (sac à dos, vue de dos, sur le dos) vs alias curé de Déni de service (DoS) ────
+
+it('ne lie PAS "dos" dans "sac à dos" - un des 3 faux liens mesurés sur 900 pages de production', function () {
+    hanTerm('Déni de service (DoS)', 'deni-de-service-test', aliases: ['dos', 'ddos', 'déni de service distribué', 'attaque par déni de service']);
+
+    $html = GlossaryLinkifier::linkify('<p>Cette fiche pour enfants illustre un sac à dos transparent rempli de crayons de couleur.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/deni-de-service');
+});
+
+it('ne lie PAS "dos" dans une vue "de dos" - deuxième faux lien mesuré en production (personnage 3D)', function () {
+    hanTerm('Déni de service (DoS)', 'deni-de-service-test', aliases: ['dos', 'ddos', 'déni de service distribué', 'attaque par déni de service']);
+
+    $html = GlossaryLinkifier::linkify('<p>Le personnage 3D est modélisé avec un grand soin, même vu de dos.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/deni-de-service');
+});
+
+it('ne lie PAS "dos" pour un objet porté "sur son dos" - troisième faux lien mesuré en production (skieur)', function () {
+    hanTerm('Déni de service (DoS)', 'deni-de-service-test', aliases: ['dos', 'ddos', 'déni de service distribué', 'attaque par déni de service']);
+
+    $html = GlossaryLinkifier::linkify('<p>Le skieur descend la piste avec son équipement attaché sur son dos.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/deni-de-service');
+});
+
+it('lie toujours "déni de service" (la base, sans DoS) dans un vrai texte de cybersécurité', function () {
+    $terme = hanTerm('Déni de service (DoS)', 'deni-de-service-test', aliases: ['dos', 'ddos', 'déni de service distribué', 'attaque par déni de service']);
+
+    $html = GlossaryLinkifier::linkify('<p>Un déni de service a rendu le site inaccessible pendant plusieurs heures cette nuit-là.</p>');
 
     expect($html)->toContain('glossary-link')
         ->and($html)->toContain('/glossaire/'.$terme->slug);
