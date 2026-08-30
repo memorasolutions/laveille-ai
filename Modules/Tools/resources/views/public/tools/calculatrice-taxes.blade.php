@@ -287,55 +287,19 @@
         ],
     ];
 @endphp
+<script src="{{ asset('tools/js/calc-parse-amount.js') }}"></script>
 <script>
     window.HELP_CONTENT = {!! json_encode($calcHelp, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!};
 
-    // #P0-audit 2026-08-30 : normalisation de saisie numérique partagée, PLACÉE ICI (avant les
-    // scripts de l'outil) pour être réutilisable par d'autres outils de la même famille - aucun
-    // utilitaire équivalent n'existait ailleurs dans le projet (vérifié par grep sur public/tools
-    // et public/js avant d'écrire celui-ci, conformément à la règle DRY du projet).
-    //
-    // window.CalcParseAmount(brut) -> nombre JS ou NaN. Gère, dans cet ordre :
-    //  - espaces (normaux ET insécables U+00A0/U+202F) utilisés comme séparateur de milliers,
-    //    supprimés uniquement s'ils ne sont PAS suivis d'exactement 2 chiffres (sinon ce serait
-    //    un espace décimal, cas non standard - on ne devine pas, cf. "1,234.56" plus bas) ;
-    //  - un SEUL séparateur décimal, virgule OU point, désigné explicitement (jamais deviné) :
-    //    c'est le DERNIER "," ou "." de la chaîne qui fait foi si un chiffre le suit ; tout
-    //    séparateur antérieur est alors traité comme un séparateur de milliers et retiré. Couvre
-    //    "12,50", "12.50", "1 234,56", "1 234,56" (espace insécable), "1,234.56" (anglais) ET
-    //    "1.234,56" (européen) sans ambiguïté puisque c'est la POSITION (dernier séparateur) qui
-    //    tranche, jamais une supposition sur la locale ;
-    //  - saisie partielle pendant la frappe ("12," ou "12,0") : NE JAMAIS vider ni rejeter, on
-    //    complète mentalement le nombre déjà tapé (parseFloat s'arrête proprement).
-    window.CalcParseAmount = function (raw) {
-        if (raw === null || raw === undefined) return NaN;
-        var s = raw.toString().trim();
-        if (s === '') return NaN;
-        s = s.replace(/[  ]/g, ' '); // espaces insécables -> espace normal
-        s = s.replace(/\s/g, ''); // espaces (milliers) retirés - jamais un séparateur décimal en fr/en
-        var lastComma = s.lastIndexOf(',');
-        var lastDot = s.lastIndexOf('.');
-        var lastSep = Math.max(lastComma, lastDot);
-        if (lastSep === -1) {
-            var n0 = parseFloat(s);
-            return isNaN(n0) ? NaN : n0;
-        }
-        var intPart = s.slice(0, lastSep).replace(/[.,]/g, '') || '0';
-        var decPart = s.slice(lastSep + 1).replace(/[^0-9]/g, '');
-        var n = parseFloat(intPart + '.' + (decPart === '' ? '0' : decPart));
-        return isNaN(n) ? NaN : n;
-    };
-
-    // window.CalcMoney(nombre, {withSymbol}) -> chaîne fr-CA : virgule décimale, espace insécable
-    // avant le symbole "$" QUAND il est demandé. withSymbol=false pour les champs qui affichent
-    // déjà un "$" séparé (span .currency-symbol du gabarit) - évite le double symbole constaté
-    // (capture réelle : "$5.00$") quand le "$" du prefix ET celui du formatteur coexistaient.
-    window.CalcMoney = function (n, opts) {
-        opts = opts || {};
-        if (typeof n !== 'number' || isNaN(n)) n = 0;
-        var out = n.toFixed(2).replace('.', ',');
-        return opts.withSymbol === false ? out : out + ' $';
-    };
+    // window.CalcParseAmount / window.CalcMoney : déplacés dans public/tools/js/calc-parse-amount.js
+    // (audit DRY 2026-08-30, corps de fonction inchangé - voir ce fichier pour le détail des règles
+    // de parsing). Le <script src> juste au-dessus les charge AVANT ce bloc, donc rien ne change
+    // ici. Raison du déplacement : un bloc <script> inline n'existe QUE sur la page qui le contient
+    // - la promesse déjà écrite dans le commentaire d'origine (« réutilisable par d'autres outils
+    // de la même famille ») était donc fausse tant que ces fonctions restaient ici. Un fichier .js
+    // statique, lui, est chargeable par n'importe quelle autre vue via un simple <script src>.
+    // Voir Modules/Tools/resources/views/public/tools/simulateur-fiscal.blade.php, qui le charge
+    // désormais pour corriger le même défaut sur ses champs revenu/REER/temps supplémentaire.
 
     window.taxConfig = {
         tax_rates: {

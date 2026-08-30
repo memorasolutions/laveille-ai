@@ -13,6 +13,7 @@
 <style>.page-wrapper { overflow: visible !important; }</style>
 @endpush
 @push('styles')
+<script src="{{ asset('tools/js/calc-parse-amount.js') }}"></script>
 <script>
 function fiscalSim(cfg) {
     function calcTax(taxableIncome, personalAmount, brackets) {
@@ -40,10 +41,37 @@ function fiscalSim(cfg) {
     }
     return {
         cfg: cfg,
-        income: cfg.ui.defaultIncome,
-        overtime: 0,
+        // #P0-audit 2026-08-30 : income/overtime/rrsp restent des NOMBRES pour TOUS les getters
+        // plus bas (aucun autre calcul de ce fichier ne change) - mais portés par un texte saisi
+        // librement (*Text) + un accesseur qui applique window.CalcParseAmount, par cohérence
+        // avec calculatrice-taxes.blade.php (même mécanisme partagé, public/tools/js/calc-parse-
+        // amount.js, chargé plus haut - DRY, pas redupliqué).
+        // HONNÊTETÉ DE MESURE (2026-08-30) : le champ type="number" équivalent avait été changé
+        // sur calculatrice-taxes.blade.php sur la foi de « 12,50 devient 1250 » (virgule avalée).
+        // Testé ICI en direct (Chrome 152, Playwright réel - pas fill()) sur les 4 locales
+        // en-US/en-CA/fr-CA/fr-FR : CE Chrome analyse "12,50" correctement (valueAsNumber=12.5)
+        // dans les 4 cas - la corruption originale NE S'EST PAS reproduite. Un cas réellement
+        // corrompu existe bien ("150,000" tapé -> 150, la virgule finale écrase tout ce qui la
+        // précède) mais CalcParseAmount fait EXACTEMENT le même choix pour cette chaîne précise
+        // (comportement documenté, pas deviné - voir calc-parse-amount.js) : ce n'est donc pas ce
+        // qui distingue les deux mécanismes. Le champ texte est conservé malgré tout, pour trois
+        // raisons qui ne dépendent PAS de la reproduction exacte du symptôme d'origine : (1)
+        // cohérence avec calculatrice-taxes.blade.php - même geste, même champ "montant", même
+        // outil de parsing ; (2) Firefox/Safari/WebView mobile non testables dans cet
+        // environnement (binaires Playwright absents) - la variation DE FAIT observée sur cette
+        // seule version de Chrome interdit de conclure à une absence de risque ailleurs ; (3)
+        // aucune régression mesurée (13 assertions, SimulateurFiscalMoneyInputTest.php + tests
+        // manuels ci-dessus) contre un gain de robustesse qui ne coûte rien.
+        incomeText: String(cfg.ui.defaultIncome),
+        get income() { return window.CalcParseAmount ? (window.CalcParseAmount(this.incomeText) || 0) : (parseFloat(String(this.incomeText).replace(',', '.')) || 0); },
+        set income(v) { this.incomeText = String(v); },
+        overtimeText: '0',
+        get overtime() { return window.CalcParseAmount ? (window.CalcParseAmount(this.overtimeText) || 0) : (parseFloat(String(this.overtimeText).replace(',', '.')) || 0); },
+        set overtime(v) { this.overtimeText = String(v); },
         isEmployee: true,
-        rrsp: 0,
+        rrspText: '0',
+        get rrsp() { return window.CalcParseAmount ? (window.CalcParseAmount(this.rrspText) || 0) : (parseFloat(String(this.rrspText).replace(',', '.')) || 0); },
+        set rrsp(v) { this.rrspText = String(v); },
         includeRRQ: true,
         includeAE: true,
         includeRQAP: true,
@@ -153,7 +181,7 @@ function fiscalSim(cfg) {
                                     <div class="mb-2">
                                         <label class="form-label fw-medium mb-0" style="font-size: 0.8rem;">{{ __('Revenu brut') }}</label>
                                         <div class="input-group input-group-sm">
-                                            <input type="number" class="form-control" x-model.number="income" step="1000" aria-label="Revenu annuel brut" min="0" max="500000">
+                                            <input type="text" inputmode="decimal" autocomplete="off" class="form-control" x-model="incomeText" aria-label="Revenu annuel brut">
                                             <span class="input-group-text">$</span>
                                         </div>
                                         <input type="range" class="form-range" x-model.number="income" min="0" max="300000" step="1000" style="margin-top: 2px;">
@@ -163,7 +191,7 @@ function fiscalSim(cfg) {
                                     <div class="mb-2">
                                         <label class="form-label fw-medium mb-0" style="font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">{{ __('REER') }} <small class="text-muted" x-text="'(max ' + fmt(maxRrsp) + ')'"></small> <button type="button" @click="jQuery('#reerHelpModal').modal('show')" style="background: var(--c-primary); color: #fff; border-radius: 50%; width: 18px; height: 18px; font-weight: 700; font-size: 0.6rem; padding: 0; line-height: 18px; border: none; cursor: pointer; flex-shrink: 0;">?</button></label>
                                         <div class="input-group input-group-sm">
-                                            <input type="number" class="form-control" x-model.number="rrsp" aria-label="Cotisation REER" :max="maxRrsp" min="0" step="500">
+                                            <input type="text" inputmode="decimal" autocomplete="off" class="form-control" x-model="rrspText" aria-label="Cotisation REER">
                                             <span class="input-group-text">$</span>
                                         </div>
                                         <input type="range" class="form-range" x-model.number="rrsp" min="0" :max="maxRrsp" step="500" style="margin-top: 2px;">
@@ -173,7 +201,7 @@ function fiscalSim(cfg) {
                                     <div class="mb-2">
                                         <label class="form-label fw-medium mb-0" style="font-size: 0.8rem;">{{ __('Temps supp.') }}</label>
                                         <div class="input-group input-group-sm">
-                                            <input type="number" class="form-control" x-model.number="overtime" step="1000" min="0" max="100000" aria-label="{{ __('Temps supplémentaire') }}">
+                                            <input type="text" inputmode="decimal" autocomplete="off" class="form-control" x-model="overtimeText" aria-label="{{ __('Temps supplémentaire') }}">
                                             <span class="input-group-text">$</span>
                                         </div>
                                         <input type="range" class="form-range" x-model.number="overtime" min="0" max="50000" step="500" style="margin-top: 2px;">

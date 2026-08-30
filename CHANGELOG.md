@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.238.5] - 2026-08-30
+
+### Corrigé
+- **`window.CalcParseAmount`/`window.CalcMoney` (normalisation de saisie monétaire virgule/point, ajoutés en v1.238.0) restaient enfermés dans le `<script>` inline de `calculatrice-taxes.blade.php` - le commentaire d'origine promettait déjà « réutilisable par d'autres outils de la même famille », mais un bloc `<script>` inline n'existe que sur la page qui le contient, donc cette promesse était fausse tant que le code n'en bougeait pas. Extrait tel quel (corps de fonction identique à l'octet près, vérifié par diff) vers `public/tools/js/calc-parse-amount.js`, un fichier statique chargeable par n'importe quelle vue via un simple `<script src>`. `calculatrice-taxes.blade.php` le charge désormais ainsi, en lieu et place de la définition inline - comportement inchangé (12 tests `CalculatriceTaxesContentTest.php` toujours verts).
+- **`simulateur-fiscal.blade.php` utilisait le même motif que `calculatrice-taxes.blade.php` avant son propre correctif de v1.238.0 : `<input type="number">` + `x-model.number`, sans aucun parsing défensif, sur ses trois champs monétaires (revenu brut, cotisation REER, temps supplémentaire).** Passés en `type="text" inputmode="decimal"` + accesseurs `get`/`set` Alpine qui appliquent `window.CalcParseAmount` (le fichier partagé ci-dessus) - `income`/`rrsp`/`overtime` restent des NOMBRES pour tous les calculs existants du fichier (aucun autre calcul ne change), seule la lecture du champ passe par le parseur partagé. Les 3 curseurs `type="range"` associés restent inchangés (glissés, jamais tapés - non concernés par ce défaut).
+- **Honnêteté de mesure, consignée dans le code et ici** : la justification d'origine (« `type="number"` avale la virgule française, `12,50` devient `1250` ») a été retestée EN DIRECT sur ce correctif (Chrome 152 réel via Playwright, frappe caractère par caractère - pas une simple assignation de valeur) sur 4 locales (en-US, en-CA, fr-CA, fr-FR) : dans les 4 cas, CE Chrome interprète `12,50` correctement (`valueAsNumber = 12.5`) - la corruption décrite ne s'est PAS reproduite ici. Un cas réellement corrompu existe bien (`150,000` tapé devient `150`, la virgule finale écrase tout ce qui la précède) mais `CalcParseAmount` fait exactement le même choix pour cette chaîne précise (comportement documenté, pas deviné) : ce cas ne distingue donc pas les deux mécanismes. Le correctif est conservé malgré tout, pour trois raisons indépendantes de la reproduction exacte du symptôme d'origine : cohérence avec `calculatrice-taxes.blade.php` (même geste utilisateur, même outil de parsing) ; Firefox/Safari/WebView mobile non vérifiables dans cet environnement (binaires Playwright absents) - la variation déjà observée entre locales interdit de conclure à une absence de risque ailleurs ; et le correctif ne coûte aucune régression mesurée contre un gain de robustesse réel.
+
+### Tests
+- `Modules/Tools/tests/Feature/SimulateurFiscalMoneyInputTest.php` (3 tests neufs, 13 assertions) : rouge confirmé contre le code d'avant correctif (3 échecs collés), vert confirmé après. Suite complète du module outils : 413 tests, 1776 assertions, zéro échec.
+
+### Note de méthode
+- Mesure en direct (Chrome réel, pas seulement des tests HTTP) via le binaire Playwright déjà mis en cache par le projet (MCP `playwright` indisponible cette session - contournement documenté dans le commit).
+
 ## [1.238.4] - 2026-08-30
 
 ### Corrigé
