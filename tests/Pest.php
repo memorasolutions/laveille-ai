@@ -159,9 +159,24 @@ function testsIsolatedLangPath(): ?string
     if (! file_exists($path.'/fr.json')) {
         copy(__DIR__.'/../lang/fr.json', $path.'/fr.json');
         copy(__DIR__.'/../lang/en.json', $path.'/en.json');
-        // Reproduit le symlink réel (fr_CA.json -> fr.json, migration Québec 2026-03) : la
-        // dédup par realpath() de TranslationService::getLocales() en dépend.
-        @symlink($path.'/fr.json', $path.'/fr_CA.json');
+        // PAS de symlink fr_CA.json ici (contrairement au vrai lang/) : première version de ce
+        // correctif le reproduisait « pour fidélité » et a RECASSÉ ces mêmes 4 tests sur CI Linux
+        // (toujours vert en local macOS) - TranslationService::getLocales() dédup par realpath()
+        // en gardant le PREMIER fichier rencontré par File::files() (Symfony Finder), et l'ordre
+        // d'énumération d'un répertoire n'est PAS garanti alphabétique : ext4 (runner CI) peut
+        // renvoyer fr_CA.json avant fr.json, ce qu'APFS (ce poste) ne fait jamais dans ce cas
+        // précis. Résultat mesuré sur CI : getLocales() rendait ['fr_CA', 'en'], jamais 'fr' -
+        // exactement le symptôme d'origine, pour une cause entièrement différente et auto-infligée.
+        // Ni Phase155Test.php ni TranslationModuleTest.php ne testent la locale 'fr_CA' : aucun
+        // fichier tiers n'a de raison d'exister dans une copie isolée qui n'appartient qu'à ces
+        // deux écrivains - un seul fichier par réalpath, dédup jamais en jeu, ordre sans objet.
+    }
+    // Retire un éventuel symlink fr_CA.json laissé par une exécution locale antérieure à ce
+    // correctif (répertoire storage/framework/testing/ réutilisé d'un run à l'autre hors CI,
+    // qui repart toujours d'un checkout neuf) - sans quoi le guard ci-dessus, qui ne teste que
+    // fr.json, ne le nettoierait jamais.
+    if (is_link($path.'/fr_CA.json')) {
+        @unlink($path.'/fr_CA.json');
     }
 
     return $path;
