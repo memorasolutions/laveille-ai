@@ -1042,6 +1042,53 @@ class NewsArticle extends Model implements Searchable
     }
 
     /**
+     * Ticket #1915 (2026-08-30) - SOURCE UNIQUE du vocabulaire de 'nature_original'. Seul
+     * écrivain : Modules\News\Console\NewsApplyCommand (--payload), qui DÉRIVE sa liste blanche
+     * d'ici plutôt que de la dupliquer (un doublon avait déjà produit le défaut que ce ticket
+     * corrige : une liste blanche affirmée par un skill mais absente du code réel). Champ INTERNE
+     * - jamais affiché tel quel sur la fiche publique, même garde-fou que internal_source_text ;
+     * 'label' sert l'admin et le débogage, pas une vue publique.
+     *
+     * Mesure du 2026-08-30 (ticket #1915) : sur les 213 fiches publiées passées par /actu2
+     * (niveau_preuve non nul), 129 (60 %) avaient 'nature_original' vide faute de valeur
+     * applicable - l'énumération fermée d'origine (4 valeurs, 2026-08-17) ne couvrait pas ce que
+     * le site publie réellement. Trois valeurs ajoutées, chacune tirée d'un cas RÉEL observé en
+     * production, jamais anticipée :
+     *
+     * - 'contenu_educatif' : l'original est un cours, une conférence ou un atelier pédagogique
+     *   enregistré (ex. fiches 33558 et 36089 - conférences de Stanford et de Geoffrey Hinton -
+     *   laissées vides ; fiches 35314 et 35315 - ateliers Anthropic, cours Stanford CS336 -
+     *   forcées à tort en 'message_personnel').
+     * - 'projet_communautaire' : l'original est un projet logiciel ou un dépôt de code à but non
+     *   commercial (communautaire, open source), documentation du dépôt comprise (ex. fiche 39524
+     *   FreeCORE - laissée vide plutôt que forcée en 'annonce_commerciale', un projet explicitement
+     *   non commercial ; fiche 39528 « Claude Code gratuit » - forcée à tort en
+     *   'message_personnel', une approximation relevée par l'agent lui-même).
+     * - 'entrevue_publiee' : l'original est une entrevue publiée par un média ou un blogue,
+     *   distincte d'un message spontané (ex. fiche 37573 - entrevue de Sam Altman - laissée vide ;
+     *   fiche 35337 - entrevue de Boris Cherny chez Y Combinator - forcée à tort en
+     *   'annonce_commerciale').
+     */
+    public const NATURE_ORIGINAL_VALUES = [
+        'annonce_commerciale' => 'Annonce commerciale',
+        'etude_evaluee' => 'Étude évaluée',
+        'preimpression' => 'Préimpression',
+        'message_personnel' => 'Message personnel',
+        'contenu_educatif' => 'Contenu éducatif',
+        'projet_communautaire' => 'Projet communautaire',
+        'entrevue_publiee' => 'Entrevue publiée',
+    ];
+
+    /**
+     * Libellé français de 'nature_original', ou null si absente/inconnue - une valeur retirée du
+     * vocabulaire après coup se comporte comme une absence, même garde-fou que factCheckVerdict().
+     */
+    public function natureOriginalLabel(): ?string
+    {
+        return self::NATURE_ORIGINAL_VALUES[$this->nature_original] ?? null;
+    }
+
+    /**
      * Module « vérification » (2026-08-21) - SOURCE UNIQUE du vocabulaire des verdicts.
      *
      * Tout ce qui touche à une vérification en découle et n'est JAMAIS réécrit ailleurs : le

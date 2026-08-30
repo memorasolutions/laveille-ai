@@ -152,6 +152,32 @@ it('never renders the niveau_preuve badge when the field is absent', function ()
     $response->assertOk()->assertDontSee('<p class="nw-niveau-preuve">', false);
 });
 
+// ── nature_original reste INTERNE (ticket #1915, 2026-08-30) : aucune des sept valeurs, y
+// compris les trois ajoutées, ne doit jamais fuiter en clair sur la fiche publique - même
+// garde-fou que internal_source_text (voir NewsArticle::NATURE_ORIGINAL_VALUES). Preuve
+// comportementale que la vérification « rendu public » du ticket n'a rien trouvé à câbler.
+
+it('never leaks the raw nature_original identifier on the public fiche, for any of the seven values', function () {
+    $source = a2rSource();
+
+    foreach (array_values(array_keys(NewsArticle::NATURE_ORIGINAL_VALUES)) as $index => $valeur) {
+        // Le slug est numéroté (JAMAIS dérivé de $valeur, même en substituant les underscores) :
+        // un slug qui contient le nom de la valeur ferait apparaître ce nom dans l'URL/les liens
+        // de partage de la page pour une raison qui n'a RIEN à voir avec le rendu de
+        // nature_original - et ferait alors échouer l'assertion pour une fausse raison (mesuré :
+        // 'preimpression' sans underscore passait tel quel dans le slug puis dans les liens
+        // Facebook/X/LinkedIn). Même logique pour le texte visible ci-dessous.
+        $article = a2rArticle($source->id, 'nature-original-interne-'.($index + 1), [
+            'structured_summary' => ['hook' => 'Accroche neutre, sans rapport avec la classification interne.'],
+            'nature_original' => $valeur,
+        ]);
+
+        $response = $this->get(route('news.show', $article));
+
+        $response->assertOk()->assertDontSee($valeur, false);
+    }
+});
+
 // ── Provenance affichée : jamais « Soumission manuelle » (demande fondateur 2026-08-17) ──
 
 function a2rManualSource(): NewsSource

@@ -189,12 +189,14 @@ class NewsApplyCommand extends Command
      */
     private const COMPOSED_SUMMARY_STRING_MAX = 600;
 
-    /**
-     * Valeurs acceptées pour 'nature_original' (design doc, section "Implémentation /actu2 -
-     * volet serveur (2026-08-17)") - classification INTERNE de la nature de l'original retrouvé
-     * par le skill.
-     */
-    private const ALLOWED_NATURE_ORIGINAL = ['annonce_commerciale', 'etude_evaluee', 'preimpression', 'message_personnel'];
+    // ACTION : 'nature_original' (design doc, section "Implémentation /actu2 - volet serveur
+    // (2026-08-17)", élargie ticket #1915, 2026-08-30) n'a PLUS de liste blanche dupliquée ici -
+    // la validation (plus bas, dans handle()) lit directement NewsArticle::NATURE_ORIGINAL_VALUES,
+    // source unique du vocabulaire. Une liste dupliquée peut dériver de la vraie sans qu'aucun
+    // test ne le voie : c'est exactement le défaut que ce ticket corrige (un skill affirmait
+    // trois clés en liste blanche qui n'y étaient pas).
+    // MCP: SELF (<5 lignes)
+    // RAISON: ticket #1915, mesure du 2026-08-30 - DRY sur le vocabulaire, pas de duplication.
 
     /**
      * Valeurs acceptées pour 'niveau_preuve' (même section) - degré auquel la fiche s'appuie sur
@@ -552,8 +554,8 @@ class NewsApplyCommand extends Command
         // MCP: SELF (<5 lignes)
         // RAISON: design doc, section "Implémentation /actu2 - volet serveur (2026-08-17)".
         if (array_key_exists('nature_original', $decoded)) {
-            if (! is_string($decoded['nature_original']) || ! in_array($decoded['nature_original'], self::ALLOWED_NATURE_ORIGINAL, true)) {
-                $this->error('nature_original invalide (attendu : '.implode(', ', self::ALLOWED_NATURE_ORIGINAL).').');
+            if (! is_string($decoded['nature_original']) || ! array_key_exists($decoded['nature_original'], NewsArticle::NATURE_ORIGINAL_VALUES)) {
+                $this->error('nature_original invalide (attendu : '.implode(', ', array_keys(NewsArticle::NATURE_ORIGINAL_VALUES)).').');
 
                 return self::FAILURE;
             }

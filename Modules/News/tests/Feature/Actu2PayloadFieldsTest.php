@@ -96,6 +96,67 @@ it('refuses an invalid nature_original value, persisting nothing', function () {
     expect($article->fresh()->nature_original)->toBeNull();
 });
 
+// ── Ticket #1915 (2026-08-30) : trois valeurs ajoutées après mesure de 129 fiches publiées
+// (niveau_preuve non nul) où AUCUNE des 4 valeurs d'origine ne convenait - contenu_educatif,
+// projet_communautaire, entrevue_publiee. Rouge avant ce ticket (refusées, exactement comme
+// 'valeur-inventee' ci-dessus) ; vert après. Source unique : NewsArticle::NATURE_ORIGINAL_VALUES.
+
+it('applies the newly added nature_original value contenu_educatif (ticket #1915)', function () {
+    $article = a2pArticle();
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), ['nature_original' => 'contenu_educatif']));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->nature_original)->toBe('contenu_educatif');
+});
+
+it('applies the newly added nature_original value projet_communautaire (ticket #1915)', function () {
+    $article = a2pArticle();
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), ['nature_original' => 'projet_communautaire']));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->nature_original)->toBe('projet_communautaire');
+});
+
+it('applies the newly added nature_original value entrevue_publiee (ticket #1915)', function () {
+    $article = a2pArticle();
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), ['nature_original' => 'entrevue_publiee']));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->nature_original)->toBe('entrevue_publiee');
+});
+
+it('still refuses a value absent from NewsArticle::NATURE_ORIGINAL_VALUES after the widening', function () {
+    $article = a2pArticle();
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), ['nature_original' => 'encore-inventee']));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->nature_original)->toBeNull();
+});
+
+it('NewsArticle::NATURE_ORIGINAL_VALUES carries the seven expected keys, each with a non-empty French label', function () {
+    expect(array_keys(NewsArticle::NATURE_ORIGINAL_VALUES))->toBe([
+        'annonce_commerciale',
+        'etude_evaluee',
+        'preimpression',
+        'message_personnel',
+        'contenu_educatif',
+        'projet_communautaire',
+        'entrevue_publiee',
+    ]);
+
+    foreach (NewsArticle::NATURE_ORIGINAL_VALUES as $valeur => $libelle) {
+        expect($libelle)->toBeString()->not->toBe('');
+    }
+});
+
 // ── niveau_preuve : valeurs valides / invalides ─────────────────────────────────────
 
 it('applies a valid niveau_preuve value', function () {
