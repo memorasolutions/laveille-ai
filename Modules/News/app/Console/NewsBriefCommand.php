@@ -30,6 +30,14 @@ use Modules\News\Services\NewsImageService;
  * RAISON: mandat 2026-08-28 - une correction éditoriale réelle était à l'arrêt faute de pouvoir
  * relire le résumé composé autrement qu'en le reconstruisant depuis le HTML rendu.
  *
+ * ACTION : meta_description ajoutée au JSON (2026-08-30, tâche #1942) - cette clé, désormais
+ * modifiable via NewsApplyCommand (--payload=), était invisible du brief : impossible de savoir,
+ * avant de corriger une fiche, si une valeur figée existait déjà. Même doctrine que
+ * structured_summary ci-dessus : champ ajouté sans option, jamais caché derrière un flag.
+ * MCP: SELF (<5 lignes)
+ * RAISON: tâche #1942 - « décrire ce qui est déjà en base avant toute décision de rédaction »
+ * vaut aussi pour ce champ, maintenant qu'il est écrivable par cette même porte.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -66,6 +74,7 @@ class NewsBriefCommand extends Command
             'source_captured_at' => $article->source_captured_at?->toIso8601String(),
             'updated_at' => $article->updated_at?->toIso8601String(),
             'primary_sources' => $article->primary_sources ?? [],
+            'meta_description' => $article->meta_description,
             'structured_summary' => $article->structured_summary,
             'nature_original' => $article->nature_original,
             'niveau_preuve' => $article->niveau_preuve,

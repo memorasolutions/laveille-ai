@@ -1540,3 +1540,223 @@ it('title/seo_title/summary : un cadratin devient un trait d\'union en base', fu
         ->and($article->seo_title)->not->toContain('—')
         ->and($article->summary)->not->toContain('—');
 });
+
+// ── Clé meta_description (correctif 2026-08-30, tâche #1942 - « la description que Google
+// affiche garde les anciennes valeurs ») - la balise publique <meta name="description"> était
+// figée pour toujours dès qu'elle était posée une fois : cette porte ne pouvait jamais la
+// corriger, même en --enrich. Deux volets testés séparément : (a) la clé s'applique comme
+// n'importe quel champ texte simple (même garde que seo_title) ; (b) une correction de
+// summary/composed_summary qui NE fournit PAS de nouvelle meta_description la remet
+// automatiquement à null - jamais de valeur figée qui survit à la correction qui la rend
+// fausse. ─────────────────────────────────────────────────────────────────────────────────────
+
+it('applies meta_description like any simple text field, em dash stripped, without touching summary', function () {
+    $sourceText = 'Texte source pour la correction de meta_description.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'meta_description' => 'Ancienne description périmée.',
+    ]);
+    $summaryAvant = $article->summary;
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'meta_description' => 'Nouvelle description — corrigée.',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    expect($article->meta_description)->toBe('Nouvelle description - corrigée.')
+        ->and($article->meta_description)->not->toContain('—')
+        ->and($article->summary)->toBe($summaryAvant);
+});
+
+it('refuses a non-string, non-null meta_description', function () {
+    $article = nacArticle(['meta_description' => 'Description existante.']);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'meta_description' => ['pas' => 'une chaîne'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->meta_description)->toBe('Description existante.');
+});
+
+it('refuses a meta_description longer than 255 characters', function () {
+    $article = nacArticle(['meta_description' => 'Description existante.']);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'meta_description' => str_repeat('x', 256),
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->meta_description)->toBe('Description existante.');
+});
+
+it('accepts a meta_description of exactly 255 characters (boundary)', function () {
+    $article = nacArticle(['meta_description' => 'Description existante.']);
+    $borne = str_repeat('x', 255);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'meta_description' => $borne,
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->meta_description)->toBe($borne);
+});
+
+it('an explicit null meta_description clears an existing value back to the automatic cascade', function () {
+    $article = nacArticle(['meta_description' => 'Description à effacer.']);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'meta_description' => null,
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->meta_description)->toBeNull();
+});
+
+it('an explicit empty-string meta_description is treated as null (never publishes an empty <meta> tag)', function () {
+    $article = nacArticle(['meta_description' => 'Description à effacer.']);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'meta_description' => '',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->meta_description)->toBeNull();
+});
+
+it('a payload touching only image_credit (no summary, no composed_summary) never erases an existing meta_description', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source pour la non-régression de meta_description.',
+        'source_content_hash' => hash('sha256', 'Texte source pour la non-régression de meta_description.'),
+        'meta_description' => 'MARQUEUR-DESCRIPTION-A-PRESERVER',
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'image_credit' => 'Photo : agence de test',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->meta_description)->toBe('MARQUEUR-DESCRIPTION-A-PRESERVER');
+});
+
+// ── Le coeur du correctif (tâche #1942) : une correction de fond qui ne rafraîchit pas
+// meta_description ne doit plus jamais laisser une valeur périmée en ligne. ────────────────────
+
+it('correcting summary WITHOUT providing meta_description resets the stale meta_description to null (recidive fix)', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Le produit coûte 12 dollars.',
+        'source_content_hash' => hash('sha256', 'Le produit coûte 12 dollars.'),
+        'meta_description' => 'MARQUEUR-DESCRIPTION-PERIMEE-20-DOLLARS',
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'summary' => 'Le produit coûte en réalité 12 dollars, pas 20.',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    expect($article->summary)->toBe('Le produit coûte en réalité 12 dollars, pas 20.')
+        ->and($article->meta_description)->toBeNull();
+});
+
+it('correcting composed_summary WITHOUT providing meta_description also resets the stale meta_description to null', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Texte source pour la composition.',
+        'source_content_hash' => hash('sha256', 'Texte source pour la composition.'),
+        'meta_description' => 'MARQUEUR-DESCRIPTION-PERIMEE-COMPOSED',
+        'structured_summary' => null,
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'composed_summary' => ['hook' => 'Nouveau fait corrigé.'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->meta_description)->toBeNull();
+});
+
+it('correcting summary WHILE providing a fresh meta_description in the SAME payload keeps the explicit value (never overwritten by the auto-reset)', function () {
+    $article = nacArticle([
+        'internal_source_text' => 'Le produit coûte 12 dollars.',
+        'source_content_hash' => hash('sha256', 'Le produit coûte 12 dollars.'),
+        'meta_description' => 'MARQUEUR-DESCRIPTION-PERIMEE-20-DOLLARS',
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'summary' => 'Le produit coûte en réalité 12 dollars, pas 20.',
+        'meta_description' => 'MARQUEUR-NOUVELLE-DESCRIPTION-12-DOLLARS',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    expect($article->summary)->toBe('Le produit coûte en réalité 12 dollars, pas 20.')
+        ->and($article->meta_description)->toBe('MARQUEUR-NOUVELLE-DESCRIPTION-12-DOLLARS');
+});
+
+it('--enrich corrects meta_description on an already-published article, without touching its slug or publication status (real-world scenario, task #1942)', function () {
+    $sourceText = 'Texte source pour la correction de description en enrich.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'is_published' => true,
+        'published_at' => now()->subDays(15),
+        'meta_description' => 'MARQUEUR-ANCIENNE-DESCRIPTION-PUBLIEE',
+    ]);
+    $ancienSlug = $article->slug;
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'meta_description' => 'MARQUEUR-DESCRIPTION-CORRIGEE-EN-LIGNE',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload, '--enrich' => true])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    expect($article->meta_description)->toBe('MARQUEUR-DESCRIPTION-CORRIGEE-EN-LIGNE')
+        ->and($article->slug)->toBe($ancienSlug)
+        ->and($article->is_published)->toBeTrue();
+});
+
+it('--enrich correcting summary on an already-published article WITHOUT a fresh meta_description resets it to null, letting the public page fall back to a description synchronous with the corrected content', function () {
+    $sourceText = 'Texte source pour le scénario reel de la tâche #1942.';
+    $article = nacArticle([
+        'internal_source_text' => $sourceText,
+        'source_content_hash' => hash('sha256', $sourceText),
+        'is_published' => true,
+        'published_at' => now()->subDays(8),
+        'summary' => 'Ancien résumé publié, avec un chiffre faux.',
+        'meta_description' => 'MARQUEUR-DESCRIPTION-AVEC-LE-MEME-CHIFFRE-FAUX',
+    ]);
+
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'summary' => 'Résumé corrigé, avec le bon chiffre.',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload, '--enrich' => true])
+        ->assertSuccessful();
+
+    $article = $article->fresh();
+    expect($article->summary)->toBe('Résumé corrigé, avec le bon chiffre.')
+        ->and($article->meta_description)->toBeNull()
+        // La cascade publique (show.blade.php) part maintenant de displayExcerpt(), qui lit
+        // le résumé qui vient d'être corrigé - jamais l'ancien chiffre faux.
+        ->and($article->displayExcerpt(155))->toContain('bon chiffre')
+        ->and($article->displayExcerpt(155))->not->toContain('chiffre faux');
+});

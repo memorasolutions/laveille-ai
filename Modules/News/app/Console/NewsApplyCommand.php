@@ -23,9 +23,15 @@ use Modules\News\Services\NewsImageService;
  * une double protection anti-écrasement (empreinte du texte source + updated_at).
  *
  * Trois modes indépendants, chacun reprenable seul :
- * - `--payload=` : applique seo_title / summary / editorial_proof_pairs / primary_sources /
- *                  image_credit / composed_summary depuis un fichier JSON. La clé `summary`
- *                  efface AUSSI structured_summary (résumé MACHINE de la collecte - addendum daté
+ * - `--payload=` : applique seo_title / meta_description / summary / editorial_proof_pairs /
+ *                  primary_sources / image_credit / composed_summary depuis un fichier JSON. La
+ *                  clé `meta_description` (2026-08-30) écrit la balise <meta name="description">
+ *                  publique - `null` ou une chaîne vide la remet à la cascade automatique
+ *                  (NewsArticle::displayExcerpt()), et toute correction de `summary`/
+ *                  `composed_summary` qui ne la fournit PAS l'y remet aussi d'elle-même (voir
+ *                  applyPayload() ci-dessous, recherche 'remplaceLeResumeAffiche') - une
+ *                  description ne peut plus survivre à la correction qui la rend fausse. La clé
+ *                  `summary` efface AUSSI structured_summary (résumé MACHINE de la collecte - addendum daté
  *                  2026-08-17, fin de journée, RESTREINT le 2026-08-28 à cette seule clé - voir
  *                  NewsArticle::logStructuredSummaryOverride() ; auparavant N'IMPORTE QUELLE clé
  *                  de contenu déclenchait l'effacement, ce qui détruisait en silence le résumé
@@ -142,7 +148,17 @@ class NewsApplyCommand extends Command
     // MCP: SELF (<5 lignes)
     // RAISON: mandat 2026-08-29 - « permettre à une fiche d'actualité de renvoyer vers UN de
     //         nos articles de blogue », calqué sur le mécanisme déjà en place pour les outils.
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'related_tool_slugs_remove', 'related_article_slugs', 'related_article_slugs_remove', 'entities', 'fact_check'];
+    // ACTION : 'meta_description' rejoint la liste blanche (2026-08-30, tâche #1942) - la balise
+    // <meta name="description">/og:description publique n'était PAS modifiable par cette porte :
+    // une fiche corrigée (chiffre faux, affirmation déformée) gardait sa description PÉRIMÉE en
+    // ligne pour Google, sans aucun moyen de la corriger autrement que le formulaire admin
+    // manuel. Voir aussi le bloc d'écriture dédié plus bas (même garde que seo_title) et le
+    // garde-fou d'invalidation automatique sur correction de 'summary'/'composed_summary'
+    // (recherche 'remplaceLeResumeAffiche' plus bas) - une fiche RE-corrigée sans repasser cette
+    // clé retombe sur la cascade automatique plutôt que de garder une valeur figée.
+    // MCP: SELF (<5 lignes)
+    // RAISON: tâche #1942 - angle mort signalé par le fondateur, mesuré sur 94 fiches.
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'meta_description', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'related_tool_slugs_remove', 'related_article_slugs', 'related_article_slugs_remove', 'entities', 'fact_check'];
 
     /**
      * ACTION : « Article de blogue lié » (2026-08-29) - plafond applicatif STRICT du nombre
@@ -366,6 +382,45 @@ class NewsApplyCommand extends Command
                 return self::FAILURE;
             }
             $updates['seo_title'] = lv_strip_em_dash($decoded['seo_title']);
+        }
+
+        // ACTION : clé meta_description (correctif 2026-08-30, angle mort signalé tâche #1942 -
+        // « la description que Google affiche garde les anciennes valeurs ») - cette clé était
+        // absente d'ALLOWED_PAYLOAD_KEYS depuis toujours : la porte de correction ne pouvait
+        // JAMAIS toucher la balise <meta name="description">/og:description d'une fiche, même en
+        // --enrich. Une fiche d'avant /actu2 (meta_description posée une fois par FetchNewsCommand
+        // à l'ingestion RSS) dont un chiffre était corrigé gardait donc l'ANCIENNE description en
+        // ligne pour Google et les moteurs de réponse - le pire endroit pour laisser une erreur,
+        // puisque c'est ce qu'un lecteur voit AVANT de cliquer. Même garde que seo_title (chaîne,
+        // tiret cadratin retiré), plus une borne de longueur (255 - même plafond que le formulaire
+        // manuel AdminNewsController::update(), jamais un nouveau chiffre inventé) et une
+        // convention `null`/chaîne vide explicite = « efface, reviens à la cascade automatique »
+        // (NewsArticle::displayExcerpt(), show.blade.php) plutôt qu'un champ figé qui ne peut plus
+        // jamais être remis à jour par cette porte.
+        // MCP: SELF (<15 lignes utiles, calqué sur seo_title)
+        // RAISON: tâche #1942 - mesuré : 94 fiches corrigées entre le 22 et le 29 août portaient
+        // encore une meta_description figée, jamais atteinte par cette porte.
+        if (array_key_exists('meta_description', $decoded)) {
+            if ($decoded['meta_description'] !== null && ! is_string($decoded['meta_description'])) {
+                $this->error('meta_description doit être une chaîne de caractères ou null.');
+
+                return self::FAILURE;
+            }
+
+            $metaDescription = is_string($decoded['meta_description']) ? trim($decoded['meta_description']) : null;
+            if ($metaDescription === '') {
+                // Chaîne vide = même intention que null : revenir à la cascade automatique
+                // (displayExcerpt()) plutôt que publier une balise <meta description> vide, que
+                // la coalescence `??` de show.blade.php ne rattraperait jamais (elle ne se
+                // déclenche que sur null, jamais sur une chaîne vide).
+                $metaDescription = null;
+            } elseif ($metaDescription !== null && mb_strlen($metaDescription) > 255) {
+                $this->error('meta_description doit faire 255 caractères maximum (comme le formulaire admin).');
+
+                return self::FAILURE;
+            }
+
+            $updates['meta_description'] = $metaDescription !== null ? lv_strip_em_dash($metaDescription) : null;
         }
 
         if (array_key_exists('summary', $decoded)) {
@@ -773,7 +828,7 @@ class NewsApplyCommand extends Command
         // ne rend alors rien du tout.
 
         if ($updates === [] && $relatedToolSlugs === null && $relatedToolSlugsRemove === null && $relatedArticleSlugs === null && $relatedArticleSlugsRemove === null && $entities === null && $factCheckUpdates === []) {
-            $this->error('Payload sans effet : aucune des clés seo_title / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs / related_tool_slugs_remove / related_article_slugs / related_article_slugs_remove / entities / fact_check n\'est fournie.');
+            $this->error('Payload sans effet : aucune des clés seo_title / meta_description / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs / related_tool_slugs_remove / related_article_slugs / related_article_slugs_remove / entities / fact_check n\'est fournie.');
 
             return self::FAILURE;
         }
@@ -837,6 +892,28 @@ class NewsApplyCommand extends Command
                 // gardait deja le bouton manuel Publier-et-purger, il manquait a la porte de l'agent.
                 if (! array_key_exists('structured_summary', $updates) && ! $article->hasComposedSummary()) {
                     $updates['structured_summary'] = null;
+                }
+
+                // ACTION : invalidation automatique de meta_description (correctif 2026-08-30,
+                // tâche #1942 - « empêcher la récidive ») - RÉUTILISE exactement le même
+                // déclencheur $remplaceLeResumeAffiche que structured_summary ci-dessus (DRY,
+                // même portée étroite, même leçon du 2026-08-28 : jamais `$updates !== []` seul,
+                // qui détruirait une valeur sur un payload qui ne touche PAS le résumé affiché).
+                // Une meta_description EXPLICITEMENT posée par CE MÊME payload (bloc d'écriture
+                // plus haut) n'est jamais écrasée ici - seule une fiche dont le résumé change
+                // SANS fournir de nouvelle meta_description bascule vers null. Le rendu public
+                // (Modules\News\resources\views\public\show.blade.php) retombe alors sur
+                // NewsArticle::displayExcerpt(), calculé depuis le résumé qui vient d'être
+                // corrigé - donc TOUJOURS synchrone avec le contenu affiché, jamais figé. C'est
+                // le choix retenu contre le champ manuel resté seul : une description figée peut
+                // survivre à la correction qui la rend fausse, une description dérivée ne le
+                // peut structurellement pas.
+                // MCP: SELF (<5 lignes utiles)
+                // RAISON: tâche #1942 - 94 fiches corrigées entre le 22 et le 29 août portaient
+                // encore l'ancienne meta_description ; ce garde-fou rend la récidive impossible
+                // pour toute correction future, pas seulement pour celle d'aujourd'hui.
+                if (! array_key_exists('meta_description', $updates)) {
+                    $updates['meta_description'] = null;
                 }
             }
 
