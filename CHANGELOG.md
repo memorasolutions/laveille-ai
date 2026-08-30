@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.237.3] - 2026-08-30
+
+### Corrigé
+- **Un même terme du glossaire pouvait s'auto-lier jusqu'à 10 fois sur une seule fiche actualité, sans aucune sensibilité aux sections visuelles.** Mesuré sur la fiche 39486 : « firmware » lié 5 fois, dont 2 fois dans la même section « À retenir » (1 avant le premier h2, 2 dans « À retenir », 1 dans « Pourquoi ça compte », 1 dans « Citation »). Cause identifiée par lecture du code, pas par hypothèse : les 15 appels `@glossarize()` de `Modules/News/resources/views/public/show.blade.php` ne passaient aucune option, donc le plafond par défaut de `GlossaryLinkifier` (`MAX_OCCURRENCES_PER_TERM = 10`) s'appliquait à la page entière et non par section - le compteur `$seenThisRequest` est un état statique partagé entre tous les appels `@glossarize()` d'une même requête HTTP (intentionnel, voir son docblock). Le mode `per_section` (tâche #1350, 2026-07-25, « moins agressant ») n'était pas la cause : jamais opté pour les actualités, et de toute façon inopérant sur cette vue puisque chaque fragment glossarisé (hook, point-clé, citation...) est un texte isolé sans `<h2>` - les titres de section sont rendus par Blade en dehors de l'appel.
+- **Mesure indépendante avant correctif, sur 73 fiches réelles de production** (échantillon réparti, un URL sur 16 du sitemap complet de 1153 fiches actualités, jamais les premières venues) : 11 liens/page en médiane (31 au maximum), et 61/73 fiches (83,6 %) portaient au moins un terme répété 2 fois ou plus dans une même section - jusqu'à 6 fois pour un seul terme dans une seule section dans le pire cas.
+- Correctif : `['max_occ' => 1]` ajouté aux 15 appels de la vue publique des actualités - même mécanisme déjà en place pour le glossaire (`Modules/Dictionary/resources/views/public/show.blade.php`, tâche #300, « éviter saturation visuelle ») et pour le blog (`Modules/FrontTheme/resources/views/blog/show.blade.php`, tâche #1350) : aucune abstraction nouvelle, la même option déjà éprouvée ailleurs. Restaure le comportement « première occurrence globale » documenté comme intention d'origine dès 2026-05-05 (docblock de `GlossaryLinkifier::$seenThisRequest`), silencieusement élargi pour les actualités quand `MAX_OCCURRENCES_PER_TERM` est passé de 1 à 10 (tâche #158) sans que ce module choisisse un plafond plus bas comme l'ont fait le glossaire et le blog.
+- Test de non-régression neuf, `Modules/News/tests/Feature/GlossaryLinkDensityTest.php` : rouge avant correctif (5 liens mesurés, reproduisant exactement la distribution de la fiche 39486), vert après (1 lien) ; second cas couvrant deux termes distincts cités plusieurs fois chacun, pour vérifier que le plafond agit par terme et ne fait jamais tomber un lien légitime à zéro.
+
+### Note de méthode
+- Trois politiques de densité coexistaient dans `GlossaryLinkifier.php` (première occurrence par section H2, plafond de 10 par terme et par page, compteur documenté comme visant une première occurrence globale) sans qu'aucun commentaire ne dise laquelle s'applique aux actualités. Vérifié module par module avant toute décision : glossaire et blog plafonnent déjà, l'annuaire n'expose qu'un seul appel donc une exposition moindre, seules les actualités cumulaient plafond haut ET fragmentation en 15 appels séparés.
+- Suite ciblée après correctif : 64 tests, 350 assertions, zéro échec (rendu composé, mise en page, partage, attribution de citation, JSON-LD DefinedTermSet, exclusion « Paragraph Composer »).
+
 ## [1.237.2] - 2026-08-30
 
 ### Corrigé

@@ -503,9 +503,31 @@
                             ? __('Rédigé à partir du média cité; chaque fait est vérifié contre le texte source.')
                             : __('Rédigé à partir de la source originale; chaque fait est vérifié contre le texte source.');
                     @endphp
+                    {{-- 2026-08-30 (mesure en production, fiche 39486) : TOUS les appels @glossarize()
+                         de cette vue reçoivent désormais ['max_occ' => 1]. Avant ce correctif, aucune
+                         option n'était passée nulle part dans ce fichier - donc le plafond par défaut
+                         de GlossaryLinkifier (MAX_OCCURRENCES_PER_TERM = 10, GLOBAL et non par section,
+                         car $seenThisRequest est partagé entre les ~15 appels de cette page)
+                         s'appliquait tel quel. Résultat mesuré : « firmware » lié 5 fois sur une seule
+                         fiche dont 2 fois dans la même section « À retenir ». Échantillon indépendant
+                         de 73 fiches réelles (sitemap.xml, réparties) : 11 liens/page en médiane, 31 au
+                         maximum, et 61/73 fiches (83,6 %) portaient au moins un terme répété 2 fois ou
+                         plus DANS LA MÊME section (jusqu'à 6 fois dans le pire cas). `per_section`
+                         (tâche #1350) n'aurait rien changé ici : chaque appel de ce fichier reçoit un
+                         fragment de texte SANS <h2> (les titres de section sont rendus par Blade, hors
+                         de l'appel), donc $currentSection resterait à 0 pour les 15 appels - un
+                         per_section => true y serait inerte. `max_occ => 1` réutilise le MÊME mécanisme
+                         déjà en place pour le glossaire (Dictionary/show.blade.php, tâche #300, « éviter
+                         saturation visuelle ») et pour le blog (FrontTheme/blog/show.blade.php, tâche
+                         #1350) - aucune abstraction nouvelle. Effet : un terme ne peut plus être lié
+                         qu'une seule fois sur toute la fiche, peu importe le nombre de sections où il
+                         est cité (comportement « première occurrence globale » déjà documenté comme
+                         intention d'origine dans le docblock de self::$seenThisRequest, restauré ici
+                         pour les actualités). Test de non-régression :
+                         Modules/News/tests/Feature/GlossaryLinkDensityTest.php. --}}
                     @if($essentialText)
                         <aside class="nw-tldr" aria-label="{{ __("L'essentiel") }}">
-                            <p>@glossarize(e($essentialText))</p>
+                            <p>@glossarize(e($essentialText), ['max_occ' => 1])</p>
                         </aside>
                         <p class="nw-essential-transparency">{{ $transparencyText }}</p>
 
@@ -530,7 +552,7 @@
                          séparément seulement s'il n'a pas déjà servi de contenu à « L'essentiel »
                          ci-dessus (cas où le tldr est absent mais le hook présent). --}}
                     @if($ss && !empty($ss['hook']) && !$essentialUsedHook)
-                        <p class="nw-lead">@glossarize(e($ss['hook']))</p>
+                        <p class="nw-lead">@glossarize(e($ss['hook']), ['max_occ' => 1])</p>
                     @endif
 
                     @if($isComposed)
@@ -549,7 +571,7 @@
                         <h2 class="nw-section-heading">{{ __('À retenir') }}</h2>
                         <ul class="nw-key-list">
                             @foreach($ss['key_points'] as $point)
-                                <li>@glossarize(e($point))</li>
+                                <li>@glossarize(e($point), ['max_occ' => 1])</li>
                             @endforeach
                         </ul>
                         @endif
@@ -558,7 +580,7 @@
                         @if(!empty($ss['why_important']))
                         <h2 class="nw-section-heading">{{ __('Pourquoi ça compte') }}</h2>
                         <div class="nw-why">
-                            <p>@glossarize(e($ss['why_important']))</p>
+                            <p>@glossarize(e($ss['why_important']), ['max_occ' => 1])</p>
                         </div>
                         @endif
 
@@ -576,7 +598,7 @@
                         @if(!empty($ss['quote']['text'] ?? null))
                         <h2 class="nw-section-heading">{{ __('Citation') }}</h2>
                         <blockquote class="nw-quote" @if(!empty($article->resolved_url ?? $article->url)) cite="{{ $article->resolved_url ?? $article->url }}" @endif>
-                            « @glossarize(e($ss['quote']['text'])) »
+                            « @glossarize(e($ss['quote']['text']), ['max_occ' => 1]) »
                             @if(!empty($ss['quote']['author']))
                                 <cite>{{ $ss['quote']['author'] }}</cite>
                             @endif
@@ -587,7 +609,7 @@
                              québécoise datée (décision éditoriale, jamais forcée côté code). --}}
                         @if(!empty($ss['angle_qc_ca']))
                         <h2 class="nw-section-heading">{{ __('Ce que ça change au Québec') }}</h2>
-                        <p class="nw-expert">🇨🇦 @glossarize(e($ss['angle_qc_ca']))</p>
+                        <p class="nw-expert">🇨🇦 @glossarize(e($ss['angle_qc_ca']), ['max_occ' => 1])</p>
                         @endif
 
                         {{-- 7. Action concrète - bonus Codex (design doc) : cette clé n'était
@@ -596,7 +618,7 @@
                         @if(!empty($ss['action_concrete']))
                         <h2 class="nw-section-heading">{{ __('Action concrète') }}</h2>
                         <div class="nw-why">
-                            <p>@glossarize(e($ss['action_concrete']))</p>
+                            <p>@glossarize(e($ss['action_concrete']), ['max_occ' => 1])</p>
                         </div>
                         @endif
 
@@ -625,7 +647,7 @@
                              LDA", 2026-08-13). --}}
                         @if($ss && !empty($ss['quote']))
                             <blockquote class="nw-quote" @if(!empty($article->resolved_url ?? $article->url)) cite="{{ $article->resolved_url ?? $article->url }}" @endif>
-                                « @glossarize(e($ss['quote'])) »
+                                « @glossarize(e($ss['quote']), ['max_occ' => 1]) »
                                 <x-news::quote-attribution :article="$article" />
                             </blockquote>
                         @endif
@@ -644,7 +666,7 @@
                                         <span class="nw-sources-author"> &mdash; {{ $src['author'] }}</span>
                                     @endif
                                     @if(!empty($src['angle']))
-                                        <span class="nw-sources-angle"> : @glossarize(e($src['angle']))</span>
+                                        <span class="nw-sources-angle"> : @glossarize(e($src['angle']), ['max_occ' => 1])</span>
                                     @endif
                                 </li>
                             @endforeach
@@ -660,7 +682,7 @@
                         <h2 class="nw-section-heading">{{ __('Que faut-il retenir ?') }}</h2>
                         <ul class="nw-key-list">
                             @foreach($ss['key_points'] as $point)
-                                <li>@glossarize(e($point))</li>
+                                <li>@glossarize(e($point), ['max_occ' => 1])</li>
                             @endforeach
                         </ul>
                         @endif
@@ -668,7 +690,7 @@
                         @if(isset($ss['why_important']))
                         <h2 class="nw-section-heading">{{ __('Pourquoi cette nouvelle compte-t-elle ?') }}</h2>
                         <div class="nw-why">
-                            <p>@glossarize(e($ss['why_important']))</p>
+                            <p>@glossarize(e($ss['why_important']), ['max_occ' => 1])</p>
                             @if(!empty($ss['key_stat']))
                                 <p style="margin-top: 0.75rem; margin-bottom: 0;"><span class="nw-stat">{{ $ss['key_stat'] }}</span></p>
                             @endif
@@ -681,7 +703,7 @@
                         <ul class="nw-key-list">
                             {{-- Garde défensive : un modèle IA peut renvoyer une chaîne au lieu du tableau contractuel. --}}
                             @foreach((is_array($ss['divergences']) ? $ss['divergences'] : [$ss['divergences']]) as $divergence)
-                                <li>@glossarize(e($divergence))</li>
+                                <li>@glossarize(e($divergence), ['max_occ' => 1])</li>
                             @endforeach
                         </ul>
                         @endif
@@ -690,7 +712,7 @@
                         @if(is_array($ss['archive_context'] ?? null) && !empty($ss['archive_context']['summary']))
                         <h2 class="nw-section-heading">{{ __('Ce qui a changé') }}</h2>
                         <div class="nw-why">
-                            <p>@glossarize(e($ss['archive_context']['summary']))</p>
+                            <p>@glossarize(e($ss['archive_context']['summary']), ['max_occ' => 1])</p>
                             @if(!empty($ss['archive_context']['related']))
                                 <ul class="nw-key-list" style="margin-top: 0.75rem; margin-bottom: 0;">
                                     @foreach($ss['archive_context']['related'] as $relatedArchive)
@@ -705,7 +727,7 @@
 
                         {{-- Actus 2.0 - angle québécois/canadien, jamais affiché si absent/nul (jamais forcé côté prompt). --}}
                         @if(!empty($ss['angle_qc_ca']))
-                        <p class="nw-expert">🇨🇦 @glossarize(e($ss['angle_qc_ca']))</p>
+                        <p class="nw-expert">🇨🇦 @glossarize(e($ss['angle_qc_ca']), ['max_occ' => 1])</p>
                         @endif
 
                         @if(!empty($ss['expert_name']))
@@ -755,7 +777,7 @@
                     @if($ss && isset($ss['faq_question']))
                     <div class="nw-faq">
                         <h3>{{ $ss['faq_question'] }}</h3>
-                        <p>@glossarize(e($ss['faq_answer']))</p>
+                        <p>@glossarize(e($ss['faq_answer']), ['max_occ' => 1])</p>
                     </div>
                     @endif
 
