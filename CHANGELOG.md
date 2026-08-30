@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.240.0] - 2026-08-30
+
+### Ajouté
+- **Ticket #1910 : nouvelle fiche annuaire CanIRun.ai** (`/annuaire/canirunai`), outil web gratuit et open source (licence MIT, `github.com/midudev/canirun.ai`) qui détecte le matériel de l'ordinateur (GPU, RAM, CPU) directement dans le navigateur et indique quels modèles d'IA ouverts peuvent y tourner localement, sans rien envoyer à un serveur. Ajout par migration idempotente (`Modules/Directory/database/migrations/2026_08_30_140000_add_canirun_ai_directory_tool.php`, `up()`/`down()` testés localement), suivant la structure d'une fiche complète existante (description, description courte, guide d'utilisation, fonctionnalités clés, cas d'usage, avantages, inconvénients, FAQ, public cible, catégorie « Code et développement »).
+- **Fiche d'actualité d'origine introuvable en base de production malgré une recherche exhaustive** (toutes les colonnes texte de `news_articles`, `news_article_entities`, `news_dedup_log`, `news_article_tool`, historique Search Console `laveille.ai` depuis mai 2025, recherche web) : très probablement publiée puis supprimée par le pipeline d'élagage (`NewsArticle` n'utilise pas `SoftDeletes` - une suppression y est définitive). La fiche annuaire a donc été rédigée à partir d'une vérification indépendante et fraîche de la source primaire (site officiel et dépôt GitHub du projet), pas d'une reprise du travail déjà fait - à signaler si l'article d'origine est retrouvé par un autre moyen.
+- **Vivacité de l'outil vérifiée par trois contrôles indépendants le 2026-08-30** : code HTTP (redirection 307 du domaine nu vers `https://www.canirun.ai/`, réponse finale 200), contenu réel de la page (titre, méta-description et balises structurées conformes à l'outil décrit, pas de page de parking) et fraîcheur de l'activité (en-tête `Last-Modified` du jour même sur la page, dernier commit du dépôt GitHub à moins d'une heure de la vérification, 315 étoiles, dépôt ni archivé ni désactivé).
+- **Contrôle d'absence de doublon effectué sur la base de PRODUCTION** (la base locale s'est révélée périmée de plusieurs semaines pour ce module) par une passerelle de lecture seule temporaire, déployée puis retirée après usage : aucune fiche existante pour « canirun », sous aucune graphie.
+
 ## [1.239.3] - 2026-08-30
 
 ### Corrigé
