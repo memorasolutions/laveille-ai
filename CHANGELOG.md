@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.242.2] - 2026-08-30
+
+### Retiré
+- **Retrait de 3 bandes dessinées pédagogiques (`biais-algorithmique`, `cybersecurite`, `deepfake`) qui montraient un personnage enfant** - mesure de la règle fondatrice du 2026-08-29 (« jamais d'images d'élèves ni d'enfants sur ce site, même générées par IA »), remesurée le 2026-08-30 : le passif initial de 13 images (mesuré le 29 août) était sous-évalué, le vrai passif inclut ce standard « visionneur de BD » (`public/bd/{slug}/manifest.json`, `Modules/Dictionary/app/Support/ComicLibrary.php`) jamais audité initialement. Les 3 planches assemblées (personnage enfant récurrent de la bibliothèque `octopus`/`kid`) sont retirées de `public/bd/` - convention zéro-code : l'absence du manifest fait disparaître automatiquement le bouton « Lire la BD » et le picto de grille sur `/glossaire/{slug}`, sans toucher à la fiche elle-même. **Les 3 termes gardent leur image hero propre** (`images/glossaire/{biais-algorithmique,cybersecurite,deepfake}.{jpg,webp}`), vérifiée indépendamment saine (abstraite, sans personnage) - aucune page ne se retrouve sans illustration. Fichiers sauvegardés intacts hors du dépôt public (`.backups/bd/2026-08-30-retraits-images-enfants/`, gitignoré) avant retrait - restauration triviale si besoin.
+- **Régénération de remplacement volontairement HORS PÉRIMÈTRE de ce correctif** : le skill `/bd` livre des planches assemblées par l'utilisateur (règle permanente du 2026-07-07, « je dessine moi-même les contours/bulles et j'assemble ») et exige une approbation explicite avant mise en ligne (règle permanente du projet) - deux garde-fous distincts de la remédiation autonome des images seules (glossaire/blogue) traitée par ailleurs dans cette même session. Une nouvelle BD pour ces 3 termes reste une tâche créative séparée, à faire via `/bd` avec Stéphane.
+
 ## [1.242.1] - 2026-08-30
 
 ### Corrigé
