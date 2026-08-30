@@ -58,7 +58,7 @@ it('retourne au moins 7 items avec les bons labels et des textes non vides', fun
 
     $labels = array_map(fn ($i) => $i['label'], $items);
 
-    foreach (['Résumé (NotebookLM)', 'NotebookLM Infographie', 'NotebookLM Diapositives', 'Post LinkedIn', 'Post Facebook', 'Post X', 'Légende Instagram'] as $expected) {
+    foreach (['Résumé (Gemini Notebook)', 'Gemini Notebook Infographie', 'Gemini Notebook Diapositives', 'Post LinkedIn', 'Post Facebook', 'Post X', 'Légende Instagram'] as $expected) {
         expect($labels)->toContain($expected);
     }
 

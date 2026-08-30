@@ -1,7 +1,7 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
 @section('title', "L'IA en éducation au Québec : étudiants, TDAH et apprentissage - " . config('app.name'))
-@section('meta_description', "L'IA peut aider les étudiants québécois, dont ceux avec un TDAH, à organiser, résumer et structurer leur travail. Outils, glossaire, guides (NotebookLM, TDAH) et veille.")
+@section('meta_description', "L'IA peut aider les étudiants québécois, dont ceux avec un TDAH, à organiser, résumer et structurer leur travail. Outils, glossaire, guides (Gemini Notebook, TDAH) et veille.")
 @push('head')
 <meta property="og:title" content="L'IA en éducation au Québec : étudiants, TDAH et apprentissage">
 @php
@@ -31,7 +31,7 @@
             <p>Une sélection d'outils d'IA pour soutenir l'organisation, la lecture et la rédaction, selon les besoins variés des étudiants.</p>
             <p style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">
                 <x-core::button :href="route('directory.index')" variant="primary">Explorer les outils</x-core::button>
-                <x-core::button :href="route('directory.show', 'notebooklm')" variant="secondary" size="sm">NotebookLM</x-core::button>
+                <x-core::button :href="route('directory.show', 'notebooklm')" variant="secondary" size="sm">Gemini Notebook</x-core::button>
             </p>
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Comprendre les concepts</h2>
@@ -43,7 +43,7 @@
             <ul>
                 <li><a href="{{ route('guide.ia-etudier') }}" style="color: var(--sys-text-link, #064E5A);">L'IA pour étudier au Québec : usages, bénéfices et règles</a></li>
                 <li><a href="{{ route('blog.show', 'la-plupart-des-etudiants-tdah-utilisent-mal-lia-voici-le-guide-complet-et-concret') }}" style="color: var(--sys-text-link, #064E5A);">La plupart des étudiants TDAH utilisent mal l'IA : le guide complet et concret</a></li>
-                <li><a href="{{ route('blog.show', 'notebooklm-le-guide-complet-pour-maitriser-toutes-les-options-expliquees-simplement') }}" style="color: var(--sys-text-link, #064E5A);">Guide complet de NotebookLM expliqué simplement</a></li>
+                <li><a href="{{ route('blog.show', 'notebooklm-le-guide-complet-pour-maitriser-toutes-les-options-expliquees-simplement') }}" style="color: var(--sys-text-link, #064E5A);">Guide complet de Gemini Notebook expliqué simplement</a></li>
                 <li><a href="{{ route('blog.index') }}" style="color: var(--sys-text-link, #064E5A);">Tous les guides du blogue</a></li>
             </ul>
 

@@ -6,7 +6,7 @@ namespace Modules\Core\Concerns;
 
 /**
  * Helpers PARTAGÉS pour générer les contenus de partage admin (superadmin) :
- * prompt « NotebookLM Infographie », post réseaux sociaux, hashtags, nettoyage des liens.
+ * prompt « Gemini Notebook Infographie », post réseaux sociaux, hashtags, nettoyage des liens.
  * Évite la duplication entre News, Dictionary, Directory, Blog (consigne zéro-duplication).
  *
  * Le modèle qui l'utilise implémente sa propre méthode publique adminShareContents(): array
@@ -15,7 +15,7 @@ namespace Modules\Core\Concerns;
 trait HasAdminShareContents
 {
     /**
-     * Assemble le prompt « NotebookLM Infographie » : lien de section + consigne de
+     * Assemble le prompt « Gemini Notebook Infographie » : lien de section + consigne de
      * vulgarisation propre au type + blocs Langue/Structure/Design/Accessibilité/Hiérarchie
      * (best practices juin 2026 : structure narrative, data storytelling, contraste AA, format vertical).
      */
@@ -33,7 +33,7 @@ trait HasAdminShareContents
     }
 
     /**
-     * Assemble le prompt « NotebookLM Diapositives » (Slide Deck) : consigne/objectif propre au
+     * Assemble le prompt « Gemini Notebook Diapositives » (Slide Deck) : consigne/objectif propre au
      * type + structure pédagogique fixe (best practices juin 2026 : 1 idée + 1 « à retenir » par
      * diapo, titres-phrases, ≤4 puces, plan d'abord puis deck) + bloc Références/marque
      * (pied de page « La veille de Stef — laveille.ai », micro-sources, lien de section sur la diapo finale).
@@ -353,7 +353,7 @@ trait HasAdminShareContents
     }
 
     /**
-     * Retire toutes les URLs http(s) d'un texte (les liens n'ont pas leur place dans NotebookLM / posts).
+     * Retire toutes les URLs http(s) d'un texte (les liens n'ont pas leur place dans Gemini Notebook / posts).
      */
     protected function stripLinks(string $text): string
     {

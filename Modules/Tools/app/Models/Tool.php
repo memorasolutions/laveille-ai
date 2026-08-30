@@ -54,7 +54,7 @@ class Tool extends Model
 
     /**
      * Contenus de partage admin (superadmin) pour un outil INTERACTIF (/outils/{slug}) :
-     * résumé NotebookLM, prompts infographie + diapositives, posts LinkedIn/Facebook/X +
+     * résumé Gemini Notebook, prompts infographie + diapositives, posts LinkedIn/Facebook/X +
      * légende Instagram. Réutilise le trait DRY HasAdminShareContents (zéro duplication de logique
      * sociale). Robuste si la description est vide. Angle : faire ESSAYER l'outil (gratuit).
      */
@@ -66,7 +66,7 @@ class Tool extends Model
         $description = trim((string) ($this->description ?? ''));
         $answerSummary = trim((string) ($this->answer_summary ?? ''));
 
-        // Résumé (NotebookLM) : markdown propre, sans liens.
+        // Résumé (Gemini Notebook) : markdown propre, sans liens.
         $resume = "# {$name}\n\n";
         if ($description !== '') {
             $resume .= "## Description\n{$description}\n\n";
@@ -79,7 +79,7 @@ class Tool extends Model
         }
         $resume = $this->stripLinks($resume);
 
-        // Prompts NotebookLM.
+        // Prompts Gemini Notebook.
         $prompt = $this->infographiePrompt($url, 'Présente l\'outil interactif « ' . $name . ' » dans une infographie : à quoi il sert, à qui il s\'adresse, pourquoi l\'essayer. Public : curieux sans connaissances préalables.');
         $slides = $this->slidesPrompt($url, 'Objectif : présenter l\'outil interactif « ' . $name . ' » : à quoi il sert, pour qui, comment l\'essayer. Public : curieux, sans connaissances préalables.');
 
@@ -118,9 +118,9 @@ class Tool extends Model
         ]))) . "\n\n" . implode(' ', $igHashtags);
 
         return [
-            ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
-            ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
-            ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
+            ['label' => 'Résumé (Gemini Notebook)', 'icon' => '📄', 'text' => $resume],
+            ['label' => 'Gemini Notebook Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'Gemini Notebook Diapositives', 'icon' => '🖼️', 'text' => $slides],
             ['label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin],
             ['label' => 'Post Facebook', 'icon' => '📘', 'text' => $facebook],
             ['label' => 'Post X', 'icon' => '✖️', 'text' => $x],

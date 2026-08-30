@@ -196,11 +196,11 @@ Gemini brille par la richesse et la diversité de ses outils, tous orientés ver
 - **Intégration Workspace** : rédiger un courriel à partir d'un brouillon dans Gmail, synthétiser un rapport dans Docs, analyser des données dans Sheets ou générer des diapositives dans Slides - tout cela avec un simple prompt.
 - **Deep Search** : combine recherche web en temps réel et raisonnement avancé pour fournir des réponses nuancées, sourcées et contextualisées, bien au-delà d'un simple résumé.
 - **Gems personnalisés** : créez des experts virtuels spécialisés (rédacteur technique, analyste financier, coach marketing) que vous pouvez invoquer à volonté. Une fonctionnalité unique qui personnalise l'expérience selon vos besoins professionnels.
-- **NotebookLM** : transformez jusqu'à 500 documents (PDF, liens, textes) en un carnet interactif où l'IA vous pose des questions, génère des podcasts pédagogiques ou résume des concepts complexes. Disponible dès l'abonnement AI Pro.
+- **Gemini Notebook (anciennement NotebookLM)** : transformez jusqu'à 500 documents (PDF, liens, textes) en un carnet interactif où l'IA vous pose des questions, génère des podcasts pédagogiques ou résume des concepts complexes. Disponible dès l'abonnement AI Pro.
 - **Création multimédia** : génération et édition d'images via ImageFX, création de vidéos courtes avec Veo 3.1 (réservé à l'offre Ultra), et outils comme Flow filmmaking pour orchestrer des scénarios visuels complexes.
 - **API ouverte** : les développeurs peuvent intégrer Gemini 3.1 Pro dans leurs applications, avec une tarification transparente et une compatibilité avec les frameworks modernes (Vertex AI, Firebase).
 
-Ces fonctionnalités ne sont pas juxtaposées : elles interagissent. Par exemple, un Gem personnalisé peut accéder à vos fichiers dans Drive via NotebookLM, puis générer un rapport dans Docs - le tout en quelques clics.
+Ces fonctionnalités ne sont pas juxtaposées : elles interagissent. Par exemple, un Gem personnalisé peut accéder à vos fichiers dans Drive via Gemini Notebook, puis générer un rapport dans Docs - le tout en quelques clics.
 
 ## Tarification
 
@@ -208,7 +208,7 @@ Google propose une stratégie tarifaire stratifiée, adaptée à différents niv
 
 - **Gratuit** : accès à Gemini Flash et Pro (avec limites quotidiennes), Deep Search, création d'images basique, intégration partielle à Workspace. Suffisant pour les curieux ou les utilisateurs occasionnels.
 - **AI Plus (8 $ US par mois)** : suppression des limites, priorité d'accès aux nouveaux modèles, plus de requêtes multimodales. Idéal pour les freelances ou les PME.
-- **AI Pro (20 $ US par mois)** : inclut 500 notebooks dans NotebookLM, accès complet à tous les outils créatifs, intégration avancée à Workspace, et Gems illimités. Le plan recommandé pour les professionnels réguliers.
+- **AI Pro (20 $ US par mois)** : inclut 500 notebooks dans Gemini Notebook, accès complet à tous les outils créatifs, intégration avancée à Workspace, et Gems illimités. Le plan recommandé pour les professionnels réguliers.
 - **AI Ultra (250 $ US par mois)** : réservé aux studios, agences ou départements R&D nécessitant Veo 3.1 pour la génération vidéo haute fidélité, ainsi qu'un débit et une capacité de traitement extrêmes.
 
 Pour les développeurs, l'API Gemini 3.1 Pro est facturée 2 $ par million de jetons en entrée et 12 $ par million en sortie, un tarif compétitif face à la concurrence.
@@ -227,7 +227,7 @@ En revanche, Claude conserve un avantage en compréhension fine de textes très 
 
 Gemini représente une évolution majeure dans l'accessibilité de l'IA professionnelle. Google ne se contente pas de suivre la tendance : il redéfinit ce qu'un assistant IA peut être - non plus un outil isolé, mais un copilote intégré à chaque étape du travail.
 
-L'intégration Workspace est une killer feature pour les organisations déjà dans l'écosystème Google. La fenêtre contextuelle de 1 million de jetons permet des analyses impossibles ailleurs sans segmentation. Les Gems et NotebookLM introduisent une personnalisation rarement vue chez la concurrence. Et la tarification est claire, progressive et justifiée par les fonctionnalités.
+L'intégration Workspace est une killer feature pour les organisations déjà dans l'écosystème Google. La fenêtre contextuelle de 1 million de jetons permet des analyses impossibles ailleurs sans segmentation. Les Gems et Gemini Notebook introduisent une personnalisation rarement vue chez la concurrence. Et la tarification est claire, progressive et justifiée par les fonctionnalités.
 
 Quelques bémols subsistent : l'expérience gratuite, bien que généreuse, impose des limites frustrantes pour les utilisateurs intensifs. Certains outils comme Veo restent réservés à une niche très haut de gamme (250 $ par mois). Et l'interface, parfois minimaliste, peut manquer de guidage pour les nouveaux venus.
 
@@ -779,13 +779,13 @@ MD;
     private function notebooklm(): string
     {
         return <<<'MD'
-Le paysage de l'intelligence artificielle générative évolue à une vitesse fulgurante, passant des simples agents de discussion à des outils de productivité spécialisés. Lancé officiellement par Google en 2024, NotebookLM se distingue comme une solution de gestion des connaissances qui ne se contente pas de générer du texte, mais qui s'approprie vos propres données pour devenir un expert de vos dossiers.
+Le paysage de l'intelligence artificielle générative évolue à une vitesse fulgurante, passant des simples agents de discussion à des outils de productivité spécialisés. Lancé officiellement par Google en 2024, Gemini Notebook (anciennement NotebookLM) se distingue comme une solution de gestion des connaissances qui ne se contente pas de générer du texte, mais qui s'approprie vos propres données pour devenir un expert de vos dossiers.
 
-## À propos de NotebookLM
+## À propos de Gemini Notebook
 
-NotebookLM n'est pas un robot conversationnel générique. Il s'agit d'un carnet de notes intelligent conçu pour pallier l'un des plus grands défauts des IA actuelles : les hallucinations. En limitant le champ de réflexion de l'IA à vos propres sources, Google propose une approche dite de mise à la terre (grounding).
+Gemini Notebook n'est pas un robot conversationnel générique. Il s'agit d'un carnet de notes intelligent conçu pour pallier l'un des plus grands défauts des IA actuelles : les hallucinations. En limitant le champ de réflexion de l'IA à vos propres sources, Google propose une approche dite de mise à la terre (grounding).
 
-Propulsé par le modèle Gemini, NotebookLM se concentre exclusivement sur les documents que vous lui fournissez. C'est votre cerveau numérique personnel, capable de synthétiser des milliers de pages en quelques secondes tout en restant fidèle au contenu original. Pour les chercheurs, les juristes ou les créateurs de contenu, cette spécificité transforme radicalement la phase de documentation.
+Propulsé par le modèle Gemini, Gemini Notebook se concentre exclusivement sur les documents que vous lui fournissez. C'est votre cerveau numérique personnel, capable de synthétiser des milliers de pages en quelques secondes tout en restant fidèle au contenu original. Pour les chercheurs, les juristes ou les créateurs de contenu, cette spécificité transforme radicalement la phase de documentation.
 
 ## Fonctionnalités principales
 
@@ -804,19 +804,19 @@ Propulsé par le modèle Gemini, NotebookLM se concentre exclusivement sur les d
 
 Elephas s'adresse principalement aux utilisateurs de l'écosystème Apple et mise sur une intégration profonde avec le système d'exploitation. Cependant, il demande souvent une configuration plus complexe et ne possède pas la puissance de calcul centralisée de Google.
 
-ChatGPT permet de téléverser des fichiers pour analyse, mais il manque de la structure organisationnelle de NotebookLM. Là où ChatGPT traite chaque session comme une conversation éphémère, NotebookLM bâtit une base de connaissances structurée et persistante. De plus, la fonction Audio Overview n'a actuellement aucun équivalent direct chez OpenAI en termes de qualité de synthèse narrative.
+ChatGPT permet de téléverser des fichiers pour analyse, mais il manque de la structure organisationnelle de Gemini Notebook. Là où ChatGPT traite chaque session comme une conversation éphémère, Gemini Notebook bâtit une base de connaissances structurée et persistante. De plus, la fonction Audio Overview n'a actuellement aucun équivalent direct chez OpenAI en termes de qualité de synthèse narrative.
 
-L'avantage majeur de NotebookLM reste son intégration native avec Google Drive, simplifiant le flux de travail pour ceux qui utilisent déjà la suite Workspace.
+L'avantage majeur de Gemini Notebook reste son intégration native avec Google Drive, simplifiant le flux de travail pour ceux qui utilisent déjà la suite Workspace.
 
 ## Notre avis
 
-Google a frappé un coup de circuit avec NotebookLM. Cet outil ne se contente pas de répondre à des questions; il aide réellement à comprendre des sujets complexes.
+Google a frappé un coup de circuit avec Gemini Notebook. Cet outil ne se contente pas de répondre à des questions; il aide réellement à comprendre des sujets complexes.
 
 Ce qui nous a le plus impressionnés, c'est la précision des citations. Dans un contexte professionnel au Québec, où la rigueur et l'exactitude des sources sont primordiales, pouvoir valider instantanément une affirmation de l'IA est un gain de temps inestimable. L'Audio Overview, bien qu'encore principalement optimisé pour l'anglais, montre un potentiel immense pour la consommation d'information passive.
 
 Toutefois, l'interface pourrait bénéficier d'outils d'édition de texte plus poussés directement dans les notes. On sent que l'outil est encore jeune et que Google priorise l'efficacité de l'analyse sur la mise en forme.
 
-En résumé, NotebookLM est sans doute l'application de l'IA la plus utile lancée par Google ces dernières années. Que vous soyez un étudiant croulant sous les lectures ou un gestionnaire devant synthétiser des rapports de plusieurs centaines de pages, cet assistant mérite une place de choix dans votre coffre à outils numérique.
+En résumé, Gemini Notebook est sans doute l'application de l'IA la plus utile lancée par Google ces dernières années. Que vous soyez un étudiant croulant sous les lectures ou un gestionnaire devant synthétiser des rapports de plusieurs centaines de pages, cet assistant mérite une place de choix dans votre coffre à outils numérique.
 MD;
     }
 

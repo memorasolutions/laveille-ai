@@ -451,9 +451,9 @@ class Tool extends Model implements Searchable
         $linkedin = $this->buildLinkedInPost($hook, $plainDef, $interest, $cta, $hashtags, $tutoBonus);
         $facebook = $this->buildFacebookPost($hook, $plainDef, $interest, $cta, $hashtags, $tutoBonus);
         return [
-            ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
-            ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
-            ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
+            ['label' => 'Résumé (Gemini Notebook)', 'icon' => '📄', 'text' => $resume],
+            ['label' => 'Gemini Notebook Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'Gemini Notebook Diapositives', 'icon' => '🖼️', 'text' => $slides],
             ['label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin],
             ['label' => 'Post Facebook', 'icon' => '📘', 'text' => $facebook],
         ];

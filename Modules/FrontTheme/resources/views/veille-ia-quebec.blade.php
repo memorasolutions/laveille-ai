@@ -40,7 +40,7 @@
             <p style="display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;">
                 <x-core::button :href="route('directory.index')" variant="secondary">Explorer les outils</x-core::button>
                 <x-core::button :href="route('directory.show', 'perplexity')" variant="secondary" size="sm">Perplexity</x-core::button>
-                <x-core::button :href="route('directory.show', 'notebooklm')" variant="secondary" size="sm">NotebookLM</x-core::button>
+                <x-core::button :href="route('directory.show', 'notebooklm')" variant="secondary" size="sm">Gemini Notebook</x-core::button>
             </p>
 
             <h2 style="font-family: var(--f-heading); margin-top: 36px;">Comprendre les concepts</h2>

@@ -58,7 +58,7 @@ SHAPE
                 'content_keys' => ['weekly_prompt', 'wellness_challenge'],
                 'auto_source'  => 'DigestContentService::getWellnessChallenge() + generateWeeklyPrompt() (rotation config)',
                 'field_type'   => 'textarea',
-                'placeholder'  => "ex: Cette semaine, essaie de résumer une réunion avec NotebookLM. Durée : 10 min.",
+                'placeholder'  => "ex: Cette semaine, essaie de résumer une réunion avec Gemini Notebook. Durée : 10 min.",
                 'shape'        => <<<'SHAPE'
 Choisir UNE des deux structures selon la nature de la consigne :
 

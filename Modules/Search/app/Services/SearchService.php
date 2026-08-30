@@ -110,9 +110,14 @@ class SearchService
                 $fields = $modelClass::searchableFields();
                 $sectionKey = $modelClass::searchSectionKey();
 
-                $qb = $modelClass::query()->where(function (Builder $q) use ($fields, $query) {
+                // Recherche insensible à la casse : plusieurs colonnes texte (Directory, Dictionary,
+                // Acronyms...) utilisent la collation utf8mb4_bin, où `LIKE` est sensible à la casse.
+                // Sans ce LOWER() des deux côtés, chercher "notebooklm" ne trouvait pas "NotebookLM"
+                // (constaté le 2026-08-29 : 0 résultat Annuaire en minuscules contre 7 en casse exacte).
+                $queryLower = mb_strtolower($query);
+                $qb = $modelClass::query()->where(function (Builder $q) use ($fields, $queryLower) {
                     foreach ($fields as $field) {
-                        $q->orWhere($field, 'LIKE', "%{$query}%");
+                        $q->orWhereRaw('LOWER(`'.$field.'`) LIKE ?', ['%'.$queryLower.'%']);
                     }
                 });
 

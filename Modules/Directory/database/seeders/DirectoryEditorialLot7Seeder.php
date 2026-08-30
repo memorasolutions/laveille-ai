@@ -227,7 +227,7 @@ Le plan Free offre 60 pages par mois. Le plan Student a 2 dollars par mois cible
 
 ## Comparaison avec les alternatives
 
-ChatPDF est le concurrent le plus direct en simplicite, mais Humata prend l'avantage sur les documents longs et la précision des citations. AskYourPDF propose des extensions de navigateur mais son interface est moins professionnelle. NotebookLM de Google adopte une approche de prise de notes augmentée mais n'offre pas la même focalisation sur l'analyse de documents bruts.
+ChatPDF est le concurrent le plus direct en simplicite, mais Humata prend l'avantage sur les documents longs et la précision des citations. AskYourPDF propose des extensions de navigateur mais son interface est moins professionnelle. Gemini Notebook (anciennement NotebookLM) de Google adopte une approche de prise de notes augmentée mais n'offre pas la même focalisation sur l'analyse de documents bruts.
 
 ## Notre avis
 

@@ -44,7 +44,7 @@ class EducationPricingSeeder extends Seeder
             ],
             'gemini' => [
                 'type' => 'free',
-                'details' => 'Google AI Pro gratuit 12 mois pour les étudiants vérifiés (Gemini 3.1 Pro, NotebookLM Plus, 2 To stockage). Vérification SheerID.',
+                'details' => 'Google AI Pro gratuit 12 mois pour les étudiants vérifiés (Gemini 3.1 Pro, Gemini Notebook Plus [anciennement NotebookLM Plus], 2 To stockage). Vérification SheerID.',
                 'url' => 'https://one.google.com/explore-plan/gemini-advanced',
                 'verif' => true,
             ],
@@ -57,7 +57,7 @@ class EducationPricingSeeder extends Seeder
             ],
             'notebooklm' => [
                 'type' => 'free',
-                'details' => 'Inclus dans Google AI Pro étudiant (gratuit 12 mois). NotebookLM Plus avec fonctionnalités avancées.',
+                'details' => 'Inclus dans Google AI Pro étudiant (gratuit 12 mois). Gemini Notebook Plus (anciennement NotebookLM Plus) avec fonctionnalités avancées.',
                 'url' => 'https://notebooklm.google.com/',
                 'verif' => false,
             ],

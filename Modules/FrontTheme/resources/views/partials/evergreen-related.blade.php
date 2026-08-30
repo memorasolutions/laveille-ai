@@ -7,7 +7,7 @@
 
     $pillars = [
         ['route' => 'pillar.ia-pme', 'label' => __('IA pour les PME'), 'kw' => ['pme','entreprise','affaires','business','productivité','marketing','vente','gestion','employé']],
-        ['route' => 'pillar.ia-education', 'label' => __('IA en éducation'), 'kw' => ['éducation','étudiant','école','tdah','apprentissage','université','cégep','enseign','cours','notebooklm','devoir']],
+        ['route' => 'pillar.ia-education', 'label' => __('IA en éducation'), 'kw' => ['éducation','étudiant','école','tdah','apprentissage','université','cégep','enseign','cours','notebooklm','gemini notebook','devoir']],
         ['route' => 'pillar.ia-dev', 'label' => __('IA pour les développeurs'), 'kw' => ['développeur','code','claude','mcp','llm','rag','api','programmation','cursor','token','local','technique','modèle']],
         ['route' => 'pillar.veille-ia', 'label' => __('Faire sa veille IA'), 'kw' => ['veille','source','actualité','tendance','hebdo','newsletter','suivre']],
         ['route' => 'pillar.ia-generative', 'label' => __('IA générative'), 'kw' => ['génératif','générative','image','vidéo','midjourney','dall-e','prompt','audio','création','sora','runway','hallucination']],
