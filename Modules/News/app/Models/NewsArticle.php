@@ -393,7 +393,15 @@ class NewsArticle extends Model implements Searchable
         foreach ($pairs as $pair) {
             $type = $pair['type'] ?? null;
 
-            if ($type === 'fact' && ! EditorialProofNormalizer::containsExact($sourceText, (string) ($pair['excerpt'] ?? ''))) {
+            // ACTION: troisième appelant du même défaut, corrigé le 2026-08-29 par la MÊME garde
+            // que les deux autres (news:apply #1984, puis storeProofPair()) plutôt qu'une
+            // quatrième réécriture de la règle.
+            // RAISON: destroySourceText() peut vider internal_source_text APRÈS l'ajout des paires.
+            // containsExact() contre une chaîne vide ne réussit jamais, et cette vérification-ci
+            // BLOQUE LA PUBLICATION : la fiche deviendrait impubliable pour des citations qu'on
+            // ne peut plus contrôler, définitivement, puisque la source ne revient jamais.
+            // MCP: SELF (1 ligne utile)
+            if ($type === 'fact' && ! EditorialProofNormalizer::verifyFactPair($sourceText, (string) ($pair['excerpt'] ?? ''))['accepted']) {
                 return [
                     'ready' => false,
                     'missing' => [],
@@ -1211,7 +1219,7 @@ class NewsArticle extends Model implements Searchable
     }
 
     /**
-     * Contenus de partage admin (superadmin) : résumé NotebookLM, prompt NotebookLM, post réseaux sociaux.
+     * Contenus de partage admin (superadmin) : résumé Gemini Notebook, prompt Gemini Notebook, post réseaux sociaux.
      * Retourne un tableau d'items [label, icon, text] pour le composant <x-core::admin-copy-menu>.
      * Logique générée Hermes, hashtag affiné (préserve la casse des acronymes).
      */
@@ -1220,7 +1228,7 @@ class NewsArticle extends Model implements Searchable
         $title = $this->seo_title ?: $this->title;
         $structured = is_array($this->structured_summary) ? $this->structured_summary : null;
 
-        // 1. Résumé complet pour NotebookLM (titres de section, sans liens).
+        // 1. Résumé complet pour Gemini Notebook (titres de section, sans liens).
         if ($structured) {
             $resume = "# {$title}\n\n";
             if ($hook = data_get($structured, 'hook')) {
@@ -1258,7 +1266,7 @@ class NewsArticle extends Model implements Searchable
         }
         $resume = $this->stripLinks($resume);
 
-        // 2. Prompt NotebookLM (via trait HasAdminShareContents).
+        // 2. Prompt Gemini Notebook (via trait HasAdminShareContents).
         $prompt = $this->infographiePrompt('https://laveille.ai/actualites', 'Vulgarise les points clés de tous les documents dans une infographie engageante. Public : étudiants sans connaissances préalables.');
         $slides = $this->slidesPrompt('https://laveille.ai/actualites', 'Objectif : décrypter cette actualité et ce qu\'elle change concrètement. Public : étudiants, sans connaissances préalables.');
 
@@ -1301,9 +1309,9 @@ class NewsArticle extends Model implements Searchable
         $facebook = $this->buildFacebookPost($hook, $plainDef, $interest, "Toi, t'en penses quoi ? 👇", $tags);
 
         return [
-            ['label' => 'Résumé (NotebookLM)', 'icon' => '📄', 'text' => $resume],
-            ['label' => 'NotebookLM Infographie', 'icon' => '🤖', 'text' => $prompt],
-            ['label' => 'NotebookLM Diapositives', 'icon' => '🖼️', 'text' => $slides],
+            ['label' => 'Résumé (Gemini Notebook)', 'icon' => '📄', 'text' => $resume],
+            ['label' => 'Gemini Notebook Infographie', 'icon' => '🤖', 'text' => $prompt],
+            ['label' => 'Gemini Notebook Diapositives', 'icon' => '🖼️', 'text' => $slides],
             [
                 'label' => 'Post LinkedIn', 'icon' => '💼', 'text' => $linkedin,
                 'track_url' => route('admin.news.articles.mark-shared', ['article' => $this, 'platform' => 'linkedin']),

@@ -165,6 +165,20 @@ class AppServiceProvider extends ServiceProvider
                 'trace' => $event->exception->getTraceAsString(),
             ]);
 
+            // ACTION: rendre AUDITABLES les deux sorties silencieuses de ce bloc (2026-08-29).
+            // RAISON: la nuit du 25 au 26 août, trois jobs ont échoué entre 21h38 et 06h10 Québec
+            // (01:38 à 10:10 UTC) sans qu'aucun courriel ne parte, et RIEN n'a permis de savoir
+            // pourquoi. Le Log::error ci-dessus avait bien écrit ; c'est donc APRÈS lui que
+            // l'information disparaissait. Deux portes muettes, pas une :
+            //   - le catch, qui avalait toute exception levée par le service ;
+            //   - le class_exists() en faux, qui saute l'appel sans un mot : si le module
+            //     Notifications est désactivé dans modules_statuses.json, PLUS AUCUNE alerte ne
+            //     part et personne ne s'en aperçoit.
+            // Canal dédié obligatoire : LOG_LEVEL=error en production rendrait un info invisible
+            // sur le canal par défaut - c'est précisément le piège corrigé dans le service.
+            // L'intention d'origine est conservée intacte : on journalise, on ne relance JAMAIS
+            // depuis un gestionnaire d'échec, sous peine d'aggraver l'incident qu'il signale.
+            // MCP: SELF (<5 lignes utiles, le reste est du commentaire)
             try {
                 if (class_exists(\Modules\Notifications\Services\AutomationAlertService::class)) {
                     \Modules\Notifications\Services\AutomationAlertService::fire(
@@ -176,9 +190,20 @@ class AppServiceProvider extends ServiceProvider
                             'trace' => $event->exception->getTraceAsString(),
                         ]
                     );
+                } else {
+                    Log::channel('automation_alerts')->warning(
+                        'Aucune alerte envoyée : le service AutomationAlertService est introuvable (module Notifications désactivé ?).',
+                        ['job' => $event->job->resolveName()]
+                    );
                 }
-            } catch (\Throwable) {
-                // Ne jamais throw depuis un failing handler
+            } catch (\Throwable $e) {
+                Log::channel('automation_alerts')->error(
+                    'Aucune alerte envoyée : le service a levé une exception, avalée ici pour ne pas aggraver l\'échec du job.',
+                    [
+                        'job' => $event->job->resolveName(),
+                        'erreur' => $e->getMessage(),
+                    ]
+                );
             }
         });
     }

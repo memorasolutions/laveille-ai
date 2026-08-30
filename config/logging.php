@@ -228,6 +228,28 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Alertes automatisées vers le superadministrateur (2026-08-26) - canal dédié à
+        // Modules\Notifications\Services\AutomationAlertService::fire(), le seul mécanisme qui
+        // prévient un humain quand un job échoue en production. Incident constaté : entre 15h28
+        // Québec le 25 août (19:28 UTC) et 08h46 le 26 (12:46 UTC), TROIS jobs ont échoué (21h38,
+        // 01h36, 06h10 Québec) sans qu'aucun courriel ne parte, et il était impossible de savoir
+        // pourquoi - le régulateur anti-spam (cache 15 minutes) et un envoi réussi ne laissaient
+        // NI L'UN NI L'AUTRE de trace ; seul l'échec (Log::error, canal par défaut) l'était déjà,
+        // et c'est justement son silence qui a permis d'exclure une exception PHP. 'level' fixé en
+        // dur à 'info', volontairement INDÉPENDANT de LOG_LEVEL - même parade que 'fusion'/
+        // 'quality_gate'/'directory_screenshots'/'composition'/'directory_discovery'/'llms'/
+        // 'translation'/'news_fetch' ci-dessus : LOG_LEVEL=error en prod avalerait sinon les trois
+        // issues (étouffée / envoyée / superadmin_email manquant) avant écriture, rendant à
+        // nouveau impossible de distinguer un silence légitime d'une panne muette. Rétention
+        // alignée sur les autres canaux 'daily' du projet.
+        'automation_alerts' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/automation_alerts.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

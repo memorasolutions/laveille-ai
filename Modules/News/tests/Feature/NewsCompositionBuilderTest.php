@@ -671,6 +671,61 @@ it('an admin can remove a single proof pair without touching the others', functi
         ->and($remaining[0]['statement'])->toBe('Un second passage.');
 });
 
+/**
+ * ACTION : correctif todo #1984, second point d'entrée (2026-08-29) - NewsArticle::
+ * publishAndPurgeSource() met is_published=true ET internal_source_text=null dans la MÊME
+ * transaction, reproduit ici directement plutôt que via une vraie publication (le contrôleur
+ * publish() a ses propres tests, ce n'est pas l'objet ici). Ce chemin est ATTEIGNABLE en
+ * production : ni la route ni storeProofPair() ne vérifient is_published (contrairement à
+ * `news:apply` hors --enrich, qui refuse d'écrire sur une fiche déjà publiée AVANT même
+ * d'atteindre la comparaison de sous-chaîne). Avant ce correctif, la requête ci-dessous
+ * répondait 422 en accusant à tort l'extrait ; EditorialProofNormalizer::verifyFactPair()
+ * (RÉUTILISÉE par storeProofPair(), même règle que NewsApplyCommand::normalizeProofPairs())
+ * accepte désormais la paire et la signale 'source_verified' => false plutôt que de la refuser.
+ */
+it('a "fact" pair on an already published article (source purged) is accepted and flagged source_verified=false, not rejected', function () {
+    $admin = ncbAdmin();
+    $source = ncbSource();
+    $article = ncbArticle($source->id, [
+        'is_published' => true,
+        'internal_source_text' => null,
+    ]);
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.composition.proof-pairs.store', $article), [
+        'statement' => 'Une citation légitime, mais impossible à revérifier après la purge du texte source.',
+        'excerpt' => 'un extrait parfaitement réel de la source déjà purgée',
+        'type' => 'fact',
+    ]);
+
+    $response->assertOk()->assertJson(['success' => true]);
+
+    $pairs = $article->fresh()->editorial_proof_pairs;
+    expect($pairs)->toHaveCount(1)
+        ->and($pairs[0]['type'])->toBe('fact')
+        ->and($pairs[0]['source_verified'])->toBeFalse();
+});
+
+it('an "analysis" pair on an already published article (source purged) still works, untouched by this fix', function () {
+    $admin = ncbAdmin();
+    $source = ncbSource();
+    $article = ncbArticle($source->id, [
+        'is_published' => true,
+        'internal_source_text' => null,
+    ]);
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.composition.proof-pairs.store', $article), [
+        'statement' => 'Une analyse éditoriale, jamais soumise à la vérification de sous-chaîne.',
+        'excerpt' => 'peu importe ce texte, aucune vérification ne s\'applique aux paires "analysis"',
+        'type' => 'analysis',
+    ]);
+
+    $response->assertOk()->assertJson(['success' => true]);
+
+    $pairs = $article->fresh()->editorial_proof_pairs;
+    expect($pairs)->toHaveCount(1)
+        ->and($pairs[0])->not->toHaveKey('source_verified');
+});
+
 it('the editorial_proof_pairs column never appears in any public view or the candidates() listing', function () {
     $admin = ncbAdmin();
     $source = ncbSource();

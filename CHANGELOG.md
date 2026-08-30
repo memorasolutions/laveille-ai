@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.237.0] - 2026-08-29
+
+### Corrigé
+- **Le mécanisme d'alerte se taisait là où il comptait, et personne ne pouvait le savoir.** Dans la nuit du 25 au 26 août, trois jobs ont échoué entre 21h38 et 06h10 Québec (01:38 à 10:10 UTC) sans qu'aucun courriel ne parte : 17 heures de silence. Trois sorties silencieuses sont désormais auditables sur un canal dédié `automation_alerts` (`daily`, `level` fixé à `info` EN DUR, donc insensible au `LOG_LEVEL=error` qui masquait déjà l'une d'elles sur le canal par défaut) : l'alerte étouffée par le régulateur anti-spam, avec sa clé et les secondes restantes ; l'envoi réussi ; et l'adresse d'administration absente. Dans le gestionnaire `Queue::failing()`, DEUX portes muettes fermées plutôt qu'une : le `catch (\Throwable)` sans corps, et le `class_exists()` en faux qui sautait l'appel sans un mot - si le module Notifications était désactivé, plus aucune alerte ne partirait et rien ne le dirait. L'intention d'origine tient : on journalise, on ne relève jamais depuis un gestionnaire d'échec.
+- **Troisième et dernier appelant de `containsExact()` laissé sans garde.** `NewsArticle::publishReadinessCheck()` commande la PUBLICATION (bouton d'administration et `news:apply --publish`) : une fiche dont la source avait été purgée après l'ajout de ses citations devenait impubliable DÉFINITIVEMENT, la source ne revenant jamais. Corrigé par la même garde `verifyFactPair()` que les deux autres, jamais par une quatrième réécriture de la règle. Mesure préalable : trois appels réels dans tout le code, pas un quatrième caché.
+- **Une citation ajoutée à la main dans l'écran d'administration était refusée en silence sur une fiche publiée.** Le chemin est VIVANT, pas théorique : ni la route, ni `show()`, ni `storeProofPair()` ne vérifient `is_published`, et la seule protection était côté client - elle ne couvre ni un appel direct, ni un onglet resté ouvert pendant qu'un autre chemin purge la source. Règle « source absente, paire acceptée et signalée » extraite dans `EditorialProofNormalizer::verifyFactPair()`, réutilisée par le contrôleur.
+- **Le runner HTTP de production committé implémentait une porte d'exécution périmée, SANS liste blanche.** Passage à un modèle borné dans le temps : durée de vie de 45 minutes vérifiée AVANT toute lecture de `$_GET` - un runner sans jeton valide doit pouvoir expirer, sinon il devient ineffaçable puisque la suppression de fichiers cPanel est hors service sur ce compte -, liste blanche stricte des commandes, auto-suppression sur `last=1`. Le bon gabarit n'avait JAMAIS été committé : reconstruit depuis les mémoires datées et le contrat du skill, pas copié d'un fichier inexistant.
+- **Un test bloquait toute la suite depuis des jours, et la fonction qu'il appelait n'avait jamais disparu.** `ctRenderConstructeur()` était déclarée comme fonction globale à l'intérieur d'un fichier de test, et un second fichier pariait sur l'ordre de chargement - un pari qui tient tant que la suite tourne en entier, et qui tombe dès qu'on lance le fichier seul. Déplacée dans `tests/Pest.php`, seul fichier dont le chargement est garanti quel que soit le périmètre, vérifié dans le code de Pest plutôt que supposé.
+
+### Ajouté
+- **Filet contre les faux auto-liens, couvrant les DEUX modules qui posent des liens** (`/glossaire/` et `/acronymes-education/`) - un contrôle qui n'en regarde qu'un est déjà passé à côté. Verrouille symétriquement que les VRAIS liens survivent : Node.js, Z.ai, jan.ai, et « Gemini 3.5 » qui ne doit pas se couper en « Gemini 3 ». Le mécanisme de blocage existait déjà mais n'avait jamais été éprouvé : ce lot ajoute la preuve, pas le correctif.
+- Couverture réelle rendue au service d'alerte : ses 7 tests étaient IGNORÉS en silence depuis toujours, `orchestra/testbench` n'étant pas installé. 39 tests désormais, 0 ignoré.
+
+### Note de méthode
+- **`Mail::fake()` ne peut PAS détecter un `Mail::raw()`** : `MailFake::raw()` a un corps vide en Laravel 12.62. Un test écrit ainsi échoue toujours, et sa version inversée passe toujours - ce qui est pire. Utiliser `Mail::shouldReceive('raw')`.
+- **La suite complète ne finit JAMAIS** : elle meurt de faim mémoire vers 7170 lignes, et `phpunit.xml` écrase silencieusement tout `-d memory_limit` de la ligne de commande. Aucune ligne de bilan n'est atteinte. Les validations se font donc par module, ce qui laisse passer les régressions inter-modules : la limite est nommée plutôt que tue.
+
 ## [1.236.0] - 2026-08-29
 
 ### Sécurité

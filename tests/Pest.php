@@ -93,3 +93,28 @@ afterEach(function () {
 expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
+
+/*
+ * Helper global partagé entre les tests de rendu du blade du constructeur de prompts
+ * (Modules/Tools/tests/Feature/ConstructeurGabaritsRenderTest.php et
+ * PromptFromDraftRenderTest.php). DOIT vivre ICI, dans tests/Pest.php, et nulle part ailleurs :
+ * Pest ne charge QUE ce fichier (Bootstrappers\BootFiles du package) pour amorcer TOUTE
+ * exécution, quel que soit son périmètre (suite complète, un seul module, un seul fichier). Une
+ * fonction PHP globale déclarée à même un fichier de test n'est disponible que si CE fichier a
+ * déjà été chargé dans le même processus - vrai par accident quand la suite tourne au complet
+ * dans l'ordre alphabétique, faux dès qu'un fichier est ciblé isolément. C'est exactement ce qui
+ * bloquait la suite complète : la fonction était déclarée dans
+ * ConstructeurGabaritsRenderTest.php et utilisée par PromptFromDraftRenderTest.php sans garantie
+ * d'ordre de chargement entre les deux fichiers (« Call to undefined function
+ * ctRenderConstructeur() », corrigé le 2026-08-29).
+ */
+function ctRenderConstructeur(): string
+{
+    $tool = \Modules\Tools\Models\Tool::where('slug', 'constructeur-prompts')->first();
+    if (! $tool) {
+        (new \Modules\Tools\Database\Seeders\ToolSeeder())->run();
+        $tool = \Modules\Tools\Models\Tool::where('slug', 'constructeur-prompts')->firstOrFail();
+    }
+
+    return view('tools::public.tools.constructeur-prompts', ['tool' => $tool])->render();
+}

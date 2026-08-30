@@ -608,6 +608,21 @@ class NewsCompositionController extends Controller
      * (normalizeProofPairs()) - aucune divergence entre les deux portes d'écriture.
      * MCP: SELF (<5 lignes utiles)
      * RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
+     *
+     * ACTION : correctif todo #1984, second point d'entrée (2026-08-29) - sur une fiche DÉJÀ
+     * PUBLIÉE, NewsArticle::publishAndPurgeSource() a mis internal_source_text à null, donc
+     * $article->internal_source_text arrive systématiquement vide ici. Contre une chaîne vide,
+     * EditorialProofNormalizer::containsExact() ne peut JAMAIS réussir - une paire "fact"
+     * pourtant légitime se voyait refusée avec un message qui accusait à tort l'extrait, alors
+     * que la vraie cause est l'absence de texte à comparer. Ce chemin reste ATTEIGNABLE en
+     * production (aucune garde is_published ici ni côté route, contrairement à `news:apply` hors
+     * --enrich) : un onglet resté ouvert depuis avant la publication, ou tout appel direct à cette
+     * route, y arrive toujours. Délègue désormais à EditorialProofNormalizer::verifyFactPair()
+     * (RÉUTILISÉE, jamais réécrite - même règle que le correctif déjà appliqué à
+     * NewsApplyCommand::normalizeProofPairs()) : source absente -> paire ACCEPTÉE, signalée
+     * 'source_verified' => false plutôt que refusée en silence.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: todo #1984, même famille de défaut que son premier correctif.
      */
     public function storeProofPair(Request $request, NewsArticle $article): JsonResponse
     {
@@ -618,14 +633,19 @@ class NewsCompositionController extends Controller
             'source_url' => ['required_if:type,primary_fact', 'nullable', 'url:http,https', 'max:2000'],
         ]);
 
+        $sourceVerifiedFalse = false;
+
         if ($validated['type'] === 'fact') {
             $source = (string) $article->internal_source_text;
+            $verdict = EditorialProofNormalizer::verifyFactPair($source, $validated['excerpt']);
 
-            if (! EditorialProofNormalizer::containsExact($source, $validated['excerpt'])) {
+            if (! $verdict['accepted']) {
                 return response()->json([
                     'error' => 'Cet extrait n\'est pas une sous-chaîne exacte du texte source : reprends-le mot pour mot, ou déclare cette paire comme « analyse ».',
                 ], 422);
             }
+
+            $sourceVerifiedFalse = $verdict['source_verified'] === false;
         }
 
         $pairs = $article->editorial_proof_pairs ?? [];
@@ -638,6 +658,12 @@ class NewsCompositionController extends Controller
         ];
         if ($validated['type'] === 'primary_fact') {
             $newPair['source_url'] = $validated['source_url'];
+        }
+        // Signale, sans jamais l'accepter en silence, qu'une paire "fact" n'a pas pu être
+        // revérifiée faute de texte source (voir verifyFactPair() ci-dessus) - même clé et même
+        // sémantique que NewsApplyCommand::normalizeProofPairs() (todo #1984).
+        if ($sourceVerifiedFalse) {
+            $newPair['source_verified'] = false;
         }
         $pairs[] = $newPair;
 

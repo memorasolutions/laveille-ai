@@ -6,7 +6,8 @@ declare(strict_types=1);
  * Brique 2 - « Partir de mon brouillon » (SPEC-BRIQUE2). Rend RÉELLEMENT le blade du constructeur
  * (même pattern que ConstructeurGabaritsRenderTest.php, la leçon du 500 du 2026-08-20 : un point
  * d'entrée ajouté sans test de rendu direct de la vue peut casser silencieusement toute la page).
- * Réutilise le helper global ctRenderConstructeur() déjà déclaré par ConstructeurGabaritsRenderTest.php.
+ * Réutilise le helper global ctRenderConstructeur(), déclaré dans tests/Pest.php (pas dans un
+ * fichier de test - un fichier de test n'est pas garanti chargé avant celui-ci, cf. tests/Pest.php).
  *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai

@@ -20,16 +20,10 @@ use Modules\Tools\Models\Tool;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
-function ctRenderConstructeur(): string
-{
-    $tool = Tool::where('slug', 'constructeur-prompts')->first();
-    if (! $tool) {
-        (new ToolSeeder())->run();
-        $tool = Tool::where('slug', 'constructeur-prompts')->firstOrFail();
-    }
-
-    return view('tools::public.tools.constructeur-prompts', ['tool' => $tool])->render();
-}
+// ctRenderConstructeur() est déclarée globalement dans tests/Pest.php (pas ici) : Pest le charge
+// pour TOUTE exécution quel que soit son périmètre, alors qu'une fonction déclarée dans CE fichier
+// ne serait disponible que si ce fichier est chargé avant PromptFromDraftRenderTest.php, qui la
+// réutilise - faux dès qu'un fichier est ciblé isolément (corrigé le 2026-08-29).
 
 it('le blade du constructeur se rend SANS erreur quand aucun gabarit officiel n\'existe (cas exact du 500)', function () {
     // Forcer le cas vide : aucun gabarit officiel (c'est ce qui plantait - $officialTemplates
