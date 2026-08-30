@@ -137,6 +137,32 @@ perdu, à chaque fois.
 Le chemin t'est donné au moment où tu lances la commande. Interroge-le, à intervalles si besoin.
 Ne reste jamais suspendu à un signal.
 
+### La commande d'attente
+
+Mesuré à nouveau le 2026-08-30, cinquième agent figé le même soir malgré cette section : annoncer
+« j'attends la notification » puis ne plus rien faire n'est PAS une attente, c'est un arrêt. Une
+notification de tâche de fond ne remonte qu'à la boucle principale, jamais à un agent délégué -
+même quand la tâche de fond a été lancée par toi. Le geste concret, celui qui bloque réellement ton
+tour en avant-plan et qui rend la main dès que c'est fini, sans dépendre d'aucune notification :
+
+```
+for i in $(seq 1 60); do
+  if grep -q "exited with code" <chemin>/<id-tache>.output 2>/dev/null; then
+    echo "=== TERMINE ==="; tail -40 <chemin>/<id-tache>.output; break
+  fi
+  echo "en cours ($i)"; sleep 30
+done
+```
+
+Le `<chemin>/<id-tache>.output` est celui que la commande t'a donné au moment où tu l'as lancée en
+arrière-plan. Cette boucle plafonne à trente minutes - largement de quoi couvrir une suite de
+tests de ce projet - et se relance simplement (nouvel appel, même motif) si elle expire sans que
+la tâche soit terminée : ne jamais la confondre avec un signal que la tâche elle-même a échoué. Une
+simple relecture du fichier à chaque tour (`tail -40`) fonctionne tout aussi bien si la boucle
+complète n'est pas disponible : tant que la dernière ligne ne dit pas « exited with code », c'est
+encore en cours, on réinterroge. Dans les deux cas, ne jamais terminer un tour en te déclarant en
+attente d'une notification à venir - le tour suivant ne viendra pas tout seul.
+
 **Ce qui reste bon, et qu'il ne faut PAS relâcher** : refuser de déployer avant d'avoir la preuve,
 et ne lancer qu'une suite de tests à la fois. Ces exigences sont justes. Seule la façon d'attendre
 était fausse.
