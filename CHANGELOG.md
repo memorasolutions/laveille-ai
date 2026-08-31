@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.242.9] - 2026-08-31
+
+### Corrigé
+- **Ticket #2086 : le garde anti-écrasement de `generateFallbackGradient()` journalisait sur le canal par défaut, avalé par `LOG_LEVEL=error` en production.** Toutes les autres lignes de `ScreenshotService.php` utilisent déjà le canal dédié `directory_screenshots` (niveau fixe `info`, même parade que `fusion`/`quality_gate`) - cette ligne était la seule exception. Conséquence concrète : quand un fichier existant pèse entre 5 et 20 Ko ET que les trois tentatives de recapture échouent, la fonction retourne « succès » sans rien écrire de neuf, et jusqu'ici sans laisser la moindre trace. Correctif d'une ligne, sur le modèle exact des lignes voisines - aucun changement de comportement.
+
+### Ajouté
+- **Ticket #2087 : `directory:dispatch-margin-recapture`** - identifie les fiches d'annuaire publiées dont la vignette n'offre aucune marge de recadrage (master absent ou hauteur inférieure ou égale à 630px, donc `ScreenshotFocalService::deriveThumbnail` ne peut jamais déplacer le point focal) et corrige chacune par le chemin le moins coûteux disponible : dérivation LOCALE du master depuis la vignette déjà en place quand elle le permet (gratuit, aucun appel réseau, réutilise intégralement `ScreenshotMasterDerivationService` - aucun seuil recopié), sinon mise en file d'une recapture réseau (`CaptureScreenshotJob`, queue `screenshots`) - jamais exécutée en synchrone dans la commande elle-même. Les outils au screenshot verrouillé sont exclus de la recapture réseau (`ScreenshotService::capture()` la refuserait de toute façon) mais restent éligibles à la dérivation locale gratuite. `--limit` borne uniquement les recaptures réseau mises en file (jamais les dérivations locales, toujours traitées) ; `--dry-run` classe sans rien écrire ni mettre en file. Idempotente : un outil qui gagne sa marge n'est plus jamais recompté au run suivant.
+- Avant tout dispatch, relecture de la configuration réelle des deux consommateurs de la queue `screenshots` (planificateur Laravel dans `DirectoryServiceProvider` ET cron cPanel déclaré hors dépôt) : les deux confirmés à `--timeout=330` en production, `retry_after` de la connexion `database` confirmé à 360 (aucune surcharge `DB_QUEUE_RETRY_AFTER` dans le `.env` de production) - cohérent avec le pire cas mesuré de 276 secondes (`CaptureScreenshotJob`, correctif v1.220.0/v1.221.0). La file existante sert donc de véhicule pour la passe de rattrapage, sans cron temporaire.
+
+### Tests
+- `Modules/Directory/tests/Feature/DispatchMarginRecaptureCommandTest.php` (nouveau, 7 cas) : marge déjà exploitable (rien ne bouge), dérivation locale gratuite, recapture mise en file (vignette structurellement trop courte / master existant trop court), screenshot verrouillé jamais mis en file, `--dry-run` n'écrit et ne met rien en file, `--limit` borne les recaptures réseau sans jamais brider les dérivations locales.
+- Suite ciblée `ScreenshotOverwriteGuardTest` + `DeriveMasterFromUploadTest` + `DispatchMarginRecaptureCommandTest` + `QueueRetryAfterCoherenceTest` : 32 passed (103 assertions).
+
 ## [1.242.8] - 2026-08-31
 
 ### Corrigé

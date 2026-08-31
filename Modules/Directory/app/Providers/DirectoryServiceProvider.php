@@ -77,6 +77,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\Commands\AuditPricingTieredCommand::class,
             \Modules\Directory\Console\Commands\BackfillEcosystemTagsCommand::class,
             \Modules\Directory\Console\Commands\BackfillScreenshotMastersCommand::class,
+            \Modules\Directory\Console\Commands\DispatchMarginRecaptureCommand::class,
             \Modules\Directory\Console\PricingStatsCommand::class,
             \Modules\Directory\Console\EnrichFormationsCommand::class,
             \Modules\Directory\Console\FixHnSlugsCommand::class,

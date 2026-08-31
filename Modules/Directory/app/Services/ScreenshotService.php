@@ -247,7 +247,7 @@ class ScreenshotService
         $path = "{$outputDir}/{$slug}.jpg";
         // Anti-overwrite S79 : si screenshot existant >= 5KB, on ne le remplace pas par un fallback gradient
         if (File::exists($path) && File::size($path) >= 5000) {
-            Log::info("generateFallbackGradient: SKIP existant {$slug} (".File::size($path).' bytes) — anti-overwrite S79');
+            Log::channel('directory_screenshots')->info("generateFallbackGradient: SKIP existant {$slug} (".File::size($path).' bytes) — anti-overwrite S79');
             $tool->screenshot = "screenshots/{$slug}.jpg";
             $tool->saveQuietly();
             return true;
