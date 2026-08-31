@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.244.4] - 2026-08-31
+
+### Corrigé
+- **Ticket #2099. `docker/php/Dockerfile` appelait `php artisan config:cache`, la commande formellement interdite sur ce projet** (incident du 2026-06-30 : le middleware `AcademyUnderConstruction` lit `config('academy.under_construction')`, dérivé de `env('ACADEMY_UNDER_CONSTRUCTION', true)` - sans mise en cache la config relit le `.env` en direct, mais avec `config:cache` tout `env()` hors `config/` devient `null` à l'exécution et le gate retombe sur son défaut fermé). Cette occurrence précise avait déjà été repérée et volontairement laissée de côté en v1.244.2 (« un défaut plus grave et distinct », hors périmètre de ce ticket-là). Risque resté DORMANT jusqu'ici : ce Dockerfile n'est référencé que par `docker-compose.yml` (option de développement local), jamais par le pipeline de production réel (cPanel/rsync/SSH). `RUN php artisan config:cache && php artisan route:cache` devient `RUN php artisan route:cache` - `route:cache` reste volontairement en place (ne lit pas `env()`, sans rapport avec l'incident, traité séparément en #2096).
+
+### Ajouté
+- **Garde-fou d'architecture permanent** (`tests/Architecture/ConfigCacheForbiddenTest.php`, même patron que `TranslatableSlugFallbackTest.php` du 2026-08-31) : l'interdiction de `config:cache` ne reposait jusqu'ici que sur `docs/CONTRAINTES-SOUS-AGENTS.md` et la mémoire des agents - elle vient d'être violée sans que personne ne s'en aperçoive. Le nouveau test balaie tout fichier EXÉCUTABLE du dépôt (tout fichier sous `docker/`, `Dockerfile*` et `docker-compose*.yml`/`compose*.yml` à la racine, `Makefile`, `.github/workflows/*.yml`, tout script `.sh` où qu'il vive, et `public/_lv*.php` - la famille des scripts de déploiement de secours autonomes, dont `_lvgit.php` qui avait déjà porté cette exacte violation une fois, retirée le 2026-08-23) à la recherche de deux formes d'invocation réelle (`artisan config:cache` en shell/YAML/Makefile, et `['artisan', 'config:cache']` en tableau PHP), en ignorant les lignes de commentaire. Volontairement restreint aux fichiers exécutables, jamais à la prose (`CHANGELOG.md`, `docs/`, commentaires PHP qui expliquent déjà l'interdiction dans `Modules/Health` et `Modules/Backoffice`) : un contrôle qui crie au loup sur une mention documentaire se fait désactiver dans la semaine. Trois tests : détection des violations, garde-fou anti faux-négatif (le scanner voit bien les fichiers connus), et négatif de contrôle (le scanner reste vert alors que la chaîne `config:cache` existe encore, à dessein, dans des commentaires des mêmes fichiers scannés).
+- **Hors périmètre, constaté au passage mais volontairement NON corrigé** : `Makefile` (cibles `cache` et `deploy`) lance `php artisan optimize`, qui appelle `config:cache` en interne - même classe de risque dormant que le Dockerfile ci-dessus (outil de confort local, non référencé par le pipeline de déploiement réel), mais hors du périmètre nommé de ce ticket (borné à `config:cache` littéral, pas à ses équivalents fonctionnels). Signalé pour suite à donner.
+
+### Tests
+- `tests/Architecture/ConfigCacheForbiddenTest.php` isolé (`php artisan test --testsuite=Architecture`, aucune autre suite concurrente) : 30 tests passés (102 assertions), y compris les deux tests d'architecture préexistants (`ArchTest`, `TranslatableSlugFallbackTest`), code de sortie réel 0 (jamais celui d'un `| tail`).
+- Preuve de non-vacuité du nouveau test : `config:cache` réintroduit temporairement dans `docker/php/Dockerfile` → 2 tests rouges avec le fichier et la ligne exacts rapportés (`docker/php/Dockerfile:38`), code de sortie réel 1 → Dockerfile restauré → 30 tests de nouveau verts, code de sortie réel 0.
+- Négatif de contrôle vérifié : le test reste vert alors que la chaîne `config:cache` existe encore dans des commentaires de `scripts/deploy.sh`, `.github/workflows/deploy.yml` et `public/_lvgit.php` (les trois fichiers scannés eux-mêmes, pas seulement la documentation hors périmètre).
+- `php -l` sur le nouveau fichier de test et sur `config/version.php`.
+
 ## [1.244.3] - 2026-08-31
 
 ### Ajouté

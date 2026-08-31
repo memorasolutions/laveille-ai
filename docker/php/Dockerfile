@@ -35,7 +35,7 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 COPY . .
 
-RUN php artisan config:cache && php artisan route:cache
+RUN php artisan route:cache
 
 EXPOSE 9000
 
