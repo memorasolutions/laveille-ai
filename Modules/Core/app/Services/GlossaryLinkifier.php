@@ -252,6 +252,23 @@ class GlossaryLinkifier
             return '';
         }
 
+        // 2026-08-31 (incident #2107, urgence production) : coupe-circuit. Le journal de
+        // production du jour montre des dizaines de « Maximum execution time of 30 seconds
+        // exceeded » à CETTE ligne précise (matchInText(), boucle preg_match par terme, avec
+        // un re-scan récursif à chaque coupure de texte) - coût déjà mesuré à 5-7s/page le
+        // 2026-08-02 (#1526) avec un corpus de termes bien plus petit qu'aujourd'hui (des
+        // dizaines de termes/alias/outils ajoutés depuis, dont plusieurs le jour même).
+        // Résultat mesuré en production le 2026-08-31 : environ la moitié des pages articles,
+        // actualités et annuaire échouent ou dépassent 27 secondes. Coupure RÉVERSIBLE, PAS UNE
+        // SUPPRESSION : repasser GLOSSARY_LINKIFIER_ENABLED à true (ou l'omettre - true par
+        // défaut) rétablit le comportement normal SANS redéploiement (config jamais mise en
+        // cache sur ce projet, config:cache interdit - voir docs/CONTRAINTES-SOUS-AGENTS.md).
+        // Ne pas laisser ce coupe-circuit actif en continu : la cause structurelle (coût qui
+        // croît avec le nombre de termes ET la taille du texte, non borné) reste à corriger.
+        if (! (bool) config('core.glossary_linkifier_enabled', true)) {
+            return $html;
+        }
+
         $skipSlug = $options['skip_slug'] ?? null;
         $maxLinks = $options['max_links'] ?? self::MAX_LINKS_PER_PAGE;
         $maxOcc = $options['max_occ'] ?? self::MAX_OCCURRENCES_PER_TERM; // 2026-05-26 #300 : opt option pour pages glossaire (1 occurrence par terme)
