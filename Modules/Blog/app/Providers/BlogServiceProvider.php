@@ -12,6 +12,7 @@ namespace Modules\Blog\Providers;
 
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Modules\Blog\Console\ArticleVerifyCommand;
 use Modules\Blog\Console\DownloadWpImagesCommand;
 use Modules\Blog\Console\ImportWordPressCommand;
 use Modules\Blog\Console\MigrateContentImagesCommand;
@@ -32,7 +33,7 @@ class BlogServiceProvider extends BaseModuleServiceProvider
     public function boot(): void
     {
         $this->bootModule();
-        $this->commands([ImportWordPressCommand::class, DownloadWpImagesCommand::class, MigrateContentImagesCommand::class, YouTubeSummarizeCommand::class]);
+        $this->commands([ImportWordPressCommand::class, DownloadWpImagesCommand::class, MigrateContentImagesCommand::class, YouTubeSummarizeCommand::class, ArticleVerifyCommand::class]);
 
         Gate::policy(Article::class, ArticlePolicy::class);
         Gate::policy(Comment::class, CommentPolicy::class);

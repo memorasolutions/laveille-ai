@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.244.0] - 2026-08-31
+
+### Ajouté
+- **Module « vérification » étendu au blogue** (demande fondateur : « aussi avoir des tags qui disent si on contredit une nouvelle qui circule sur internet »). Nouvelle table `blog_article_verifications` (`Modules\Blog\Models\ArticleVerification`) : une LISTE de vérifications attachées à un article de fond, jamais un verdict global sur l'article entier - décision de structure tranchée en panel (un verdict global écraserait des conclusions hétérogènes). Chaque entrée porte l'affirmation normalisée, le verdict, un motif propre au cas, les sources probantes, la date de vérification et l'origine traçable. DRY strict : le vocabulaire des cinq verdicts reste défini À UN SEUL ENDROIT (`NewsArticle::FACT_CHECK_VERDICTS`), consommé jamais copié. Porte d'écriture bornée dédiée `blog:verify {article} --payload=` (`Modules\Blog\Console\ArticleVerifyCommand`), jumelle de la clé `fact_check` de `news:apply`. Rendu strictement additif : le composant partagé `<x-news::fact-check-badge>` (duck-typé, insensible au nom de classe) rend chaque entrée à l'identique d'une fiche d'actualité, sans dupliquer le rendu ; le nouveau composant `<x-blog::article-verifications>` n'ajoute que le motif et les sources, propres au blogue.
+- **Statut orthogonal « vérification non concluante »** (tranché le 2026-08-27, jamais implémenté jusqu'ici - mesuré) : une fiche ou un article qui a CHERCHÉ à vérifier une affirmation sans pouvoir trancher vers un des cinq verdicts. Jamais un sixième verdict, jamais un substitut - un verdict réel prime toujours. Implémenté à la fois pour les actualités (`news_articles.fact_check_inconclusive_at`, sous-clé `"inconclusive": true` du payload `fact_check`) et pour le blogue (`blog_article_verifications.inconclusive_at`). Rendu par une teinte neutre dédiée (`#064E5A` sur fond auto-teinté à 5 %, DÉJÀ mesurée à 8,21:1 AAA ailleurs dans la charte - aucune nouvelle couleur inventée), jamais confondue visuellement avec un verdict tranché, et jamais cliquable vers `/verifications` (qui ne liste que les fiches tranchées).
+
+### Corrigé
+- **Le verdict `contexte_manquant` était circulaire** - voir [1.243.1] ci-dessous pour le détail (test de discrimination) et [1.243.1] pour l'élargissement de `attribution_erronee` aux données, pas seulement aux propos d'une personne.
+
+### Modifié
+- **Skill `/article` (rédaction laveille.ai)** : nouvelle section « Vérification obligatoire en cas de contradiction » - dès qu'une section d'un article contredit une affirmation qui circule, poser une vérification structurée via `blog:verify` est OBLIGATOIRE, jamais une simple mention en prose. Ne vend jamais de bénéfice de référencement pour ce module (le `ClaimReview` correspondant est un résultat enrichi retiré des résultats Google depuis juin 2025, outils de contrôle Search Console supprimés en septembre 2025).
+
+### Tests
+- Nouveau `Modules/Blog/tests/Feature/ArticleVerificationModuleTest.php` (25 tests) : modèle et contrat partagé avec `NewsArticle`, porte d'écriture `blog:verify` (création, mise à jour, retrait doux, exclusivité verdict/inconclusive, garde-fou cross-article - un id de vérification d'un AUTRE article est refusé), rendu public strictement additif (liste, titre de section dès la deuxième entrée, filtre de sécurité sur les sources non http(s)).
+- `Modules/News/tests/Feature/FactCheckModuleTest.php` étendu (+11 tests, 42 au total) pour le statut non concluant : modèle, porte d'écriture, rendu public, omission du balisage ClaimReview.
+- Suite combinée, isolée (aucune autre suite en cours, attente d'une suite complète d'un autre poste avant de lancer) : 67 passed (175 assertions), zéro régression sur le vocabulaire partagé.
+- Vérification visuelle réelle (Chrome headless piloté directement, le serveur Playwright MCP étant resté indisponible toute la session) : un article de blogue publié SANS vérification, puis le MÊME article avec une vérification posée (badge, motif, sources), puis à nouveau SANS après retrait - le troisième état est visuellement identique au premier. Statut non concluant vérifié visuellement côté actualités sur une fiche isolée créée puis supprimée pour l'occasion (teinte neutre distincte, jamais cliquable).
+
 ## [1.243.4] - 2026-08-31
 
 ### Corrigé

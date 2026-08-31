@@ -10,16 +10,30 @@
     NewsArticle::FACT_CHECK_VERDICTS via factCheckVerdict() - jamais réécrit ici (DRY strict).
     Ajouter un verdict au modèle suffit : cette vue n'a pas à changer.
 
+    Partagé avec le blogue (2026-08-31) : ce composant est duck-typé, jamais lié à NewsArticle
+    par son nom de classe. Toute donnée qui expose factCheckVerdict()/hasFactCheckInconclusive()
+    et les propriétés fact_check_claim/fact_check_source (une entrée `Modules\Blog\Models\
+    ArticleVerification`, par exemple) se rend ici à l'identique, sans dupliquer ce fichier.
+
+    Statut orthogonal « vérification non concluante » (2026-08-31, tranché le 2026-08-27) : une
+    fiche qui a CHERCHÉ à vérifier une affirmation sans pouvoir trancher vers un des cinq
+    verdicts. Jamais un sixième verdict, jamais confondu visuellement avec un verdict tranché -
+    teinte neutre dédiée, jamais rouge ni ambre. N'est pas cliquable vers /verifications : cette
+    page ne liste que les fiches tranchées (scope factChecked()), un lien y mènerait vers une
+    page qui ne montre pas cette fiche.
+
     Deux formats, un seul composant (paramétré, jamais dupliqué) :
       compact=false (défaut) - bloc complet pour la page d'une fiche : verdict, affirmation
                                examinée, et lien vers la source d'origine.
       compact=true           - pastille seule, pour une liste ou une carte.
 
     Cadrage éditorial : le badge qualifie TOUJOURS l'affirmation, jamais la personne qui l'a
-    relayée. C'est autant une question de justesse que de prudence juridique.
+    relayée. C'est autant une question de justesse que de prudence juridique. Nous qualifions
+    l'écart factuel, jamais l'intention : chaque vérification est datée, bornée à l'affirmation
+    examinée, et révisable si une preuve nouvelle apparaît.
 
     Props :
-        article  (\Modules\News\Models\NewsArticle) requis
+        article  (objet exposant factCheckVerdict()) requis
         compact  (bool) facultatif, défaut false
 
     @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
@@ -34,27 +48,33 @@
     // JsonLdService::claimReview().
     $verdict = method_exists($article, 'factCheckVerdict') ? $article->factCheckVerdict() : null;
 
+    // Statut orthogonal, même garde défensive : un objet sans cette méthode (une fiche ordinaire
+    // d'un autre module) se comporte comme s'il n'était jamais non concluant.
+    $inconclusive = (! $verdict && method_exists($article, 'hasFactCheckInconclusive'))
+        ? $article->hasFactCheckInconclusive()
+        : false;
+
     // Défense en profondeur : la porte d'écriture refuse déjà tout ce qui n'est pas http(s),
     // mais une donnée plus ancienne ou écrite autrement ne doit jamais produire un href
     // exécutable (javascript:, data:). Un lien qui ne passe pas ce filtre n'est pas affiché.
     $nwFcSource = null;
-    if ($verdict && filled($article->fact_check_source)) {
+    if (($verdict || $inconclusive) && filled($article->fact_check_source)) {
         $nwFcSchema = mb_strtolower((string) parse_url($article->fact_check_source, PHP_URL_SCHEME));
         $nwFcSource = in_array($nwFcSchema, ['http', 'https'], true) ? $article->fact_check_source : null;
     }
 @endphp
 
-@if($verdict)
+@if($verdict || $inconclusive)
     @once
     @push('styles')
     <style>
         /* Badge de vérification - reprend les jetons de la charte (aucune couleur en dur hors
            repli), et le motif visuel de .nw-editorial-signature pour rester dans la même
            famille : bordure gauche, fond très légèrement teinté, contraste AAA.
-           Les deux teintes ont été MESURÉES sur le fond réel du badge, pas choisies à l'oeil :
-           #9B1F1F donne 7,47:1 et #6E4700 donne 7,64:1, là où les valeurs plus vives d'abord
-           retenues (#A32222 et #8A5A00) plafonnaient à 6,94:1 et 5,53:1 - sous le seuil AAA de
-           la charte. Toute retouche de ces deux valeurs se remesure avant d'être posée. */
+           Les deux teintes de verdict ont été MESURÉES sur le fond réel du badge, pas choisies
+           à l'oeil : #9B1F1F donne 7,47:1 et #6E4700 donne 7,64:1, là où les valeurs plus vives
+           d'abord retenues (#A32222 et #8A5A00) plafonnaient à 6,94:1 et 5,53:1 - sous le seuil
+           AAA de la charte. Toute retouche de ces deux valeurs se remesure avant d'être posée. */
         .nw-factcheck {
             display: flex; align-items: flex-start; gap: 0.75rem;
             margin: 0.75rem 0 1.25rem;
@@ -67,6 +87,10 @@
         }
         .nw-factcheck--danger  { --nw-fc-accent: #9B1F1F; --nw-fc-bg: rgba(155, 31, 31, 0.05); }
         .nw-factcheck--warning { --nw-fc-accent: #6E4700; --nw-fc-bg: rgba(110, 71, 0, 0.05); }
+        /* Teinte « non concluante » (2026-08-31) : réutilise --c-primary tel quel, DÉJÀ mesuré à
+           8,21:1 AAA sur ce même fond auto-teinté à 5% ailleurs dans la charte (audit S135,
+           voir public/css/charte.css) - aucune nouvelle couleur inventée, aucune remesure due. */
+        .nw-factcheck--inconclusive { --nw-fc-accent: #064E5A; --nw-fc-bg: rgba(6, 78, 90, 0.05); }
         .nw-factcheck__icon { flex-shrink: 0; width: 20px; height: 20px; margin-top: 0.125rem; color: var(--nw-fc-accent); }
         .nw-factcheck__label { display: block; font-weight: 700; color: var(--nw-fc-accent); letter-spacing: 0.01em; }
         .nw-factcheck__summary { display: block; margin-top: 0.125rem; }
@@ -89,7 +113,9 @@
            poids que l'ancien <strong>, donc AUCUN changement visuel sur une fiche déjà en
            ligne, seule une affordance de survol/focus s'ajoute. Rapport de contraste mesuré
            inchangé (voir commentaire des deux teintes ci-dessus) : la couleur du texte ne
-           change pas, seul son élément HTML change de <strong> à <a>. */
+           change pas, seul son élément HTML change de <strong> à <a>. Le statut « non
+           concluante » n'est JAMAIS cliquable (voir docblock en tête de fichier) : il reste
+           un <strong>, quelle que soit la disponibilité de la route. */
         a.nw-factcheck__label { text-decoration: none; }
         a.nw-factcheck__label:hover, a.nw-factcheck__label:focus-visible { text-decoration: underline; }
         a.nw-factcheck__label:focus-visible { outline: 3px solid var(--nw-fc-accent); outline-offset: 3px; border-radius: 2px; }
@@ -106,18 +132,27 @@
         }
         .nw-factcheck-pill--danger  { --nw-fc-accent: #9B1F1F; --nw-fc-bg: rgba(155, 31, 31, 0.06); }
         .nw-factcheck-pill--warning { --nw-fc-accent: #6E4700; --nw-fc-bg: rgba(110, 71, 0, 0.06); }
+        .nw-factcheck-pill--inconclusive { --nw-fc-accent: #064E5A; --nw-fc-bg: rgba(6, 78, 90, 0.06); }
         .nw-factcheck-pill__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
     </style>
     @endpush
     @endonce
 
+    @php
+        $nwFcTone = $verdict ? $verdict['tone'] : 'inconclusive';
+        $nwFcLabel = $verdict ? __($verdict['label']) : __('Vérification non concluante');
+        $nwFcSummary = $verdict
+            ? __($verdict['summary'])
+            : __("Nous avons cherché à vérifier cette affirmation sans pouvoir trancher vers une conclusion. Ce n'est pas un verdict : c'est une recherche restée ouverte.");
+    @endphp
+
     @if($compact)
-        <span class="nw-factcheck-pill nw-factcheck-pill--{{ $verdict['tone'] }}">
+        <span class="nw-factcheck-pill nw-factcheck-pill--{{ $nwFcTone }}">
             <span class="nw-factcheck-pill__dot" aria-hidden="true"></span>
-            {{ __('Vérification') }} : {{ __($verdict['label']) }}
+            {{ __('Vérification') }} : {{ $nwFcLabel }}
         </span>
     @else
-        <div class="nw-factcheck nw-factcheck--{{ $verdict['tone'] }}" role="note">
+        <div class="nw-factcheck nw-factcheck--{{ $nwFcTone }}" role="note">
             <svg class="nw-factcheck__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/>
                 <path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -132,13 +167,14 @@
                      <a> invalide en HTML, risque réel de navigation cassée sur un partial
                      réutilisé aussi par la fiche outil de l'annuaire). Route::has() protège le
                      module News désactivable ; sans la route, on revient au <strong> d'origine
-                     plutôt que de rendre un lien mort. --}}
-                @if(Route::has('news.verifications'))
-                    <a href="{{ route('news.verifications') }}" class="nw-factcheck__label" aria-label="{{ __('Vérification') }} : {{ __($verdict['label']) }} - {{ __('voir toutes les vérifications') }}">{{ __('Vérification') }} : {{ __($verdict['label']) }}</a>
+                     plutôt que de rendre un lien mort. Le statut « non concluante » n'est
+                     jamais cliquable : /verifications ne liste que les fiches tranchées. --}}
+                @if($verdict && Route::has('news.verifications'))
+                    <a href="{{ route('news.verifications') }}" class="nw-factcheck__label" aria-label="{{ __('Vérification') }} : {{ $nwFcLabel }} - {{ __('voir toutes les vérifications') }}">{{ __('Vérification') }} : {{ $nwFcLabel }}</a>
                 @else
-                    <strong class="nw-factcheck__label">{{ __('Vérification') }} : {{ __($verdict['label']) }}</strong>
+                    <strong class="nw-factcheck__label">{{ __('Vérification') }} : {{ $nwFcLabel }}</strong>
                 @endif
-                <span class="nw-factcheck__summary">{{ __($verdict['summary']) }}</span>
+                <span class="nw-factcheck__summary">{{ $nwFcSummary }}</span>
 
                 @if(filled($article->fact_check_claim))
                     <span class="nw-factcheck__claim">« {{ $article->fact_check_claim }} »</span>

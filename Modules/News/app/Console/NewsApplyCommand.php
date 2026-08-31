@@ -590,6 +590,7 @@ class NewsApplyCommand extends Command
                 $factCheckUpdates['fact_check_verdict'] = null;
                 $factCheckUpdates['fact_check_claim'] = null;
                 $factCheckUpdates['fact_check_source'] = null;
+                $factCheckUpdates['fact_check_inconclusive_at'] = null;
             } else {
                 $allowedVerdicts = array_keys(NewsArticle::FACT_CHECK_VERDICTS);
 
@@ -597,20 +598,43 @@ class NewsApplyCommand extends Command
                 // orthographiée (« souce ») serait sinon ignorée EN SILENCE, et l'agent croirait
                 // avoir posé une source qui n'existe pas. Refus explicite, jamais un oubli muet.
                 if (is_array($factCheck)) {
-                    $inconnues = array_diff(array_keys($factCheck), ['verdict', 'claim', 'source']);
+                    $inconnues = array_diff(array_keys($factCheck), ['verdict', 'claim', 'source', 'inconclusive']);
 
                     if ($inconnues !== []) {
-                        $this->error('fact_check : sous-clé(s) inconnue(s) refusée(s) : '.implode(', ', $inconnues).' (attendu : verdict, claim, source).');
+                        $this->error('fact_check : sous-clé(s) inconnue(s) refusée(s) : '.implode(', ', $inconnues).' (attendu : verdict, claim, source, inconclusive).');
 
                         return self::FAILURE;
                     }
                 }
 
-                if (! is_array($factCheck)
+                // Statut orthogonal « vérification non concluante » (2026-08-31), tranché le
+                // 2026-08-27 (docs/specs/2026-08-27-exposition-verifications-panel.md) : une
+                // fiche qui a CHERCHÉ une affirmation sans pouvoir trancher vers un des cinq
+                // verdicts n'est pas une fiche qui n'a rien cherché - jamais un sixième verdict.
+                $inconclusif = is_array($factCheck) && array_key_exists('inconclusive', $factCheck) && $factCheck['inconclusive'] === true;
+
+                // Exclusivité : une fiche est soit tranchée, soit non concluante, jamais les deux
+                // à la fois sur la même requête.
+                if ($inconclusif && array_key_exists('verdict', $factCheck) && $factCheck['verdict'] !== null) {
+                    $this->error('fact_check.inconclusive et fact_check.verdict sont exclusifs : une fiche est soit tranchée, soit non concluante, jamais les deux.');
+
+                    return self::FAILURE;
+                }
+
+                // claim reste obligatoire même en mode non concluant (garde-fou AVANT la
+                // validation de longueur plus bas, commune aux deux chemins, pour éviter un
+                // accès à une clé absente).
+                if ($inconclusif && ! isset($factCheck['claim'])) {
+                    $this->error('fact_check.inconclusive nécessite quand même une clé claim (l\'affirmation examinée, même sans verdict).');
+
+                    return self::FAILURE;
+                }
+
+                if (! $inconclusif && (! is_array($factCheck)
                     || ! isset($factCheck['verdict'], $factCheck['claim'])
                     || ! is_string($factCheck['verdict'])
-                    || ! in_array($factCheck['verdict'], $allowedVerdicts, true)) {
-                    $this->error('fact_check invalide : verdict attendu parmi '.implode(', ', $allowedVerdicts).', avec une clé claim.');
+                    || ! in_array($factCheck['verdict'], $allowedVerdicts, true))) {
+                    $this->error('fact_check invalide : verdict attendu parmi '.implode(', ', $allowedVerdicts).', avec une clé claim (ou "inconclusive": true à la place du verdict).');
 
                     return self::FAILURE;
                 }
@@ -653,8 +677,9 @@ class NewsApplyCommand extends Command
                     }
                 }
 
-                $factCheckUpdates['fact_check_verdict'] = $factCheck['verdict'];
+                $factCheckUpdates['fact_check_verdict'] = $inconclusif ? null : $factCheck['verdict'];
                 $factCheckUpdates['fact_check_claim'] = trim($factCheck['claim']);
+                $factCheckUpdates['fact_check_inconclusive_at'] = $inconclusif ? now('America/Toronto') : null;
 
                 if ($sourceFournie) {
                     $factCheckUpdates['fact_check_source'] = $claimSource;
@@ -944,9 +969,15 @@ class NewsApplyCommand extends Command
             Log::channel('composition')->info('news:apply - verdict de vérification appliqué', [
                 'article_id' => $article->id,
                 'verdict' => $factCheckUpdates['fact_check_verdict'],
+                'inconclusive' => $factCheckUpdates['fact_check_inconclusive_at'] !== null,
             ]);
 
-            $this->info("Fiche {$article->id} : verdict de vérification ".($factCheckUpdates['fact_check_verdict'] ?? 'retiré').'.');
+            // Message CLI honnête : « retiré » seulement si les DEUX champs sont vides (erasure),
+            // « non concluante » si le statut orthogonal est posé - jamais confondre les deux.
+            $factCheckMessage = $factCheckUpdates['fact_check_verdict']
+                ?? (($factCheckUpdates['fact_check_inconclusive_at'] ?? null) !== null ? 'non concluante' : 'retiré');
+
+            $this->info("Fiche {$article->id} : verdict de vérification {$factCheckMessage}.");
         }
 
         if ($relatedToolSlugs !== null) {

@@ -365,6 +365,16 @@ class Article extends Model implements SearchableContract
         return $this->hasMany(Faq::class)->orderBy('position');
     }
 
+    /**
+     * Module « vérification » étendu au blogue (2026-08-31) - liste des vérifications
+     * attachées à l'article, jamais un verdict global (décision de structure du 2026-08-31).
+     * Vocabulaire consommé depuis NewsArticle::FACT_CHECK_VERDICTS, jamais copié ici.
+     */
+    public function verifications(): HasMany
+    {
+        return $this->hasMany(ArticleVerification::class)->ordered();
+    }
+
     protected static function newFactory(): ArticleFactory
     {
         return ArticleFactory::new();

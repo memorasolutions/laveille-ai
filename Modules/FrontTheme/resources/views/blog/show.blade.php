@@ -321,6 +321,11 @@
                             </script>
                         </div>
 
+                        {{-- Module « vérification » étendu au blogue (2026-08-31) - strictement additif :
+                             rend une LISTE de vérifications attachées, jamais un verdict global. Ne
+                             rend rien du tout sur un article sans vérification (voir le composant). --}}
+                        <x-blog::article-verifications :article="$article" />
+
                         @include('fronttheme::blog.partials.faq-accordion')
 
                         @include('fronttheme::partials.evergreen-related', ['haystack' => \Illuminate\Support\Str::lower(($article->title ?? '').' '.($article->blogCategory?->name ?? '').' '.(optional($article->tagsRelation)->pluck('name')->implode(' ') ?? ''))])

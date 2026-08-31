@@ -152,6 +152,9 @@ class NewsArticle extends Model implements Searchable
         'fact_check_verdict',
         'fact_check_claim',
         'fact_check_source',
+        // Statut orthogonal « vérification non concluante » (2026-08-31) - voir
+        // hasFactCheckInconclusive(), jamais un sixième verdict.
+        'fact_check_inconclusive_at',
         // Traduction des titres précalculée (2026-08-24) - voir la migration
         // 2026_08_24_090000_add_title_fr_to_news_articles. Seul écrivain :
         // Modules\News\Console\TranslateTitlesCommand (`news:translate-titles`), jamais l'écran
@@ -179,6 +182,7 @@ class NewsArticle extends Model implements Searchable
         'retired_at' => 'datetime',
         'reviewed_at' => 'datetime',
         'title_fr_at' => 'datetime',
+        'fact_check_inconclusive_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -1163,6 +1167,17 @@ class NewsArticle extends Model implements Searchable
     {
         return $this->fact_check_verdict !== null
             && array_key_exists($this->fact_check_verdict, self::FACT_CHECK_VERDICTS);
+    }
+
+    /**
+     * Statut orthogonal « vérification non concluante » (tranché le 2026-08-27, voir docs/specs/
+     * 2026-08-27-exposition-verifications-panel.md) : la fiche a CHERCHÉ à vérifier une
+     * affirmation sans pouvoir trancher vers un des cinq verdicts. Un verdict réel prime toujours
+     * sur ce statut - hasFactCheck() est vérifié en premier, jamais les deux affichés ensemble.
+     */
+    public function hasFactCheckInconclusive(): bool
+    {
+        return ! $this->hasFactCheck() && $this->fact_check_inconclusive_at !== null;
     }
 
     /**

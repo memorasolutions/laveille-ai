@@ -596,3 +596,123 @@ it('le badge complet de la fiche vérifiée est cliquable et mène vers /verific
     $response->assertOk()
         ->assertSee('<a href="'.route('news.verifications').'" class="nw-factcheck__label"', false);
 });
+
+// ── F. Statut orthogonal « vérification non concluante » (2026-08-31) ──────────────────
+
+it('hasFactCheckInconclusive est vrai quand le statut est posé sans verdict', function () {
+    $article = fcmArticle(['fact_check_inconclusive_at' => now()]);
+
+    expect($article->hasFactCheckInconclusive())->toBeTrue();
+});
+
+it('hasFactCheckInconclusive est faux quand un verdict est posé, même avec la colonne remplie', function () {
+    $article = fcmArticle([
+        'fact_check_verdict' => 'citation_inexacte',
+        'fact_check_inconclusive_at' => now(),
+    ]);
+
+    expect($article->hasFactCheckInconclusive())->toBeFalse();
+});
+
+it('hasFactCheckInconclusive est faux par défaut', function () {
+    $article = fcmArticle();
+
+    expect($article->hasFactCheckInconclusive())->toBeFalse();
+});
+
+it('pose le statut non concluant via fact_check.inconclusive, sans verdict', function () {
+    $article = fcmArticle();
+    $payload = fcmPayloadFile(array_merge(fcmFreshMeta($article), [
+        'fact_check' => ['inconclusive' => true, 'claim' => 'Une affirmation examinée sans conclusion possible.'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $fresh = $article->fresh();
+    expect($fresh->fact_check_verdict)->toBeNull()
+        ->and($fresh->fact_check_inconclusive_at)->not->toBeNull();
+});
+
+it('refuse inconclusive et verdict à la fois (exclusivité)', function () {
+    $article = fcmArticle();
+    $payload = fcmPayloadFile(array_merge(fcmFreshMeta($article), [
+        'fact_check' => ['inconclusive' => true, 'verdict' => 'citation_inexacte', 'claim' => 'Une affirmation.'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    $fresh = $article->fresh();
+    expect($fresh->fact_check_verdict)->toBeNull()
+        ->and($fresh->fact_check_inconclusive_at)->toBeNull();
+});
+
+it('refuse inconclusive sans claim', function () {
+    $article = fcmArticle();
+    $payload = fcmPayloadFile(array_merge(fcmFreshMeta($article), [
+        'fact_check' => ['inconclusive' => true],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->fact_check_inconclusive_at)->toBeNull();
+});
+
+it('poser un verdict normal efface un statut non concluant déjà posé', function () {
+    $article = fcmArticle(['fact_check_inconclusive_at' => now()]);
+    $payload = fcmPayloadFile(array_merge(fcmFreshMeta($article), [
+        'fact_check' => ['verdict' => 'citation_inexacte', 'claim' => 'Une affirmation tranchée cette fois.'],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $fresh = $article->fresh();
+    expect($fresh->fact_check_verdict)->toBe('citation_inexacte')
+        ->and($fresh->fact_check_inconclusive_at)->toBeNull();
+});
+
+it('fact_check à null efface aussi le statut non concluant', function () {
+    $article = fcmArticle(['fact_check_inconclusive_at' => now()]);
+    $payload = fcmPayloadFile(array_merge(fcmFreshMeta($article), ['fact_check' => null]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $fresh = $article->fresh();
+    expect($fresh->fact_check_verdict)->toBeNull()
+        ->and($fresh->fact_check_claim)->toBeNull()
+        ->and($fresh->fact_check_source)->toBeNull()
+        ->and($fresh->fact_check_inconclusive_at)->toBeNull();
+});
+
+it('le message d\'erreur sur une sous-clé inconnue mentionne inconclusive dans les clés attendues', function () {
+    $article = fcmArticle();
+    $payload = fcmPayloadFile(array_merge(fcmFreshMeta($article), [
+        'fact_check' => ['bogus' => true],
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->expectsOutputToContain('inconclusive')
+        ->assertFailed();
+});
+
+// ── G. Rendu et JSON-LD du statut non concluant ─────────────────────────────────────
+
+it('affiche "Vérification non concluante" sur la fiche publique, jamais dans un lien cliquable', function () {
+    $article = fcmPublishedArticle('test-non-concluante', ['fact_check_inconclusive_at' => now()]);
+
+    $response = $this->get(route('news.show', $article));
+
+    $response->assertOk()
+        ->assertSee('Vérification non concluante')
+        ->assertDontSee('>Vérification : Vérification non concluante</a', false);
+});
+
+it('omet le balisage ClaimReview sur une fiche non concluante sans verdict', function () {
+    $article = fcmPublishedArticle('test-claim-review-inconcluant', ['fact_check_inconclusive_at' => now()]);
+
+    expect(\Modules\SEO\Services\JsonLdService::claimReview($article))->toBeNull();
+});
