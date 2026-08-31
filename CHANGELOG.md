@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.244.3] - 2026-08-31
+
+### Ajouté
+- **`blog:verify` branché sur le runner HTTP de production** (`scripts/templates/prod-oneshot.php.tpl` + `scripts/prod-artisan.sh`), à côté de la famille `/actu2` - un seul argument positionnel (id d'article de blogue) plus `--payload`, jumeau de `news:apply`. Sans ce branchement, la nouvelle porte d'écriture du module « vérification » étendu au blogue (v1.244.0) restait inutilisable en production : le terminal cPanel et `tinker` sont hors service sur ce compte, seul ce runner permet à un agent d'exécuter une commande artisan à distance.
+
+### Mesuré (diagnostic d'incident, sans rapport avec ce module)
+- **Deux articles de blogue publiés répondent par intermittence en HTTP 500/timeout en production, cause étrangère au module de vérification.** Diagnostic direct (runner HTTP jetable, jamais commité, même architecture de sécurité que `prod-oneshot.php.tpl` - jeton, expiration, auto-suppression vérifiée après coup) : `Article::verifications()->get()` répond en 0,001 s dans les deux cas - le nouveau code n'est pas en cause. Le rendu complet de la page prend 48 ms pour un article, mais **66,59 secondes** pour l'autre (`comment-installer-openclaw-en-toute-securite-sur-macos`, id 67) - bien au-delà du plafond de 30 s qui explique les échecs HTTP observés. Le journal de production de la même fenêtre montre des dizaines d'occurrences de `Maximum execution time... GlossaryLinkifier.php:1138` et un épuisement mémoire, concurremment à un traitement par lots actif sur une autre session (`[CaptureScreenshotJob]`, plusieurs centaines d'identifiants). Signalé pour suite à donner - hors du périmètre de ce chantier (`Modules/Core/app/Services/GlossaryLinkifier.php` déjà en modification par ailleurs au moment de la mesure).
+
 ## [1.244.2] - 2026-08-31
 
 ### Corrigé

@@ -102,6 +102,7 @@ case "$ARTISAN_COMMAND" in
     news:apply)          POSITIONAL_NAMES=(article) ;;
     news:create-draft)   POSITIONAL_NAMES=(url) ;;
     news:backfill-auto-tools) POSITIONAL_NAMES=() ;;
+    blog:verify)         POSITIONAL_NAMES=(article) ;;
     *)
         echo "Noms d'arguments positionnels inconnus pour ${ARTISAN_COMMAND} - complète POSITIONAL_NAMES dans ce script (scripts/prod-artisan.sh)." >&2
         exit 1

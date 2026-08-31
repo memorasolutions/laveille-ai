@@ -63,7 +63,12 @@ if (! is_string($providedToken) || $providedToken === '' || ! hash_equals($expec
 // news:backfill-auto-tools (mandat #1929, 2026-08-31) - rattrapage BORNÉ et rejouable des outils
 // liés manquants, jamais une commande destructive : dry-run mesure sans écrire, hors dry-run
 // attachAuto() ne fait qu'ajouter, ne touche jamais une sélection manuelle existante.
-const COMMANDES_AUTORISEES = ['news:brief', 'news:source', 'news:apply', 'news:create-draft', 'news:backfill-auto-tools'];
+// blog:verify (2026-08-31, module « vérification » étendu au blogue) : même doctrine que
+// news:apply/fact_check - jamais d'Eloquent/SQL direct par l'agent, seule cette porte bornée
+// pose/corrige/retire une vérification, et son propre contrat de validation (exclusivité
+// verdict/inconclusive, vocabulaire fermé) vit entièrement dans Modules\Blog\Console\
+// ArticleVerifyCommand, jamais recopié ici.
+const COMMANDES_AUTORISEES = ['news:brief', 'news:source', 'news:apply', 'news:create-draft', 'news:backfill-auto-tools', 'blog:verify'];
 
 // ACTION : liste blanche des arguments/options, CETTE FOIS PAR COMMANDE - une commande autorisée
 // ne suffit pas non plus à tout permettre. Reflète exactement le $signature de chaque classe sous
@@ -85,6 +90,10 @@ const ARGUMENTS_AUTORISES = [
     // Trois options, aucun argument positionnel - purement des réglages de mesure/rattrapage,
     // jamais un identifiant d'article ni un contenu (mandat #1929).
     'news:backfill-auto-tools' => ['--limit', '--dry-run', '--echantillon'],
+    // Un seul argument positionnel (id d'article de blogue) plus --payload, jumeau exact de
+    // news:apply pour ce besoin - le contrat fin (clé verification, sous-clés autorisées) reste
+    // dans ArticleVerifyCommand, cette ligne ne fait qu'autoriser l'appel de la commande.
+    'blog:verify' => ['article', '--payload'],
 ];
 
 $commande = $_GET['cmd'] ?? null;
