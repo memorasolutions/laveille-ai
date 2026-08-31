@@ -1110,6 +1110,16 @@ class NewsArticle extends Model implements Searchable
      *
      * 'rating' : note ClaimReview sur 5 (1 = entièrement faux, 5 = entièrement exact), attendue
      * par Google en complément de l'étiquette textuelle, qui reste la valeur affichée.
+     *
+     * 'contexte_manquant' : poser ce verdict exige de trancher, au cas par cas, si l'élément
+     * manquant est grave (il fait dire à l'affirmation quelque chose de faux) ou accessoire
+     * (compression éditoriale normale). Ce jugement suit un test de discrimination à question
+     * unique - jamais réécrit ici - documenté dans `docs/specs/
+     * 2026-08-31-test-discrimination-contexte-manquant.md` et rappelé par le skill `/actu2`.
+     *
+     * 'attribution_erronee' : élargi le 2026-08-31 pour couvrir aussi les DONNÉES (un chiffre
+     * vrai attribué au mauvais document), pas seulement les propos d'une personne - cas
+     * déclencheur : un chiffre exact, mais rattaché à une source qui ne l'a pas produit.
      */
     public const FACT_CHECK_VERDICTS = [
         'contenu_synthetique' => [
@@ -1127,7 +1137,7 @@ class NewsArticle extends Model implements Searchable
         'attribution_erronee' => [
             'label' => 'Attribution erronée',
             'tone' => 'danger',
-            'summary' => "Les propos existent, mais pas sous cette forme, ou pas de cette personne, ou pas à cette occasion.",
+            'summary' => "Les propos ou les données existent, mais pas sous cette forme, pas de cette personne, pas de ce document, ou pas à cette occasion.",
             'rating' => 2,
         ],
         'presentation_trompeuse' => [

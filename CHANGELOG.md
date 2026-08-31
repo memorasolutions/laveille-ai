@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.243.1] - 2026-08-31
+
+### Corrigé
+- **Module « vérification » : le verdict `contexte_manquant` était circulaire** (demande fondateur : « aussi avoir des tags qui disent si on contredit une nouvelle qui circule »). Sa définition exigeait de juger si un élément était « indispensable » sans dire comment le reconnaître - deux rédacteurs pouvaient légitimement en tirer deux verdicts opposés sur la même fiche. Nouveau test de discrimination à question unique et réponse exclusive (« sans l'élément manquant, la croyance qu'en tire un lecteur devient-elle FAUSSE une fois l'élément connu ? »), documenté dans `docs/specs/2026-08-31-test-discrimination-contexte-manquant.md` et rappelé (jamais recopié) par le skill `/actu2`. Éprouvé sur 4 cas réels : 2 fiches publiées (32, `contexte_manquant` ; 35, `citation_inexacte`), 1 variante construite sur la fiche 32 avec un second élément réellement omis mais accessoire (preuve que le test ne sur-déclenche pas), 1 cas documenté du déploiement du module (fiche 34655, citation Altman, `citation_inexacte`) - preuve que le test respecte la frontière avec le verdict voisin.
+- **`attribution_erronee` élargi** : le libellé public ne couvrait que les propos d'une personne (« pas de cette personne, ou pas à cette occasion »), jamais un chiffre vrai attribué au mauvais document. Nouveau texte : « Les propos ou les données existent, mais pas sous cette forme, pas de cette personne, pas de ce document, ou pas à cette occasion. » Aucune sixième étiquette ajoutée - divergence du panel arbitrée en élargissant l'étiquette existante, pas en la multipliant.
+
+### Tests
+- Suite ciblée `Modules/News/tests/Feature/FactCheckModuleTest.php`, isolée (aucune autre suite en cours) : 31 passed (93 assertions), zéro régression - le vocabulaire des verdicts est partagé par tout le module.
+
 ## [1.243.0] - 2026-08-31
 
 ### Ajouté
