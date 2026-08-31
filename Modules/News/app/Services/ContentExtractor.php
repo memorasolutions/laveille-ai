@@ -36,6 +36,29 @@ class ContentExtractor
             }
 
             $html = $response->body();
+
+            // ACTION : garde-fou memoire (2026-08-31) - une page anormalement volumineuse fait
+            // exploser Masterminds\HTML5 (utilise en interne par Readability), qui copie le
+            // document plusieurs fois pendant l'analyse. Mesure en production : 391 crashs par
+            // epuisement memoire (128 Mo CLI), pile dans
+            // vendor/masterminds/html5/src/HTML5/Parser/Scanner.php. Abandon avant tout appel a
+            // Readability - l'appelant retombe deja sur l'accroche RSS quand extract() renvoie
+            // null (comportement existant, aucun article n'est perdu).
+            // MCP: SELF (<5 lignes utiles, garde de taille)
+            // RAISON: borner ce qu'on donne a une dependance plutot que de modifier la
+            // dependance elle-meme.
+            $maxBytes = (int) config('news.extraction_max_bytes', 3000000);
+            if (strlen($html) > $maxBytes) {
+                Log::channel('news_fetch')->warning(sprintf(
+                    'ContentExtractor: page ignoree (%d octets > plafond %d) pour %s - risque d\'epuisement memoire Readability/HTML5, repli sur l\'accroche RSS.',
+                    strlen($html),
+                    $maxBytes,
+                    $url
+                ));
+
+                return null;
+            }
+
             $ogImage = self::extractOgImage($html);
 
             // Readability PHP v3.3 : new Readability($config) puis ->parse($html)

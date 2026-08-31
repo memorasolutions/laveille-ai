@@ -107,6 +107,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Taille maximale du HTML analyse par Readability (garde-fou memoire)
+    |--------------------------------------------------------------------------
+    | ContentExtractor et SourceMarkdownFetcher telechargent integralement le HTML d'une page
+    | puis le font analyser par fivefilters/readability.php, qui delegue le parsing a
+    | Masterminds\HTML5 (dependance jamais appelee directement par ce projet). Cette analyse
+    | copie le document plusieurs fois en memoire (normalisation UTF-8, remplacement des
+    | retours de ligne, arbre DOM) : une page anormalement volumineuse epuise le plafond de
+    | 128 Mo du processus CLI et tue tout le cron news:fetch en cours - mesure en production
+    | le 2026-08-31 (391 epuisements memoire, pile dans
+    | vendor/masterminds/html5/src/HTML5/Parser/Scanner.php). Une page d'article legitime
+    | tient tres large sous cette borne ; au-dela, l'extraction est abandonnee (repli sur
+    | l'accroche RSS deja existant en cas d'echec Readability) plutot que de risquer tout le
+    | run. Override via env NEWS_EXTRACTION_MAX_BYTES.
+    */
+    'extraction_max_bytes' => (int) env('NEWS_EXTRACTION_MAX_BYTES', 3000000),
+
+    /*
+    |--------------------------------------------------------------------------
     | Repli d'affichage (cascade "summary, sinon accroche, sinon repli")
     |--------------------------------------------------------------------------
     | Design doc "Actus - zero copie du texte source" (2026-08-13), section 4.5. Phrase de
