@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.242.6] - 2026-08-31
+
+### Corrigé
+- **`ComicViewerTest` cassé par le retrait éthique de v1.242.2 (3 planches montrant un enfant, dont les 2 seules pages de la BD « deepfake ») : `ComicLibrary::forSlug('deepfake')` renvoie désormais `null`, alors que le test « navigation multi-planches » exigeait un tableau de 2 planches.** Vérifié EN PRODUCTION avant tout correctif de test, par requête réelle plutôt que par supposition : les 3 fiches concernées (`/glossaire/deepfake`, `/glossaire/biais-algorithmique`, `/glossaire/cybersecurite`) répondent 200, affichent leur définition et leur image hero propre (`images/glossaire/{slug}.jpg`, vérifiée chargeable), et ne contiennent plus aucune trace de la BD retirée (ni bouton « Lire la BD », ni chemin `/bd/`, ni image cassée) - le garde `@if($comic)` du composant a fait disparaître la section proprement, comme prévu par la convention zéro-code du standard « visionneur de BD ». Aucune page publique ne servait de visionneur vide.
+- **Plus aucune BD du dépôt n'a deux planches ou plus** (`biais-algorithmique` et `cybersecurite` n'en avaient qu'une chacune, aussi entièrement retirées) : le test ne pouvait donc plus s'appuyer sur un contenu réel pour vérifier le COMPORTEMENT de navigation entre plusieurs pages. Corrigé par une fixture temporaire auto-nettoyée (`try`/`finally`, slug `uniqid()` pour rester sans collision en dépôt partagé activement travaillé par d'autres sessions) qui écrit puis retire son propre `manifest.json` sous `public/bd/`, sans toucher à aucun contenu réel ni à aucune image - le composant ne vérifie jamais l'existence des fichiers de planches au rendu, seule l'existence du manifest compte pour `ComicLibrary::hasComic()`.
+- Aucune image ni planche retirée n'a été régénérée ni réintroduite - régénération volontairement hors périmètre de ce correctif, conformément à la règle permanente du projet (planches assemblées par l'utilisateur, approbation explicite requise via le skill `/bd`).
+- Suite ciblée `Modules/Dictionary/tests/Feature/ComicViewerTest.php` : rouge confirmé avant correctif (1 échec, « rend la navigation multi-planches… », `ComicLibrary::forSlug('deepfake')` retournait `null` au lieu d'un tableau de 2 planches) ; 9/9 verts après (40 assertions). `Modules/News/tests/Feature/NewsComicViewerTest.php` (dépend d'une BD non concernée par le retrait) rejoué sans régression, 2/2.
+
 ## [1.242.5] - 2026-08-30
 
 ### Corrigé

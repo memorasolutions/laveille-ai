@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\File;
 use Modules\Dictionary\Support\ComicLibrary;
 
 uses(Tests\TestCase::class);
@@ -70,18 +71,48 @@ it('ne rend aucun viewer quand il n’y a pas de BD', function () {
 });
 
 it('rend la navigation multi-planches quand une BD a plusieurs pages', function () {
-    $comic = ComicLibrary::forSlug('deepfake');
+    // Fixture temporaire auto-nettoyée. « deepfake » (seule BD du dépôt à 2 planches) a
+    // été retiré le 2026-08-30 pour motif éthique (personnage enfant, règle fondatrice
+    // 2026-08-29) - retrait définitif, aucun retour possible. Ce test vérifie le
+    // COMPORTEMENT de navigation multi-planches du composant lui-même, indépendamment de
+    // tout contenu réel (plus aucune BD du dépôt n'a plus d'une planche).
+    $slug = 'test-bd-multi-planches-'.uniqid();
+    $dir = public_path('bd/'.$slug);
+    File::ensureDirectoryExists($dir);
+    File::put($dir.'/manifest.json', json_encode([
+        'term_slug' => $slug,
+        'title' => 'Fixture de test - navigation multi-planches',
+        'alt' => 'Planches de test pour vérifier la navigation entre plusieurs pages.',
+        'planches' => [
+            [
+                'avif' => 'fixture-p1-site.avif', 'webp' => 'fixture-p1-site.webp', 'jpg' => 'fixture-p1-site.jpg',
+                'avif_1024' => 'fixture-p1-site-1024.avif', 'webp_1024' => 'fixture-p1-site-1024.webp',
+                'thumb' => 'fixture-p1-thumb.jpg', 'width' => 1600, 'height' => 2071,
+            ],
+            [
+                'avif' => 'fixture-p2-site.avif', 'webp' => 'fixture-p2-site.webp', 'jpg' => 'fixture-p2-site.jpg',
+                'avif_1024' => 'fixture-p2-site-1024.avif', 'webp_1024' => 'fixture-p2-site-1024.webp',
+                'thumb' => 'fixture-p2-thumb.jpg', 'width' => 1600, 'height' => 2071,
+            ],
+        ],
+    ]));
 
-    expect($comic)->toBeArray()
-        ->and($comic['planches'])->toHaveCount(2);
+    try {
+        $comic = ComicLibrary::forSlug($slug);
 
-    $html = Blade::render('<x-dictionary::comic-viewer :comic="$comic" />', ['comic' => $comic]);
+        expect($comic)->toBeArray()
+            ->and($comic['planches'])->toHaveCount(2);
 
-    expect($html)->toContain('cbd-nav')
-        ->and($html)->toContain('planches.length > 1')
-        ->and($html)->toContain('pageIndex')
-        ->and($html)->toContain('bd-deepfake-p1-site')
-        ->and($html)->toContain('bd-deepfake-p2-site');
+        $html = Blade::render('<x-dictionary::comic-viewer :comic="$comic" />', ['comic' => $comic]);
+
+        expect($html)->toContain('cbd-nav')
+            ->and($html)->toContain('planches.length > 1')
+            ->and($html)->toContain('pageIndex')
+            ->and($html)->toContain('fixture-p1-site')
+            ->and($html)->toContain('fixture-p2-site');
+    } finally {
+        File::deleteDirectory($dir);
+    }
 });
 
 it('expose hasBd dans le JSON des termes et intègre le filtre « Avec BD » à l’index', function () {
