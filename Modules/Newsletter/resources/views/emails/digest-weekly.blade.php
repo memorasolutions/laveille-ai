@@ -554,12 +554,19 @@
 
     {{-- 6. A LIRE (condensé : titre + 1 ligne + lien) --}}
     @if($featuredArticle ?? null)
+    {{-- 2026-08-31 (#2092) : le bloc « outil de la semaine » ci-dessus appelle déjà getPublicUrl(),
+         mais celui-ci appelait route('blog.show', $featuredArticle->slug) en brut - si cet article
+         n'a pas de traduction 'slug' pour la locale courante, l'envoi ÉCHOUE pour la TOTALITÉ du
+         lot d'abonnés, pas pour un seul. Article::getPublicUrl() existe depuis le 27 juillet 2026. --}}
+    @php
+        $featuredArticleUrl = $featuredArticle->getPublicUrl();
+    @endphp
     <tr>
         <td style="padding:14px 30px 6px;background-color:#f8fafc;border-top:1px solid #e5e7eb;" class="mobile-p">
             <p style="margin:0 0 6px;font-size:12px;font-weight:bold;color:#0B7285;text-transform:uppercase;letter-spacing:1px;">&#x1F4DD; À lire</p>
-            <p style="margin:0 0 4px;"><a href="{{ route('blog.show', $featuredArticle->slug) }}" style="color:#1a1a2e;font-size:15px;font-weight:bold;text-decoration:none;line-height:1.4;">{{ $featuredArticle->title }}</a></p>
+            <p style="margin:0 0 4px;"><a href="{{ $featuredArticleUrl }}" style="color:#1a1a2e;font-size:15px;font-weight:bold;text-decoration:none;line-height:1.4;">{{ $featuredArticle->title }}</a></p>
             <p style="margin:0 0 4px;font-size:13px;color:#555;line-height:1.5;">{{ Str::limit(strip_tags($featuredArticle->excerpt ?? $featuredArticle->content ?? ''), 120) }}</p>
-            <p style="margin:2px 0 0;"><a href="{{ route('blog.show', $featuredArticle->slug) }}" style="color:#0B7285;font-weight:bold;font-size:13px;">Lire l'article &rarr;</a></p>
+            <p style="margin:2px 0 0;"><a href="{{ $featuredArticleUrl }}" style="color:#0B7285;font-weight:bold;font-size:13px;">Lire l'article &rarr;</a></p>
         </td>
     </tr>
     @endif

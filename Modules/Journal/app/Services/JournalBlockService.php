@@ -68,10 +68,18 @@ class JournalBlockService
             ? $source->displayExcerpt(200)
             : Str::limit(strip_tags($source->description ?? $source->definition ?? ''), 200);
 
+        // 2026-08-31 (#2092) : route($routeName, $source->slug) accédait le slug en brut - pour
+        // une source "glossary" (Modules\Dictionary\Models\Term, slug traduisible), une fiche sans
+        // traduction pour la locale courante levait UrlGenerationException. getPublicUrl() existe
+        // pour Term (HasFallbackTranslatedSlug) et pour directory_tool (correctif de juillet 2026) ;
+        // les deux autres sources (news, tool interne) ont un slug simple, non traduisible - le
+        // repli sur route() brut reste sûr pour elles.
+        $url = method_exists($source, 'getPublicUrl') ? $source->getPublicUrl() : route($routeName, $source->slug);
+
         $payload = [
             'title' => $source->title ?? $source->name ?? '',
             'excerpt' => $excerpt,
-            'url' => route($routeName, $source->slug),
+            'url' => $url,
         ];
 
         return JournalBlock::create([

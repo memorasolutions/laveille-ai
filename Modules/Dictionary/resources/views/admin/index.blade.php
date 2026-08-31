@@ -33,7 +33,7 @@
                     <td class="text-end">
                         @php
                             $termActions = [
-                                ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('dictionary.show', $term->slug), 'target' => '_blank'],
+                                ['label' => __('Voir'), 'icon' => 'eye', 'url' => $term->getPublicUrl(), 'target' => '_blank'],
                             ];
                             if (auth()->user()?->can('update_dictionary_terms')) {
                                 $termActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.dictionary.edit', $term)];

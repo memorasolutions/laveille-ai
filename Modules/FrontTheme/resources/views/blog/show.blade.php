@@ -295,7 +295,8 @@
                                         @if($relatedArticles->isNotEmpty())
                                             @foreach($relatedArticles->take(2) as $r)
                                                 ·
-                                                <a href="{{ route('blog.show', $r->slug) }}" style="color:var(--c-primary,#064E5A);text-decoration:underline;">{{ $r->title }}</a>
+                                                {{-- 2026-08-31 (#2092) : accès brut au slug traduisible protégé par getPublicUrl(). --}}
+                                                <a href="{{ $r->getPublicUrl() }}" style="color:var(--c-primary,#064E5A);text-decoration:underline;">{{ $r->title }}</a>
                                             @endforeach
                                         @endif
                                     @endisset
@@ -428,14 +429,14 @@
                 <div class="col-sm-4" style="margin-bottom: 20px;">
                     <div class="panel panel-default" style="border-radius: 8px; overflow: hidden;">
                         @if($related->featured_image)
-                            <a href="{{ route('blog.show', $related->slug) }}">
+                            <a href="{{ $related->getPublicUrl() }}">
                                 <img src="{{ $related->featured_image_url }}?v={{ $related->updated_at?->timestamp ?? time() }}" alt="{{ $related->title }}" style="width: 100%; height: 150px; object-fit: cover;">
                             </a>
                         @endif
                         <div class="panel-body">
                             <small class="text-muted">{{ $related->published_at?->translatedFormat('d M Y') }}</small>
                             <h4 style="font-size: 15px; font-weight: 600; margin: 6px 0 8px; line-height: 1.4;">
-                                <a href="{{ route('blog.show', $related->slug) }}" style="color: inherit; text-decoration: none;">{{ $related->title }}</a>
+                                <a href="{{ $related->getPublicUrl() }}" style="color: inherit; text-decoration: none;">{{ $related->title }}</a>
                             </h4>
                             <p style="font-size: 13px; color: #374151; margin: 0;">{{ Str::limit($related->excerpt ?? strip_tags($related->content), 80) }}</p>
                         </div>
@@ -453,7 +454,10 @@
 $blogPostingJsonLd = json_encode([
     '@context' => 'https://schema.org',
     '@type' => 'BlogPosting',
-    'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => route('blog.show', $article->slug)],
+    // 2026-08-31 (#2092) : $article->slug ici est sans risque réel (c'est l'article de LA page en
+    // cours, résolu par liaison de route sur son propre slug - il ne peut pas être vide) mais
+    // getPublicUrl() reste préférable pour rester cohérent avec le reste du fichier et le scanner.
+    'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $article->getPublicUrl()],
     'headline' => $article->title,
     'description' => Str::limit($article->excerpt ?? strip_tags($article->content), 160),
     'image' => $article->featured_image_url ?: asset('images/og-image.png'),

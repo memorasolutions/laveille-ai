@@ -22,14 +22,15 @@
 @endif
 
 <div class="d-flex justify-content-end mb-3">
-    <a href="{{ route('admin.pages.preview', $page) }}" target="_blank"
+    <a href="{{ route('admin.pages.preview', $page->resolveTranslatedSlug()) }}" target="_blank"
        class="btn btn-outline-info d-flex align-items-center gap-2">
         <i data-lucide="eye"></i>
         {{ __('Apercu') }}
     </a>
 </div>
 
-<form action="{{ route('admin.pages.update', $page->slug) }}" method="POST">
+{{-- 2026-08-31 (#2092) : $page->slug était un accès brut au slug traduisible, protégé par resolveTranslatedSlug(). --}}
+<form action="{{ route('admin.pages.update', $page->resolveTranslatedSlug()) }}" method="POST">
     @csrf
     @method('PUT')
     <div class="row g-3">

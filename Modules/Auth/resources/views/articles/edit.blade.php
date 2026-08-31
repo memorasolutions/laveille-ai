@@ -91,7 +91,7 @@
         </div>
 
         @if($article->status === 'published')
-        <a href="{{ route('blog.show', $article->slug) }}" target="_blank"
+        <a href="{{ $article->getPublicUrl() }}" target="_blank"
            class="btn btn-outline-secondary rounded-2 w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
             <i data-lucide="eye"></i>
             {{ __('Voir l\'article publié') }}

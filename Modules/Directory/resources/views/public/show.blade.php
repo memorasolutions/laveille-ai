@@ -428,12 +428,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 @endif
                 @include('fronttheme::partials.article-action-bar', ['model' => $tool, 'modelType' => 'Modules\\Directory\\Models\\Tool', 'journalSourceType' => 'directory_tool', 'adminShareItems' => auth()->user()?->isSuperAdmin() ? $tool->adminShareContents() : null])
                 <div style="margin-top: 6px;">
-                    <a href="{{ route('directory.takedown.create', $tool->slug) }}" style="color:#9CA3AF; font-size:0.75rem; text-decoration:underline; text-underline-offset:2px;">⚖️ {{ __('Titulaire de droits ? Demander un retrait') }}</a>
+                    <a href="{{ route('directory.takedown.create', $tool->resolveTranslatedSlug()) }}" style="color:#9CA3AF; font-size:0.75rem; text-decoration:underline; text-underline-offset:2px;">⚖️ {{ __('Titulaire de droits ? Demander un retrait') }}</a>
                 </div>
             </div>
             @if($tool->url)
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-                    <a href="{{ route('directory.visit', $tool->slug) }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" class="rt-visit">{{ __('Visiter le site') }} →</a>
+                    <a href="{{ route('directory.visit', $tool->resolveTranslatedSlug()) }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" class="rt-visit">{{ __('Visiter le site') }} →</a>
                     @if($tool->isAffiliate())
                         <a href="{{ route('directory.affiliation.policy') }}" class="rt-affiliate-badge" title="{{ __('Ce lien est un lien d\'affiliation – en savoir plus') }}">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/></svg>
@@ -503,9 +503,12 @@ document.addEventListener('DOMContentLoaded', function () {
     @endif
 
     {{-- Suggérer une modification (composant réutilisable) --}}
+    {{-- 2026-08-31 (#2092) : $tool->slug était un accès brut au slug traduisible (le correctif de
+         juillet 2026 avait protégé getPublicUrl() mais pas cet appel-ci) - resolveTranslatedSlug()
+         (HasFallbackTranslatedSlug, ajouté à Tool sans toucher getPublicUrl() existant). --}}
     @include('fronttheme::partials.suggest-edit', [
         'model' => $tool,
-        'route' => route('directory.suggestions.store', $tool->slug),
+        'route' => route('directory.suggestions.store', $tool->resolveTranslatedSlug()),
     ])
 
     {{-- Ad: tool top --}}
@@ -754,7 +757,7 @@ document.addEventListener('DOMContentLoaded', function () {
             @if($tool->url)
             <div style="margin-top: 40px; background: linear-gradient(180deg, #F9FAFB, #F3F4F6); border: 1px solid #E5E7EB; border-radius: 16px; padding: 32px 20px; text-align: center;">
                 <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 20px; font-weight: 800; color: #111827;">{{ __('Envie d\'essayer') }} {{ $tool->name }} ?</h3>
-                <a href="{{ route('directory.visit', $tool->slug) }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" style="display: inline-block; background: var(--c-accent); color: #fff; font-weight: 700; padding: 14px 32px; border-radius: var(--r-btn); text-decoration: none; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">{{ __('Visiter le site') }} →</a>
+                <a href="{{ route('directory.visit', $tool->resolveTranslatedSlug()) }}" target="_blank" rel="{{ $tool->isAffiliate() ? 'sponsored noopener' : 'noopener noreferrer nofollow' }}" style="display: inline-block; background: var(--c-accent); color: #fff; font-weight: 700; padding: 14px 32px; border-radius: var(--r-btn); text-decoration: none; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">{{ __('Visiter le site') }} →</a>
                 @if($tool->isAffiliate())
                     <div style="margin-top: 10px;">
                         <a href="{{ route('directory.affiliation.policy') }}" class="rt-affiliate-badge" title="{{ __('Ce lien est un lien d\'affiliation – en savoir plus') }}">
@@ -814,7 +817,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-top: 24px;">
                 @include('fronttheme::partials.gamification-widget')
                 <h4 style="margin-top: 0; margin-bottom: 18px; font-weight: 700; color: #1e293b;">{{ __('Rédiger un avis') }}</h4>
-                <form action="{{ route('directory.reviews.store', $tool->slug) }}" method="POST" x-data="{ rating: 0, hover: 0 }">
+                <form action="{{ route('directory.reviews.store', $tool->resolveTranslatedSlug()) }}" method="POST" x-data="{ rating: 0, hover: 0 }">
                     @csrf
                     <div style="margin-bottom: 18px;">
                         <label style="display: block; color: #475569; font-weight: 600; margin-bottom: 8px;">{{ __('Votre note') }}</label>
@@ -850,7 +853,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
                 @include('fronttheme::partials.gamification-widget')
                 <h4 style="margin-top: 0; font-weight: 700; color: #111827; font-size: 17px; margin-bottom: 14px;">{{ __('Nouveau sujet') }}</h4>
-                <form action="{{ route('directory.discussions.store', $tool->slug) }}" method="POST">
+                <form action="{{ route('directory.discussions.store', $tool->resolveTranslatedSlug()) }}" method="POST">
                     @csrf
                     <div class="form-group" style="margin-bottom: 12px;"><input type="text" name="title" class="form-control" placeholder="{{ __('Titre de la discussion') }}" style="border-radius: 8px; height: 42px; font-weight: 600;" required></div>
                     <div class="form-group" style="margin-bottom: 12px;">
@@ -941,7 +944,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     {{-- Formulaire réponse --}}
                     @auth
-                    <form x-show="replying" x-cloak @click.stop action="{{ route('directory.discussions.store', $tool->slug) }}" method="POST" style="background: #fff; padding: 14px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                    <form x-show="replying" x-cloak @click.stop action="{{ route('directory.discussions.store', $tool->resolveTranslatedSlug()) }}" method="POST" style="background: #fff; padding: 14px; border-radius: 8px; border: 1px solid #e5e7eb;">
                         @csrf
                         <input type="hidden" name="parent_id" value="{{ $d->id }}">
                         <div class="form-group" style="margin-bottom: 10px;">
@@ -1148,7 +1151,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (!this.isYoutube) { this.step = 3; return; }
                         this.loading = true;
                         try {
-                            const res = await fetch('{{ route('directory.youtube-meta', $tool->slug) }}', {
+                            const res = await fetch('{{ route('directory.youtube-meta', $tool->resolveTranslatedSlug()) }}', {
                                 method: 'POST',
                                 headers: {'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'},
                                 body: JSON.stringify({url: this.url})
@@ -1268,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </div>
 
-                    <form action="{{ route('directory.resources.store', $tool->slug) }}" method="POST" @submit.prevent="if (!/^https?:\/\/[^\s]+\.[^\s]+/i.test(url)) { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'URL invalide. Utilisez https:// avec un domaine valide.', variant: 'warning', duration: 4000 } })); return; } submitting = true; fetch($el.action, {method:'POST',headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:new FormData($el)}).then(r=>{if(r.ok){step=4;submitting=false}else if(r.status===429){window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Trop de tentatives. Patientez 60 secondes avant de réessayer.', variant: 'warning', duration: 5000 } }));submitting=false}else{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur lors de la soumission', variant: 'danger', duration: 4000 } }));submitting=false}}).catch(()=>{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur réseau', variant: 'danger', duration: 4000 } }));submitting=false})">
+                    <form action="{{ route('directory.resources.store', $tool->resolveTranslatedSlug()) }}" method="POST" @submit.prevent="if (!/^https?:\/\/[^\s]+\.[^\s]+/i.test(url)) { window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'URL invalide. Utilisez https:// avec un domaine valide.', variant: 'warning', duration: 4000 } })); return; } submitting = true; fetch($el.action, {method:'POST',headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:new FormData($el)}).then(r=>{if(r.ok){step=4;submitting=false}else if(r.status===429){window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Trop de tentatives. Patientez 60 secondes avant de réessayer.', variant: 'warning', duration: 5000 } }));submitting=false}else{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur lors de la soumission', variant: 'danger', duration: 4000 } }));submitting=false}}).catch(()=>{window.dispatchEvent(new CustomEvent('toast-show', { detail: { message: 'Erreur réseau', variant: 'danger', duration: 4000 } }));submitting=false})">
                         @csrf
                         <input type="hidden" name="type" :value="type">
                         <input type="hidden" name="video_id" :value="videoId">
@@ -1420,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     <h4 style="font-weight:700;color:var(--c-dark);margin:0 0 12px;font-size:15px;">{{ __('Ajouter un screenshot') }}</h4>
 
-                    <form method="POST" action="{{ route('directory.screenshots.store', $tool->slug) }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('directory.screenshots.store', $tool->resolveTranslatedSlug()) }}" enctype="multipart/form-data">
                         @csrf
                         <input type="file" name="screenshot" accept="image/*" required x-ref="fileInput" @change="compressAndSet($event.target.files[0])" style="display:none!important;">
 
@@ -1518,7 +1521,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <div class="modal fade" id="pricingReportModal" tabindex="-1" aria-labelledby="pricingReportModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('directory.pricing-report', $tool->getTranslation('slug', 'fr_CA')) }}" method="POST">
+            <form action="{{ route('directory.pricing-report', $tool->resolveTranslatedSlug()) }}" method="POST">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title" id="pricingReportModalLabel">{{ __('Signaler une tarification incorrecte') }}</h5>

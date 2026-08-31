@@ -1,5 +1,5 @@
 {{-- Composant réutilisable — bouton "Suggérer une modification"
-     Usage : @include('fronttheme::partials.suggest-edit', ['model' => $term, 'route' => route('dictionary.suggestions.store', $term->slug)])
+     Usage : @include('fronttheme::partials.suggest-edit', ['model' => $term, 'route' => route('dictionary.suggestions.store', $term->resolveTranslatedSlug())])
      $model : objet Eloquent utilisant le trait HasSuggestions (suggestableFields())
      $route : URL du POST pour soumettre la suggestion
      Le composant se désactive silencieusement si le module Directory n'est pas actif.

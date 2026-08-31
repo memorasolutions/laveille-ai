@@ -38,7 +38,8 @@
             'categoryColor' => $term->category?->color,
             'categorySlug' => $term->category ? \Illuminate\Support\Str::slug($term->category->name) : '',
             'firstLetter' => strtoupper(\Illuminate\Support\Str::substr($term->name, 0, 1)),
-            'url' => route('dictionary.show', $term->slug),
+            // 2026-08-31 (#2092) : accès brut au slug traduisible protégé par getPublicUrl().
+            'url' => $term->getPublicUrl(),
             'heroImage' => dictionary_hero_image_url($term->hero_image, false),
             'heroImageWebp' => dictionary_hero_image_webp_url($term->hero_image),
             // Standard « visionneur de BD » : true si public/bd/{slug}/manifest.json existe.

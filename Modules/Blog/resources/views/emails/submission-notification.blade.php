@@ -24,7 +24,7 @@
                 </p>
                 @if($article->published_at)
                 <div style="text-align: center; margin: 24px 0;">
-                    <a href="{{ route('blog.show', $article->slug) }}" style="display: inline-block; background: #0B7285; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">{{ __('Voir mon article') }}</a>
+                    <a href="{{ $article->getPublicUrl() }}" style="display: inline-block; background: #0B7285; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">{{ __('Voir mon article') }}</a>
                 </div>
                 @endif
             @else

@@ -110,8 +110,11 @@ class PublicAcronymController extends Controller
         }
 
         if ($count === 1) {
-            return redirect()
-                ->route('acronyms.show', $fiches->first()->getTranslation('slug', $locale))
+            // 2026-08-31 (#2092) : getTranslation('slug', $locale) sans repli levait
+            // UrlGenerationException si la fiche trouvée par son ACRONYME n'a pas de traduction
+            // 'slug' pour cette même locale (deux champs traduisibles indépendants) - getPublicUrl()
+            // (HasFallbackTranslatedSlug) protège.
+            return redirect($fiches->first()->getPublicUrl())
                 ->setStatusCode(301);
         }
 
@@ -143,8 +146,11 @@ class PublicAcronymController extends Controller
         }
 
         if ($count === 1) {
-            return redirect()
-                ->route('acronyms.show', $fiches->first()->getTranslation('slug', $locale))
+            // 2026-08-31 (#2092) : getTranslation('slug', $locale) sans repli levait
+            // UrlGenerationException si la fiche trouvée par son ACRONYME n'a pas de traduction
+            // 'slug' pour cette même locale (deux champs traduisibles indépendants) - getPublicUrl()
+            // (HasFallbackTranslatedSlug) protège.
+            return redirect($fiches->first()->getPublicUrl())
                 ->setStatusCode(301);
         }
 

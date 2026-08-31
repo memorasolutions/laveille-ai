@@ -74,7 +74,7 @@
                 <ul style="list-style: none; padding: 0; margin: 0;">
                     @foreach($articles as $article)
                         <li style="padding: 16px 0; border-bottom: 1px solid #e5e7eb;">
-                            <a href="{{ route('blog.show', $article->slug) }}" style="color: var(--c-primary); font-weight: 600; text-decoration: none; font-size: 1.05rem;">{{ $article->title }}</a>
+                            <a href="{{ $article->getPublicUrl() }}" style="color: var(--c-primary); font-weight: 600; text-decoration: none; font-size: 1.05rem;">{{ $article->title }}</a>
                             @if($article->published_at ?? null)
                                 <small style="display: block; color: var(--c-text-muted); margin-top: 4px;">{{ $article->published_at->locale('fr_CA')->isoFormat('LL') }}</small>
                             @endif

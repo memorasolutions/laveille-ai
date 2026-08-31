@@ -42,7 +42,9 @@ final class TermSchemaService
 
     public static function buildGraph(Term $term): string
     {
-        $url = route('dictionary.show', $term->slug);
+        // 2026-08-31 (#2092) : route('dictionary.show', $term->slug) était un accès brut au slug
+        // traduisible - protégé par Term::getPublicUrl() (HasFallbackTranslatedSlug).
+        $url = $term->getPublicUrl();
         $description = trim(strip_tags($term->one_sentence_answer ?: $term->analogy ?: $term->definition ?: ''));
         $description = mb_substr($description, 0, 250);
         $imageUrl = $term->hero_image ? asset($term->hero_image) : null;
@@ -109,7 +111,7 @@ final class TermSchemaService
                     if (! $rel) {
                         continue;
                     }
-                    $u = route('dictionary.show', $rel->slug);
+                    $u = $rel->getPublicUrl();
                     $out[] = ['@type' => 'DefinedTerm', '@id' => $u.'#term', 'name' => (string) $rel->name, 'url' => $u];
                 }
                 return $out;

@@ -33,7 +33,7 @@
                 </div>
             </div>
             @if($article->submission_status === 'approved' && $article->published_at)
-                <a href="{{ route('blog.show', $article->slug) }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px; margin-top: 8px; display: inline-block;">{{ __('Voir l\'article publié') }} →</a>
+                <a href="{{ $article->getPublicUrl() }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px; margin-top: 8px; display: inline-block;">{{ __('Voir l\'article publié') }} →</a>
             @endif
         </div>
         @empty

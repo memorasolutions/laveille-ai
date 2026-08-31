@@ -51,14 +51,16 @@
                             <p style="color: #6B7280; font-size: 13px; margin: 4px 0 0;">{{ __('Sauvegardé le') }} {{ format_date($bookmark->created_at) }}</p>
                         </div>
                         <div>
+                            {{-- 2026-08-31 (#2092) : Article/Term/Acronym utilisaient un slug traduisible en
+                                 brut - remplacé par getPublicUrl() (Tool l'utilisait déjà correctement). --}}
                             @if($type === 'Modules\\Blog\\Models\\Article' && Route::has('blog.show'))
-                                <a href="{{ route('blog.show', $item->slug) }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Lire') }} →</a>
+                                <a href="{{ $item->getPublicUrl() }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Lire') }} →</a>
                             @elseif($type === 'Modules\\Directory\\Models\\Tool' && Route::has('directory.show'))
                                 <a href="{{ $item->getPublicUrl() }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Voir') }} →</a>
                             @elseif($type === 'Modules\\Dictionary\\Models\\Term' && Route::has('dictionary.show'))
-                                <a href="{{ route('dictionary.show', $item->slug) }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Lire') }} →</a>
+                                <a href="{{ $item->getPublicUrl() }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Lire') }} →</a>
                             @elseif($type === 'Modules\\Acronyms\\Models\\Acronym' && Route::has('acronyms.show'))
-                                <a href="{{ route('acronyms.show', $item->getTranslation('slug', app()->getLocale())) }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Voir') }} →</a>
+                                <a href="{{ $item->getPublicUrl() }}" style="color: var(--c-primary); font-weight: 600; font-size: 13px;">{{ __('Voir') }} →</a>
                             @endif
                         </div>
                     </div>

@@ -19,7 +19,7 @@
             <div class="py-2">
                 @foreach($results as $article)
                     <a
-                        href="{{ route('blog.show', $article->slug) }}"
+                        href="{{ $article->getPublicUrl() }}"
                         class="block px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
                     >
                         <div class="font-semibold text-gray-900 line-clamp-1">{{ $article->title }}</div>

@@ -9,7 +9,8 @@
     <ul class="list-unstyled">
         @foreach($posts as $post)
             <li class="mb-2">
-                <a href="{{ route('blog.show', $post->slug) }}">{{ $post->title }}</a>
+                {{-- 2026-08-31 (#2092) : accès brut au slug traduisible protégé par getPublicUrl(). --}}
+                <a href="{{ $post->getPublicUrl() }}">{{ $post->title }}</a>
                 <small class="text-muted d-block">{{ $post->published_at->diffForHumans() }}</small>
             </li>
         @endforeach

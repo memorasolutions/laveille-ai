@@ -43,7 +43,7 @@
                         </div>
                         <div class="details">
                             <span class="date">{{ $article->published_at?->translatedFormat('d M Y') }}</span>
-                            <h4><a href="{{ route('blog.show', $article->slug) }}">{{ $article->title }}</a></h4>
+                            <h4><a href="{{ $article->getPublicUrl() }}">{{ $article->title }}</a></h4>
                         </div>
                     </div>
                 @endforeach

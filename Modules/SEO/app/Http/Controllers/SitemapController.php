@@ -41,8 +41,11 @@ class SitemapController
         }
 
         // Articles publiés (avec images)
+        // 2026-08-31 (#2092) : url('/blog/'.$article->slug) était un accès brut au slug traduisible
+        // (même défaut que le plan de site cassé le 18 juillet 2026) - Article::getPublicUrl() existe
+        // déjà depuis le 27 juillet 2026 et protège ce même besoin, il suffisait de l'appeler ici.
         Article::where('status', 'published')->whereNotNull('published_at')->select(['id', 'slug', 'updated_at', 'featured_image'])->get()->each(function ($article) use ($sitemap) {
-            $url = Url::create(url('/blog/'.$article->slug))
+            $url = Url::create($article->getPublicUrl())
                 ->setLastModificationDate($article->updated_at)
                 ->setPriority(0.8)
                 ->setChangeFrequency('weekly');
@@ -55,9 +58,13 @@ class SitemapController
         });
 
         // Pages statiques publiées
+        // 2026-08-31 (#2092) : route('page.show', $page->slug) reproduisait littéralement le
+        // patron qui a cassé le plan de site le 18 juillet 2026 (accès brut à un slug traduisible,
+        // null dès qu'une page n'a pas de traduction pour la locale courante) - protégé désormais
+        // par StaticPage::getPublicUrl() (HasFallbackTranslatedSlug).
         StaticPage::where('status', 'published')->select(['id', 'slug', 'updated_at'])->get()->each(function ($page) use ($sitemap) {
             $sitemap->add(
-                Url::create(route('page.show', $page->slug))
+                Url::create($page->getPublicUrl())
                     ->setLastModificationDate($page->updated_at)
                     ->setPriority(0.6)
                     ->setChangeFrequency('monthly')
@@ -88,8 +95,10 @@ class SitemapController
         // Glossaire (si module Dictionary actif)
         if (Route::has('dictionary.index') && class_exists(\Modules\Dictionary\Models\Term::class)) {
             $sitemap->add(Url::create(route('dictionary.index'))->setPriority(0.8)->setChangeFrequency('weekly'));
+            // 2026-08-31 (#2092) : même défaut que le plan de site cassé le 18 juillet 2026 (accès
+            // brut à un slug traduisible) - protégé par Term::getPublicUrl() (HasFallbackTranslatedSlug).
             \Modules\Dictionary\Models\Term::published()->select(['id', 'slug', 'updated_at', 'hero_image'])->get()->each(function ($term) use ($sitemap) {
-                $url = Url::create(route('dictionary.show', $term->slug))
+                $url = Url::create($term->getPublicUrl())
                     ->setLastModificationDate($term->updated_at)
                     ->setPriority(0.7)
                     ->setChangeFrequency('monthly');
@@ -161,9 +170,13 @@ class SitemapController
         // Acronymes éducation (si module Acronyms actif)
         if (Route::has('acronyms.index') && class_exists(\Modules\Acronyms\Models\Acronym::class)) {
             $sitemap->add(Url::create(route('acronyms.index'))->setPriority(0.8)->setChangeFrequency('weekly'));
+            // 2026-08-31 (#2092) : getTranslation('slug', app()->getLocale()) sans troisième
+            // paramètre ni repli reproduisait LITTÉRALEMENT le patron qui a cassé le plan de site
+            // le 18 juillet 2026 (config/translatable.php non publié = pas de fallback réel) -
+            // protégé par Acronym::getPublicUrl() (HasFallbackTranslatedSlug).
             \Modules\Acronyms\Models\Acronym::published()->select(['id', 'slug', 'updated_at'])->get()->each(function ($acronym) use ($sitemap) {
                 $sitemap->add(
-                    Url::create(route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())))
+                    Url::create($acronym->getPublicUrl())
                         ->setLastModificationDate($acronym->updated_at)
                         ->setPriority(0.6)
                         ->setChangeFrequency('monthly')

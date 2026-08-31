@@ -41,7 +41,7 @@
                 <div class="border-top px-3 py-1">
                     <p class="mb-1 text-uppercase text-muted small fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">{{ __('Articles') }}</p>
                     @foreach($articles as $article)
-                    <a href="{{ route('blog.show', $article->slug) }}"
+                    <a href="{{ $article->getPublicUrl() }}"
                        class="d-flex align-items-center gap-2 rounded px-2 py-1 text-decoration-none text-body search-result-item">
                         <i data-lucide="file-text" class="text-muted icon-sm flex-shrink-0"></i>
                         <span class="small">{{ $article->title }}</span>

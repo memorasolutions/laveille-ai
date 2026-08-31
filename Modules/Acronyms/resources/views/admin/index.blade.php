@@ -41,7 +41,7 @@
                     <td class="text-end">
                         @php
                             $acronymActions = [
-                                ['label' => __('Voir'), 'icon' => 'eye', 'url' => route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())), 'target' => '_blank'],
+                                ['label' => __('Voir'), 'icon' => 'eye', 'url' => $acronym->getPublicUrl(), 'target' => '_blank'],
                             ];
                             if (auth()->user()?->can('update_acronyms')) {
                                 $acronymActions[] = ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.acronyms.edit', $acronym)];

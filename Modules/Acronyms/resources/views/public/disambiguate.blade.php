@@ -121,15 +121,17 @@
         <div class="row acr-disamb-grid">
             @foreach($fiches as $fiche)
                 @php
+                    // 2026-08-31 (#2092) : le repli $ficheLocale -> $fiche->slug (magique, même
+                    // locale) rebouclait sur la même valeur sans vrai 3e niveau - getPublicUrl()
+                    // (HasFallbackTranslatedSlug) replie vers 'fr' puis la 1re traduction disponible.
                     $ficheLocale = app()->getLocale();
-                    $ficheSlug = $fiche->getTranslation('slug', $ficheLocale, false) ?: $fiche->slug;
                     $ficheFull = $fiche->getTranslation('full_name', $ficheLocale, false) ?: $fiche->full_name;
                     $ficheDesc = $fiche->getTranslation('one_sentence_answer', $ficheLocale, false)
                         ?: $fiche->getTranslation('description', $ficheLocale, false)
                         ?: $fiche->description;
                     $ficheExcerpt = \Illuminate\Support\Str::limit(strip_tags((string) $ficheDesc), 160);
                     $ficheIcon = $fiche->icon ?: '🎓';
-                    $ficheUrl = route('acronyms.show', $ficheSlug);
+                    $ficheUrl = $fiche->getPublicUrl();
                     $ficheCat = $fiche->category;
                     $ficheCatColor = $ficheCat ? ($ficheCat->color ?? 'var(--c-primary)') : 'var(--c-primary)';
                 @endphp
@@ -186,13 +188,12 @@
     $__pos = 1;
     foreach ($fiches as $__fiche) {
         $__loc = app()->getLocale();
-        $__slug = $__fiche->getTranslation('slug', $__loc, false) ?: $__fiche->slug;
         $__full = $__fiche->getTranslation('full_name', $__loc, false) ?: $__fiche->full_name;
         $_items[] = [
             '@type' => 'ListItem',
             'position' => $__pos++,
             'name' => $sigle . ' – ' . $__full,
-            'url' => route('acronyms.show', $__slug),
+            'url' => $__fiche->getPublicUrl(),
         ];
     }
     $_itemList = [

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
+use Modules\Core\Traits\HasFallbackTranslatedSlug;
 use Modules\Core\Traits\HasLifecycleStatus;
 use Modules\Core\Traits\HasSponsorship;
 use Modules\Directory\Traits\HasSuggestions;
@@ -28,6 +29,7 @@ use Spatie\Translatable\HasTranslations;
 class Tool extends Model implements Searchable
 {
     use HasAdminShareContents;
+    use HasFallbackTranslatedSlug;
     use HasLifecycleStatus;
     use HasSponsorship;
     use HasSuggestions;

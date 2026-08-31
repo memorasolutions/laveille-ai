@@ -46,9 +46,12 @@ class VoteController extends Controller
             $author = \App\Models\User::find($item->user_id);
             if ($author && $author->id !== auth()->id()) {
                 $title = $item->title ?? $item->name ?? __('votre contenu');
+                // 2026-08-31 (#2092) : le cas 'acronym' accédait getTranslation() sans repli - un
+                // acronyme sans traduction pour la locale courante levait UrlGenerationException
+                // et cassait l'envoi de LA notification de seuil de vote. getPublicUrl() protège.
                 $url = match ($type) {
                     'tool' => method_exists($item, 'getPublicUrl') ? $item->getPublicUrl() : route('directory.show', $item->slug ?? $id),
-                    'acronym' => route('acronyms.show', $item->getTranslation('slug', app()->getLocale())),
+                    'acronym' => $item->getPublicUrl(),
                     default => url('/'),
                 };
                 $author->notify(new \Modules\Voting\Notifications\VoteThresholdNotification($count, $title, $url));

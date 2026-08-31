@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
+use Modules\Core\Traits\HasFallbackTranslatedSlug;
 use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Directory\Traits\HasSuggestions;
@@ -20,6 +21,7 @@ use Spatie\Translatable\HasTranslations;
 class Acronym extends Model implements Searchable
 {
     use \Modules\Core\Traits\HasModerationStatus;
+    use HasFallbackTranslatedSlug;
     use HasPublishedState;
     use HasSuggestions;
     use HasTranslations;
@@ -117,7 +119,17 @@ class Acronym extends Model implements Searchable
 
     public function searchableResultUrl(): string
     {
-        return route('acronyms.show', $this->slug);
+        return $this->getPublicUrl();
+    }
+
+    /**
+     * URL publique de la fiche, protégée par HasFallbackTranslatedSlug (2026-08-31, #2092) : un
+     * accès direct à $this->slug ou getTranslation('slug', app()->getLocale()) sans repli renvoie
+     * null et fait tomber la page dès qu'un acronyme n'a pas de traduction pour la locale courante.
+     */
+    public function getPublicUrl(): string
+    {
+        return route('acronyms.show', $this->resolveTranslatedSlug());
     }
 
     public function adminShareContents(): array

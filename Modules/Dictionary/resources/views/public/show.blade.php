@@ -28,7 +28,10 @@
         'explainer' => 'Vulgarisation',
         default => 'Terme',
     };
-    $_shareDirectUrl = route('dictionary.show', $term->getTranslation('slug', 'fr_CA', false) ?: $term->slug);
+    // 2026-08-31 (#2092) : le repli 'fr_CA' -> $term->slug (magique, même locale que la locale
+    // courante) rebouclait sur la même valeur sans vrai 3e niveau de repli - remplacé par
+    // Term::getPublicUrl() (HasFallbackTranslatedSlug), qui replie vers 'fr' puis 1re traduction.
+    $_shareDirectUrl = $term->getPublicUrl();
     $_shareIndexUrl = route('dictionary.index');
     $_shareUtmUrl = $_shareDirectUrl . '?utm_source=share_dictionary&utm_medium=clipboard';
     $_shareAnalogyPart = $_shareAnalogy ? "\n🧠 En termes simples : " . mb_strimwidth($_shareAnalogy, 0, 150, '…') : '';
@@ -61,7 +64,7 @@
 @push('head')
 <meta name="llm:summary" content="{{ e($term->name) }} – {{ e(Str::limit(strip_tags($term->analogy ?? $term->definition ?? ''), 200)) }} (Glossaire Techno)">
 <meta name="llm:keywords" content="{{ e($term->name) }}, glossaire techno, intelligence artificielle, définition, francophone, Québec">
-<meta name="llm:url" content="{{ route('dictionary.show', $term->slug) }}">
+<meta name="llm:url" content="{{ $term->getPublicUrl() }}">
 @endpush
 
 @push('styles')
@@ -212,9 +215,11 @@
         </div>
 
         {{-- Suggest edit --}}
+        {{-- 2026-08-31 (#2092) : $term->slug était un accès brut au slug traduisible, protégé par
+             resolveTranslatedSlug() (même trait que getPublicUrl()). --}}
         @include('fronttheme::partials.suggest-edit', [
             'model' => $term,
-            'route' => route('dictionary.suggestions.store', $term->slug),
+            'route' => route('dictionary.suggestions.store', $term->resolveTranslatedSlug()),
         ])
 
         {{-- Main card --}}
@@ -461,7 +466,8 @@
 
                                     @php
                                         $_renderChip = function ($t) {
-                                            $url = route('dictionary.show', $t->slug);
+                                            // 2026-08-31 (#2092) : accès brut au slug traduisible protégé par getPublicUrl().
+                                            $url = $t->getPublicUrl();
                                             $icon = $t->icon ?: '📄';
                                             $name = e((string) $t->name);
                                             $aria = e(__('Voir la définition de').' '.((string) $t->name));
@@ -518,7 +524,8 @@
             <div class="row row-flex">
                 @foreach($relatedTerms as $related)
                     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-                        <a href="{{ route('dictionary.show', $related->slug) }}"
+                        {{-- 2026-08-31 (#2092) : accès brut au slug traduisible protégé par getPublicUrl(). --}}
+                        <a href="{{ $related->getPublicUrl() }}"
                            class="gl-related-card"
                            aria-label="{{ __('Lire la définition de') }} {{ $related->name }}">
                             <div>

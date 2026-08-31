@@ -407,7 +407,10 @@ class Article extends Model implements SearchableContract
 
     public function searchableResultUrl(): string
     {
-        return route('blog.show', $this->slug);
+        // 2026-08-31 (#2092) : route('blog.show', $this->slug) était encore un accès brut, alors
+        // que getPublicUrl() (ci-dessus) protège déjà ce même besoin depuis le 27 juillet 2026 -
+        // ne pas réinventer une seconde résolution, réutiliser celle qui existe déjà.
+        return $this->getPublicUrl();
     }
 
     public function adminShareContents(): array

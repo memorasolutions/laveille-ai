@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
+use Modules\Core\Traits\HasFallbackTranslatedSlug;
 use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
 use Modules\Directory\Traits\HasSuggestions;
@@ -22,6 +23,7 @@ use Spatie\Translatable\HasTranslations;
 class Term extends Model implements Searchable
 {
     use HasAdminShareContents;
+    use HasFallbackTranslatedSlug;
     use HasPublishedState;
     use HasSuggestions;
     use HasTranslations;
@@ -126,7 +128,17 @@ class Term extends Model implements Searchable
 
     public function searchableResultUrl(): string
     {
-        return route('dictionary.show', $this->slug);
+        return $this->getPublicUrl();
+    }
+
+    /**
+     * URL publique de la fiche, protégée par HasFallbackTranslatedSlug (2026-08-31, #2092) : un
+     * accès direct à $this->slug ou route('dictionary.show', $this->slug) renvoie null et fait
+     * tomber la page dès qu'un terme n'a pas de traduction 'slug' pour la locale courante.
+     */
+    public function getPublicUrl(): string
+    {
+        return route('dictionary.show', $this->resolveTranslatedSlug());
     }
 
     public function adminShareContents(): array

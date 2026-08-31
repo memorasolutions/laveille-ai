@@ -83,9 +83,9 @@
                                     <span class="card-meta-compact-readtime">{{ $minRead }} {{ __('min lecture') }}</span>
                                 </div>
                                 <div class="entry-details">
-                                    <h3><a href="{{ route('blog.show', $article->slug) }}">{{ $article->title }}</a></h3>
+                                    <h3><a href="{{ $article->getPublicUrl() }}">{{ $article->title }}</a></h3>
                                     <p>{{ Str::limit($article->excerpt ?? strip_tags($article->content), 200) }}</p>
-                                    <a href="{{ route('blog.show', $article->slug) }}" class="read-more">{{ __('LIRE LA SUITE...') }}</a>
+                                    <a href="{{ $article->getPublicUrl() }}" class="read-more">{{ __('LIRE LA SUITE...') }}</a>
                                 </div>
                             </div>
                             @if($loop->iteration === 3 && class_exists(\Modules\Ads\Services\AdsRenderer::class))

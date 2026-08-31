@@ -21,6 +21,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Mews\Purifier\Facades\Purifier;
+use Modules\Core\Traits\HasFallbackTranslatedSlug;
 use Modules\Core\Traits\HasPreviewToken;
 use Modules\Core\Traits\HasRevisions;
 use Modules\Core\Traits\HasScheduledPublishing;
@@ -33,7 +34,7 @@ use Spatie\Translatable\HasTranslations;
 
 class StaticPage extends Model
 {
-    use BelongsToTenant, HasCustomFields, HasFactory, HasPreviewToken, HasRevisions, HasScheduledPublishing, HasTranslations, LogsActivity, Searchable, SoftDeletes;
+    use BelongsToTenant, HasCustomFields, HasFactory, HasFallbackTranslatedSlug, HasPreviewToken, HasRevisions, HasScheduledPublishing, HasTranslations, LogsActivity, Searchable, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -126,6 +127,16 @@ class StaticPage extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * URL publique de la page, protégée par HasFallbackTranslatedSlug (2026-08-31, #2092) : un
+     * accès direct à $this->slug ou route('page.show', $this->slug) renvoie null et fait tomber
+     * la page (et le plan de site) dès qu'une page n'a pas de traduction pour la locale courante.
+     */
+    public function getPublicUrl(): string
+    {
+        return route('page.show', $this->resolveTranslatedSlug());
     }
 
     public function resolveRouteBinding($value, $field = null): ?self

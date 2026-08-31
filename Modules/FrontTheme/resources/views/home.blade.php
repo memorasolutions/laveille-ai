@@ -503,7 +503,9 @@
                         $diffLabel = match($term->difficulty ?? 'beginner') { 'beginner' => __('Débutant'), 'intermediate' => __('Intermédiaire'), 'advanced' => __('Avancé'), default => __('Débutant') };
                     @endphp
                     <div class="col-md-4 col-sm-6 col-xs-12">
-                        <a href="{{ route('dictionary.show', $term->slug) }}" class="hp-card">
+                        {{-- 2026-08-31 (#2092) : $term->slug était un accès brut au slug traduisible,
+                             même défaut que le plan de site cassé le 18 juillet 2026. --}}
+                        <a href="{{ $term->getPublicUrl() }}" class="hp-card">
                             <div class="hp-card-term-header" style="{{ $heroSrc ? '' : 'background: linear-gradient(135deg, var(--c-primary), var(--c-dark));' }}">
                                 @if($heroSrc)
                                     <img src="{{ $heroSrc }}" alt="{{ $term->name }}" loading="lazy">
@@ -540,7 +542,9 @@
                 <div class="row hp-row-flex">
                     @foreach($featuredAcronyms as $acronym)
                     <div class="col-md-3 col-sm-6 col-xs-12">
-                        <a href="{{ route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale())) }}" class="hp-card">
+                        {{-- 2026-08-31 (#2092) : getTranslation('slug', app()->getLocale()) sans
+                             repli reproduisait le patron qui a cassé le plan de site le 18 juillet 2026. --}}
+                        <a href="{{ $acronym->getPublicUrl() }}" class="hp-card">
                             <div class="hp-card-body">
                                 <div style="display: flex !important; align-items: center !important; gap: 10px; margin-bottom: 10px;">
                                     @if($acronym->logo_url)

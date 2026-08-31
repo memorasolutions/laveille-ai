@@ -82,9 +82,10 @@
                                 </div>
                             @else
                                 <div class="d-flex align-items-center justify-content-center">
+                                    {{-- 2026-08-31 (#2092) : $page->slug était un accès brut au slug traduisible. --}}
                                     @include('core::components.action-menu', ['actions' => array_filter([
-                                        ['label' => __('Voir public'), 'icon' => 'eye', 'url' => route('page.show', $page->slug), 'target' => '_blank'],
-                                        auth()->user()?->can('update_pages') ? ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.pages.edit', $page->slug)] : null,
+                                        ['label' => __('Voir public'), 'icon' => 'eye', 'url' => $page->getPublicUrl(), 'target' => '_blank'],
+                                        auth()->user()?->can('update_pages') ? ['label' => __('Modifier'), 'icon' => 'pencil', 'url' => route('admin.pages.edit', $page->resolveTranslatedSlug())] : null,
                                         (auth()->user()?->can('update_pages') || auth()->user()?->can('delete_pages')) ? ['divider' => true] : null,
                                         auth()->user()?->can('delete_pages') ? ['label' => __('Supprimer'), 'icon' => 'trash-2', 'wireClick' => "confirmDeletePage({$page->id})", 'danger' => true] : null,
                                     ])])

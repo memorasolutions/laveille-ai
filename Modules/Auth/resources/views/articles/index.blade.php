@@ -80,7 +80,7 @@
                                         <i data-lucide="pen"></i> {{ __('Modifier') }}
                                     </a>
                                     @if($article->status === 'published')
-                                    <a href="{{ route('blog.show', $article->slug) }}" target="_blank"
+                                    <a href="{{ $article->getPublicUrl() }}" target="_blank"
                                        class="btn btn-sm btn-outline-secondary rounded-2">
                                         <i data-lucide="eye"></i>
                                     </a>

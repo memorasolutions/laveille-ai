@@ -72,10 +72,11 @@ class UserContributionsController extends Controller
     {
         if (! $suggestion->suggestable) return null;
         $type = class_basename($suggestion->suggestable_type);
-        $slug = $suggestion->suggestable->slug ?? '';
+        // 2026-08-31 (#2092) : Term/Acronym utilisaient un slug traduisible en brut (jamais résolu
+        // que pour le type Tool, ci-dessous) - remplacé par getPublicUrl() pour les trois types.
         if ($type === 'Tool' && \Route::has('directory.show')) return $suggestion->suggestable->getPublicUrl();
-        if ($type === 'Term' && \Route::has('dictionary.show')) return route('dictionary.show', $slug);
-        if ($type === 'Acronym' && \Route::has('acronyms.show')) return route('acronyms.show', $slug);
+        if ($type === 'Term' && \Route::has('dictionary.show')) return $suggestion->suggestable->getPublicUrl();
+        if ($type === 'Acronym' && \Route::has('acronyms.show')) return $suggestion->suggestable->getPublicUrl();
         return null;
     }
 }

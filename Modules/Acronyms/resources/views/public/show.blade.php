@@ -32,7 +32,7 @@
 @push('head')
 <meta name="llm:summary" content="{{ e($acronym->acronym) }} = {{ e($acronym->full_name) }}. {{ e(Str::limit(strip_tags($acronym->one_sentence_answer ?: ($acronym->description ?? '')), 180)) }} (Acronyme éducation Québec)">
 <meta name="llm:keywords" content="{{ e($acronym->acronym) }}, {{ e($acronym->full_name) }}, acronyme éducation, sigle, Québec">
-<meta name="llm:url" content="{{ route('acronyms.show', $acronym->slug) }}">
+<meta name="llm:url" content="{{ $acronym->getPublicUrl() }}">
 @endpush
 
 @push('styles')
@@ -200,9 +200,11 @@
 
         {{-- Suggest edit + Report + admin actions --}}
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            {{-- 2026-08-31 (#2092) : getTranslation() sans repli protégé par resolveTranslatedSlug()
+                 (même trait que getPublicUrl(), route différente donc pas la même méthode). --}}
             @include('fronttheme::partials.suggest-edit', [
                 'model' => $acronym,
-                'route' => route('acronyms.suggestions.store', $acronym->getTranslation('slug', app()->getLocale())),
+                'route' => route('acronyms.suggestions.store', $acronym->resolveTranslatedSlug()),
             ])
             @if(Route::has('directory.community.report'))
                 @include('core::components.report-modal', [
@@ -424,7 +426,8 @@
                                     ->keyBy(fn ($a) => (string) $a->getTranslation('slug', $_locale, false))
                                 : collect();
                             $_renderKgChip = function ($a) {
-                                $url = route('acronyms.show', $a->getTranslation('slug', app()->getLocale(), false));
+                                // 2026-08-31 (#2092) : getTranslation() sans repli protégé par getPublicUrl().
+                                $url = $a->getPublicUrl();
                                 $icon = $a->icon ?: '🔤';
                                 $label = e((string) $a->acronym);
                                 $aria = e(__('Voir la signification de').' '.((string) $a->acronym));
@@ -500,7 +503,7 @@
                                 :title="$acronymTitle"
                                 :summary="$acronym->getTranslation('one_sentence_answer', 'fr_CA', false) ?: ($acronym->getTranslation('description', 'fr_CA', false) ?: '')"
                                 :sections="$acronymSections"
-                                :directUrl="route('acronyms.show', $acronym->getTranslation('slug', 'fr_CA', false) ?: $acronym->slug)"
+                                :directUrl="$acronym->getPublicUrl()"
                                 :indexUrl="route('acronyms.index')"
                                 indexLabel="Voir tous les acronymes"
                                 utmSource="share_acronym"
@@ -522,7 +525,8 @@
             <div class="row row-flex">
                 @foreach($relatedAcronyms as $related)
                     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-                        <a href="{{ route('acronyms.show', $related->getTranslation('slug', app()->getLocale())) }}"
+                        {{-- 2026-08-31 (#2092) : getTranslation() sans repli protégé par getPublicUrl(). --}}
+                        <a href="{{ $related->getPublicUrl() }}"
                            class="acr-show-related-card"
                            aria-label="{{ __('Voir la signification de') }} {{ $related->acronym }}">
                             <div>
@@ -547,7 +551,7 @@
 @push('scripts')
 {{-- Schema.org JSON-LD inline (DefinedTerm enrichi + BreadcrumbList + FAQPage si présent) --}}
 @php
-    $_acrUrl = route('acronyms.show', $acronym->getTranslation('slug', app()->getLocale(), false) ?: $acronym->slug);
+    $_acrUrl = $acronym->getPublicUrl();
     $_acrDesc = $acronym->one_sentence_answer ?: ($acronym->description ? Str::limit(strip_tags($acronym->description), 280) : $acronym->full_name);
 
     $_definedTerm = [
