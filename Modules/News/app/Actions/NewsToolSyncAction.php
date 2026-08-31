@@ -126,6 +126,18 @@ final class NewsToolSyncAction
      * lit le résultat de CE MÊME appel linkify() (getLastMatchedTerms() ci-dessous), le correctif
      * couvre les deux mécanismes (corps de texte + attachement auto) sans code additionnel ici.
      *
+     * 2026-08-31 (mandat #2091, « Clark » détecté dans « Clark Wiethorn », « Ghost » dans
+     * « Ghost Murmur ») : le symétrique du cas ci-dessus - un mot qui SUIT le nom, cette fois -
+     * touche AUSSI le mécanisme de recapture ci-dessous ($neverAutoIds), qui a son PROPRE
+     * balayage regex (`\bNom\b` sur le texte brut), distinct de matchInText(). Un nom de
+     * TOOL_NEVER_AUTO qui n'est PAS dans TOOL_NEVER_RECAPTURE (donc recapturable) pourrait subir
+     * le même défaut : rien ne garantissait qu'il ne préfixe jamais un nom propre sans rapport.
+     * Plutôt que dupliquer une seconde fois la définition de « qu'est-ce qu'une continuation sûre
+     * après un nom d'outil », le filtre ci-dessous appelle GlossaryLinkifier::buildToolSuffixGuard()
+     * - LE MÊME fragment regex que matchInText(), un seul endroit pour la même règle, comme
+     * demandé par la revue du mandat #2091 : « une seule fonction de frontière, éprouvée par un
+     * jeu de tests commun ».
+     *
      * Renvoie une Collection d'IDs d'outils (sans enregistrer - l'admin valide).
      *
      * @return Collection<int, int>
@@ -163,7 +175,7 @@ final class NewsToolSyncAction
             // majuscule - c'est la faille fermée ici (voir docblock plus haut). Le reste de
             // TOOL_NEVER_AUTO ("avec", "tome", "make"...) garde le comportement d'origine.
             ->reject(fn (string $name) => in_array($name, GlossaryLinkifier::TOOL_NEVER_RECAPTURE, true))
-            ->filter(fn (string $name) => (bool) preg_match('/\b' . preg_quote(ucfirst($name), '/') . '\b/u', $text))
+            ->filter(fn (string $name) => (bool) preg_match('/\b'.preg_quote(ucfirst($name), '/').'\b'.GlossaryLinkifier::buildToolSuffixGuard().'/u', $text))
             ->map(fn (string $name) => Tool::published()
                 ->whereRaw("{$nameJsonExpr} = ?", [mb_strtolower($name)])
                 ->value('id'))

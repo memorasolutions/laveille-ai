@@ -501,3 +501,116 @@ it('lie Anthropic Claude en entier, jamais coupe', function () {
     );
     expect(str_contains($html, '>Anthropic</a>'))->toBeFalse();
 });
+
+/**
+ * 2026-08-31 (mandat #2091) : garde SUFFIXE - GlossaryLinkifier::TOOL_SUFFIX_SAFE_MODIFIERS /
+ * buildToolSuffixGuard(). Deux faux rattachements mesures en production (CHANGELOG v1.242.11) :
+ * l'outil « Clark » detecte dans le nom propre « Clark Wiethorn » (agent du FBI), l'outil
+ * « Ghost » detecte dans le nom de code « Ghost Murmur ». Le nom d'outil est le PREMIER mot
+ * d'un nom propre compose sans rapport avec l'outil - symetrique de TOOL_COMPOUND_EXCLUSIONS
+ * (prefixe fautif AVANT le nom), mais cette fois le parasite SUIT.
+ *
+ * Portee volontairement limitee a type='tool' (voir docblock de la constante) : contrairement au
+ * cas Composer/TOOL_COMPOUND_EXCLUSIONS (qui depend de loadTerms(), donc teste uniquement via
+ * l'API publique dans le module News), cette garde ne depend d'AUCUNE configuration chargee
+ * depuis la base - seul $term['type'] pilote son activation. La reflexion bas niveau de ce
+ * fichier reste donc un test valide et rapide pour le mecanisme lui-meme ; la preuve de bout en
+ * bout (vrais modeles Tool + artisan news:backfill-auto-tools) vit dans
+ * Modules/News/tests/Feature/ToolNameProperNounSuffixTest.php.
+ */
+function glxTermeOutil(string $nom, string $slug): array
+{
+    return [['name' => $nom, 'slug' => $slug, 'definition' => 'Test',
+             'type' => 'tool', 'url' => '/annuaire/'.$slug, 'match_strategy' => 'case_sensitive']];
+}
+
+// === Les 2 cas REELS mesures en production : DOIVENT rester NON LIES ===
+
+it('ne lie pas Clark a l interieur du nom propre Clark Wiethorn', function () {
+    [$dom, $root] = glxDomFromHtml("<p>L'agent du FBI Clark Wiethorn a confirme l'information.</p>");
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('Clark', 'clark'), false, 10);
+
+    expect($liens)->toBe(0);
+    expect(str_contains($dom->saveHTML(), 'glossary-link'))->toBeFalse();
+});
+
+it('ne lie pas Ghost a l interieur du nom de code Ghost Murmur', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le programme, nom de code Ghost Murmur, a ete revele hier.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('Ghost', 'ghost'), false, 10);
+
+    expect($liens)->toBe(0);
+    expect(str_contains($dom->saveHTML(), 'glossary-link'))->toBeFalse();
+});
+
+// === Non-regression : la mention SEULE reste legitime (meme outil, texte different) ===
+
+it('lie toujours Clark quand il est mentionne seul', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Nous utilisons Clark pour automatiser nos taches.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('Clark', 'clark'), false, 10);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($dom->saveHTML(), '/annuaire/clark'))->toBeTrue();
+});
+
+it('lie toujours Ghost en fin de phrase', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le meilleur outil de suivi de prix reste Ghost.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('Ghost', 'ghost'), false, 10);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($dom->saveHTML(), '/annuaire/ghost'))->toBeTrue();
+});
+
+// === Cas legitimes du mandat : DOIVENT continuer de lier (modificateur de produit connu) ===
+
+it('lie ChatGPT dans le nom compose legitime ChatGPT Plus', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Les abonnes ChatGPT Plus profitent des derniers modeles.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('ChatGPT', 'chatgpt'), false, 10);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($dom->saveHTML(), '/annuaire/chatgpt'))->toBeTrue();
+});
+
+it('lie Claude dans le nom compose legitime Claude Code', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Claude Code a ete mis a jour cette semaine.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('Claude', 'claude'), false, 10);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($dom->saveHTML(), '/annuaire/claude'))->toBeTrue();
+});
+
+it('lie Gemini dans le nom compose legitime Gemini Pro', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Gemini Pro surpasse les benchmarks precedents.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('Gemini', 'gemini'), false, 10);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($dom->saveHTML(), '/annuaire/gemini'))->toBeTrue();
+});
+
+it('lie Mistral dans le nom compose legitime Mistral Large', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Mistral Large impressionne sur les taches de code.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('Mistral', 'mistral'), false, 10);
+
+    expect($liens)->toBe(1);
+    expect(str_contains($dom->saveHTML(), '/annuaire/mistral'))->toBeTrue();
+});
+
+// === Portee : le glossaire (type != 'tool') n'est PAS soumis a cette garde ===
+
+it('la garde suffixe ne touche pas un terme de glossaire suivi d un mot majuscule', function () {
+    // « Mistral » existe reellement comme fiche de glossaire (l'editeur) ; son alias « Mistral
+    // AI » doit continuer de fonctionner meme si « AI » est absent de TOOL_SUFFIX_SAFE_MODIFIERS
+    // pour un mot qui ne serait PAS un modificateur connu - la garde ne s'applique qu'aux outils.
+    [$dom, $root] = glxDomFromHtml('<p>Mistral Zephyr est une conference organisee par l editeur.</p>');
+
+    $liens = glxWalk($dom, $root, glxTerme('Mistral', 'mistral'), false, 10);
+
+    expect($liens)->toBe(1, 'Un terme de type glossaire ne doit jamais etre bloque par la garde suffixe des outils.');
+});

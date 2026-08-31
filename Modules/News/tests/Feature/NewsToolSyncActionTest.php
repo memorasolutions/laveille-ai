@@ -18,6 +18,14 @@ declare(strict_types=1);
  * d'outil TOOL_NEVER_AUTO (ex. « avec ») ne doit PAS déclencher de faux positif quand il
  * apparaît en minuscule en milieu de phrase (un outil publié « Avec » existe réellement
  * dans l'annuaire - confirmé en production).
+ *
+ * 2026-08-31 (mandat #2091) : la fixture du premier test citait « Claude Mythos Preview
+ * d'Anthropic » - un nom de modèle entièrement fictif, sans rapport avec ce que ce test
+ * vérifie (le balayage de structured_summary). Une fois la garde suffixe posée
+ * (GlossaryLinkifier::TOOL_SUFFIX_SAFE_MODIFIERS), « Mythos » - mot inventé, absent de
+ * tout vocabulaire réel de modificateurs produit - bloquait à tort la recapture de
+ * « Claude ». Réduit à « Claude d'Anthropic » : preserve l'intention du test (aucune
+ * majuscule ne suit directement le nom), sans dépendre d'un nom de produit qui n'existe pas.
  */
 
 use Modules\Dictionary\Models\Term;
@@ -66,11 +74,11 @@ it('suggest() détecte un outil TOOL_NEVER_AUTO mentionné uniquement dans le r�
         'description'    => '',
         'summary'        => '',
         'structured_summary' => [
-            'hook' => "En juin 2026, un record de vulnérabilités a été signalé, principalement grâce à l'utilisation de modèles IA comme Claude Mythos Preview d'Anthropic.",
+            'hook' => "En juin 2026, un record de vulnérabilités a été signalé, principalement grâce à l'utilisation de modèles IA comme Claude d'Anthropic.",
             'key_points' => [
                 '1 500 vulnérabilités critiques signalées en juin 2026',
             ],
-            'why_important' => "Les modèles d'IA, comme Claude Mythos Preview d'Anthropic, permettent de détecter automatiquement les vulnérabilités.",
+            'why_important' => "Les modèles d'IA, comme Claude d'Anthropic, permettent de détecter automatiquement les vulnérabilités.",
         ],
         'slug'         => 'article-ntsa-claude',
         'pub_date'     => now()->subDay(),

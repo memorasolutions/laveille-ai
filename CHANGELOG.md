@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.243.2] - 2026-08-31
+
+### Corrigé
+- **Mandat #2091 (cinquième récidive du même motif) : un nom d'outil suivi d'un nom propre composé sans rapport n'est plus rattaché.** Deux faux rattachements mesurés en production (CHANGELOG v1.242.11) : l'outil « Clark » détecté dans le nom propre « Clark Wiethorn » (agent du FBI) ; l'outil « Ghost » détecté dans le nom de code « Ghost Murmur ». Dans les deux cas, le nom d'outil est le PREMIER mot d'un nom propre composé de deux mots, sans rapport avec l'outil - le symétrique exact de `GlossaryLinkifier::TOOL_COMPOUND_EXCLUSIONS` (préfixe fautif AVANT le nom), mais cette fois le parasite SUIT.
+- **Une RÈGLE, pas un catalogue.** Une simple liste d'exclusion par outil est structurellement impossible ici (on ne peut pas énumérer tous les noms propres du monde). Nouveau mécanisme : `GlossaryLinkifier::TOOL_SUFFIX_SAFE_MODIFIERS` (~80 modificateurs de produit génériques et réutilisables pour TOUS les outils - Pro, Plus, Code, Large, Studio...) + `buildToolSuffixGuard()`, un lookahead regex qui bloque un nom d'outil suivi d'un espace puis d'un mot à majuscule initiale qui N'EST PAS un modificateur connu. Portée : uniquement `type='tool'`/`'tool_alias'` - le glossaire et les acronymes n'ont pas ce risque (leurs compléments légitimes sont déjà des entrées à part entière plus longues, gagnées par le tri longueur DESC).
+- **Testée CONTRE les cas légitimes AVANT d'être posée** (17 cas dans un script isolé, puis dans la suite Pest) : « ChatGPT Plus », « Claude Code », « Gemini Pro », « Mistral Large » continuent de lier le nom de l'outil - le mot qui suit y est un modificateur connu. La leçon du 2026-08-27 (un resserrement de frontière avait cassé Node.js/Z.ai/jan.ai en silence) a été appliquée au pied de la lettre : la liste des cas légitimes a été écrite avant le correctif, pas après.
+- **Connaissance dupliquée fermée, pas seulement contournée.** `NewsToolSyncAction::suggest()` porte son PROPRE balayage regex pour les noms de `TOOL_NEVER_AUTO` (`$neverAutoIds`, boundary `\b`), distinct du pattern de `matchInText()`. Les deux étaient exposés au même risque de suffixe mais ne le savaient pas l'un de l'autre. Décision DRY explicite : la RÈGLE de frontière (`buildToolSuffixGuard()`, méthode publique) est désormais partagée par les deux mécanismes - ils évoluent ensemble, un futur ajout au vocabulaire de modificateurs profite aux deux sans double frappe. Décision explicite de NE PAS fusionner les deux PIPELINES de matching (DOM récursif à occurrence unique côté `matchInText()`, balayage plein-texte côté `$neverAutoIds`) : ils ont des besoins réellement différents (position dans le DOM vs simple présence dans le texte concaténé), les fusionner créerait un couplage accidentel plus coûteux que la petite duplication de structure restante.
+- Effet de bord positif repéré en écrivant les tests : une fixture pré-existante (`NewsToolSyncActionTest.php`) citait un nom de modèle entièrement fictif (« Claude Mythos Preview ») sans rapport avec ce qu'elle vérifie - corrigée en « Claude d'Anthropic » pour ne plus dépendre d'un mot inventé absent de tout vocabulaire réel.
+
+### Tests
+- `Modules/Core/tests/Unit/GlossaryLinkifierTest.php` (+9 cas : les 2 vrais faux rattachements bloqués, la mention seule toujours liée, les 4 noms composés légitimes du mandat, la portée glossaire non affectée) : suite complète **49 passed (84 assertions)**, zéro régression sur les cas déjà verrouillés (Node.js, Z.ai, jan.ai, DeepLearning.AI, Gemini 3/3.5, xAI, AGI...).
+- `Modules/News/tests/Feature/ToolNameProperNounSuffixTest.php` (nouveau, 8 cas, calqué sur `ComposerParagraphFauxComposeTest.php`) : les deux mécanismes (lien corps de texte + attachement `news:backfill-auto-tools`) vérifiés pour les 2 cas réels ET les cas légitimes (ChatGPT Plus, Notion AI).
+- Suite complète du module News (dépôt partagé, aucune autre suite active au lancement) : **624 passed (2086 assertions)**. Suite complète du module Core : **202 passed (603 assertions)**. Zéro échec, zéro régression.
+
 ## [1.243.1] - 2026-08-31
 
 ### Corrigé

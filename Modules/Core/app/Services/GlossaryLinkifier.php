@@ -168,6 +168,72 @@ class GlossaryLinkifier
     ];
 
     /**
+     * 2026-08-31 (mandat #2091, CHANGELOG v1.242.11) : deux faux rattachements mesurés en
+     * production - outil « Clark » détecté dans le nom propre « Clark Wiethorn » (agent du
+     * FBI) ; outil « Ghost » détecté dans le nom de code « Ghost Murmur ». Dans les deux cas
+     * le nom d'outil est le PREMIER mot d'un nom propre composé de deux mots, sans rapport
+     * avec l'outil - le symétrique exact de TOOL_COMPOUND_EXCLUSIONS ci-dessus (préfixe fautif
+     * AVANT le nom), mais cette fois le parasite SUIT le nom.
+     *
+     * Ce cas ne peut PAS se traiter par catalogue par-outil (on ne peut pas énumérer tous les
+     * noms propres du monde qui pourraient suivre un nom d'outil) : c'est une RÈGLE générale,
+     * pas une liste d'exceptions qui grandit à chaque incident.
+     *
+     * Enjeu chiffré : environ 400 à 450 rattachements légitimes attendent que ce motif soit
+     * fermé (taux d'erreur mesuré 2/12 = 17 % sur l'échantillon réel du 2026-08-31).
+     *
+     * Piste testée AVANT d'être posée (17 cas, script isolé) : un nom d'outil suivi d'un
+     * espace puis d'un mot à majuscule initiale qui n'appartient pas à un vocabulaire connu de
+     * MODIFICATEURS DE PRODUIT (Pro, Plus, Code, Large...) est probablement le premier mot
+     * d'un nom propre composé sans rapport avec l'outil. Testée CONTRE les cas légitimes -
+     * « ChatGPT Plus », « Claude Code », « Gemini Pro », « Mistral Large » sont des noms
+     * composés produit parfaitement valides et DOIVENT continuer de lier le nom de l'outil :
+     * le mot qui suit y est un modificateur connu, pas un nom propre étranger à l'outil.
+     *
+     * Portée : uniquement type='tool' et type='tool_alias' (jamais glossaire/acronyme, qui
+     * n'ont pas ce risque - leurs compléments légitimes, ex. « Mistral (Le Chat) », sont déjà
+     * des entrées à part entière plus longues, gagnées par le tri longueur DESC avant même
+     * d'atteindre le nom court).
+     *
+     * Limite assumée, du même ordre que les autres listes de ce fichier (dos/CNN/mistral,
+     * QUALIFIER_ORGANISATION) : un modificateur absent de cette liste fait perdre UNIQUEMENT
+     * un lien (le nom de l'outil reste alors simple texte) - jamais un lien FAUX, donc jamais
+     * une régression au sens de ce mandat. À l'inverse, un nom propre réel qui contiendrait
+     * accidentellement un mot de cette liste en 2e position (ex. « Ghost Studio » comme studio
+     * d'enregistrement) reste un risque résiduel accepté, jamais éliminé par construction.
+     */
+    public const TOOL_SUFFIX_SAFE_MODIFIERS = [
+        'Pro', 'Plus', 'Max', 'Ultra', 'Lite', 'Mini', 'Air', 'SE', 'XL', 'HD',
+        'AI', 'Studio', 'Code', 'Large', 'Medium', 'Small', 'Nano',
+        'Enterprise', 'Business', 'Team', 'Teams', 'Personal', 'Premium', 'Basic', 'Free',
+        'Cloud', 'Edge', 'Mobile', 'Web', 'Desktop', 'API', 'SDK', 'GPT',
+        'Turbo', 'Boost', 'Advanced', 'Standard', 'Essential', 'Essentials', 'Ultimate',
+        'Creator', 'Developer', 'Solo', 'Family', 'Student', 'Education', 'Gaming',
+        'Search', 'Chat', 'Voice', 'Vision', 'Live', 'Agent', 'Agents', 'Assistant',
+        'Connect', 'Sync', 'Flow', 'Kit', 'Hub', 'Suite', 'Labs', 'Lab',
+        'Go', 'One', 'Beta', 'Alpha', 'Home', 'Prime', 'Neo', 'Core', 'Base', 'Now', 'Next', 'Copilot',
+    ];
+
+    /**
+     * Fragment regex (lookahead) de la garde suffixe ci-dessus - calculé une seule fois
+     * (mémoïsation statique locale) puis réutilisé par matchInText() ET par
+     * NewsToolSyncAction::suggest() (méthode PUBLIC exprès : un seul endroit définit la
+     * règle, les deux mécanismes qui en ont besoin la partagent au lieu de la redupliquer -
+     * c'est précisément l'écart qui avait permis au motif « Clark »/« Ghost » de rentrer par
+     * un mécanisme pendant que l'autre restait, lui, protégé).
+     */
+    public static function buildToolSuffixGuard(): string
+    {
+        static $guard = null;
+        if ($guard === null) {
+            $alt = implode('|', array_map(fn ($w) => preg_quote($w, '/'), self::TOOL_SUFFIX_SAFE_MODIFIERS));
+            $guard = '(?!\s(?!(?:'.$alt.')\b)\p{Lu})';
+        }
+
+        return $guard;
+    }
+
+    /**
      * 2026-05-05 #141 b : tracking cumulatif inter-appels.
      * Une page peut appeler @glossarize() plusieurs fois (hook, key_points, why_important, etc.).
      * On veut first-occurrence GLOBAL et accumulation des matched terms pour Schema.org.
@@ -1044,6 +1110,14 @@ class GlossaryLinkifier
             // MCP: SELF (<5 lignes)
             // RAISON: correctif de frontiere sur le point unique ou le motif est construit.
             $finDeMot = '(?![\p{L}\p{N}_\-\/]|\.\w)';
+            // 2026-08-31 (mandat #2091) : garde SUFFIXE, symétrique de celle du prefixe ci-dessous -
+            // voir TOOL_SUFFIX_SAFE_MODIFIERS/buildToolSuffixGuard(). Portée limitée à type='tool' et
+            // 'tool_alias' : seuls les noms d'outils sont exposés au risque « nom propre composé qui
+            // commence par le nom de l'outil » (Clark Wiethorn, Ghost Murmur) - le glossaire/les
+            // acronymes n'ont pas ce risque (voir docblock de la constante).
+            $finSuffixeOutil = in_array($term['type'] ?? '', ['tool', 'tool_alias'], true)
+                ? self::buildToolSuffixGuard()
+                : '';
             // 2026-08-28 : garde de FAUX COMPOSÉ (TOOL_COMPOUND_EXCLUSIONS, ex. « Composer » dans
             // « Paragraph Composer »). Lookbehind négatif À LARGEUR FIXE par préfixe exclu
             // (préfixe + 1 espace, casse insensible sur le seul préfixe) : rejette UNIQUEMENT le
@@ -1054,9 +1128,9 @@ class GlossaryLinkifier
                 $debutDeMot .= '(?<!(?i:'.preg_quote($prefixExclu, '/').')[\s\x{00A0}])';
             }
             if ($strategy === 'partial_case_sensitive') {
-                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.self::buildPartialCasePattern($name).$finDeMot.'/u';
+                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.self::buildPartialCasePattern($name).$finDeMot.$finSuffixeOutil.'/u';
             } else {
-                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.preg_quote($name, '/').$finDeMot.'/u';
+                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.preg_quote($name, '/').$finDeMot.$finSuffixeOutil.'/u';
                 if ($strategy === 'loose') $pattern .= 'i';
             }
             // case_sensitive ET exact_phrase : pas de flag i (casse exacte)
