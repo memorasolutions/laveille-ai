@@ -25,7 +25,12 @@ use Illuminate\Support\Facades\Storage;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+// Groupe "smoke" (ticket #2095) : sas rapide et bloquant avant déploiement. Ce fichier couvre la
+// SEULE porte d'écriture bornée de la composition d'actualités (voir docblock ci-dessus) - liste
+// blanche du payload, double protection anti-écrasement, mode --publish : exactement la zone où
+// deux régressions réelles ont atteint la production le 2026-08-26 et le 2026-08-28 (résumé riche
+// effacé par un payload partiel).
+uses(Tests\TestCase::class, RefreshDatabase::class)->group('smoke');
 
 // ── Helpers locaux (préfixés Nac pour éviter tout conflit inter-fichiers) ──────────────
 

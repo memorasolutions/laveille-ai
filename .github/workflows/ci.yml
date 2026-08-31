@@ -3,6 +3,16 @@ name: CI
 on:
   push:
     branches: [main, master, 'feature/*']
+    # 2026-08-31 (ticket #2095) : identique au paths-ignore historique de deploy.yml (2026-08-23,
+    # « un commit de documentation seule ne doit plus déployer »). Le déploiement se déclenche
+    # désormais via workflow_run sur CETTE CI (voir deploy.yml) : si la CI ne tourne pas sur un
+    # commit de documentation seule, deploy.yml ne se déclenche pas non plus - même protection,
+    # une seule source de vérité, pas de filtre dupliqué à deux endroits.
+    paths-ignore:
+      - 'QUESTIONS-CLAUDE.html'
+      - 'QUESTIONS-CLAUDE.html.bak-*'
+      - 'docs/**'
+      - '*.md'
   pull_request:
     branches: [main, master]
 
@@ -38,37 +48,54 @@ jobs:
       - name: Larastan (static analysis level 6) - signalement seul, meme dette
         run: vendor/bin/phpstan analyse --memory-limit=512M || true
 
-  tests:
+  # Ticket #2095 - ce job remplace l'ancien job "tests" (suite complète, 36-39 min,
+  # continue-on-error: true). Ce drapeau masquait des échecs réels : mesuré sur 2 runs GitHub
+  # Actions distincts (33337672499 du 2026-08-30, 33399133405 du 2026-08-31) où le job "tests"
+  # était en conclusion "failure" PENDANT que le workflow entier rapportait "success" - aucun
+  # commit cassé n'a jamais été bloqué par ce job. Voir docs/specs/2026-08-31-ci-deploy-gating-
+  # decision.md pour la mesure complète et le club des sages qui a tranché ce chantier.
+  #
+  # Composition du sous-ensemble (testsuites Architecture+Unit + groupe Pest "smoke"), MESURÉE
+  # le 2026-08-31, jamais supposée : 198 tests / 525 assertions, 0 échec sur 6 exécutions
+  # indépendantes (3x Architecture+Unit : 40.33s/41.00s/40.51s ; 3x groupe smoke :
+  # 61.14s/61.01s/60.88s). Vérifié aussi contre un run GitHub Actions Linux réel
+  # (33399133405) : les 2 fichiers du groupe smoke y passent déjà, seul BlogAdminTest (hors de ce
+  # sous-ensemble) y a échoué. Budget total mesuré environ 100 secondes d'exécution de tests,
+  # très sous les 10 minutes cibles.
+  #
+  # Choix du contenu : pas une nouvelle suite inventée, seulement des tests EXISTANTS déjà
+  # stables, choisis parce qu'ils auraient attrapé les vrais défauts de production de la semaine
+  # du 2026-08-23 au 2026-08-31 - jamais choisis pour leur seule rapidité :
+  #   - Architecture (testsuite complète) : ConfigCacheForbiddenTest (la commande interdite
+  #     config:cache) + TranslatableSlugFallbackTest (le repli de construction d'adresse qui avait
+  #     cassé le plan de site en juillet, retrouvé ailleurs le 2026-08-31)
+  #   - Unit (testsuite complète) : aides de typographie française
+  #   - Groupe "smoke" (Pest ->group('smoke')) : GlossaryLinkifierTest (frontière des
+  #     correspondances de noms de l'auto-lien du glossaire - zone de 3 correctifs réels entre le
+  #     2026-08-23 et le 2026-08-28) + NewsApplyCommandTest (seule porte d'écriture bornée de la
+  #     composition d'actualités - résumé riche effacé à deux reprises en production, 2026-08-26
+  #     et 2026-08-28)
+  #
+  # Exécution en SÉRIE, jamais --parallel. Mesure réelle du 2026-08-31 : le mode parallèle
+  # n'apporte aucun gain sur ce sous-ensemble restreint (61.14s en parallèle contre 61.01s/60.88s
+  # en série sur 3 exécutions - l'écart tient au démarrage de paratest, pas au travail utile). Le
+  # mode série élimine par construction toute la classe de course déjà mesurée dans ce projet :
+  # Phase155Test et TranslationModuleTest écrivaient tous deux dans les mêmes lang/fr.json et
+  # lang/en.json réels sous workers Paratest concurrents (diagnostiqué et corrigé le 2026-08-30,
+  # commits cbbfe6b0/3d53e53c - reconfirmé stable ici par 2 exécutions parallèles indépendantes,
+  # 27/27 tests verts chaque fois). La suite complète (36-39 min, 6600+ tests, mode parallèle par
+  # défaut) continue de tourner chaque nuit dans nightly-tests.yml, jamais sur le chemin critique
+  # du déploiement - y compris pour diagnostiquer une flakiness résiduelle distincte (ex.
+  # BlogAdminTest, "No hint path defined for [fronttheme]", non reproduite sur 4 exécutions
+  # isolées le 2026-08-31 - piste ouverte, pas une régression de ce sas).
+  #
+  # Aucun continue-on-error : zéro tolérance, ce job doit pouvoir réellement faire échouer le
+  # workflow (et donc bloquer le déploiement, voir deploy.yml).
+  smoke:
+    name: Sas rapide (bloquant)
     runs-on: ubuntu-latest
-    # 50 min, pas 30 : un premier plafond de 30 a tue le job par timeout (pas par un echec de
-    # test) sur un run reel du 2026-08-30 - la suite complete mesure 2204,87 s (36,7 min) sur ce
-    # runner. 50 min laisse une marge reelle plutot qu'un plafond qui coupe la mesure elle-meme.
-    timeout-minutes: 50
-    continue-on-error: true
+    timeout-minutes: 15
 
-    # Pas de service MySQL ici : phpunit.xml force DB_CONNECTION=sqlite (:memory:) pour la suite
-    # de tests, exactement comme en local. Un service MySQL + "php artisan migrate --force" fut
-    # tente le 2026-08-30 : il echoue systematiquement sur une contrainte preexistante et sans
-    # rapport avec le code teste (2026_03_02_600003_create_url_redirects_table : unique() sur
-    # une colonne string(2048) en utf8mb4 = 8192 octets, largement au-dessus de la limite dure
-    # InnoDB de 3072 octets). Documente pour suivi separe - hors perimetre de cette porte de CI.
-    #
-    # continue-on-error : signalement seul, PAS un blocage. Premiere execution reelle de ce job
-    # (2026-08-30, jamais reussie une seule fois en 556 runs historiques) : 74 tests en echec sur
-    # ~6600+, tous par des causes preexistantes et sans rapport avec un push donne - dont une
-    # decouverte systemique : ~48 modules declarent "Modules\X\Database\Seeders\Y" en namespace
-    # mais rangent le fichier dans "database/seeders/" (minuscule) - PSR-4 est sensible a la casse,
-    # macOS (poste de developpement) est insensible a la casse et masque le bogue depuis toujours,
-    # Linux (ce runner) ne le masque pas. Corriger les ~48 (en realite 11, mesure v1.238.1) modules
-    # est traite a part (v1.238.1/.8, v1.239.1), sans effet sur CE compte (verifie par diff exact
-    # des noms de tests en echec, avant/apres, v1.240.1).
-    #
-    # v1.240.1 (2026-08-30) : 43 -> 17 echecs, regroupes par cause plutot que corriges un par un.
-    # 32 venaient d'une meme famille (une valeur que le vrai .env du poste fournit mais que
-    # .env.example, celui que la CI copie, ne fournit jamais - gate under_construction Academy/
-    # Decido, OPENROUTER_API_KEY, APP_NAME) : corrige dans phpunit.xml + 2 fichiers de test.
-    # 11 restent, cause identifiee ou pistee (detail CHANGELOG.md v1.240.1) - jamais un correctif
-    # a l'aveugle sur une piste non confirmee.
     env:
       APP_ENV: testing
       CACHE_STORE: array
@@ -115,13 +142,23 @@ jobs:
 
       - run: php artisan key:generate
 
-      - name: Run tests
-        run: php artisan test --parallel
+      - name: Architecture + Unit (testsuites complètes)
+        run: php artisan test --testsuite=Architecture,Unit
 
+      - name: Sous-ensemble Feature/Modules marqué smoke
+        run: php artisan test --group=smoke
+
+  # e2e est MORT dans le flux réel de ce dépôt (mesuré le 2026-08-31, ticket #2095) : ce job ne se
+  # déclenche que sur pull_request, et ce dépôt ne travaille jamais par PR (gh pr list --state all
+  # ne montre que Dependabot et une branche d'audit ancienne). Dernière exécution de ci.yml sur
+  # événement pull_request : mars 2026, 100% en échec. Il ne protège donc rien dans le flux de
+  # livraison actuel. Laissé tel quel (le réanimer - le brancher sur push, ou le retirer
+  # entièrement - est un chantier distinct, hors périmètre de #2095), mais désormais NOMMÉ comme
+  # dormant plutôt que compté silencieusement comme une protection active.
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: tests
+    needs: smoke
     if: github.event_name == 'pull_request'
     continue-on-error: true
 

@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 use Modules\Core\Services\GlossaryLinkifier;
 
+// Groupe "smoke" (ticket #2095) : sas rapide et bloquant avant déploiement. Ce fichier couvre
+// la frontière des correspondances de noms de l'auto-lien du glossaire (bornage aux séparateurs,
+// priorité nom principal/alias) - la zone exacte où plusieurs défauts réels ont été mesurés en
+// production entre le 2026-08-23 et le 2026-08-28 (Node.js/Z.ai/jan.ai coupés par un bornage trop
+// large, « xAI » et sept autres collisions alias/nom principal). Tests unitaires purs, aucun accès
+// disque ni base de données : rapides et déterministes par construction.
+uses()->group('smoke');
+
 it('extracts base name from qualifier "X (Y)"', function () {
     expect(GlossaryLinkifier::extractQualifierAliases('Loi 25 (Québec)'))
         ->toBe(['Loi 25']);

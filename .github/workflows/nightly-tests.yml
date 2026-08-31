@@ -1,0 +1,107 @@
+# Projet MEMORA solutions - Ticket #2095 - ce workflow remplace l'ancien job "tests" de
+# ci.yml qui tournait sur CHAQUE push avec continue-on-error, donc sans jamais bloquer ni
+# alerter clairement (mesuré : le job était en conclusion "failure" pendant que le workflow
+# entier rapportait "success" sur 2 runs distincts, voir ci.yml et docs/specs/2026-08-31-ci-
+# deploy-gating-decision.md). Il sert aussi de terrain pour diagnostiquer une flakiness
+# résiduelle non liée au sous-ensemble smoke de ci.yml (ex. BlogAdminTest, échec "No hint path
+# defined for [fronttheme]" mesuré le 2026-08-31 mais NON reproduit sur 4 exécutions isolées le
+# même jour - piste ouverte, pas une régression du sas rapide).
+name: Suite complète (nocturne)
+
+on:
+  schedule:
+    # 05h00 Québec (09:00 UTC) - fenêtre creuse, aucune conclusion humaine n'attend ce résultat
+    # en direct. L'écart Québec/UTC varie de 4 à 5 heures selon l'heure avancée ou normale de
+    # l'Est ; le cron reste fixé en UTC (seule zone stable pour GitHub Actions).
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      # Diagnostic ponctuel série vs parallèle à la demande (section 5.1.D de la décision
+      # #2095). Jamais un mode série permanent : jugé trop coûteux par le club des sages,
+      # déjà tranché.
+      mode:
+        type: choice
+        description: "Mode d'exécution de la suite complète"
+        options:
+          - parallel
+          - serial
+        default: parallel
+
+jobs:
+  full-suite:
+    name: Suite complète Pest (diagnostic, jamais bloquant)
+    runs-on: ubuntu-latest
+    # 50 min, identique au budget mesuré de l'ancien job "tests" : la suite complète mesure
+    # 33 à 39 minutes selon le run (2008,05s / 2204,87s / 2243,23s d'exécution des tests seule).
+    timeout-minutes: 50
+
+    env:
+      APP_ENV: testing
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, sqlite3, pdo_sqlite, xml, ctype, json, intl, bcmath, gd
+          coverage: none
+          tools: composer
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: cp .env.example .env
+
+      - run: php artisan key:generate
+
+      # Aucun continue-on-error : ce job doit pouvoir échouer visiblement (rouge dans l'onglet
+      # Actions, notification GitHub par défaut à l'auteur du dernier changement du fichier),
+      # précisément PARCE QUE rien d'autre n'en dépend. Aucun workflow_run ne l'écoute ; il est
+      # totalement découplé du déclencheur de deploy.yml. Échec visible ET jamais bloquant, les
+      # deux à la fois, parce que rien de downstream ne le lit.
+      - name: Suite complète
+        run: |
+          if [ "${{ github.event.inputs.mode }}" = "serial" ]; then
+            php artisan test
+          else
+            php artisan test --parallel
+          fi
+
+      - name: Récapitulatif de l'échec
+        if: failure()
+        run: |
+          {
+            echo "## Échec de la suite complète (nocturne)"
+            echo ""
+            echo "Cet échec ne bloque aucun déploiement : ce workflow est totalement découplé"
+            echo "du chemin critique (deploy.yml n'écoute que le workflow CI, jamais celui-ci)."
+            echo "Consultez les logs de l'étape 'Suite complète' ci-dessus pour le détail des"
+            echo "tests en échec."
+          } >> "$GITHUB_STEP_SUMMARY"

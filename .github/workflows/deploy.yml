@@ -1,41 +1,71 @@
 name: Deploy to cPanel via rsync/SSH
 
+# Ticket #2095 (2026-08-31) : le déclenchement direct sur push est retiré. Avant ce chantier,
+# deploy.yml et ci.yml étaient deux workflows indépendants déclenchés par le MÊME push, sans
+# qu'aucun des deux ne consulte l'autre - même quand la CI tournait jusqu'au bout, son job de
+# tests portait continue-on-error: true et ne pouvait donc jamais faire échouer le passage.
+# Mesuré : rien n'a jamais empêché un commit cassé de partir en production. Détail complet et
+# club des sages qui a tranché ce chantier : docs/specs/2026-08-31-ci-deploy-gating-decision.md.
+#
+# Le déclenchement passe désormais par workflow_run sur le workflow "CI" : ce job n'évalue les
+# étapes suivantes QUE si cette CI (voir ci.yml, job "smoke") a réellement terminé en succès - et
+# épingle explicitement le head_sha exact rapporté par cet événement (jamais un checkout
+# implicite de la branche courante), pour fermer la course suivante : sous cancel-in-progress et
+# cadence rapide de push, l'approbation du sas pour un push A pourrait sinon autoriser le
+# déploiement d'un push B plus récent et jamais testé.
+#
+# La protection historique « un commit de documentation seule ne doit plus déployer »
+# (2026-08-23 : 4 déploiements sur 12 ne portaient aucun changement de code, chacun coûtant au
+# site une fenêtre de maintenance pour rien) vit désormais dans le paths-ignore de ci.yml : si la
+# CI ne tourne pas sur un commit donné, cet événement workflow_run ne se déclenche pas non plus
+# pour ce commit - une seule source de vérité, jamais un filtre dupliqué à deux endroits.
 on:
-  push:
-    branches:
-      - master
-    # 2026-08-23 : un commit de DOCUMENTATION SEULE ne doit plus déployer.
-    #
-    # Mesuré ce jour-là : 4 déploiements sur 12 ne portaient aucun changement de code (entrées de
-    # journal). Or chaque déploiement passe le site en maintenance le temps du rsync et de la
-    # reconstruction des caches, soit environ 2 minutes. Écrire au journal coûtait donc au site
-    # une indisponibilité, pour rien. Le 503 est même tombé pendant un contrôle en production,
-    # provoqué par mon propre commit de journal.
-    #
-    # LISTE VOLONTAIREMENT ÉTROITE, jamais un filtre large. Deux pièges évités :
-    #  - `**.md` aurait exclu `public/bd/README.md`, qui vit DANS l'arbre servi. `*.md` ne matche
-    #    que la racine, car `*` ne traverse pas les `/` dans la syntaxe GitHub.
-    #  - un commit MIXTE (documentation + code) déploie quand même : GitHub déclenche dès qu'un
-    #    seul fichier du push sort de cette liste. C'est le comportement voulu.
-    #
-    # Aucune divergence durable n'est créée : le rsync du déploiement suivant emporte de toute
-    # façon les fichiers ignorés ici. Et `workflow_dispatch` reste disponible pour forcer un
-    # déploiement à la main en cas de doute.
-    paths-ignore:
-      - 'QUESTIONS-CLAUDE.html'
-      - 'QUESTIONS-CLAUDE.html.bak-*'
-      - 'docs/**'
-      - '*.md'
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [master]
+  # Reste disponible pour forcer un déploiement à la main en cas de doute - contournement
+  # volontaire et assumé du sas, c'est le sens même d'un déclenchement manuel.
   workflow_dispatch:
+
+# File stricte, JAMAIS d'annulation en cours de transfert. rsync n'est pas une opération atomique
+# (voir l'étape "Deploy via rsync" plus bas) : interrompre un déploiement en cours de transfert
+# laisserait le répertoire de production dans un état mi-copié - une casse immédiate, pire que le
+# problème que cette file résout. cancel-in-progress reste donc à false (la valeur par défaut),
+# écrit ici explicitement pour qu'un futur changement ne le relâche pas par inadvertance. Une
+# rafale de push se résorbe naturellement une fois le sas amont ramené sous 10 minutes (voir
+# ci.yml) : plus de rafale à absorber au niveau du déploiement lui-même.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
     name: Deploy to production
     runs-on: ubuntu-latest
+    # Un déclenchement manuel (workflow_dispatch) est toujours autorisé - contournement
+    # volontaire du sas. Un déclenchement par workflow_run n'autorise le déploiement QUE si la CI
+    # rapporte réellement "success" (jamais "failure", "cancelled", ni aucun autre état).
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
 
     steps:
+      - name: Déterminer le commit exact à déployer
+        # Le SHA exact rapporté par l'événement CI - jamais github.sha implicite, qui pour un
+        # déclenchement workflow_run refléterait la branche courante au moment de CET événement,
+        # potentiellement plus récente que ce qui a été réellement testé (exactement la course
+        # documentée en tête de fichier). Pour un déclenchement manuel, github.sha correspond à
+        # la branche demandée au moment du dispatch - comportement voulu, aucun sas à respecter.
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "DEPLOY_SHA=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_ENV"
+          else
+            echo "DEPLOY_SHA=${{ github.sha }}" >> "$GITHUB_ENV"
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
 
       - name: Setup SSH
         run: |
@@ -186,6 +216,9 @@ jobs:
             --data '{"purge_everything":true}' || true
 
       - name: Deploy notification
+        # DEPLOY_SHA (jamais github.sha, voir l'étape "Déterminer le commit exact à déployer" en
+        # tête de job) : c'est le commit réellement testé par le sas CI qui est journalisé ici,
+        # pas nécessairement la branche courante au moment de ce workflow.
         run: |
           echo "::notice::Deploy rsync/SSH termine avec succes vers server.memora.pro"
-          echo "Deploye le $(date -u '+%Y-%m-%d %H:%M:%S UTC') depuis le commit ${{ github.sha }}"
+          echo "Deploye le $(date -u '+%Y-%m-%d %H:%M:%S UTC') depuis le commit ${{ env.DEPLOY_SHA }}"
