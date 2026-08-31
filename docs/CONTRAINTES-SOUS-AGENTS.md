@@ -254,6 +254,100 @@ Remèdes, du plus simple au plus sûr : un clone indépendant plutôt qu'un work
 dépendances entrent en jeu, ou à défaut un `composer dump-autoload` local au worktree avec un
 `vendor/` qui lui appartient.
 
+## 6 quinquies. LE NAVIGATEUR PILOTÉ EST CÂBLÉ PAR SESSION, PAS PAR SOUS-AGENT - LE LOCAL EST LA VOIE NORMALE
+
+Mesuré le 2026-08-31 vers 11h30 Québec (15h30 UTC), ticket #2029. Quatre faits mesurés ce jour,
+pas supposés - ne pas relire ceci comme une hypothèse.
+
+**1. La panne est réelle et persistante, pas une rumeur.** Appel direct de
+`mcp__playwright__browser_tabs` (list) : échec immédiat, `Error: async initializeServer: Target
+page, context or browser has been closed`. Un second essai (`browser_navigate`) donne EXACTEMENT
+la même erreur - pas d'auto-guérison au simple retry. Le même message, mot pour mot, avait déjà
+été mesuré par d'autres agents la veille (30 août, 11h28, script `mesure-partage.mjs`) et le matin
+même (31 août, 8h46, script `qc-turnstile.js`), laissés en scratchpad. La panne dure depuis au
+moins deux jours, sur plusieurs sessions - pas un accident isolé à une seule tâche.
+
+**2. Aucun processus orphelin au sens strict, aujourd'hui.** `ps` montre 7 sessions Claude Code
+vivantes en parallèle sur cette machine (`claude --dangerously-skip-permissions --continue`),
+chacune avec sa propre instance du serveur MCP `playwright` (config unique et globale dans
+`~/.claude.json` : `npx -y @playwright/mcp@0.0.76 --isolated --storage-state
+.../ia-combined-storage-state.json`). Les 7 processus serveur ont un parent VIVANT (aucun
+reparenté à `launchd`/PID 1) : le plus ancien tient depuis 12 jours 22 heures (session ouverte le
+18 août), le plus récent depuis moins de 2 jours. Ce ne sont pas des orphelins qui gardent un
+verrou : ce sont des serveurs légitimes de sessions actives, dont certaines restent ouvertes très
+longtemps. L'ancienne cause documentée au skill `/nanobanana` (2026-07-20 : verrou `SingletonLock`
+sur un profil persistant `~/Library/Application Support/Playwright-MCP/claude-main`) est dépassée
+- ce dossier n'a plus été touché depuis le 26 juillet, la config est passée à `--isolated` depuis.
+Le mécanisme de panne a changé de visage (un contexte fermé qui ne se relance pas tout seul, plutôt
+qu'un verrou de fichier) ; la note de ce skill qui affirme qu'il faut redémarrer Claude Code au
+complet pour le débloquer ne tient donc plus telle quelle (voir point 4). Commande de mesure,
+reproductible :
+```
+ps -eo pid,ppid,etime,lstart,command | grep -i "playwright-mcp\|npm exec @playwright" | grep -v grep
+```
+
+**3. La cause structurelle : table de références et navigateur PARTAGÉS par session, pas par
+sous-agent.** Le bloc `mcpServers.playwright` de `~/.claude.json` ne porte aucun paramètre de
+portée « par sous-agent » : commande et arguments sont identiques pour toute une session. Claude
+Code instancie UN serveur par SESSION top-niveau (confirmé : 7 sessions vivantes = exactement 7
+processus serveur, chacun né en même temps que sa session parente). Un sous-agent lancé par l'outil
+Agent/Task À L'INTÉRIEUR d'une session hérite forcément de la connexion unique de sa session
+parente - il n'existe aucun moyen, côté agent, d'obtenir sa propre instance. Deux sous-agents actifs
+en même temps dans LA MÊME session partagent donc nécessairement un seul navigateur, un seul jeu
+d'onglets, une seule numérotation de références : l'un peut fermer ou renaviguer la page que
+l'autre est en train d'utiliser, ce qui explique l'erreur du point 1. **Rien ne contourne ceci à
+l'intérieur d'une session : ce n'est pas un bug ponctuel à corriger, c'est la granularité même de
+l'outil.**
+
+**4. Une relance légère existe et fonctionne, sans redémarrer Claude Code au complet - mais
+seulement pour SA PROPRE session, et seulement quand personne d'autre ne s'en sert au même
+instant.** Testé en direct ce jour : arrêt propre (`kill`, jamais `-9` d'entrée) des deux processus
+`playwright-mcp` de la session courante (identifiés par leur PPID, vérifié comme étant bien celui
+de SA PROPRE session avant tout kill), puis rappel immédiat d'un outil `mcp__playwright__*` :
+Claude Code relance automatiquement une instance fraîche en moins de dix secondes, pleinement
+fonctionnelle (`browser_tabs`, `browser_navigate` vers laveille.ai, `browser_take_screenshot` tous
+vérifiés). Ceci ne règle PAS la cause du point 3 (le navigateur relancé reste unique et partagé) -
+seulement la panne du point 1. **Avant de tuer quoi que ce soit : vérifier que le PPID du processus
+appartient bien à SA PROPRE session** (`ps -p <PPID>` doit montrer SON PROPRE processus `claude`,
+pas un autre). Ne jamais toucher le PID d'une autre session. Ne jamais tuer
+`perplexity-pro-playwright` (session de recherche utilisée en permanence, y compris par d'autres
+sessions). Ne jamais tuer un `chrome-headless-shell` récent (onglet probable d'une recherche en
+cours ailleurs) - dans le doute sur l'âge ou l'appartenance d'un processus, ne pas y toucher.
+
+**LA RÈGLE DE TRAVAIL, à partir de maintenant :**
+
+- **Le navigateur LOCAL est la voie NORMALE pour toute preuve visuelle demandée à un sous-agent,
+  pas un pis-aller.** Le paquet `playwright` est déjà une dépendance installée du projet
+  (`node_modules/playwright` - vérifié, ne pas le réinstaller). Le scratchpad ne résout pas le
+  module tout seul ; lancer avec :
+  ```
+  NODE_PATH="/Users/stephanelapointe/__IA__/_____SERVEUR_____/site_internet/la-veille-de-stef-v2/node_modules" node mon-script.js
+  ```
+  Patron minimal, validé à plusieurs reprises entre le 29 et le 31 août :
+  `chromium.launch({ headless: false })` (navigateur VISIBLE, jamais invisible - conforme à la
+  validation visuelle exigée ailleurs dans ce fichier), contexte ÉPHÉMÈRE par défaut (aucun
+  `--user-data-dir` fixe, donc zéro risque de verrou de profil), `browser.close()` en fin de
+  script. Chaque script Node lancé est un processus indépendant : N sous-agents en parallèle = N
+  navigateurs indépendants, aucune collision possible - exactement ce que l'outil piloté ne peut
+  pas offrir (point 3). Génération du script : comme tout code de plus de 5 lignes, déléguer à
+  `mcp__hermes__model_invoke` (task_type=code) plutôt que l'écrire soi-même.
+- **Session authentifiée requise (Gemini, claude.ai)** : technique déjà documentée au skill
+  `/nanobanana` - copier `~/Library/Application Support/Playwright-MCP/claude-main` vers un dossier
+  temporaire, y supprimer `SingletonLock`, `SingletonCookie` et `SingletonSocket`, puis
+  `chromium.launchPersistentContext(copie, { headless: false, channel: 'chrome' })`. **Supprimer la
+  copie après usage, sans exception : elle contient une session Google active.**
+- **L'outil piloté `mcp__playwright__*` reste correct pour un premier essai rapide** (il peut
+  fonctionner - il a fonctionné après la relance testée au point 4) et pour un flux qui doit garder
+  le MÊME état de navigateur entre plusieurs appels successifs d'un seul agent isolé. **Mais au
+  premier échec (`async initializeServer`, `Target page, context or browser has been closed`, ou
+  toute erreur du même genre), basculer directement sur le navigateur local - ne pas insister, ne
+  pas réessayer une deuxième fois le même appel : la deuxième tentative mesurée ce jour a échoué à
+  l'identique.**
+- **Si plusieurs sous-agents de la MÊME session ont besoin d'une preuve visuelle en même temps,
+  chacun utilise sa propre instance de navigateur local.** Ne jamais compter sur l'outil piloté
+  partagé pour du travail visuel parallèle : c'est exactement le scénario qui produit la collision
+  du point 3.
+
 ## 7. CE QU'ON ATTEND D'UN RAPPORT
 
 - Court, factuel, sans embellissement.
