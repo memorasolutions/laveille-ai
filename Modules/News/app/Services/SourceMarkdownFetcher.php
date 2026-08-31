@@ -226,13 +226,13 @@ class SourceMarkdownFetcher
      */
     private function extractReadability(string $html, string $url): ?array
     {
-        // ACTION : meme garde-fou memoire que ContentExtractor::extract() (2026-08-31, meme
-        // cle de config news.extraction_max_bytes) - Masterminds\HTML5 copie le document
-        // plusieurs fois pendant l'analyse et peut epuiser le plafond memoire CLI sur une page
-        // volumineuse. Retour null = meme chemin d'echec que Readability lui-meme ci-dessous,
-        // deja gere par les deux appelants (fetchViaHttp/fetchViaPuppeteer).
+        // ACTION : même garde-fou mémoire que ContentExtractor::extract() (2026-08-31, même
+        // clé de config news.extraction_max_bytes) - Masterminds\HTML5 copie le document
+        // plusieurs fois pendant l'analyse et peut épuiser le plafond mémoire CLI sur une page
+        // volumineuse. Retour null = même chemin d'échec que Readability lui-même ci-dessous,
+        // déjà géré par les deux appelants (fetchViaHttp/fetchViaPuppeteer).
         // MCP: SELF (<5 lignes utiles, garde de taille)
-        // RAISON: borner ce qu'on donne a une dependance plutot que de modifier la dependance.
+        // RAISON: borner ce qu'on donne à une dépendance plutôt que de modifier la dépendance.
         if (strlen($html) > (int) config('news.extraction_max_bytes', 3000000)) {
             return null;
         }

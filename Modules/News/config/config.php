@@ -54,15 +54,15 @@ return [
     | 2026-08-17 - decision du fondateur (verbatim : « supprime l'automatisation qu'on
     | utilisait pour les anciennes actus, on ne l'utilisera plus »). La generation MACHINE du
     | resume structure (AiSummaryService::scoreAndSummarize/scoreAndSummarizeGroup) a la collecte
-    | est abandonnee : le contenu des fiches vient desormais exclusivement du flux /actu2
+    | est abandonnee : le contenu des fiches vient désormais exclusivement du flux /actu2
     | (composition IA supervisee). Reversible par configuration (doctrine modules
-    | desactivables) - jamais une suppression de code seche. La COLLECTE elle-meme (titres,
+    | desactivables) - jamais une suppression de code seche. La COLLECTE elle-même (titres,
     | liens, dedup, evaluation de pertinence par mots-cles) CONTINUE sans interruption : elle
     | alimente le selecteur de l'ecran de composition et le courriel de veille de 7h15.
     | Effet conjoint : drapeau eteint = plus AUCUN texte d'article n'est envoye au fournisseur
     | de modele pendant la collecte (point de vigilance Loi 25 de la cloture Actus 2.0, regle
     | par extinction).
-    | DEFAUT VOLONTAIREMENT FALSE, meme doctrine qu'autopublish ci-dessus : un oubli de
+    | DEFAUT VOLONTAIREMENT FALSE, même doctrine qu'autopublish ci-dessus : un oubli de
     | configuration (env absent, mauvaise valeur) ne doit jamais pouvoir relancer la generation
     | machine ni l'envoi des textes au fournisseur par accident - il faut une action explicite
     | (NEWS_MACHINE_SUMMARY_ENABLED=true) pour la reactiver.
@@ -87,7 +87,7 @@ return [
     | composition pour chacun. DEFAUT ACTIF (contrairement a autopublish) : ce courriel ne
     | publie rien tout seul, il informe seulement - aucun risque a le laisser actif par defaut.
     | max_items borne la taille du courriel si un gros arriere s'est accumule (ex. premier envoi
-    | apres plusieurs jours sans consultation) ; le reste reste consultable dans l'administration.
+    | après plusieurs jours sans consultation) ; le reste reste consultable dans l'administration.
     */
     'digest' => [
         'enabled' => (bool) env('NEWS_DIGEST_ENABLED', true),
@@ -107,33 +107,33 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Taille maximale du HTML analyse par Readability (garde-fou memoire)
+    | Taille maximale du HTML analysé par Readability (garde-fou mémoire)
     |--------------------------------------------------------------------------
-    | ContentExtractor et SourceMarkdownFetcher telechargent integralement le HTML d'une page
-    | puis le font analyser par fivefilters/readability.php, qui delegue le parsing a
-    | Masterminds\HTML5 (dependance jamais appelee directement par ce projet). Cette analyse
-    | copie le document plusieurs fois en memoire (normalisation UTF-8, remplacement des
-    | retours de ligne, arbre DOM) : une page anormalement volumineuse epuise le plafond de
-    | 128 Mo du processus CLI et tue tout le cron news:fetch en cours - mesure en production
-    | le 2026-08-31 (391 epuisements memoire, pile dans
-    | vendor/masterminds/html5/src/HTML5/Parser/Scanner.php). Une page d'article legitime
-    | tient tres large sous cette borne ; au-dela, l'extraction est abandonnee (repli sur
-    | l'accroche RSS deja existant en cas d'echec Readability) plutot que de risquer tout le
+    | ContentExtractor et SourceMarkdownFetcher téléchargent intégralement le HTML d'une page
+    | puis le font analyser par fivefilters/readability.php, qui délègue le parsing à
+    | Masterminds\HTML5 (dépendance jamais appelée directement par ce projet). Cette analyse
+    | copie le document plusieurs fois en mémoire (normalisation UTF-8, remplacement des
+    | retours de ligne, arbre DOM) : une page anormalement volumineuse épuise le plafond de
+    | 128 Mo du processus CLI et tue tout le cron news:fetch en cours - mesuré en production
+    | le 2026-08-31 (391 épuisements mémoire, pile dans
+    | vendor/masterminds/html5/src/HTML5/Parser/Scanner.php). Une page d'article légitime
+    | tient très large sous cette borne ; au-delà, l'extraction est abandonnée (repli sur
+    | l'accroche RSS déjà existant en cas d'échec Readability) plutôt que de risquer tout le
     | run. Override via env NEWS_EXTRACTION_MAX_BYTES.
     */
     'extraction_max_bytes' => (int) env('NEWS_EXTRACTION_MAX_BYTES', 3000000),
 
     /*
     |--------------------------------------------------------------------------
-    | Extraction isolee dans un sous-processus (garde-fou memoire, ticket #2110)
+    | Extraction isolée dans un sous-processus (garde-fou mémoire, ticket #2110)
     |--------------------------------------------------------------------------
-    | Mesure en production le 2026-08-31 : le garde-fou de taille brute ci-dessus n'a PAS
-    | empeche une nouvelle exhaustion memoire le jour meme de son deploiement, sur la MEME
+    | Mesuré en production le 2026-08-31 : le garde-fou de taille brute ci-dessus n'a PAS
+    | empêché une nouvelle exhaustion mémoire le jour même de son déploiement, sur la MÊME
     | pile d'appel (Masterminds\HTML5) pour un document pourtant sous le plafond - la taille
-    | brute ne suffit pas a predire l'amplification memoire du parsing. Drapeau ACTIF par
-    | defaut : chaque extraction (ContentExtractor::extract) est lancee dans un processus PHP
-    | dedie et jetable via la commande interne news:extract-isolated - un epuisement memoire
-    | a l'interieur ne tue plus jamais le cron news:fetch parent. Ne desactiver QUE pour les
+    | brute ne suffit pas à prédire l'amplification mémoire du parsing. Drapeau ACTIF par
+    | défaut : chaque extraction (ContentExtractor::extract) est lancée dans un processus PHP
+    | dédié et jetable via la commande interne news:extract-isolated - un épuisement mémoire
+    | à l'intérieur ne tue plus jamais le cron news:fetch parent. Ne désactiver QUE pour les
     | tests unitaires (Http::fake() ne peut pas atteindre un vrai sous-processus) - jamais en
     | production.
     */
@@ -201,7 +201,7 @@ return [
         // ne rejette qu'un candidat (sequence d'au moins entity_min_capitalized_words mots a
         // majuscule initiale, comptant au moins entity_min_significant_words mots significatifs
         // de entity_min_word_length caracteres ou plus une fois les mots-outils ecartes)
-        // entierement absent de la source (aucun mot significatif partiellement retrouve,
+        // entièrement absent de la source (aucun mot significatif partiellement retrouve,
         // casse/accents ignores). Le seuil entity_min_significant_words evite qu'une paire
         // "mot + sigle court" (ex. acronyme de 3 lettres accole a un mot capitalise) soit jugee
         // a tort "absente" faute de matiere suffisante a comparer.

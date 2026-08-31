@@ -3,21 +3,21 @@
 declare(strict_types=1);
 
 /**
- * Garde-fous memoire de ContentExtractor (ticket #2110). Deux couches mesurees en production
+ * Garde-fous mémoire de ContentExtractor (ticket #2110). Deux couches mesurées en production
  * le 2026-08-31, dans cet ordre :
  *
- * 1. Un garde de taille brute sur le HTML avant Readability (extractInProcess) - insuffisant a
- *    lui seul : une nouvelle exhaustion memoire a ete mesuree le jour meme de son deploiement,
- *    sur la MEME pile d'appel (Masterminds\HTML5, Scanner.php:351), pour un document pourtant
- *    sous le plafond. La taille brute ne predit pas l'amplification memoire du parsing.
- * 2. L'isolation de l'extraction dans un sous-processus PHP dedie et jetable (extract() ->
- *    news:extract-isolated) - un epuisement memoire a l'interieur ne tue plus jamais le cron
- *    news:fetch parent, quelle que soit l'ampleur du probleme cote dependance.
+ * 1. Un garde de taille brute sur le HTML avant Readability (extractInProcess) - insuffisant à
+ *    lui seul : une nouvelle exhaustion mémoire a été mesurée le jour même de son déploiement,
+ *    sur la MÊME pile d'appel (Masterminds\HTML5, Scanner.php:351), pour un document pourtant
+ *    sous le plafond. La taille brute ne prédit pas l'amplification mémoire du parsing.
+ * 2. L'isolation de l'extraction dans un sous-processus PHP dédié et jetable (extract() ->
+ *    news:extract-isolated) - un épuisement mémoire à l'intérieur ne tue plus jamais le cron
+ *    news:fetch parent, quelle que soit l'ampleur du problème côté dépendance.
  *
  * Les tests de la couche 1 appellent extractInProcess() directement (le dispatcher extract()
- * isolerait sinon l'appel dans un vrai sous-processus, hors de portee de Http::fake()). Les
+ * isolerait sinon l'appel dans un vrai sous-processus, hors de portée de Http::fake()). Les
  * tests de la couche 2 appellent extract() avec Process::fake() pour simuler un sous-processus
- * qui reussit ou qui plante (OOM), sans jamais allouer de memoire reelle pendant la suite.
+ * qui réussit ou qui plante (OOM), sans jamais allouer de mémoire réelle pendant la suite.
  */
 
 use Illuminate\Support\Facades\Config;
@@ -29,7 +29,7 @@ uses(Tests\TestCase::class);
 
 // ── Couche 1 : garde de taille brute (extractInProcess) ────────────────────────────────
 
-it('extractInProcess() retourne null et n\'appelle jamais Readability quand le corps HTML depasse le plafond configure', function () {
+it('extractInProcess() retourne null et n\'appelle jamais Readability quand le corps HTML dépasse le plafond configuré', function () {
     Config::set('news.extraction_max_bytes', 50);
 
     Http::fake([
@@ -41,12 +41,12 @@ it('extractInProcess() retourne null et n\'appelle jamais Readability quand le c
     expect($result)->toBeNull();
 });
 
-it('extractInProcess() traite normalement une page sous le plafond (comportement inchange)', function () {
-    // Plafond par defaut remis explicitement - aucune dependance a l'ordre d'execution des tests.
+it('extractInProcess() traite normalement une page sous le plafond (comportement inchangé)', function () {
+    // Plafond par défaut remis explicitement - aucune dépendance à l'ordre d'exécution des tests.
     Config::set('news.extraction_max_bytes', 3000000);
 
-    $sentence = 'Ceci est une phrase de test qui decrit un evenement technologique important '
-        .'survenu recemment au Quebec et ailleurs dans le monde francophone. ';
+    $sentence = 'Ceci est une phrase de test qui décrit un événement technologique important '
+        .'survenu récemment au Québec et ailleurs dans le monde francophone. ';
     $body = str_repeat('<p>'.str_repeat($sentence, 3).'</p>', 4);
     $html = '<!DOCTYPE html><html lang="fr"><head><title>Article de test</title></head>'
         .'<body><article><h1>Article de test</h1>'.$body.'</article></body></html>';
@@ -62,23 +62,23 @@ it('extractInProcess() traite normalement une page sous le plafond (comportement
     expect($result['content'])->not->toBeEmpty();
 });
 
-it('la cle de config news.extraction_max_bytes vaut 3 000 000 par defaut', function () {
+it('la clé de config news.extraction_max_bytes vaut 3 000 000 par défaut', function () {
     expect((int) config('news.extraction_max_bytes'))->toBe(3000000);
 });
 
 // ── Couche 2 : isolation en sous-processus (extract) ────────────────────────────────────
 
-it('la cle de config news.extraction_isolated_process vaut true par defaut', function () {
+it('la clé de config news.extraction_isolated_process vaut true par défaut', function () {
     expect((bool) config('news.extraction_isolated_process'))->toBeTrue();
 });
 
-it('extract() decode la sortie JSON du sous-processus isole quand il reussit', function () {
+it('extract() décode la sortie JSON du sous-processus isolé quand il réussit', function () {
     Config::set('news.extraction_isolated_process', true);
 
     $expected = [
-        'title' => 'Titre isole',
-        'content' => 'Contenu isole suffisamment long pour un test.',
-        'html' => '<p>Contenu isole suffisamment long pour un test.</p>',
+        'title' => 'Titre isolé',
+        'content' => 'Contenu isolé suffisamment long pour un test.',
+        'html' => '<p>Contenu isolé suffisamment long pour un test.</p>',
         'image' => null,
         'author' => null,
         'word_count' => 60,
@@ -93,11 +93,11 @@ it('extract() decode la sortie JSON du sous-processus isole quand il reussit', f
     expect($result)->toBe($expected);
 });
 
-it('extract() retourne null sans propager l\'echec quand le sous-processus isole plante (OOM simule)', function () {
+it('extract() retourne null sans propager l\'échec quand le sous-processus isolé plante (OOM simulé)', function () {
     Config::set('news.extraction_isolated_process', true);
 
-    // Code de sortie 137 = SIGKILL, signature typique d'un processus tue par epuisement
-    // memoire (OOM killer ou limite memory_limit) - exactement le scenario qui, avant ce
+    // Code de sortie 137 = SIGKILL, signature typique d'un processus tué par épuisement
+    // mémoire (OOM killer ou limite memory_limit) - exactement le scénario qui, avant ce
     // correctif, faisait mourir tout le cron news:fetch en cours.
     Process::fake([
         '*' => Process::result(output: '', errorOutput: 'Allowed memory size exhausted', exitCode: 137),
@@ -108,7 +108,7 @@ it('extract() retourne null sans propager l\'echec quand le sous-processus isole
     expect($result)->toBeNull();
 });
 
-it('extract() retourne null quand le sous-processus isole renvoie une sortie non-JSON', function () {
+it('extract() retourne null quand le sous-processus isolé renvoie une sortie non-JSON', function () {
     Config::set('news.extraction_isolated_process', true);
 
     Process::fake([

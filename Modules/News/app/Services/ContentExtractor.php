@@ -16,17 +16,17 @@ class ContentExtractor
      * Extraire le contenu propre d'un article web via Readability PHP.
      *
      * ACTION : dispatcher (2026-08-31, ticket #2110) - le garde-fou de taille brute seul
-     * n'a pas empeche une nouvelle exhaustion memoire mesuree en production le jour meme
-     * de son deploiement, MEME PILE D'APPEL (Masterminds\HTML5, Scanner.php:351) sur un
-     * document pourtant sous le plafond : la taille brute ne predit pas l'amplification
-     * memoire du parsing. Isole desormais l'extraction dans un sous-processus PHP jetable
-     * (news:extract-isolated) - un epuisement memoire a l'interieur ne tue plus jamais le
-     * cron news:fetch parent. Le drapeau news.extraction_isolated_process (defaut actif)
+     * n'a pas empêché une nouvelle exhaustion mémoire mesurée en production le jour même
+     * de son déploiement, MÊME PILE D'APPEL (Masterminds\HTML5, Scanner.php:351) sur un
+     * document pourtant sous le plafond : la taille brute ne prédit pas l'amplification
+     * mémoire du parsing. Isole désormais l'extraction dans un sous-processus PHP jetable
+     * (news:extract-isolated) - un épuisement mémoire à l'intérieur ne tue plus jamais le
+     * cron news:fetch parent. Le drapeau news.extraction_isolated_process (défaut actif)
      * ne repasse en appel direct que pour les tests unitaires (Http::fake() ne peut pas
      * atteindre un vrai sous-processus).
-     * MCP: SELF (dispatcher, code metier ci-dessous)
-     * RAISON: isoler ce qu'on ne peut pas borner a coup sur plutot que de continuer a
-     * deviner un plafond de taille qui vient d'echouer une fois en production.
+     * MCP: SELF (dispatcher, code métier ci-dessous)
+     * RAISON: isoler ce qu'on ne peut pas borner à coup sûr plutôt que de continuer à
+     * deviner un plafond de taille qui vient d'échouer une fois en production.
      *
      * @return array{title: string, content: string, html: string, image: ?string, author: ?string, word_count: int}|null
      */
@@ -40,10 +40,10 @@ class ContentExtractor
     }
 
     /**
-     * Lance l'extraction dans un sous-processus PHP dedie, jetable, avec sa propre memoire.
-     * Un plantage du sous-processus (OOM, timeout, sortie non-JSON) est traite comme un
-     * echec d'extraction ordinaire (retour null, repli sur l'accroche RSS deja existant) -
-     * jamais propage au processus appelant.
+     * Lance l'extraction dans un sous-processus PHP dédié, jetable, avec sa propre mémoire.
+     * Un plantage du sous-processus (OOM, timeout, sortie non-JSON) est traité comme un
+     * échec d'extraction ordinaire (retour null, repli sur l'accroche RSS déjà existant) -
+     * jamais propagé au processus appelant.
      */
     private function extractViaIsolatedProcess(string $url): ?array
     {
@@ -57,14 +57,14 @@ class ContentExtractor
                 '--no-interaction',
             ]);
         } catch (\Throwable $e) {
-            Log::channel('news_fetch')->warning("ContentExtractor: lancement du sous-processus en echec pour {$url}: {$e->getMessage()}");
+            Log::channel('news_fetch')->warning("ContentExtractor: lancement du sous-processus en échec pour {$url}: {$e->getMessage()}");
 
             return null;
         }
 
         if (! $process->successful()) {
             Log::channel('news_fetch')->warning(sprintf(
-                'ContentExtractor: sous-processus termine anormalement (code %s) pour %s - probable epuisement memoire isole, le cron parent est intact.',
+                'ContentExtractor: sous-processus terminé anormalement (code %s) pour %s - probable épuisement mémoire isolé, le cron parent est intact.',
                 $process->exitCode(),
                 $url
             ));
@@ -78,8 +78,8 @@ class ContentExtractor
     }
 
     /**
-     * Corps reel de l'extraction (HTTP + Readability) - execute soit directement (tests
-     * unitaires), soit a l'interieur du sous-processus isole lance par
+     * Corps réel de l'extraction (HTTP + Readability) - exécuté soit directement (tests
+     * unitaires), soit à l'intérieur du sous-processus isolé lancé par
      * extractViaIsolatedProcess() via la commande news:extract-isolated.
      *
      * @return array{title: string, content: string, html: string, image: ?string, author: ?string, word_count: int}|null
@@ -104,20 +104,20 @@ class ContentExtractor
 
             $html = $response->body();
 
-            // ACTION : garde-fou memoire (2026-08-31) - une page anormalement volumineuse fait
-            // exploser Masterminds\HTML5 (utilise en interne par Readability), qui copie le
+            // ACTION : garde-fou mémoire (2026-08-31) - une page anormalement volumineuse fait
+            // exploser Masterminds\HTML5 (utilisé en interne par Readability), qui copie le
             // document plusieurs fois pendant l'analyse. Mesure en production : 391 crashs par
-            // epuisement memoire (128 Mo CLI), pile dans
-            // vendor/masterminds/html5/src/HTML5/Parser/Scanner.php. Abandon avant tout appel a
-            // Readability - l'appelant retombe deja sur l'accroche RSS quand extract() renvoie
+            // épuisement mémoire (128 Mo CLI), pile dans
+            // vendor/masterminds/html5/src/HTML5/Parser/Scanner.php. Abandon avant tout appel à
+            // Readability - l'appelant retombe déjà sur l'accroche RSS quand extract() renvoie
             // null (comportement existant, aucun article n'est perdu).
             // MCP: SELF (<5 lignes utiles, garde de taille)
-            // RAISON: borner ce qu'on donne a une dependance plutot que de modifier la
-            // dependance elle-meme.
+            // RAISON: borner ce qu'on donne à une dépendance plutôt que de modifier la
+            // dépendance elle-même.
             $maxBytes = (int) config('news.extraction_max_bytes', 3000000);
             if (strlen($html) > $maxBytes) {
                 Log::channel('news_fetch')->warning(sprintf(
-                    'ContentExtractor: page ignoree (%d octets > plafond %d) pour %s - risque d\'epuisement memoire Readability/HTML5, repli sur l\'accroche RSS.',
+                    'ContentExtractor: page ignorée (%d octets > plafond %d) pour %s - risque d\'épuisement mémoire Readability/HTML5, repli sur l\'accroche RSS.',
                     strlen($html),
                     $maxBytes,
                     $url
