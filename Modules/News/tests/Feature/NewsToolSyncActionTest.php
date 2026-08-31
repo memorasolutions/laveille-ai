@@ -235,3 +235,76 @@ it('suggest() ne suggère jamais l\'outil « Local » à partir de « Local AI �
 
     expect($suggested->all())->not->toContain($tool->id);
 });
+
+// ── Décision mesurée le 2026-08-31 : ne chercher QUE dans le texte RÉELLEMENT affiché au
+// lecteur (titre optimisé, à défaut le titre + corps affiché), jamais dans le titre BRUT de
+// la source - voir le docblock de NewsToolSyncAction::suggest() pour la mesure complète
+// (350 fiches, 217 liens exploitables, 0,5 % de perte, 0 perte sur les vraies mentions). ──
+
+it('suggest() ignore un outil mentionné SEULEMENT dans le titre brut de la source, absent du texte affiché', function () {
+    // Le titre BRUT (source) mentionne l'outil ; ni le titre optimisé (réellement affiché au
+    // lecteur), ni le corps affiché ne le mentionnent - un lecteur ne trouverait donc aucune
+    // justification dans le texte sous ses yeux. Ce test doit échouer (rouge) si suggest() se
+    // remet un jour à scanner le titre brut plutôt que le titre affiché.
+    $tool = ntsaTool('Nimbolt', 'nimbolt');
+
+    $article = NewsArticle::create([
+        'news_source_id' => ntsaSource()->id,
+        'title'          => 'Le moment Nimbolt de la robotique agricole, selon les analystes',
+        'seo_title'      => 'La robotique agricole franchit une étape selon les analystes',
+        'guid'           => 'guid-ntsa-titre-brut-seul',
+        'url'            => 'https://exemple.com/ntsa-titre-brut-seul',
+        'description'    => '',
+        'summary'        => '',
+        'structured_summary' => [
+            'hook' => "Des analystes constatent une progression rapide de l'automatisation agricole.",
+            'key_points' => [
+                "L'automatisation réduit les coûts de main-d'oeuvre saisonnière.",
+            ],
+            'why_important' => 'Cette évolution touche directement la souveraineté alimentaire.',
+        ],
+        'slug'         => 'article-ntsa-titre-brut-seul',
+        'pub_date'     => now()->subDay(),
+        'is_published' => true,
+        'seo_status'   => 'index',
+    ]);
+
+    $suggested = app(NewsToolSyncAction::class)->suggest($article);
+
+    expect($suggested->all())->not->toContain($tool->id);
+});
+
+// ── Test symétrique : une mention présente dans le texte affiché DOIT produire un lien ──
+
+it('suggest() détecte un outil mentionné SEULEMENT dans le titre optimisé (affiché), absent du titre brut', function () {
+    // Symétrique du test précédent : le titre optimisé (seo_title, réellement affiché au
+    // lecteur) mentionne l'outil ; ni le titre brut ni le corps ne le mentionnent. Un lecteur
+    // trouve la justification directement dans le titre sous ses yeux - la suggestion doit
+    // rester produite. Preuve que seo_title est désormais scanné (il ne l'était pas avant).
+    $tool = ntsaTool('Solandra', 'solandra');
+
+    $article = NewsArticle::create([
+        'news_source_id' => ntsaSource()->id,
+        'title'          => 'Une avancée majeure saluée par les analystes du secteur',
+        'seo_title'      => 'Solandra bouleverse la logistique agricole selon les analystes',
+        'guid'           => 'guid-ntsa-titre-optimise-seul',
+        'url'            => 'https://exemple.com/ntsa-titre-optimise-seul',
+        'description'    => '',
+        'summary'        => '',
+        'structured_summary' => [
+            'hook' => "Des analystes constatent une progression rapide de l'automatisation agricole.",
+            'key_points' => [
+                "L'automatisation réduit les coûts de main-d'oeuvre saisonnière.",
+            ],
+            'why_important' => 'Cette évolution touche directement la souveraineté alimentaire.',
+        ],
+        'slug'         => 'article-ntsa-titre-optimise-seul',
+        'pub_date'     => now()->subDay(),
+        'is_published' => true,
+        'seo_status'   => 'index',
+    ]);
+
+    $suggested = app(NewsToolSyncAction::class)->suggest($article);
+
+    expect($suggested->all())->toContain($tool->id);
+});

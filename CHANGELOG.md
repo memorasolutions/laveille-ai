@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.244.13] - 2026-08-31
+
+### Corrigé (ticket #2115, détection d'outils liés - ne scruter que le texte réellement affiché)
+
+- **Le défaut** : `NewsToolSyncAction::suggest()` cherchait les outils à suggérer dans le titre BRUT de la source (souvent en anglais, exposé à des figures de style comme « le moment ChatGPT des robots ») plutôt que dans ce que le lecteur voit réellement. Résultat possible : un outil suggéré sans aucune justification dans le texte affiché sous les yeux du lecteur.
+- **Correctif** : `$text` ne contient plus jamais le titre brut ni `description`. Il est composé du titre RÉELLEMENT affiché (`seo_title ?? title` - exactement le même repli que `show.blade.php`, pour ne jamais rouvrir l'écart qu'on ferme) et du corps affiché, réutilisé tel quel via `NewsArticle::structuredBodyText()` (source unique déjà consommée par le JSON-LD et le temps de lecture, jamais reconstruite ici).
+- **Mesure qui fonde la décision** (350 fiches tirées au hasard, 217 liens exploitables) : 0,5 % de perte sur les liens exploitables (1/217), ZÉRO perte sur les vraies mentions d'outils (0/74), aucun gain inverse (0/160). Le seul cas perdu est probablement un faux positif au départ.
+- **Tests** : 2 nouveaux (`NewsToolSyncActionTest`) - un outil mentionné SEULEMENT dans le titre brut, absent du texte affiché, ne doit produire aucun lien (rouge vérifié : le test échoue bien si le mécanisme revient à scruter le titre brut, confirmé par sonde manuelle temporaire avant restauration du correctif) ; le test symétrique confirme qu'une mention SEULEMENT dans le titre optimisé affiché produit bien un lien. Suite complète du module `News` : 644 tests, 2123 assertions, 0 échec.
+- **Hors périmètre** : le passif des liens déjà posés avant ce changement reste un chantier distinct (#2114), qui dépend de cette décision.
+
 ## [1.244.12] - 2026-08-31
 
 ### Corrigé (ticket #2110, suite - le premier correctif etait insuffisant, la preuve en production l'a dit)

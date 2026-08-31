@@ -102,8 +102,8 @@ final class NewsToolSyncAction
      *
      * Les outils de TOOL_NEVER_AUTO (mots aussi courants en français : "Claude", "Avec",
      * "Tome", "Make"...) sont exclus des $terms de GlossaryLinkifier et donc jamais détectés
-     * par linkify() ci-dessous, quel que soit $text. On les détecte séparément sur le texte
-     * COMPLET de l'article (titre + description + résumé + résumé structuré), mais en CASSE
+     * par linkify() ci-dessous, quel que soit $text. On les détecte séparément sur $text
+     * lui-même (titre affiché + corps affiché, cf. note du 2026-08-31 plus bas), mais en CASSE
      * STRICTE (la forme capitalisée "Claude", pas "claude") : un mot français courant comme
      * "avec" apparaît presque toujours en minuscule en milieu de phrase, jamais capitalisé
      * hors début de phrase - la casse stricte limite donc fortement le risque de faux positif
@@ -138,6 +138,17 @@ final class NewsToolSyncAction
      * demandé par la revue du mandat #2091 : « une seule fonction de frontière, éprouvée par un
      * jeu de tests commun ».
      *
+     * 2026-08-31 (décision mesurée sur 350 fiches tirées au hasard, 217 liens exploitables) :
+     * $text ne contient plus le titre BRUT de la source, mais le texte RÉELLEMENT affiché au
+     * lecteur - le titre optimisé (seo_title, à défaut title, exactement le même repli que
+     * show.blade.php) et le corps affiché (structuredBodyText(), source unique de vérité déjà
+     * utilisée pour le JSON-LD et le temps de lecture). Un lecteur qui voit un outil suggéré
+     * trouve désormais toujours sa justification dans le texte sous ses yeux. Mesure : 0,5 %
+     * de perte sur les liens exploitables (1/217), ZÉRO perte sur les vraies mentions d'outils
+     * (0/74), aucun gain inverse (0/160) - restreindre au texte affiché ne fait rater aucun
+     * outil réel. Le passif des liens déjà posés AVANT ce changement est un chantier distinct
+     * (#2114, hors périmètre ici) - il dépend de cette décision et ne peut être mesuré avant.
+     *
      * Renvoie une Collection d'IDs d'outils (sans enregistrer - l'admin valide).
      *
      * @return Collection<int, int>
@@ -146,14 +157,22 @@ final class NewsToolSyncAction
     {
         GlossaryLinkifier::resetState();
 
-        // ACTION : description ne véhicule plus jamais le texte source (design doc "Actus -
-        // zéro copie du texte source", 2026-08-13, section 4.1) - retirée de la détection, déjà
-        // couverte par summary + le résumé structuré aplati ci-dessous.
+        // ACTION : ne chercher QUE dans le texte RÉELLEMENT affiché au lecteur (décision
+        // mesurée du 2026-08-31 - voir docblock ci-dessus) - jamais dans le titre BRUT
+        // de la source ni dans description (déjà exclue depuis le design doc "Actus - zéro
+        // copie du texte source", 2026-08-13, section 4.1). Le titre suit EXACTEMENT le même
+        // repli que show.blade.php (seo_title ?? title) : un repli différent introduirait un
+        // nouvel écart entre ce qui est cherché et ce qui est vu. Le corps réutilise
+        // structuredBodyText() - source unique de vérité du corps affiché, déjà consommée par
+        // le JSON-LD et le temps de lecture - plutôt que de reconstruire ici la cascade
+        // résumé structuré aplati/summary : si cette cascade change un jour, ce mécanisme suit
+        // sans code additionnel.
         // MCP: SELF (<5 lignes)
+        $displayedTitle = $article->seo_title ?? $article->title;
+
         $text = implode(' ', array_filter([
-            strip_tags($article->title ?? ''),
-            strip_tags($article->summary ?? ''),
-            strip_tags($article->flattenStructuredSummary()),
+            strip_tags((string) $displayedTitle),
+            strip_tags($article->structuredBodyText()),
         ]));
 
         GlossaryLinkifier::linkify($text);
