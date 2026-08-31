@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.244.2] - 2026-08-31
+
+### Corrigé
+- **Ticket #2096, troisième et dernier correctif de suivi.** Une DEUXIÈME revue adversariale indépendante (mandat explicite : démentir la v1.244.1, pas la valider) a confirmé que le mécanisme de redirection `APP_ROUTES_CACHE` fonctionne bien comme annoncé (56 862 sondages concurrents refaits indépendamment, zéro absence), mais a trouvé deux défauts réels distincts.
+- **Fuite possible de `APP_ROUTES_CACHE` dans un worker PHP-FPM réutilisé** (`app/Console/Commands/RouteCacheAtomicCommand.php`) : `Modules/Backoffice/app/Http/Controllers/BackofficeHealthController.php` invoque `route:cache-atomic` via `Artisan::call()` **en plein milieu d'une requête web**, pas dans un processus CLI jetable comme le pipeline de déploiement. Un arrêt fatal non rattrapable (dépassement de `max_execution_time` ou de `memory_limit`) pendant la reconstruction des routes sauterait le bloc `finally`, laissant `APP_ROUTES_CACHE` pointer vers le leurre pour TOUTES les requêtes suivantes traitées par ce même worker, jusqu'à son recyclage - une dégradation silencieuse (routes jamais mises en cache), pas un plantage visible. Corrigé par `register_shutdown_function()` : les fonctions de fin de script de PHP s'exécutent même après un arrêt par dépassement de temps, contrairement à un bloc `finally`. Logique de restauration extraite dans une fermeture partagée par les deux chemins (`finally` normal + filet de sécurité), avec un drapeau pour ne l'exécuter qu'une seule fois.
+- **Mise en garde ajoutée dans le docblock de la commande** : si `APP_ROUTES_CACHE` était un jour définie dans `.env`, la résolution d'environnement de Laravel donnerait la priorité à `$_ENV`/`$_SERVER` (chargés depuis `.env`) sur le `putenv()` du leurre, neutralisant silencieusement tout le mécanisme. Absence confirmée à ce jour (recherche exhaustive dans le dépôt) ; documentée pour ne jamais être introduite par inadvertance.
+- **Instruction manuelle copiable corrigée** : `Modules/Backoffice/resources/views/themes/backend/health/index.blade.php` affichait encore `<code>php artisan route:cache</code>` comme marche à suivre suggérée à un admin en cas d'échec du bouton automatique - un texte qu'on recopie dans un terminal aurait réintroduit le bug corrigé. Remplacé par `route:cache-atomic`.
+- **Balayage final exhaustif du dépôt** (`grep -rn "route:cache"`, hors `vendor/`/`node_modules/`/`storage/`) : plus aucun appel non migré. Les seules occurrences restantes de `route:cache` (sans `-atomic`) sont des mentions historiques dans `CHANGELOG.md`/`docs/HISTORIQUE-VERSIONS.md`/commentaires de `deploy.yml`, et `docker/php/Dockerfile` (déjà documenté comme exclusion délibérée en v1.244.1).
+
+### Tests
+- Deuxième revue adversariale indépendante : mécanisme de redirection confirmé sain contre le code réel du framework (`Illuminate\Support\Env`, `vlucas/phpdotenv`) ; a reproduit elle-même le test de sondage concurrent (56 862 itérations, zéro absence) et nettoyé le dev local après (`route:clear`) ; a trouvé les deux défauts corrigés ici et un troisième point (le Dockerfile) confirmé déjà hors périmètre.
+- Cycle complet de re-vérification locale après le correctif de robustesse : sondage concurrent 4000 itérations (zéro absence) ; `APP_ROUTES_CACHE` confirmée non-fuyante dans le même processus PHP (`false` avant et après, dans le même script `tinker`) ; `route:list --json` lit 1190 routes ; `route('home')` résout correctement.
+- `php -l` sur les deux fichiers PHP modifiés (dont un passage sur le fichier Blade, qui reste du PHP valide à ce niveau).
+- Dev local restauré à son état normal non caché après chaque test, aucun résidu laissé dans le dépôt partagé.
+- Vérification post-déploiement (journal de production + site en ligne) documentée séparément après le déploiement réel déclenché par ce commit.
+
 ## [1.244.1] - 2026-08-31
 
 ### Corrigé

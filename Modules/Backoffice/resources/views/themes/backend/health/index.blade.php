@@ -110,7 +110,7 @@
                 // rien - un panneau qui affiche la marche à suivre est exactement ce qu'on recopie dans un
                 // terminal. Liste alignée sur la CI : route + event + view, aucune ne dépend d'env().
                 'Cache' => __('Vérifiez la configuration du driver de cache dans <code>.env</code> (<code>CACHE_STORE</code>), puis videz-le avec <code>php artisan cache:clear</code>. N\'utilisez jamais <code>config:cache</code> sur ce site : la configuration doit rester lue en direct depuis le <code>.env</code>.'),
-                'OptimizedApp' => __('Optimisez l\'application : <code>php artisan route:cache</code>, <code>php artisan view:cache</code>, <code>php artisan event:cache</code>. Volontairement sans <code>config:cache</code> ni <code>optimize</code> (qui l\'appelle en interne) : figer la configuration ferme des sections du site.'),
+                'OptimizedApp' => __('Optimisez l\'application : <code>php artisan route:cache-atomic</code>, <code>php artisan view:cache</code>, <code>php artisan event:cache</code>. Volontairement sans <code>config:cache</code> ni <code>optimize</code> (qui l\'appelle en interne) : figer la configuration ferme des sections du site.'),
                 'Schedule' => __('Le scheduler ne s\'exécute pas. Vérifiez le cron job : <code>* * * * * cd /chemin/projet && php artisan schedule:run >> /dev/null 2>&1</code>.'),
                 // Un seul texte doit couvrir les deux cas (solde bas mesuré, ou mesure impossible) :
                 // contrairement au courriel, ce panneau n'a pas accès au détail de l'échec. Le courriel,
