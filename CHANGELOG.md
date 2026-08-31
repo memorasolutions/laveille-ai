@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.242.7] - 2026-08-31
+
+### Corrigé
+- **Blogue : remplacement de 6 images de couverture montrant un enfant** (`storage/blog/*.jpg` + `storage/articles/ia-generative-classe-guide-quebec-enseignants.jpg`), même chantier que le glossaire en v1.242.5 - régle fondatrice « jamais d'images d'élèves ni d'enfants » (2026-08-29), passif remesuré le 30-31 août. Les 68 articles publiés ont été relus un par un (photo, pas nom du titre) : 6 montraient un enfant en photo réaliste (école, famille), généralement avec un adulte (parent, enseignant) - le type d'image visé en premier lieu par la règle du 29 août.
+- Fiches concernées : `ia-a-lecole-et-au-gouvernement-le-guide-concret-de-ce-qui-est-enfin-possible-en-2025`, `oubliez-lassistant-formez-le-centaure-comment-faire-de-lia-un-super-pouvoir-pour-nos-eleves`, `lenseignant-qui-a-defie-google-depuis-son-salon-et-equipe-maintenant-des-millions-deleves-ladigitale`, `la-fuite-de-donnees-scolaires-revele-une-menace-que-tous-les-parents-ignorent-et-les-solutions-classiques-sont-inutiles`, `le-paradoxe-du-controle-parental-la-science-revele-comment-votre-anxiete-alimente-un-cycle-qui-rend-vos-enfants-moins-autonomes`, `ia-generative-classe-guide-quebec-enseignants`.
+- Remplacement 1200×630 jpg (photo, style existant conservé), scène reformulée avec des adultes uniquement (formation professionnelle, atelier, cuisine familiale adulte) au lieu d'un enfant - interdit posé dans le prompt de génération (compte Gemini, skill `/nanobanana`), chaque image vérifiée visuellement avant et après mise en ligne (og:image, twitter:image et balise `<img>` de page confirmés).
+- **Ces images ne sont PAS suivies par git** (`storage/app/public/blog` et `storage/app/public/articles` gitignorés, upload runtime) : déposées directement en production via cPanel, anciennes versions sauvegardées hors dépôt (`.backups/blog/images-eleves-2026-08-30/`) avant écrasement. Purge Cloudflare de zone effectuée après dépôt (cache d'edge servait encore l'ancien fichier au même chemin) - re-vérifié par empreinte SHA-256 identique au fichier local avant de conclure.
+
 ## [1.242.6] - 2026-08-31
 
 ### Corrigé
