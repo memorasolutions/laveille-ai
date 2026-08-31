@@ -119,6 +119,34 @@ consignes à chaque tâche. Tout ce qui suit est acquis, permanent, et non négo
 - **Le texte alternatif décrit l'image**, il ne contient pas de mots-clés - le bourrage dégrade
   l'accessibilité sans bénéfice.
 
+**Le cache de RÉPONSE fausse un rouge/vert sur du rendu.** Mesuré le 2026-08-30 : vider le cache
+des vues ne suffit pas, `responsecache` sert la page telle qu'elle était AVANT le correctif. Un
+agent qui mesure « avant » puis « après » sans le purger obtient deux fois la même page et conclut
+que son correctif est sans effet - ou pire, qu'il fonctionne alors que rien n'a bougé. Purger les
+DEUX caches entre les deux mesures, et se méfier de tout rouge/vert identique au pixel près.
+
+**Une cible tactile de 44 px ARRONDIE n'est pas une cible de 44 px.** Même date : un bouton portait
+bien une zone de clic de 44 px, mais avec un arrondi complet - donc un cercle de 44 px de diamètre
+(1521 px²) et non un carré de 44 sur 44 (1936 px²). Les coins retombaient sur l'élément voisin. Une
+lecture de la feuille de style dit « 44 px » et paraît conforme ; seul un CLIC RÉEL au coin de la
+zone révèle le défaut. Vérifier les cibles tactiles par le geste, jamais par la déclaration.
+
+**LA CORRESPONDANCE EN SOUS-CHAÎNE, QUATRE FOIS LE MÊME DÉGÂT.** Chercher un mot sans borner ses
+frontières le trouve à l'intérieur d'autres mots. Mesuré quatre fois sur ce projet, dans deux
+mécanismes sans aucun rapport :
+  - « accept » trouvé dans « Acceptable Use Policy » : la logique qui écarte les bandeaux de cookies
+    a cliqué un lien de bas de page et capturé la mauvaise page ;
+  - « ok » trouvé dans « Book a demo » (b-OO-k) : même mécanisme, même dégât ;
+  - « clés d'accès » lié vers l'authentification sans mot de passe alors qu'il s'agissait de clés d'API ;
+  - « dos » lié vers le déni de service dans « sac à dos » et « vue de dos ».
+
+Le remède est le même partout : **borner par des frontières de mot**. Et le contrôle qui compte
+n'est pas que le bug disparaisse, c'est que les cas LÉGITIMES passent encore - un resserrement du
+même genre a cassé Node.js, Z.ai et jan.ai le 2026-08-27 en réglant trois faux liens.
+
+Avant d'écrire une recherche de motif dans du texte, se demander : ce motif peut-il vivre à
+l'intérieur d'un mot plus long ? Si oui, il faut le borner avant, pas après l'incident.
+
 ## 6 bis. TU N'ES JAMAIS RÉVEILLÉ PAR UN SIGNAL - tu lis un fichier
 
 Mesuré TROIS fois dans la même soirée, le 2026-08-29, sur trois agents indépendants qui ont tous
@@ -163,6 +191,12 @@ complète n'est pas disponible : tant que la dernière ligne ne dit pas « exite
 encore en cours, on réinterroge. Dans les deux cas, ne jamais terminer un tour en te déclarant en
 attente d'une notification à venir - le tour suivant ne viendra pas tout seul.
 
+**Un Monitor « armé » ne te réveillera pas non plus.** Mesuré six fois le 2026-08-29 et le
+2026-08-30, sur six agents distincts. « Armé » veut dire qu'il surveille, jamais qu'il te parlera :
+sa notification remonte à la boucle principale, pas à un agent délégué. Deux agents ont même
+ABANDONNÉ l'interrogation manuelle qui fonctionnait pour revenir à cette attente qui ne fonctionne
+pas, la jugeant plus propre. **L'interrogation est la méthode normale, pas un pis-aller.**
+
 **Ce qui reste bon, et qu'il ne faut PAS relâcher** : refuser de déployer avant d'avoir la preuve,
 et ne lancer qu'une suite de tests à la fois. Ces exigences sont justes. Seule la façon d'attendre
 était fausse.
@@ -181,6 +215,44 @@ mutuellement échouer, parce que `modules_statuses.json` est un fichier RÉEL pa
 value must be of type array, null returned`. Avant de conclure à une régression, vérifie qu'aucune
 autre suite ne tourne, et relance le test SEUL.
 
+
+## 6 quater. UNE SUITE COMPLÈTE LANCÉE DANS UN CHECKOUT PARTAGÉ NE PROUVE RIEN
+
+Mesuré plusieurs fois les 2026-08-29 et 30. Ce dépôt est travaillé par plusieurs sessions en
+parallèle. Une suite complète dure une quarantaine de minutes ; pendant ce temps, une autre session
+commite, change de branche ou pousse. Les fichiers changent SOUS la suite en cours.
+
+Trois issues observées, toutes trompeuses : la suite est tuée sans rendre de verdict ; elle échoue
+sur un fichier qu'un autre venait de modifier ; ou elle passe, mais sur un mélange de deux états du
+code qui n'a jamais existé nulle part.
+
+**La preuve fiable est une suite CIBLÉE sur le module touché, lancée dans un clone indépendant.**
+Elle prend quelques minutes, personne n'écrit dedans, et son verdict porte sur le code qu'on a
+réellement modifié. Une suite complète reste utile comme filet périodique, jamais comme preuve d'un
+correctif précis.
+
+Corollaire, déjà appliqué avec justesse par plusieurs agents : quand la suite complète meurt ou
+traîne, **ne pas la présenter comme un résultat, et ne pas la remplacer par un silence** - dire
+qu'elle n'a pas rendu de verdict, et fournir la preuve ciblée qui, elle, vaut.
+
+## 6 ter. UN WORKTREE AVEC `vendor/` SYMBOLIQUE TESTE LE MAUVAIS CODE
+
+Mesuré le 2026-08-30. Un agent isole son travail dans un worktree pour ne pas gêner les autres
+sessions - bon réflexe, encouragé plus haut. Mais si `vendor/` y est un lien symbolique vers celui
+du dépôt principal, **le chargeur de classes résout le VRAI chemin du lien et charge donc le code du
+dépôt principal, pas les modifications du worktree.**
+
+Conséquence, et elle est vicieuse : le test « rouge avant » et le test « vert après » sont FAUX tous
+les deux, puisqu'ils s'exécutent sur du code que l'agent n'a pas modifié. La preuve de non-vacuité,
+qui est précisément ce qui doit protéger d'un correctif illusoire, devient elle-même illusoire.
+
+**Avant de tirer la moindre conclusion d'un test lancé depuis un worktree**, vérifier quel fichier
+est réellement chargé - par réflexion sur la classe visée, ou en cassant volontairement le fichier
+du worktree pour voir si le test s'en aperçoit. S'il ne s'en aperçoit pas, le test regarde ailleurs.
+
+Remèdes, du plus simple au plus sûr : un clone indépendant plutôt qu'un worktree quand des
+dépendances entrent en jeu, ou à défaut un `composer dump-autoload` local au worktree avec un
+`vendor/` qui lui appartient.
 
 ## 7. CE QU'ON ATTEND D'UN RAPPORT
 

@@ -27,6 +27,9 @@
     --highlight: #fff9c4;
     --code-bg: #f5f2f0;
     --pastille-size: 12px;
+    --danger-bg: #fdecea;
+    --danger-border: #d32f2f;
+    --danger-text: #611a15;
   }
   [data-theme="dark"] {
     --bg: #121212;
@@ -45,6 +48,9 @@
     --btn-active-text: #000;
     --highlight: #5c4a00;
     --code-bg: #2a2a2a;
+    --danger-bg: #3a1210;
+    --danger-border: #ff6659;
+    --danger-text: #ffcdd2;
   }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -167,6 +173,21 @@
     transition: box-shadow 0.2s, background 0.3s; scroll-margin-top: 16px;
   }
   .card.highlight { box-shadow: 0 0 0 3px var(--accent), var(--shadow); }
+  .card.malformed, .tache-item.malformed { border: 2px solid var(--danger-border); }
+  .card-malformed-tag {
+    display: inline-block; background: var(--danger-border); color: #fff; font-weight: 700;
+    font-size: 0.75rem; letter-spacing: 0.2px; padding: 3px 8px; border-radius: 4px; margin-bottom: 8px;
+  }
+  .integrity-banner {
+    margin: 0 0 16px; padding: 12px 16px; border-radius: 8px; border: 2px solid var(--danger-border);
+    background: var(--danger-bg); color: var(--danger-text); font-size: 0.9rem; line-height: 1.5;
+  }
+  .integrity-banner.hidden { display: none; }
+  .integrity-banner strong { display: block; font-size: 1rem; margin-bottom: 4px; }
+  .integrity-banner ul { margin: 8px 0 0; padding-left: 20px; }
+  .integrity-banner li { margin-bottom: 2px; }
+  .integrity-banner a { color: var(--danger-text); text-decoration: underline; font-weight: 600; }
+  .integrity-details { margin-top: 8px; }
   .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
   .pastille { width: var(--pastille-size); height: var(--pastille-size); border-radius: 50%; flex-shrink: 0; }
   .type-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
@@ -258,6 +279,7 @@
 </head>
 <body>
 <div class="container">
+  <div class="integrity-banner hidden" id="integrityBanner" role="alert" aria-live="polite"></div>
   <header>
     <h1><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MiA1MiIgd2lkdGg9IjUyIiBoZWlnaHQ9IjUyIj4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg0LCA0KSI+CiAgICA8cGF0aCBkPSJNMCAyMiBRMjIgMCA0NCAyMiBRMjIgNDQgMCAyMiBaIiBmaWxsPSIjMEI3Mjg1IiBvcGFjaXR5PSIwLjEiLz4KICAgIDxwYXRoIGQ9Ik0wIDIyIFEyMiAwIDQ0IDIyIFEyMiA0NCAwIDIyIFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzBCNzI4NSIgc3Ryb2tlLXdpZHRoPSIyLjIiLz4KICAgIDxjaXJjbGUgY3g9IjIyIiBjeT0iMjIiIHI9IjkiIGZpbGw9IiMwQjcyODUiLz4KICAgIDxjaXJjbGUgY3g9IjI1IiBjeT0iMTkiIHI9IjMuMiIgZmlsbD0iI0U2N0UyMiIvPgogIDwvZz4KPC9zdmc+Cg==" alt="Logo du projet" class="logo-projet" onerror="this.style.display='none'"> laveille.ai - Journal de communication</h1>
     <div class="subtitle">MEMORA solutions - toutes les questions, réponses, indications, tâches et plans de travail, horodatés (heure du Québec)</div>
@@ -610,7 +632,9 @@ const ENTREES = [
   { id: 225, quand_quebec: "2026-08-26 06h25 Québec", quand_utc: "2026-08-26T10:25Z", type: "indication", sujet: "Nouvelle alerte sur les captures : la vraie cause était un worker caché dans les crons, et mon correctif de la veille était incomplet", contenu: "<p><strong>Corrigé, et je dois vous dire que ma correction d'hier était incomplète.</strong> L'alerte de ce matin n'est pas la même que celle d'hier : hier le job était <em>repris trop tôt</em>, aujourd'hui il était <em>tué en cours de route</em>.</p><p><strong>La vraie cause était invisible depuis le code.</strong> Un détail de la trace m'a mis sur la piste : le worker qui a tué le job tournait en continu, alors que celui que j'avais analysé hier tourne par à-coups. Il s'agissait donc d'un <strong>autre</strong> travailleur, déclaré directement dans les tâches planifiées du serveur, et donc absent du dépôt. Il traitait les captures d'écran <strong>sans aucune limite de temps déclarée</strong>, ce qui fait que le serveur appliquait sa valeur par défaut : <strong>60 secondes</strong>. Or une capture peut légitimement prendre jusqu'à trois minutes. Il coupait donc le travail en plein milieu.</p><p><strong>Ce que j'ai fait</strong> : ajouté la limite de 270 secondes à cette tâche planifiée, en notant d'abord son état exact pour pouvoir revenir en arrière. Vérifié ensuite : les deux travailleurs qui s'occupent des captures sont maintenant alignés, et le délai de reprise (300 s) reste supérieur aux deux. Aucun doublon, aucune tâche résiduelle.</p><p><strong>Pourquoi je ne l'avais pas vu hier</strong> : le cPanel me renvoyait une page d'attente, je n'ai donc pas pu lire les tâches planifiées et j'ai conclu sur les seuls travailleurs visibles dans le code. J'avais même écrit noir sur blanc que « le plus long est à 270 secondes ». C'était faux : il y en avait un à 60. J'ai corrigé ma note et inscrit la leçon en tête du test concerné, parce qu'un test ne peut pas détecter un travailleur qu'il ne voit pas.</p><p><strong>Bonne nouvelle au passage</strong> : le cPanel répond de nouveau, j'ai donc pu lire toutes les tâches planifiées du serveur. C'était le seul point que l'audit d'hier n'avait pas pu couvrir. Résultat pour laveille.ai : quatre tâches, toutes légitimes, <strong>aucun résidu</strong>.</p>", statut: "info", priorite: "normale", todo: null, liens: [] },
   { id: 226, quand_quebec: "2026-08-26 11h30 Québec", quand_utc: "2026-08-26T15:30Z", type: "indication", sujet: "Le site était 12 fois trop lent à froid, et trois failles de plus ont été trouvées puis corrigées", contenu: "<p><strong>Le gain le plus important d'abord.</strong> Une fiche d'outil jamais visitée mettait entre 4 et 10 secondes à s'afficher, alors qu'une seconde visite prenait une demi-seconde. J'ai trouvé pourquoi : le petit logo affiché à côté de chaque lien (le « favicon ») était cherché sur Internet <strong>pendant que la page se construisait</strong>, avec jusqu'à trois tentatives de trois secondes par site. Le calcul se fait désormais en arrière-plan. Mesure avant/après sur la même page : <strong>2 605 millisecondes contre 204</strong>, soit douze fois plus rapide.</p><p><strong>Pourquoi ça compte pour vous</strong> : votre annuaire compte 1 544 pages, et le robot de Google visite surtout des pages « froides », jamais consultées. Il subissait donc cette lenteur à chaque passage. C'est une piste sérieuse pour expliquer qu'il ne repasse plus depuis le 4 août, même si je ne peux pas l'affirmer.</p><p><strong>Trois failles trouvées et fermées.</strong> (1) L'interface de recherche technique du site donnait <strong>le nom et le courriel de tous vos comptes</strong> à n'importe quel inscrit. (2) Une page publique de « journal » affichait du code fourni par l'utilisateur sans le nettoyer, visible par n'importe quel visiteur. (3) N'importe quel inscrit pouvait <strong>publier un article</strong> sur le blogue par l'interface technique, sans avoir le droit correspondant. Les trois sont corrigées et verrouillées par des tests.</p><p><strong>Deux nettoyages.</strong> Une commande qui installe du <em>contenu de démonstration</em> pouvait tourner sur le vrai site : elle refuse maintenant. Rassurez-vous sur un point que j'ai vérifié : sa partie « effacement » ne touchait que des comptes de test, jamais vos vraies données. Et une tâche automatique « temporaire » tournait encore chaque minute alors qu'elle annonçait elle-même être retirée après usage.</p><p><strong>Ce que j'ai refusé de faire, volontairement.</strong> Sur les 20 endroits où figurait une couleur trop pâle, <strong>seuls 2 étaient réellement fautifs</strong> : les autres sont des bordures, des cases de jeu ou du code généré. Un remplacement automatique aurait abîmé des affichages corrects. Et je n'ai pas touché à la description des produits de la boutique : c'est du texte que vous écrivez vous-même, et je ne peux pas vérifier depuis ici s'il contient de la mise en forme voulue.</p><p><strong>Une alerte écartée</strong> : on m'a signalé que le site accepterait des images SVG piégées. J'ai testé : c'est faux, la vérification les refuse déjà. Deux analyses se contredisaient, la mesure a tranché.</p>", statut: "info", priorite: "haute", todo: null, liens: [] },
   { id: 227, quand_quebec: "2026-08-27 20h40 Québec", quand_utc: "2026-08-28T00:40Z", type: "question", sujet: "Décision attendue : la page « modèles d’IA et versions » - protocole du club des sages clos en 4 rounds", contenu: "<p><strong>Tu avais demandé</strong> de réfléchir avec les IA à une page citant les modèles d’IA et leurs versions, puis de te proposer une solution. Le protocole est clos, voici la proposition et la décision qui t’appartient.</p><p><strong>Le résultat le plus instructif n’est pas la conclusion mais la mécanique.</strong> Au round 3, chaque oracle devait garder UNE seule option parmi trois ; ils en ont gardé trois différentes. Au round 4, sommés de trancher, chacun a adopté le choix d’un autre - permutation circulaire parfaite, aucun n’est resté sur sa position. Ce n’est pas un signal faible : c’est la preuve que ma question forçait un faux choix. Les trois options n’étaient pas concurrentes, c’étaient trois couches du même objet. Un 5e round aurait fait tourner la roue encore.</p><p><strong>Onze idées sont mortes et le sont restées</strong> sur quatre rounds, dont le banc d’essai maison, tué par son propre auteur. Les deux idées neuves nées au round 3 ont été tuées à l’unanimité au round 4, chacune par celui qui l’avait proposée.</p><p><strong>Un désaccord tranché contre la majorité</strong> : documenter « ce qui meurt » (les API dépréciées) séduisait deux oracles sur trois. J’ai tranché contre, sur l’argument le plus factuel : les développeurs sont la seule audience d’un tel radar, et ils utilisent des bloqueurs de publicité. Un site financé par la pub y attirerait son audience la moins monétisable.</p><p><strong>MA PROPOSITION : une page « familles, versions et alias » - et ce n’est pas un chantier neuf.</strong> Les oracles raisonnaient sur un site abstrait. Ce qu’ils n’avaient pas : neuf faux liens automatiques mesurés le même jour, dont « Gemini Omni » coupé à l’intérieur de « Gemini Omni 1.1 Flash », et chaque « Google » du site renvoyant vers la fiche Gemini. Tous ont une seule cause : le site ne sait pas distinguer une famille d’un produit, ni un produit d’une version. La page demandée est donc la structure qui manque DÉJÀ, et dont l’absence casse quelque chose de visible en production.</p><p><strong>Ce que je ne sais pas, et que je préfère dire</strong> : aucune donnée ne prouve qu’une page de catalogue attire du trafic ici. C’est vrai des trois options. Ce qui distingue celle-ci, c’est qu’elle sert même si le trafic ne vient pas - elle répare le linkifier.</p><p><strong>Deux points de rigueur.</strong> DeepSeek a fabriqué une source au round 3 (« Codex, 2023 » pour un chiffre de 78 % inexistant) ; une consigne anti-fabrication au round 4 l’a arrêté. Et claude.ai était à quota épuisé : le panel a tourné à 4 oracles sur 5, signalé plutôt que tu.</p><p><strong>DÉCISION ATTENDUE : est-ce que je construis cette page ?</strong> Rien n’est implémenté, aucune ligne de code écrite.</p>" },
-  // ===FIN-ENTREES=== (les nouvelles entrées s'insèrent juste AVANT cette ligne, qui reste À L'INTÉRIEUR du tableau)
+    { id: 228, quand_quebec: "2026-08-31 05h16 Québec", quand_utc: "2026-08-31T09:16Z", type: "decision-requise", sujet: "Le mot de passe qui déchiffre la sauvegarde n'est déposé nulle part", contenu: "<p>L'archive de sauvegarde de laveille.ai est chiffrée par un mot de passe qui vit UNIQUEMENT dans le fichier de configuration du serveur de production. Aucune copie de ce mot de passe n'existe ailleurs.</p><p>Le scénario contre lequel la sauvegarde existe - la perte du serveur - est exactement celui qui emporte la clé. Serveur perdu, mot de passe perdu avec lui, et l'archive devient un bloc illisible que personne ne pourra jamais ouvrir. La copie hors-site en cours de mise en place ne règle PAS ce point : elle met l'archive à l'abri, pas la clé.</p><p>Une sauvegarde qu'on ne peut pas déchiffrer n'est pas une sauvegarde, c'est un fichier.</p><p>Ce que Stéphane doit faire, et c'est rapide : déposer ce mot de passe dans le coffre 1Password du projet (la convention <code>projet:laveille</code> existe déjà), puis confirmer que c'est fait. Claude n'a besoin de savoir QUE le fait qu'il y est, jamais sa valeur - déposer un secret est une opération sur des identifiants, que les règles du projet réservent à Stéphane, et c'est précisément ce qui protège ici : un secret recopié machinalement finit dans un journal ou un historique de commandes.</p>", statut: "en-attente", priorite: "haute", todo: null, liens: [] },
+  { id: 229, quand_quebec: "2026-08-31 05h17 Québec", quand_utc: "2026-08-31T09:17Z", type: "decision-requise", sujet: "Trois bandes dessinées ont été retirées et attendent d'être refaites", contenu: "<p>Trois bandes dessinées entières ont été retirées du site - deepfake, biais algorithmique et cybersécurité - parce que leur personnage récurrent était un enfant, ce qui contrevient à la règle posée le 29 août.</p><p>Rien n'est cassé : les trois fiches de glossaire répondent normalement, gardent leur image propre, et le bouton « Lire la BD » a disparu proprement. Mais trois contenus pédagogiques ont disparu du site et ne sont pas remplacés.</p><p>Pourquoi Claude ne les a pas refaites de sa propre initiative : deux règles permanentes du projet s'y opposent. Produire une bande dessinée passe par le skill dédié et exige une approbation explicite avant toute mise en ligne. Remplacer une image dans une fiche est une remédiation autonome ; produire une bande dessinée est une production créative. La frontière est nette.</p><p>La matière narrative existe encore - les fichiers retirés sont sauvegardés. Seul le dessin est à refaire, avec l'interdit posé dans le prompt de génération plutôt qu'au contrôle après coup, méthode qui a fonctionné sur les 68 images déjà remplacées.</p><p>Ce que Stéphane doit décider : quand relancer cette production, et s'il veut la même trame ou en profiter pour la réécrire.</p>", statut: "en-attente", priorite: "normale", todo: null, liens: [] },
+// ===FIN-ENTREES=== (les nouvelles entrées s'insèrent juste AVANT cette ligne, qui reste À L'INTÉRIEUR du tableau) (les nouvelles entrées s'insèrent juste AVANT cette ligne, qui reste À L'INTÉRIEUR du tableau)
 ];
 
 // ===DEBUT-PLANS=== (ne pas modifier cette ligne - les nouveaux plans s'ajoutent juste avant FIN)
@@ -663,7 +687,7 @@ const TACHES = [
   { n: 1758, sujet: "Faire descendre SKILL.md du skill /bd de 666 vers 350 lignes par un arbitrage éditorial règle par règle sur ce qui est encore exécutable", statut: "a_venir", attend: "", quand: "2026-08-22", preuve: "", prochaine_action: "" },
 // ===FIN-TACHES===
 ];
-const TACHES_META = { synchronise_le: "2026-08-22 17h30 Québec", quand_utc: "2026-08-22T21:30Z", note: "Tâches 547 à 1728 antérieures : complétées ou autrement closes (Académie LMS, Décido, minuteur visuel, prompteur, constructeur de prompts, BD, glossaire, audits, OPcache, Pi forge, chantiers légaux, Actus 2.0 zéro copie), à l'exception de 5 tâches bloquées restaurées le 22 août 2026 après une synchronisation défectueuse qui les avait effacées à tort (anciens n874, n1041, n1614, n1721, n1728, repris sous n1749 à n1753 - voir entrée 154 du Journal) - synthèse d'historique, détail dans le système de tâches sur demande. Les 1 848 fiches en attente du pipeline ne sont pas supprimées, la suppression étant irréversible et 5 d'entre elles provenant de vrais utilisateurs." };
+const TACHES_META = { synchronise_le: "2026-08-31 05h15 Québec", quand_utc: "2026-08-31T09:15Z", note: "" };
 
 // ===DEBUT-DOSSIERS=== (ne pas modifier cette ligne - les nouveaux dossiers s'ajoutent juste avant FIN)
 const DOSSIERS = [
@@ -724,6 +748,101 @@ const TACHE_GROUPE_TITRES = {
   "a_venir": "À venir",
   "complete": "Complétées"
 };
+
+// --- Garde-fou d'intégrité des données (posé le 2026-08-28, mission #1714) ------------------
+// Une entrée qui utilise un mauvais nom de champ (ex. "titre" au lieu du "sujet" exigé par le
+// contrat, ou un champ requis carrément absent) ne provoque AUCUNE erreur visible par défaut :
+// le champ manquant vaut "undefined" et s'affiche tel quel dans la carte, ou pire, fait planter
+// silencieusement la recherche dès qu'elle atteint cette entrée (aucune carte ne s'affiche
+// alors, sans aucun message). Ce défaut s'est déjà produit trois fois sans être vu. Les
+// fonctions ci-dessous vérifient CHAQUE entrée au chargement contre le contrat documenté dans
+// ~/.claude/refs/journal-questions/README.md et rendent le défaut visible à l'écran - en
+// bannière ET directement sur la carte concernée - plutôt que de le laisser disparaître en
+// silence. Reprendre le contrat exact avant de faire évoluer ces fonctions.
+
+function champManquant(valeur) {
+  return valeur === undefined || valeur === null || (typeof valeur === 'string' && valeur.trim() === '');
+}
+
+function validateEntree(e) {
+  const problemes = [];
+  if (champManquant(e.sujet)) problemes.push('sujet manquant');
+  if (champManquant(e.contenu)) problemes.push('contenu manquant');
+  if (champManquant(e.quand_quebec)) problemes.push('quand_quebec manquant');
+  if (champManquant(e.quand_utc)) problemes.push('quand_utc manquant');
+  if (champManquant(e.type) || !(e.type in TYPE_LABELS)) problemes.push('type manquant ou invalide (' + e.type + ')');
+  if (champManquant(e.statut) || !(e.statut in STATUT_LABELS)) problemes.push('statut manquant ou invalide (' + e.statut + ')');
+  if (champManquant(e.priorite) || !(e.priorite in PRIORITE_LABELS)) problemes.push('priorite manquante ou invalide (' + e.priorite + ')');
+  return problemes;
+}
+
+function validatePlan(p) {
+  const problemes = [];
+  if (champManquant(p.titre)) problemes.push('titre manquant');
+  if (champManquant(p.contenu)) problemes.push('contenu manquant');
+  if (champManquant(p.quand_quebec)) problemes.push('quand_quebec manquant');
+  if (champManquant(p.quand_utc)) problemes.push('quand_utc manquant');
+  if (champManquant(p.statut) || !(p.statut in PLAN_STATUT_LABELS)) problemes.push('statut manquant ou invalide (' + p.statut + ')');
+  return problemes;
+}
+
+function validateTache(t) {
+  const problemes = [];
+  if (champManquant(t.sujet)) problemes.push('sujet manquant');
+  if (champManquant(t.quand)) problemes.push('quand manquant');
+  if (champManquant(t.statut) || !(t.statut in TACHE_STATUT_LABELS)) problemes.push('statut manquant ou invalide (' + t.statut + ')');
+  return problemes;
+}
+
+function validateDossier(d) {
+  const problemes = [];
+  if (champManquant(d.titre)) problemes.push('titre manquant');
+  if (champManquant(d.description)) problemes.push('description manquante');
+  if (champManquant(d.quand_quebec)) problemes.push('quand_quebec manquant');
+  if (champManquant(d.quand_utc)) problemes.push('quand_utc manquant');
+  return problemes;
+}
+
+function collectIntegrityProblems() {
+  const rows = [];
+  ENTREES.forEach(e => {
+    const problemes = validateEntree(e);
+    if (problemes.length) rows.push({ scope: 'Journal', hash: '#e' + e.id, label: 'Entrée #' + e.id, problemes });
+  });
+  PLANS.forEach(p => {
+    const problemes = validatePlan(p);
+    if (problemes.length) rows.push({ scope: 'Plans', hash: '#plan-' + p.id, label: 'Plan #' + p.id, problemes });
+  });
+  TACHES.forEach(t => {
+    const problemes = validateTache(t);
+    if (problemes.length) rows.push({ scope: 'Tâches', hash: '#taches', label: 'Tâche #' + t.n, problemes });
+  });
+  DOSSIERS.forEach(d => {
+    const problemes = validateDossier(d);
+    if (problemes.length) rows.push({ scope: 'Dossiers', hash: '#dossier-' + d.id, label: 'Dossier #' + d.id, problemes });
+  });
+  return rows;
+}
+
+function renderIntegrityBanner() {
+  const banner = document.getElementById('integrityBanner');
+  if (!banner) return;
+  const rows = collectIntegrityProblems();
+  if (rows.length === 0) {
+    banner.classList.add('hidden');
+    banner.innerHTML = '';
+    return;
+  }
+  const pluriel = rows.length > 1 ? 's' : '';
+  const items = rows.map(r =>
+    '<li><a href="' + r.hash + '">' + r.label + '</a> (' + r.scope + ') : ' + r.problemes.join(', ') + '</li>'
+  ).join('');
+  banner.innerHTML = '<strong>⚠️ ' + rows.length + ' entrée' + pluriel + ' malformée' + pluriel + ' détectée' + pluriel + '</strong>'
+    + '<span>Un champ requis par le contrat est manquant ou invalide sur ' + (rows.length > 1 ? 'ces entrées' : 'cette entrée') + ' - elle' + pluriel + ' s\'affiche' + (rows.length > 1 ? 'nt' : '') + ' avec un texte "undefined", ou peu' + (rows.length > 1 ? 'vent' : 't') + ' faire planter la recherche. À corriger dans le fichier (contrat : ~/.claude/refs/journal-questions/README.md). Chaque entrée listée est aussi entourée de rouge sur sa carte, où qu\'elle apparaisse.</span>'
+    + '<details class="integrity-details"><summary>Voir la liste (' + rows.length + ')</summary><ul>' + items + '</ul></details>';
+  banner.classList.remove('hidden');
+}
+// --- Fin du garde-fou d'intégrité ------------------------------------------------------------
 
 let filters = {
   preset: 'tout',
@@ -1123,8 +1242,13 @@ function render() {
     const copyReponseHtml = (e.statut === 'en-attente' && (e.type === 'question-pour-stephane' || e.type === 'decision-requise'))
       ? '<button class="btn-copy-reponse" data-copyid="' + e.id + '">Copier ma réponse</button>'
       : '';
+    const problemesEntree = validateEntree(e);
+    const malformedTag = problemesEntree.length
+      ? '<div class="card-malformed-tag">⚠️ ENTRÉE MALFORMÉE : ' + problemesEntree.join(', ') + '</div>'
+      : '';
 
-    html += '<div class="card" id="e' + e.id + '">'
+    html += '<div class="card' + (problemesEntree.length ? ' malformed' : '') + '" id="e' + e.id + '">'
+      + malformedTag
       + '<div class="card-header">'
       + '<span class="pastille" style="background:' + color + ';"></span>'
       + '<span class="type-label" style="color:' + color + ';">' + typeLabel + '</span>'
@@ -1229,8 +1353,13 @@ function renderPlans() {
     const liensHtml = p.liens && p.liens.length > 0
       ? p.liens.map(l => '<a href="' + l.href + '" target="_blank">' + l.titre + '</a>').join('')
       : '';
+    const problemesPlan = validatePlan(p);
+    const malformedTagPlan = problemesPlan.length
+      ? '<div class="card-malformed-tag">⚠️ PLAN MALFORMÉ : ' + problemesPlan.join(', ') + '</div>'
+      : '';
 
-    html += '<div class="card" id="plan-' + p.id + '">'
+    html += '<div class="card' + (problemesPlan.length ? ' malformed' : '') + '" id="plan-' + p.id + '">'
+      + malformedTagPlan
       + '<div class="card-sujet">' + p.titre + '</div>'
       + '<div class="card-horodatage"><span>' + p.quand_quebec + '</span><span class="utc">(' + p.quand_utc + ')</span></div>'
       + '<div class="card-badges"><span class="badge plan-statut ' + p.statut + '">' + statutLabel + '</span></div>'
@@ -1275,8 +1404,13 @@ function renderDossiers() {
     const liensHtml = d.liens && d.liens.length > 0
       ? d.liens.map(l => '<a href="' + l.href + '" target="_blank">' + l.titre + '</a>').join('')
       : '';
+    const problemesDossier = validateDossier(d);
+    const malformedTagDossier = problemesDossier.length
+      ? '<div class="card-malformed-tag">⚠️ DOSSIER MALFORMÉ : ' + problemesDossier.join(', ') + '</div>'
+      : '';
 
-    html += '<div class="card" id="dossier-' + d.id + '">'
+    html += '<div class="card' + (problemesDossier.length ? ' malformed' : '') + '" id="dossier-' + d.id + '">'
+      + malformedTagDossier
       + '<div class="card-sujet">' + d.titre + '</div>'
       + '<div class="card-horodatage"><span>' + d.quand_quebec + '</span><span class="utc">(' + d.quand_utc + ')</span></div>'
       + '<div class="card-contenu rich-content">' + d.description + '</div>'
@@ -1327,7 +1461,13 @@ function renderTacheItem(t) {
     }
   }
 
-  return '<div class="tache-item" id="tache-' + t.n + '">'
+  const problemesTache = validateTache(t);
+  const malformedTagTache = problemesTache.length
+    ? '<div class="card-malformed-tag">⚠️ TÂCHE MALFORMÉE : ' + problemesTache.join(', ') + '</div>'
+    : '';
+
+  return '<div class="tache-item' + (problemesTache.length ? ' malformed' : '') + '" id="tache-' + t.n + '">'
+    + malformedTagTache
     + '<div class="tache-header">'
     + '<span class="pastille" style="background:' + (TACHE_STATUT_COLOR(statutClass)) + ';"></span>'
     + '<span class="tache-n">#' + t.n + '</span>'
@@ -1487,6 +1627,7 @@ updatePresetButtons();
 updateMeta();
 updatePresetCounts();
 updateOpsBar();
+renderIntegrityBanner();
 render();
 renderPlans();
 renderTaches();
