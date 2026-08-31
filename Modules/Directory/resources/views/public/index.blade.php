@@ -18,6 +18,22 @@
     // calculé une seule fois hors boucle, même réglage que _highlight_card.blade.php (DRY sur la
     // clé de config, pas sur l'appel - clé Settings identique aux deux endroits).
     $viewsVerifiedMinDisplay = \Modules\Settings\Facades\Settings::get('directory.views_verified_min_display', 10);
+    // Ticket #1868 - Cloudflare Turnstile sur le wizard "Proposer un outil" (étape 2 plus bas).
+    // null tant que les clés Cloudflare sont absentes (état de ce projet au 2026-08-31) OU que
+    // le coupe-circuit directory.turnstile.enabled est à false : le formulaire reste alors
+    // identique à avant ce chantier, sans script Cloudflare chargé (zéro appel réseau ajouté).
+    // isEnabled() (clé SECRÈTE, vérifiée côté PublicDirectoryController::storeSubmission) est
+    // volontairement AUSSI exigé ici, en plus de siteKey() (clé PUBLIQUE) : sans ce garde-fou,
+    // poser la clé de site sans poser la clé secrète afficherait un widget que le serveur ne
+    // vérifie jamais (revue adversariale Hermes/deepseek-v4-flash, 2026-08-31) - défi inutile
+    // pour le visiteur, protection nulle malgré l'apparence contraire.
+    $turnstileSiteKey = (
+        config('directory.turnstile.enabled', true)
+        && class_exists(\Modules\Authors\Services\TurnstileVerificationService::class)
+        && app(\Modules\Authors\Services\TurnstileVerificationService::class)->isEnabled()
+    )
+        ? \Modules\Authors\Services\TurnstileVerificationService::siteKey()
+        : null;
     $toolsJson = $tools->map(function($tool) use ($pricingOptions, $ecosystemCounts, $ecosystemLabels, $viewsVerifiedMinDisplay) {
         $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : '';
         $ecoTag = $tool->ecosystem_tag ?? null;
@@ -456,7 +472,7 @@
                 const res = await fetch('{{ route('directory.submit') }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
-                    body: JSON.stringify({ url: this.toolUrl, name: this.toolName, description: this.toolDesc, short_description: this.toolShortDesc, pricing: this.toolPricing, screenshot: this.screenshotUrl, has_education_pricing: this.hasEducationPricing, education_pricing_type: this.educationPricingType, education_pricing_details: this.educationPricingDetails, education_pricing_url: this.educationPricingUrl, collection_ids: this.selectedCollections, new_collection_name: this.newCollectionName })
+                    body: JSON.stringify({ url: this.toolUrl, name: this.toolName, description: this.toolDesc, short_description: this.toolShortDesc, pricing: this.toolPricing, screenshot: this.screenshotUrl, has_education_pricing: this.hasEducationPricing, education_pricing_type: this.educationPricingType, education_pricing_details: this.educationPricingDetails, education_pricing_url: this.educationPricingUrl, collection_ids: this.selectedCollections, new_collection_name: this.newCollectionName, 'cf-turnstile-response': document.querySelector('[name=cf-turnstile-response]')?.value ?? '' })
                 });
                 const d = await res.json();
                 if (d.auth_required) { this.wStep = 3; this.authError = ''; }
@@ -745,6 +761,16 @@
 
         {{-- Erreur --}}
         <div x-show="scrapeError" x-cloak role="alert" aria-live="assertive" style="margin-top: 10px; color: #DC2626; font-size: 13px;" x-text="scrapeError"></div>
+
+        {{-- Ticket #1868 - Turnstile invisible (aucun défi visuel, conforme WCAG 2.2 AAA
+             3.3.9), même mode que Modules/Authors/resources/views/components/newsletter-optin
+             .blade.php. Rendu UNIQUEMENT si les clés Cloudflare existent ET le coupe-circuit
+             directory.turnstile.enabled est actif - $turnstileSiteKey vaut null sinon (voir
+             le bloc PHP en tête de fichier), donc rien n'est ajouté au DOM tant que ce n'est
+             pas configuré côté Cloudflare. --}}
+        @if($turnstileSiteKey)
+        <div class="cf-turnstile" data-sitekey="{{ $turnstileSiteKey }}" data-size="invisible" data-action="directory-submit"></div>
+        @endif
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
             <button type="button" @click="resetWizard()" style="background: #F3F4F6; color: var(--c-dark); border: none; padding: 10px 20px; border-radius: var(--r-btn); font-weight: 600; font-size: 14px; cursor: pointer;">
@@ -1478,6 +1504,11 @@
 @endsection
 
 @push('scripts')
+{{-- Ticket #1868 - chargé UNIQUEMENT si le widget Turnstile est rendu plus haut (voir
+     $turnstileSiteKey) : aucun appel réseau ajouté tant que Cloudflare n'est pas configuré. --}}
+@if($turnstileSiteKey)
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+@endif
 <script type="application/ld+json">
 {
     "@@context": "https://schema.org",

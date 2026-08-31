@@ -363,6 +363,48 @@ class PublicDirectoryController extends Controller
             abort(401);
         }
 
+        // Ticket #1868 - Cloudflare Turnstile, couche SUPPLÉMENTAIRE (le vrai trou était la
+        // publication sans relecture, déjà bouché par la porte de modération plus bas dans
+        // cette méthode). Service RÉUTILISÉ tel quel (Modules\Authors\Services\
+        // TurnstileVerificationService, déjà branché sur l'infolettre auteur) - jamais réécrit
+        // ici. class_exists() car Directory ne dépend normalement pas du module Authors : un
+        // Authors désactivé ne doit jamais bloquer une soumission d'outil.
+        //
+        // Deux niveaux de bypass, tous deux graceful (le formulaire fonctionne toujours) :
+        //   1) directory.turnstile.enabled (config/config.php de ce module) - coupe-circuit
+        //      DÉDIÉ, indépendant des clés Cloudflare : à poser sur false en cas de panne
+        //      Cloudflare ou de mauvaise configuration, sans toucher aux clés ni redéployer.
+        //   2) TurnstileVerificationService::isEnabled() - vrai seulement si les deux clés
+        //      Cloudflare sont configurées (absentes en local ET en production au 2026-08-31 -
+        //      ce correctif est donc livré INACTIF tant que Stéphane n'a pas créé le widget
+        //      côté Cloudflare, voir .env.example).
+        if (
+            config('directory.turnstile.enabled', true)
+            && class_exists(\Modules\Authors\Services\TurnstileVerificationService::class)
+        ) {
+            $turnstile = app(\Modules\Authors\Services\TurnstileVerificationService::class);
+
+            if ($turnstile->isEnabled()) {
+                $turnstileToken = $request->input('cf-turnstile-response');
+
+                if (! $turnstile->verify($turnstileToken, $request->ip())) {
+                    // Canal dédié 'directory_antibot' (config/logging.php) : LOG_LEVEL=error
+                    // en production avale les messages 'info' du canal par défaut - un refus
+                    // anti-abus sans trace ne peut ni être réglé ni être disculpé.
+                    \Illuminate\Support\Facades\Log::channel('directory_antibot')->info('directory.submit.turnstile_rejected', [
+                        'user_id' => auth()->id(),
+                        'has_token' => ! empty($turnstileToken),
+                        'ip' => $request->ip(),
+                    ]);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('Validation anti-robot échouée. Réessaie en rafraîchissant la page.'),
+                    ], 422);
+                }
+            }
+        }
+
         $validated = $request->validate([
             'url' => 'required|url',
             'name' => 'required|string|max:80',

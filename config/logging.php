@@ -189,6 +189,24 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Refus anti-abus à la soumission publique d'un outil (2026-08-31, ticket #1868) -
+        // Cloudflare Turnstile (Modules\Directory\Http\Controllers\PublicDirectoryController
+        // ::storeSubmission, service Modules\Authors\Services\TurnstileVerificationService).
+        // 'level' fixé en dur à 'info', volontairement INDÉPENDANT de LOG_LEVEL - même parade
+        // que 'fusion'/'quality_gate'/'directory_screenshots'/'composition'/
+        // 'directory_discovery'/'directory_enrichment' ci-dessus : LOG_LEVEL=error en
+        // production avalerait sinon chaque refus (jeton absent, jeton invalide) avant
+        // écriture, rendant un mécanisme anti-abus impossible à régler ou à disculper le jour
+        // où Stéphane configure les clés Cloudflare. Rétention alignée sur les autres canaux
+        // 'daily' du projet.
+        'directory_antibot' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/directory_antibot.log'),
+            'level' => 'info',
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         // Génération de /llms.txt et /llms-full.txt. Niveau fixé en dur : LOG_LEVEL=error en
         // production avalerait ces avertissements, alors qu'un comptage tombé à 0 annonce un
         // site vide aux moteurs de réponse - c'est précisément ce qu'il faut pouvoir constater.

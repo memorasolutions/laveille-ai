@@ -120,4 +120,31 @@ return [
         'quality_gate_enabled' => (bool) env('DIRECTORY_REENRICH_STALE_QUALITY_GATE_ENABLED', true),
         'entity_check_enabled' => (bool) env('DIRECTORY_REENRICH_STALE_ENTITY_CHECK_ENABLED', true),
     ],
+
+    /*
+     * Ticket #1868 - Cloudflare Turnstile sur la soumission publique d'un outil
+     * (/annuaire/proposer, PublicDirectoryController::storeSubmission). Couche
+     * SUPPLÉMENTAIRE, jamais la protection principale : le vrai trou était la publication
+     * sans relecture, déjà bouché par la file de modération (v1.233.0). Le compte fautif qui
+     * a motivé ce chantier était authentifié et vérifié par courriel - un captcha ne l'aurait
+     * pas arrêté.
+     *
+     * 'enabled' par défaut TRUE, à l'INVERSE de leaderboard/category_alerts/reenrich_stale
+     * ci-dessus (qui protègent contre un défaut connu et restent donc éteints par défaut).
+     * Ici l'inverse est correct : la vérification réelle reste un no-op tant que
+     * services.turnstile.secret_key est vide (TurnstileVerificationService::isEnabled(),
+     * Modules/Authors/app/Services/TurnstileVerificationService.php - clés absentes en local
+     * ET en production au 2026-08-31), donc ce drapeau seul ne bloque jamais personne. Il sert
+     * de coupe-circuit DÉDIÉ, indépendant des clés : si le widget Cloudflare tombe, est mal
+     * configuré, ou si Cloudflare est en panne, poser DIRECTORY_SUBMISSION_TURNSTILE_ENABLED
+     * =false dans .env désactive la vérification immédiatement, sans toucher aux clés ni
+     * redéployer - jamais un visiteur légitime bloqué par une dépendance externe muette.
+     * Défaut TRUE explicite (piège déjà mesuré sur ce projet : un drapeau jamais défini traité
+     * comme inactif a bloqué six commandes en silence) : dès que Stéphane crée le widget côté
+     * Cloudflare et pose les deux clés, la protection s'active d'elle-même - rien d'autre à
+     * retenir côté code.
+     */
+    'turnstile' => [
+        'enabled' => (bool) env('DIRECTORY_SUBMISSION_TURNSTILE_ENABLED', true),
+    ],
 ];
