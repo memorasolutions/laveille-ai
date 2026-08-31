@@ -163,7 +163,7 @@ class ScreenshotService
             // adversariale post-livraison) - ce comportement voulu ne doit plus rester silencieux.
             $previousFocalY = (int) ($tool->screenshot_focal_y ?? 0);
             if ($previousFocalY !== 0) {
-                Log::info("Screenshot {$slug}: focal reinitialise de {$previousFocalY} a 0 suite a une nouvelle capture");
+                Log::channel('directory_screenshots')->info("Screenshot {$slug}: focal reinitialise de {$previousFocalY} a 0 suite a une nouvelle capture");
             }
             $tool->screenshot_focal_y = 0;
             // ACTION: leve le marqueur de peremption (screenshot_master_stale) - ce chemin ecrit
@@ -188,7 +188,7 @@ class ScreenshotService
             // RAISON: design doc 2026-08-10, brique 1, section 3.
             self::persistMasterFile($json, $slug);
 
-            Log::info("Screenshot {$slug}: OK via {$method} (".round(File::size($absolutePath) / 1024).' KB)');
+            Log::channel('directory_screenshots')->info("Screenshot {$slug}: OK via {$method} (".round(File::size($absolutePath) / 1024).' KB)');
 
             return true;
         } catch (Throwable $e) {
@@ -567,7 +567,7 @@ class ScreenshotService
                     'files' => [config('app.url').'/'.ltrim($relativePath, '/')],
                 ]);
         } catch (Throwable $e) {
-            Log::warning('Cloudflare purge failed: '.$e->getMessage());
+            Log::channel('directory_screenshots')->warning('Cloudflare purge failed: '.$e->getMessage());
         }
     }
 
@@ -586,7 +586,7 @@ class ScreenshotService
         $minProtectedSize = 5000; // 5 KB — seuil incident S79
         if (! $force && \Illuminate\Support\Facades\File::exists($absolutePath)
             && \Illuminate\Support\Facades\File::size($absolutePath) >= $minProtectedSize) {
-            \Illuminate\Support\Facades\Log::info("safeWriteScreenshot: SKIP existant {$absolutePath} (".\Illuminate\Support\Facades\File::size($absolutePath).' bytes) — anti-overwrite S79');
+            \Illuminate\Support\Facades\Log::channel('directory_screenshots')->info("safeWriteScreenshot: SKIP existant {$absolutePath} (".\Illuminate\Support\Facades\File::size($absolutePath).' bytes) — anti-overwrite S79');
             return true; // Considéré comme succès (existant préservé)
         }
 

@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.242.10] - 2026-08-31
+
+### Corrigé
+- **Ticket #2088 : quatre écritures de journal restantes dans `ScreenshotService.php` sur le canal par défaut, avalé par `LOG_LEVEL=error` en production.** Le correctif de v1.242.9 n'avait traité que l'occurrence de `generateFallbackGradient()` : un grep du fichier ENTIER (plutôt qu'un échantillon) a trouvé trois autres écritures non couvertes. La plus urgente : la confirmation de succès d'une vraie capture réseau (`capture()`, méthode principale) - jusqu'ici, une capture réussie ne laissait strictement aucune trace, seul l'échec (déjà sur le canal dédié) était visible. Les trois autres : la réinitialisation du point focal après une nouvelle capture (même méthode), l'avertissement de purge Cloudflare échouée, et le garde anti-écrasement (incident S79) de `safeWriteScreenshot()` - le même garde que celui corrigé hier, mais dans une méthode différente (celle-ci partagée par le chemin de dérivation locale de master). Quatre corrections d'une ligne chacune, sur le modèle exact des lignes voisines déjà sur `directory_screenshots` - aucun changement de comportement, seul le niveau (info/warning déjà en place) est conservé.
+- Grep de contrôle après correction : zéro écriture `Log::` restante dans ce fichier sans `->channel('directory_screenshots')`.
+
+### Tests
+- Suite ciblée `Modules/Directory/tests` (dépôt partagé, autre suite déjà active attendue avant lancement) : **251 passed (661 assertions)**, zéro échec/erreur/skip - `ScreenshotOverwriteGuardTest`, `ScreenshotFocalServiceTest`, `BackfillScreenshotMastersCommandTest`, `ScreenshotAdminFocalTest` et `ToolObserverScreenshotDispatchTest` compris.
+
 ## [1.242.9] - 2026-08-31
 
 ### Corrigé
