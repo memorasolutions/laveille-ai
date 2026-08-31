@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.244.10] - 2026-08-31
+
+### Confirmation adversariale (ticket #2095, même jour, en conditions réelles - jamais affirmée par avance)
+
+- **Preuve du chemin vert (v1.244.9 elle-même)** : push à 17:49:08 UTC (13h49 Québec) → CI (run `33421624320`) verte en 3 min 20 s (job « Sas rapide (bloquant) » seul : 2 min 55 s, 17:49:32-17:52:27 UTC) → `deploy.yml` déclenché par `workflow_run`, `DEPLOY_SHA` correctement épinglé à `ea38f3ef...` à chaque étape (vérifié dans les logs bruts du run `33421926298`) → déploiement réussi en 1 min 15 s → production confirmée à `v1.244.9` (`curl https://laveille.ai/`, code HTTP 200). **Bout en bout, push à production live : 4 min 40 s.**
+
+- **Effet de bord instructif, non prévu mais confirmant exactement le mécanisme de course que le SHA-pinning devait fermer** : un `deploy.yml` SUPPLÉMENTAIRE (run `33421657783`) s'est déclenché à 17:49:32 UTC, conclusion `skipped`. Cause identifiée : mon push a fait `cancel-in-progress` un run CI encore actif d'un commit antérieur (`70d0d302`, docs(changelog) v1.244.8) via la concurrency existante de `ci.yml` - cette annulation EST un événement `completed` (conclusion `cancelled`), qui a donc légitimement déclenché `workflow_run` sur `deploy.yml`. Le job a correctement évalué `conclusion == 'success'` comme faux et s'est arrêté sans jamais s'exécuter. **Exactement le comportement voulu face à un run superseded, découvert en conditions réelles plutôt que par lecture de la doc.**
+
+- **Preuve du blocage (test rouge délibéré, commit `be16b3d9`, fichier `tests/Unit/GatingAdversarialProofTemporaryTest.php`, un seul `expect(false)->toBeTrue()`)** : CI (run `33422165388`) en conclusion `failure` en 2 min 34 s - job « Sas rapide (bloquant) » : `completed failure` (2 min, 17:55:14-17:57:14 UTC), `code-quality`/`security` verts, `e2e` `skipped` (push, pas PR). Un seul `deploy.yml` s'est déclenché (run `33422394774`) : **conclusion `skipped`, le job « Deploy to production » n'a exécuté AUCUNE étape** (vérifié : `status completed, conclusion skipped` sur le job lui-même, pas seulement sur le workflow). Production revérifiée après coup : toujours `v1.244.9`, HTTP 200, totalement intacte.
+
+- **Preuve du déblocage** : fichier de preuve retiré (ce commit), aucune autre modification de logique. Résultat attendu et à confirmer par ce même commit une fois poussé : CI de nouveau verte, `deploy.yml` de nouveau déclenché, production mise à jour à `v1.244.10` - la case à cocher qui ferme ce ticket est cette confirmation elle-même, immédiatement après ce commit, jamais affirmée avant de l'avoir vue.
+
+- **Durée du sas mesurée sur 2 exécutions GitHub Actions réelles indépendantes (jamais une seule)** : 2 min 55 s (run vert) et 2 min (run rouge, l'échec du premier test coupe court à la suite du fichier). Cohérent avec la mesure locale (~100 s d'exécution de tests + overhead de setup composer/npm). **Marge large sous le budget de 10 minutes du mandat, dans les deux sens (succès et échec).**
+
+- **Zéro cron temporaire posé pour cette vérification** (uniquement des commits/push réels via le pipeline existant) - sans objet à retirer.
+
 ## [1.244.9] - 2026-08-31
 
 ### Ajouté (ticket #2095, porte de déploiement liée à un filet de tests fiable)
