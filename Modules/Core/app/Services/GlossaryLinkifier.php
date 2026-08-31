@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v16.'; // 2026-08-31 bump v16 : relocalisation des alias curés « Mistral Large »/« Mixtral » du terme produit vers le terme éditeur (ticket #2076 point 2, migration 2026_08_31_093000_relocate_mistral_family_aliases.php) - sans ce bump, un cache v15 déjà chaud servirait 1h de plus les DEUX alias sur le terme produit, donc les mêmes faux liens vers /glossaire/mistral-le-chat
+    public const CACHE_KEY = 'glossary.terms.v17.'; // 2026-08-31 bump v17 (ticket #2109, perf) : chaque entrée porte désormais 'name_lower' (mb_strtolower(nom) précalculé) — voir matchInText(), qui l'utilise comme filtre de candidats avant de construire la regex. Un cache v16 déjà chaud n'aurait pas ce champ ; matchInText() a un repli sûr (mb_strtolower à la volée) donc rien ne casse sans ce bump, mais sans lui la moitié des entrées resteraient au chemin lent jusqu'à expiration du TTL — bump pour un gain plein dès le déploiement, comme tous les bumps précédents de cette clé.
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -669,6 +669,17 @@ class GlossaryLinkifier
                     ?: (($a['origin_rank'] ?? self::ORIGIN_DERIVED_ALIAS) <=> ($b['origin_rank'] ?? self::ORIGIN_DERIVED_ALIAS));
             });
 
+            // 2026-08-31 (ticket #2109, perf) : précalcule la forme minuscule de chaque nom UNE
+            // SEULE FOIS par heure (durée de vie de ce cache), plutôt qu'à chaque appel de
+            // matchInText() - voir son usage comme filtre de candidats juste avant la construction
+            // de la regex. Un seul point d'ajout après le tri plutôt qu'un champ à répéter dans
+            // chacun des ~10 endroits de cette méthode qui construisent une entrée : DRY, et
+            // aucune entrée ne peut être oubliée.
+            foreach ($terms as &$t) {
+                $t['name_lower'] = mb_strtolower($t['name']);
+            }
+            unset($t);
+
             return $terms;
         });
     }
@@ -985,6 +996,10 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-08-31 : v16 ajoutée ici en même temps que le bump v17 (ticket #2109, ajout du
+            // champ 'name_lower') - même raison que les notes précédentes : sans elle, une clé v16
+            // déjà chaude resterait servie jusqu'à l'expiration de son TTL après un flush explicite.
+            Cache::forget('glossary.terms.v16.'.$loc);
             // 2026-08-31 : v15 ajoutée ici en même temps que le bump v16 (relocalisation des alias
             // curés « Mistral Large »/« Mixtral », ticket #2076 point 2) - même raison que les
             // notes précédentes : sans elle, une clé v15 déjà chaude resterait servie jusqu'à
@@ -1099,6 +1114,28 @@ class GlossaryLinkifier
      */
     protected static function matchInText(\DOMDocument $dom, string $text, array $terms, array &$seen, int &$linkCount, int $maxLinks, ?string $skipSlug, int $maxOcc = self::MAX_OCCURRENCES_PER_TERM, bool $perSection = false, int $currentSection = 0): ?array
     {
+        // 2026-08-31 (ticket #2109, urgence prod #2107) : CAUSE RACINE de la lenteur sans borne -
+        // cette méthode compilait et exécutait un pattern PCRE (avec lookaheads/lookbehinds) pour
+        // CHAQUE terme (jusqu'à ~6000 avec les alias), à CHAQUE appel récursif (avant ET après
+        // chaque match trouvé), sur un texte pouvant faire des dizaines de milliers de caractères.
+        // Coût mesuré en production : 5-7s/page le 2026-08-02 (#1526), jusqu'à 66s le 2026-08-31.
+        //
+        // Correctif : un terme ne peut matcher QUE si son nom apparaît dans le texte comme
+        // sous-chaîne insensible à la casse - condition NÉCESSAIRE pour LES TROIS match_strategy
+        // de ce fichier (case_sensitive/exact_phrase exigent la casse exacte, donc impliquent la
+        // sous-chaîne insensible à la casse ; loose EST déjà une comparaison insensible à la casse ;
+        // partial_case_sensitive ne relâche la casse QUE sur la 1ère lettre, donc est strictement
+        // plus stricte que loose). Les gardes additionnelles (frontières de mot, buildToolSuffixGuard,
+        // TOOL_COMPOUND_EXCLUSIONS) ne font que REJETER des contextes en plus - elles ne peuvent
+        // jamais faire matcher un texte qui ne contient pas le nom comme sous-chaîne. Ce filtre ne
+        // peut donc JAMAIS écarter un terme que la regex aurait matché (zéro faux négatif) : preuve
+        // par construction, et vérifiée empiriquement par diff binaire de la sortie avant/après sur
+        // des contenus réels (voir rapport de session, ticket #2109). Sur ~6000 termes, la quasi-
+        // totalité échoue ce test en O(1) amorti (str_contains natif, sans PCRE) au lieu de compiler
+        // et exécuter une regex complète - c'est ce balayage répété, terme par terme, à chaque
+        // niveau de récursion, qui portait le coût sans borne.
+        $textLower = mb_strtolower($text);
+
         foreach ($terms as $term) {
             if ($linkCount >= $maxLinks) return null;
             // 2026-05-11 #158 : autorise jusqu'à MAX_OCCURRENCES_PER_TERM wraps du même terme par page
@@ -1110,6 +1147,12 @@ class GlossaryLinkifier
             }
             if (($seen[$seenKey] ?? 0) >= $maxOcc) continue;
             if ($skipSlug && $term['slug'] === $skipSlug) continue;
+
+            // Filtre de candidats (voir docblock ci-dessus) : repli sûr si 'name_lower' est absent
+            // (ex. un tableau de termes construit à la main hors loadTerms(), comme dans certains
+            // tests bas niveau) - coûte alors exactement ce que l'ancien code coûtait déjà, jamais pire.
+            $nameLower = $term['name_lower'] ?? mb_strtolower($term['name']);
+            if (! str_contains($textLower, $nameLower)) continue;
 
             $name = $term['name'];
             // 2026-05-05 #145 WSD : applique la match_strategy
