@@ -6,16 +6,28 @@ namespace App\Console\Commands;
 
 use Illuminate\Foundation\Console\RouteCacheCommand;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Command\Command;
-use Throwable;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 /**
- * Cette commande corrige un bug de production dans le cache des routes natif,
- * qui supprimait le fichier de cache avant de le regenerer, creant une fenetre
- * ou toute requete pouvait echouer faute de fichier. Cette version realise
- * une bascule atomique du cache sans jamais laisser le fichier cible absent.
+ * Corrige un bug de production : la commande native `route:cache` supprime le fichier
+ * de cache avant de redemarrer une application complete pour le reconstruire, laissant
+ * la cible ABSENTE du disque pendant toute cette phase lente (0,5 a 0,7 seconde mesure).
  *
- * Utiliser cette commande dans les pipelines de deploiement a la place de `route:cache`.
+ * Mecanisme : Illuminate\Foundation\Application::getCachedRoutesPath() respecte la
+ * variable d'environnement APP_ROUTES_CACHE (chemin absolu retourne tel quel). En la
+ * redirigeant temporairement vers un leurre qui n'existe jamais sur le disque AVANT de
+ * redemarrer l'application fraiche, celle-ci constate qu'aucune route n'est en cache et
+ * parse reellement les fichiers de routes - sans jamais toucher au VRAI fichier cible.
+ * Celui-ci n'est atteint qu'une seule fois, a la toute fin, via Filesystem::replace()
+ * (ecriture temporaire du meme dossier puis rename() atomique) : il n'est donc jamais
+ * absent, pas meme un instant.
+ *
+ * Corrige une premiere version de cette meme commande (revue independante, 2026-08-31)
+ * qui deplacait le fichier reel avant reconstruction et recreait ainsi, sans le vouloir,
+ * le defaut meme qu'elle pretendait corriger.
+ *
+ * Utiliser cette commande dans tout pipeline ou script de deploiement, a la place de
+ * `route:cache`.
  */
 #[AsCommand(name: 'route:cache-atomic')]
 class RouteCacheAtomicCommand extends RouteCacheCommand
@@ -32,7 +44,7 @@ class RouteCacheAtomicCommand extends RouteCacheCommand
      *
      * @var string
      */
-    protected $description = 'Creer un cache atomique des routes sans fenetre d\'indisponibilite';
+    protected $description = "Creer un cache atomique des routes sans fenetre d'indisponibilite";
 
     /**
      * Execute the console command.
@@ -42,58 +54,52 @@ class RouteCacheAtomicCommand extends RouteCacheCommand
     public function handle(): int
     {
         $target = $this->laravel->getCachedRoutesPath();
-        $hadExisting = $this->files->exists($target);
+        $decoy = $target . '.construction-' . getmypid();
 
-        if ($hadExisting) {
-            $backup = $target . '.ancien-' . getmypid();
+        // Valeur actuelle de la variable, a restaurer telle quelle (false = non definie,
+        // a distinguer d'une chaine vide : putenv() sans signe egal la supprime totalement).
+        $previousEnv = getenv('APP_ROUTES_CACHE');
 
-            try {
-                if (! rename($target, $backup)) {
-                    $this->components->error('Impossible de sauvegarder le fichier de cache existant.');
-
-                    return Command::FAILURE;
-                }
-            } catch (Throwable $e) {
-                $this->components->error('Erreur lors de la sauvegarde du fichier de cache : ' . $e->getMessage());
-
-                return Command::FAILURE;
-            }
-        }
+        putenv("APP_ROUTES_CACHE={$decoy}");
 
         try {
             $routes = $this->getFreshApplicationRoutes();
 
             if (count($routes) === 0) {
-                // Restaurer l'ancien cache si disponible
-                if ($hadExisting && isset($backup) && $this->files->exists($backup) && ! $this->files->exists($target)) {
-                    rename($backup, $target);
-                }
-
                 $this->components->error("Your application doesn't have any routes.");
 
-                return Command::SUCCESS;
+                return SymfonyCommand::SUCCESS;
             }
 
             foreach ($routes as $route) {
                 $route->prepareForSerialization();
             }
 
-            $this->files->replace($target, $this->buildRouteCacheFile($routes));
+            // Seul point de contact avec le vrai fichier cible dans toute la commande.
+            $this->files->replace(
+                $target,
+                $this->buildRouteCacheFile($routes)
+            );
 
-            if ($hadExisting && isset($backup)) {
-                $this->files->delete($backup);
+            $this->components->info(
+                sprintf(
+                    'Cache des routes reconstruit et bascule. Le fichier [%s] n\'a jamais ete indisponible durant l\'operation.',
+                    $target
+                )
+            );
+
+            return SymfonyCommand::SUCCESS;
+        } finally {
+            if ($previousEnv === false) {
+                putenv('APP_ROUTES_CACHE');
+            } else {
+                putenv("APP_ROUTES_CACHE={$previousEnv}");
             }
 
-            $this->components->info('Fichier de cache des routes bascule de facon atomique.');
-
-            return Command::SUCCESS;
-        } catch (Throwable $e) {
-            // Restauration en cas d'echec
-            if ($hadExisting && isset($backup) && ! $this->files->exists($target) && $this->files->exists($backup)) {
-                rename($backup, $target);
+            // Defensif seulement : le leurre n'est jamais cense recevoir d'ecriture.
+            if (file_exists($decoy)) {
+                @unlink($decoy);
             }
-
-            throw $e;
         }
     }
 }

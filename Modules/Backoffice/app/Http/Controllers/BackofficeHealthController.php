@@ -49,9 +49,16 @@ class BackofficeHealthController extends Controller
         //  - « DebugMode » lançait `config:cache`, qui ne corrige même PAS le mode debug (il ne
         //    fait que figer la configuration courante). Un bouton qui ne répare pas ce qu'il
         //    annonce et casse autre chose vaut mieux absent : APP_DEBUG se change dans le .env.
+        // 2026-08-31 #2096 : `route:cache` REMPLACÉ par `route:cache-atomic`
+        //   (app/Console/Commands/RouteCacheAtomicCommand.php). La commande native supprimait
+        //   le fichier de cache avant de le reconstruire - fenêtre où une requête (ou une tâche
+        //   planifiée, exécutée chaque minute) démarrant l'application pouvait essuyer une
+        //   erreur fatale. Ce bouton est cliquable en tout temps par un admin, en production,
+        //   SANS la protection du mode maintenance qui enveloppe le pipeline de déploiement -
+        //   l'exposition y était donc directe, pas seulement pendant un déploiement.
         return match ($check) {
             'OptimizedApp' => $this->runFixes(
-                ['route:cache', 'event:cache', 'view:cache'],
+                ['route:cache-atomic', 'event:cache', 'view:cache'],
                 'Caches route, événements et vues reconstruits. La configuration reste lue en direct depuis le .env, volontairement.'
             ),
             'Cache' => $this->runFix('cache:clear', 'Cache vidé avec succès.'),

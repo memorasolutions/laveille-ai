@@ -45,9 +45,14 @@ php artisan migrate --force
 # orphelin (aucune reference dans le depot), la conservait quand meme - et un fichier qui
 # s'appelle deploy.sh est precisement celui qu'on lance en croyant bien faire.
 # NE PAS la remettre sans un audit exhaustif de TOUS les env() (application + vendor + runtime).
+# 2026-08-31 #2096 : `route:cache` REMPLACE par `route:cache-atomic` (app/Console/Commands/
+# RouteCacheAtomicCommand.php) - la commande native supprimait le fichier de cache avant de
+# le reconstruire, fenetre ou une requete demarrant l'application pouvait essuyer une erreur
+# fatale. `optimize:clear --except=routes` pour la meme raison : ne plus supprimer le cache
+# des routes avant que route:cache-atomic ne le bascule lui-meme, atomiquement.
 echo "Optimizing..."
-php artisan optimize:clear
-php artisan route:cache
+php artisan optimize:clear --except=routes
+php artisan route:cache-atomic
 php artisan view:cache
 php artisan event:cache
 php artisan icons:cache

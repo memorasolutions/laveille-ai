@@ -64,7 +64,7 @@ $commands[] = ['/usr/bin/git', 'status', '-s'];
 // 2026-05-27 #311 : option `&cache=1` pour rafraîchir les caches Laravel après pull,
 // bullet-proof quand cPanel UAPI est down (Shell API désactivée + File Manager API
 // en restart). Workaround validé en S128 incident cPanel maintenance prolongée.
-// Allowlist commandes artisan (view:clear + route:cache + event:cache + view:cache).
+// Allowlist commandes artisan (view:clear + route:cache-atomic + event:cache + view:cache).
 // 2026-05-27 #313 : ajout options `&migrate=1` + `&seed=ClassName` (allowlist Modules\ ou Database\Seeders\).
 $phpBin = null;
 $resolvePhpBin = function () use (&$phpBin) {
@@ -85,10 +85,16 @@ $resolvePhpBin = function () use (&$phpBin) {
 // l'interdit - mais ce script de déploiement de SECOURS, lui, l'exécutait encore. Or c'est
 // précisément la voie qu'on emprunte quand la CI est indisponible, donc au pire moment.
 // Liste alignée sur celle de la CI : route + event + view, aucune ne dépend d'env().
+// 2026-08-31 #2096 : `route:cache` REMPLACÉ par `route:cache-atomic` (app/Console/Commands/
+// RouteCacheAtomicCommand.php). La commande native supprimait le fichier de cache avant de
+// le reconstruire - fenêtre où une requête ou une tâche planifiée démarrant l'application
+// pouvait essuyer une erreur fatale. La version atomique ne touche jamais le fichier réel
+// avant la bascule finale (rename() atomique). Précisément la voie de secours qui n'a PAS
+// la protection du mode maintenance du pipeline CI - encore plus exposée que lui.
 if (! empty($_GET['cache'])) {
     $phpBin = $resolvePhpBin();
     $commands[] = [$phpBin, 'artisan', 'view:clear'];
-    $commands[] = [$phpBin, 'artisan', 'route:cache'];
+    $commands[] = [$phpBin, 'artisan', 'route:cache-atomic'];
     $commands[] = [$phpBin, 'artisan', 'event:cache'];
     $commands[] = [$phpBin, 'artisan', 'view:cache'];
 }
