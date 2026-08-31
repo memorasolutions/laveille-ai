@@ -101,6 +101,7 @@ case "$ARTISAN_COMMAND" in
     news:source)        POSITIONAL_NAMES=(article url) ;;
     news:apply)          POSITIONAL_NAMES=(article) ;;
     news:create-draft)   POSITIONAL_NAMES=(url) ;;
+    news:backfill-auto-tools) POSITIONAL_NAMES=() ;;
     *)
         echo "Noms d'arguments positionnels inconnus pour ${ARTISAN_COMMAND} - complète POSITIONAL_NAMES dans ce script (scripts/prod-artisan.sh)." >&2
         exit 1
@@ -211,8 +212,19 @@ elif [ "$ARGS_WHITELIST_STATUS" -ne 0 ]; then
 fi
 
 # ── Construit l'objet JSON `args` via PHP (pas de bricolage d'échappement bash) : le marqueur
-#    BOOL_MARK devient `true`, toute autre valeur reste une chaîne. ──
-ARGS_JSON="$(BOOL_MARK="$BOOL_MARK" php -r '
+#    BOOL_MARK devient `true`, toute autre valeur reste une chaîne.
+#    Le "--" avant ARGS_PAIRS est nécessaire dès qu'une commande sans argument positionnel (ex.
+#    news:backfill-auto-tools) fait commencer ARGS_PAIRS par un flag ("--dry-run") : sans lui, le
+#    SAPI CLI de PHP essaie d'interpréter ce premier "-r" argument comme SA PROPRE option et
+#    échoue ("no argument for option -"), avant même que le code -r ne s'exécute. Bogue latent
+#    du gabarit, jamais déclenché avant car les 4 commandes /actu2 existantes ont toutes un
+#    identifiant positionnel en première position (jamais un flag). Vérifié isolément :
+#    array_slice($argv, 1) reste identique avec ou sans le "--", qui n'entre jamais dans $argv. ──
+# Même piège que ARGS_KEYS_ONLY plus haut : "${ARGS_PAIRS[@]}" sur un tableau vide lève "unbound
+# variable" sous bash 3.2 + set -u (vérifié isolément) - cas réel dès qu'une commande sans aucun
+# argument positionnel est appelée sans option (news:backfill-auto-tools seul, valeurs par défaut).
+if [ "${#ARGS_PAIRS[@]}" -gt 0 ]; then
+    ARGS_JSON="$(BOOL_MARK="$BOOL_MARK" php -r '
 $pairs = array_slice($argv, 1);
 $boolMark = getenv("BOOL_MARK");
 $out = [];
@@ -220,7 +232,10 @@ for ($i = 0; $i < count($pairs); $i += 2) {
     $out[$pairs[$i]] = ($pairs[$i + 1] === $boolMark) ? true : $pairs[$i + 1];
 }
 echo json_encode($out, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-' "${ARGS_PAIRS[@]}")"
+' -- "${ARGS_PAIRS[@]}")"
+else
+    ARGS_JSON='{}'
+fi
 
 # ── Génère le one-shot depuis le squelette : seul __TOKEN__ reste à substituer - cmd/args/last
 #    voyagent désormais en paramètres GET à l'exécution, plus rien n'est figé dans le fichier. ──

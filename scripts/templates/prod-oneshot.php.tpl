@@ -59,9 +59,11 @@ if (! is_string($providedToken) || $providedToken === '' || ! hash_equals($expec
     exit(1);
 }
 
-// Liste blanche stricte : un jeton valide ne suffit pas à tout permettre. Seules les commandes de
-// la famille /actu2 réellement exécutées par ce runner sont acceptées ici.
-const COMMANDES_AUTORISEES = ['news:brief', 'news:source', 'news:apply', 'news:create-draft'];
+// Liste blanche stricte : un jeton valide ne suffit pas à tout permettre. La famille /actu2 plus
+// news:backfill-auto-tools (mandat #1929, 2026-08-31) - rattrapage BORNÉ et rejouable des outils
+// liés manquants, jamais une commande destructive : dry-run mesure sans écrire, hors dry-run
+// attachAuto() ne fait qu'ajouter, ne touche jamais une sélection manuelle existante.
+const COMMANDES_AUTORISEES = ['news:brief', 'news:source', 'news:apply', 'news:create-draft', 'news:backfill-auto-tools'];
 
 // ACTION : liste blanche des arguments/options, CETTE FOIS PAR COMMANDE - une commande autorisée
 // ne suffit pas non plus à tout permettre. Reflète exactement le $signature de chaque classe sous
@@ -80,6 +82,9 @@ const ARGUMENTS_AUTORISES = [
     'news:source' => ['article', 'url', '--replace'],
     'news:apply' => ['article', '--payload', '--image', '--credit', '--publish', '--enrich'],
     'news:create-draft' => ['url', '--title'],
+    // Trois options, aucun argument positionnel - purement des réglages de mesure/rattrapage,
+    // jamais un identifiant d'article ni un contenu (mandat #1929).
+    'news:backfill-auto-tools' => ['--limit', '--dry-run', '--echantillon'],
 ];
 
 $commande = $_GET['cmd'] ?? null;
@@ -115,6 +120,15 @@ foreach (array_keys($args) as $cle) {
         exit(1);
     }
 }
+
+// ACTION : plafond d'exécution PHP relevé à 120 s (mesuré le 2026-08-31 : le défaut de l'hôte
+// coupe vers 30 s, ce qui tronque net un lot de plus d'une centaine de fiches sans laisser la
+// moindre sortie - même le décompte final, écrit seulement APRÈS la boucle, disparaît avec la
+// coupure). Sans effet si la fonction est désactivée côté hébergeur (silencieux, jamais fatal).
+// MCP: SELF (<5 lignes)
+// RAISON: garde-fou du mandat #1929 - mesurer avant d'écrire suppose un budget de temps qui
+// laisse la commande RENDRE SON VERDICT, pas seulement s'exécuter.
+@set_time_limit(120);
 
 require __DIR__.'/../vendor/autoload.php';
 $app = require __DIR__.'/../bootstrap/app.php';
