@@ -22,31 +22,19 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Modules\Directory\Models\Tool;
+use Tests\Concerns\RegistersMysqlSqliteCompatFunctions;
 
 uses(Tests\TestCase::class);
 uses(RefreshDatabase::class);
+uses(RegistersMysqlSqliteCompatFunctions::class);
 
 // Environnement de test = sqlite :memory: (phpunit.xml), qui n'a pas la fonction MySQL FIELD()
-// utilisée par PublicDirectoryController::show() pour trier les ressources. Même polyfill que
-// Modules/Directory/tests/Feature/AffiliateLinkTest.php.
+// utilisée par PublicDirectoryController::show() pour trier les ressources. Polyfill centralisé
+// (DRY), même mécanisme que Modules/Directory/tests/Feature/AffiliateLinkTest.php.
 beforeEach(function () {
     config()->set('app.noindex', false);
-
-    $pdo = DB::connection()->getPdo();
-    if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
-        $pdo->sqliteCreateFunction('FIELD', function (...$args) {
-            $needle = array_shift($args);
-            foreach ($args as $i => $value) {
-                if ($needle === $value) {
-                    return $i + 1;
-                }
-            }
-
-            return 0;
-        });
-    }
+    $this->registerMysqlSqliteCompatFunctions();
 });
 
 function makeNoindexTestTool(string $slug, array $overrides = []): Tool

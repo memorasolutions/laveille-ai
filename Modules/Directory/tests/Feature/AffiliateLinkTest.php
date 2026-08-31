@@ -14,32 +14,18 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Modules\Directory\Models\Tool;
+use Tests\Concerns\RegistersMysqlSqliteCompatFunctions;
 
 uses(Tests\TestCase::class);
 uses(RefreshDatabase::class);
+uses(RegistersMysqlSqliteCompatFunctions::class);
 
 // Environnement de test = sqlite :memory: (phpunit.xml), qui n'a pas la fonction MySQL FIELD()
 // utilisée par PublicDirectoryController::show() pour trier les ressources (limitation
-// pré-existante, indépendante de cette fonctionnalité). Polyfill scopé à ce fichier de test
-// uniquement — ne touche ni le code de production ni les autres tests — pour pouvoir exercer
-// la vraie route directory.show() de bout en bout (middleware + contrôleur + vue).
-beforeEach(function () {
-    $pdo = DB::connection()->getPdo();
-    if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
-        $pdo->sqliteCreateFunction('FIELD', function (...$args) {
-            $needle = array_shift($args);
-            foreach ($args as $i => $value) {
-                if ($needle === $value) {
-                    return $i + 1;
-                }
-            }
-
-            return 0;
-        });
-    }
-});
+// pré-existante, indépendante de cette fonctionnalité). Polyfill centralisé (DRY) - pour pouvoir
+// exercer la vraie route directory.show() de bout en bout (middleware + contrôleur + vue).
+beforeEach(fn () => $this->registerMysqlSqliteCompatFunctions());
 
 function makeAffiliateTestTool(string $slug, ?string $affiliateUrl = null): Tool
 {

@@ -46,14 +46,13 @@ function dictCachePlcpTerm(string $suffixe, bool $publie = false): Term
 
 // ── Preuve comportementale de bout en bout : la fiche apparaît sur les pages de liste ──
 //
-// PAS de test HTTP direct sur /glossaire ici (dictionary.index) : sa requête
-// (PublicDictionaryController::index()) trie via `orderByRaw("... JSON_UNQUOTE(JSON_EXTRACT(...`,
-// syntaxe MySQL que le SQLite :memory: de la suite de tests (phpunit.xml) ne supporte pas
-// (« no such function: JSON_UNQUOTE », mesuré le 2026-08-27) - limitation PRÉ-EXISTANTE et
-// SANS RAPPORT avec ce correctif (aucun test antérieur ne frappait /glossaire en HTTP). La
-// preuve de bout en bout se fait donc sur l'accueil (ci-dessous, requête Eloquent portable) et
-// la preuve du MÉCANISME exact sur dictionary.index se fait par les tests mock plus bas, qui
-// n'exécutent jamais la vue.
+// Mandat #1939 (2026-08-31) : /glossaire (dictionary.index) est désormais couvert par un vrai
+// test HTTP direct - voir Modules/Dictionary/tests/Feature/PublicDictionaryIndexPageTest.php.
+// La limitation sqlite d'origine (« no such function: JSON_UNQUOTE », mesurée le 2026-08-27) est
+// résolue par un polyfill de test centralisé (tests/Concerns/RegistersMysqlSqliteCompatFunctions.php),
+// jamais par un changement de comportement en production (MySQL, où JSON_UNQUOTE existe déjà).
+// La preuve ci-dessous (accueil) et les tests mock plus bas restent utiles tels quels : ils
+// ciblent le MÉCANISME de purge de cache, pas le rendu de /glossaire lui-même.
 
 it('rend l\'accueil visible avec le terme juste apres sa publication, meme si l\'accueil etait deja en cache', function () {
     config(['responsecache.enabled' => true]);

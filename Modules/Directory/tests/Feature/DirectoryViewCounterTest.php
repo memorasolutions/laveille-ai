@@ -19,36 +19,23 @@ declare(strict_types=1);
  * autres modules - avec son jumeau clicks_count_verified (migration
  * 2026_08_28_100000_add_clicks_count_verified_to_directory_tools.php).
  *
- * Polyfill FIELD() : même contournement que Modules/Directory/tests/Feature/AffiliateLinkTest.php
- * et ThinContentNoindexTest.php (sqlite :memory: de la suite de tests n'a pas la fonction MySQL
- * FIELD() utilisée par show() pour trier les ressources - limitation pré-existante, sans rapport
- * avec ce correctif).
+ * Polyfill FIELD() : même contournement centralisé (DRY) que Modules/Directory/tests/Feature/
+ * AffiliateLinkTest.php et ThinContentNoindexTest.php (sqlite :memory: de la suite de tests n'a
+ * pas la fonction MySQL FIELD() utilisée par show() pour trier les ressources - limitation
+ * pré-existante, sans rapport avec ce correctif).
  */
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Modules\Core\Services\ViewCounterService;
 use Modules\Directory\Models\Tool;
+use Tests\Concerns\RegistersMysqlSqliteCompatFunctions;
 
 uses(Tests\TestCase::class);
 uses(RefreshDatabase::class);
+uses(RegistersMysqlSqliteCompatFunctions::class);
 
-beforeEach(function () {
-    $pdo = DB::connection()->getPdo();
-    if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
-        $pdo->sqliteCreateFunction('FIELD', function (...$args) {
-            $needle = array_shift($args);
-            foreach ($args as $i => $value) {
-                if ($needle === $value) {
-                    return $i + 1;
-                }
-            }
-
-            return 0;
-        });
-    }
-});
+beforeEach(fn () => $this->registerMysqlSqliteCompatFunctions());
 
 function makeViewCounterTestTool(string $slug): Tool
 {

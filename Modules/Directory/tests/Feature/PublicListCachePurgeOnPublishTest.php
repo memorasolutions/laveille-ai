@@ -48,14 +48,14 @@ function dirCachePlcpTool(string $suffixe, string $status = 'pending'): Tool
 
 // ── Preuve comportementale de bout en bout : la fiche apparaît sur les pages de liste ──
 
-// PAS de test HTTP direct sur /annuaire ici (directory.index) : sa requête
-// (PublicDirectoryController::index(), bloc « plus votés ») fait un `having('community_votes_count', '>', 0)`
-// sur une colonne calculée par sous-requête, que le SQLite :memory: de la suite de tests
-// (phpunit.xml) refuse (« HAVING clause on a non-aggregate query », mesuré le 2026-08-27) -
-// limitation PRÉ-EXISTANTE et SANS RAPPORT avec ce correctif (aucun test antérieur ne frappait
-// /annuaire en HTTP ; fonctionne en production sur MySQL, plus permissif). La preuve de bout
-// en bout se fait donc sur l'accueil (ci-dessous) et la preuve du MÉCANISME exact sur
-// directory.index se fait par les tests mock plus bas, qui n'exécutent jamais la vue.
+// Mandat #1939 (2026-08-31) : /annuaire (directory.index) est désormais couvert par un vrai test
+// HTTP direct - voir Modules/Directory/tests/Feature/PublicDirectoryIndexPageTest.php. La cause
+// d'origine (« HAVING clause on a non-aggregate query », mesurée le 2026-08-27 : le bloc « plus
+// votés » filtrait via `having('community_votes_count', '>', 0)` sur un alias withCount() sans
+// GROUP BY - une dépendance à la permissivité MySQL, pas une fonction manquante) est corrigée
+// dans PublicDirectoryController::index() par `has('communityVotes', '>', 0)`, portable, avec le
+// même résultat sur MySQL. La preuve ci-dessous (accueil) et les tests mock plus bas restent
+// utiles tels quels : ils ciblent le MÉCANISME de purge de cache, pas le rendu de /annuaire.
 
 it('rend l\'accueil visible avec l\'outil juste apres sa publication, meme si l\'accueil etait deja en cache', function () {
     config(['responsecache.enabled' => true]);

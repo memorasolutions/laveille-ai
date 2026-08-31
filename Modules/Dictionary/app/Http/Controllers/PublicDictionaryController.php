@@ -33,8 +33,16 @@ class PublicDictionaryController extends Controller
         }
 
         if ($request->filled('letter')) {
+            // Mandat #1939 (2026-08-31) : JSON_EXTRACT nu (sans UNQUOTE) va contre la convention
+            // du projet (memory/feedback_json_extract_unquote_translatable.md) - sous MySQL, un
+            // JSON_EXTRACT scalaire reste encadré de guillemets JSON, d'où le `"{$letter}%` de
+            // l'ancien motif LIKE pour matcher ce guillemet littéral. Sous sqlite, json_extract()
+            // natif renvoie déjà la valeur SANS guillemets : le motif ne matchait donc jamais rien
+            // (silencieux, 0 résultat, aucune erreur - trouvé par PublicDictionaryIndexPageTest,
+            // pas par une exception). JSON_UNQUOTE(JSON_EXTRACT(...)) - même patron que le
+            // orderByRaw juste au-dessus - retire ce guillemet des DEUX côtés, portable.
             $letter = strtolower($request->letter);
-            $query->whereRaw("LOWER(JSON_EXTRACT(name, '$.".app()->getLocale()."')) LIKE ?", ["\"{$letter}%"]);
+            $query->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"".$locale."\"'))) LIKE ?", ["{$letter}%"]);
         }
 
         if ($request->filled('q')) {

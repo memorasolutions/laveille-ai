@@ -97,12 +97,24 @@ class PublicDirectoryController extends Controller
             : 0;
 
         // Plus votés par la communauté (si module Voting actif)
+        //
+        // Mandat #1939 (2026-08-31) : ->having('community_votes_count', ...) référençait un
+        // ALIAS de withCount() sans GROUP BY - MySQL l'accepte (extension non standard), sqlite
+        // le refuse ("HAVING clause on a non-aggregate query"). Ce n'était pas une fonction
+        // manquante mais une dépendance à la permissivité MySQL : /annuaire (directory.index)
+        // était donc IMPOSSIBLE à atteindre en HTTP dans la suite de tests (sqlite :memory:,
+        // phpunit.xml), sur CETTE requête précise seulement - published()/notArchived()/
+        // withCount() seuls sont portables. ->has('communityVotes', '>', 0) exprime le même
+        // filtre ("au moins un vote") via un WHERE EXISTS-style portable, déjà l'idiome retenu
+        // plus bas dans ce même fichier (compare(), Category::...->has('tools')) - jamais un
+        // second mécanisme. community_votes_count reste sélectionné par withCount() pour
+        // l'affichage et le tri (orderByDesc), inchangé.
         $topVoted = collect();
         if (trait_exists(\Modules\Voting\Traits\HasCommunityVotes::class)) {
             $topVoted = Tool::published()->with('categories')
                 ->when(! $showArchived, fn ($q) => $q->notArchived())
                 ->withCount(['communityVotes', 'resources as tutorials_count' => $tutorialsCountClosure])
-                ->having('community_votes_count', '>', 0)
+                ->has('communityVotes', '>', 0)
                 ->orderByDesc('community_votes_count')
                 ->limit((int) Settings::get('directory.top_voted_tools_limit', 6))->get();
         }
