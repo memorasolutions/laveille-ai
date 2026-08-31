@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.244.6] - 2026-08-31
+
+### Corrigé
+- **Ticket #2104, suite du #2099 : le garde-fou d'architecture posé pour `config:cache` ne voyait que la chaîne littérale, pas les appels composés qui l'invoquent en interne.** Un appel indirect existait déjà, signalé sans être corrigé en v1.244.4 : le `Makefile` (cibles `cache` et `deploy`) lançait `php artisan optimize`, qui liste `config:cache` comme sa toute première sous-tâche (`Illuminate\Foundation\Console\OptimizeCommand::getOptimizeTasks()`). Un garde-fou partiel qu'on croit complet fait baisser la vigilance - pire que pas de garde-fou du tout.
+- **`Makefile` (cibles `cache` et `deploy`)** : `php artisan optimize` remplacé par ses composantes sûres (`route:cache-atomic`, `event:cache`, `view:cache`), identiques à celles déjà utilisées par le pipeline de déploiement réel (`scripts/deploy.sh`, `.github/workflows/deploy.yml`).
+- **Recherche exhaustive dans le code du cadriciel** (`vendor/laravel/`, PHP uniquement, pas la mémoire des agents) : `php artisan optimize` est le SEUL appel composite qui invoque `config:cache` en interne, dans toute la dépendance de ce projet. Aucun package installé n'alimente `ServiceProvider::$optimizeCommands` d'une entrée supplémentaire qui y mènerait ; `optimize:clear` appelle `config:clear`, hors de portée.
+
+### Ajouté
+- **`app/Console/Commands/ConfigCacheGuardCommand.php` - neutralisation au niveau du framework, pas seulement du texte.** Réutilise le même mécanisme que `RouteCacheAtomicCommand` (attribut `#[AsCommand(name: '...')]`, résolu après le coeur du framework - dernier enregistré gagne), mais avec le MÊME nom plutôt qu'un nom nouveau : toute invocation de `config:cache` PAR SON NOM, dans cette application, lève désormais une `RuntimeException` avec un message clair. Bloque le chemin direct (`php artisan config:cache`) ET tout chemin indirect présent ou futur, y compris `optimize` - puisque `OptimizeCommand` résout `config:cache` par son nom via le même registre de commandes partagé, sans qu'aucune liste de commandes composites n'ait besoin d'être tenue à jour à la main.
+- **`tests/Architecture/ConfigCacheForbiddenTest.php` étendu** (3 nouveaux tests, 6 au total dans ce fichier) : preuve automatisée que `config:cache` lève l'exception attendue ; preuve que `php artisan optimize` échoue AUSSI (le coeur du ticket) ; contrôle négatif que `route:cache-atomic`/`event:cache`/`view:cache` restent structurellement intacts (mêmes classes résolues, non capturées par le remplacement).
+- Le scanner de fichiers texte (garde-fou de v1.244.4) est CONSERVÉ tel quel, en complément et non en remplacement : il attrape le cas où la commande interdite est écrite dans un script qui ne passe pas par le bootstrap de cette application (un Dockerfile ou un `.sh` isolé), là où la neutralisation ne peut pas s'appliquer.
+
+### Tests
+- `php artisan test tests/Architecture/ConfigCacheForbiddenTest.php` : 6 passés (20 assertions), code de sortie réel 0.
+- `php artisan test tests/Architecture/` (ce fichier et les deux autres tests d'architecture du même dossier, `ArchTest`, `TranslatableSlugFallbackTest`) : 33 passés (114 assertions) - aucune fuite du `uses(Tests\TestCase::class)` scopé à ce seul fichier.
+- Preuve adversariale en CLI réelle, code de sortie explicite (jamais celui d'un `| tail`) :
+  - `php artisan config:cache` (direct) → `ERROR` clair, message complet, code de sortie réel **1**. Aucun `bootstrap/cache/config.php` créé.
+  - `php artisan optimize` (indirect, le coeur du mandat) → tâche `config` affichée `FAIL`, même message clair, code de sortie réel **1** pour la commande entière (n'apparaît pas comme un succès malgré son propre `handle()` qui ne retourne normalement jamais rien). Toujours aucun `bootstrap/cache/config.php` créé.
+  - `php artisan route:cache-atomic` (autorisé) → succès, code de sortie réel **0**, fichier `bootstrap/cache/routes-v7.php` réellement écrit (1,7 Mo) puis retiré (`route:clear`) pour restaurer l'état local antérieur au test, dépôt partagé entre plusieurs sessions.
+- `vendor/bin/phpstan analyse` sur les deux fichiers modifiés/créés : aucune erreur.
+- `vendor/bin/pint` sur les deux fichiers modifiés/créés (style appliqué, comportement inchangé, re-testé après coup).
+- `php -l` sur les deux fichiers PHP modifiés/créés, et sur `config/version.php`.
+
 ## [1.244.4] - 2026-08-31
 
 ### Corrigé

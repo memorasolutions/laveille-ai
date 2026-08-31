@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Test d'architecture - interdiction formelle de la commande `php artisan config:cache`.
  *
  * @author MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
  * @project la-veille-de-stef-v2
  *
  * CONTEXTE - Incident #2099 (2026-08-31) :
@@ -37,10 +38,32 @@ declare(strict_types=1);
  * Modules/Health et Modules/Backoffice). Un contrôle qui crie au loup sur une mention documentaire se fait
  * désactiver dans la semaine.
  *
- * Hors périmètre, constaté au passage mais volontairement NON corrigé ici (mandat borné à config:cache,
- * pas à `php artisan optimize` qui l'appelle en interne) : Makefile (cibles `cache` et `deploy`) lance
- * `php artisan optimize`, un outil de confort LOCAL non référencé par le pipeline de déploiement réel -
- * même classe de risque dormant que le Dockerfile corrigé ici, mais hors du périmètre nommé de ce ticket.
+ * SUITE - ticket #2104 (2026-08-31) : le point resté hors périmètre ci-dessus a été traité. Le Makefile
+ * (cibles `cache` et `deploy`) n'appelle plus `php artisan optimize` - remplacé par ses composantes sûres
+ * (`route:cache-atomic`, `event:cache`, `view:cache`), identiques à celles du pipeline de déploiement réel.
+ *
+ * Recherche exhaustive dans le code du cadriciel (composer.json require + vendor/, PHP uniquement) : le
+ * SEUL appel composite qui invoque `config:cache` en interne, dans toute la dépendance de ce projet, est
+ * `php artisan optimize` (Illuminate\Foundation\Console\OptimizeCommand::getOptimizeTasks(), qui liste
+ * 'config' => 'config:cache' comme première sous-tâche). Aucun package installé (spatie/*, laravel/*,
+ * nwidart/laravel-modules...) n'alimente ServiceProvider::$optimizeCommands d'une entrée supplémentaire
+ * qui y mènerait. `optimize:clear` appelle `config:clear`, pas `config:cache` - hors de portée.
+ *
+ * PROTECTION PRINCIPALE, ajoutée pour ce ticket : app/Console/Commands/ConfigCacheGuardCommand.php
+ * remplace la commande native `config:cache` (même attribut #[AsCommand(name: 'config:cache')], résolu
+ * APRÈS le coeur du framework - dernier enregistré gagne) par une commande qui lève systématiquement une
+ * exception. Cela bloque TOUT chemin qui invoque `config:cache` PAR SON NOM au sein de cette application -
+ * y compris `php artisan optimize`, puisque celui-ci résout `config:cache` par son nom via le même
+ * registre de commandes partagé. C'est la protection qui compte : elle attrape aussi les chemins non
+ * imaginés (un `Artisan::call('config:cache')` écrit demain dans un contrôleur, par exemple).
+ *
+ * Ce test-ci (scan de fichiers texte) RESTE nécessaire en complément, pas en concurrence : il attrape le
+ * cas où la commande interdite est écrite dans un script qui ne passe PAS par le bootstrap de cette
+ * application (un Dockerfile ou un .sh isolé, par exemple) - un cas où la commande PHP de remplacement
+ * ci-dessus n'a tout simplement jamais l'occasion de s'exécuter.
+ *
+ * Preuve que le remplacement fonctionne, y compris pour le chemin indirect `optimize`, et qu'il ne bloque
+ * rien de légitime : voir les trois tests en fin de fichier ci-dessous.
  *
  * RAPPEL DES CACHES AUTORISÉS (ne lisent pas env()) :
  * - route:cache-atomic
@@ -49,6 +72,14 @@ declare(strict_types=1);
  *
  * Voir la documentation complète : docs/CONTRAINTES-SOUS-AGENTS.md
  */
+
+use App\Console\Commands\ConfigCacheGuardCommand;
+use App\Console\Commands\RouteCacheAtomicCommand;
+use Illuminate\Foundation\Console\EventCacheCommand;
+use Illuminate\Foundation\Console\ViewCacheCommand;
+use Illuminate\Support\Facades\Artisan;
+
+uses(Tests\TestCase::class);
 
 /**
  * Retourne la liste des fichiers exécutables à scanner pour détecter des appels à `config:cache`.
@@ -245,4 +276,40 @@ test('le contrôle ne crie pas à tort sur une mention documentaire de config:ca
 
     expect($haystack)->not->toBeEmpty();
     expect(configCacheFindViolations())->toBe([]);
+});
+
+test('la commande config:cache est neutralisée par le remplacement au niveau du framework (#2104)', function () {
+    $commands = Artisan::all();
+
+    expect($commands)->toHaveKey('config:cache');
+    expect($commands['config:cache'])->toBeInstanceOf(ConfigCacheGuardCommand::class);
+
+    expect(fn () => Artisan::call('config:cache'))
+        ->toThrow(RuntimeException::class, 'La commande config:cache est interdite');
+});
+
+test('la commande optimize échoue aussi car elle invoque config:cache en interne (#2104)', function () {
+    // Preuve du chemin INDIRECT (coeur du ticket #2104) : `optimize` liste config:cache comme sa
+    // toute première sous-tâche (OptimizeCommand::getOptimizeTasks()) - si le remplacement ne
+    // protégeait que l'appel direct, cet appel composé continuerait de figer la configuration
+    // sans qu'aucune des deux suites de tests ne le détecte.
+    expect(fn () => Artisan::call('optimize'))
+        ->toThrow(RuntimeException::class, 'La commande config:cache est interdite');
+});
+
+test('le remplacement de config:cache ne modifie ni ne bloque les caches autorisés (#2104)', function () {
+    // Contrôle négatif : le remplacement cible seulement le nom config:cache et ne doit rien
+    // capturer d'autre. Vérification structurelle (identité des classes résolues), sans écrire
+    // sur le disque : l'exécution réelle de route:cache-atomic/event:cache/view:cache est prouvée
+    // séparément, en direct, hors suite automatisée (dépôt partagé entre plusieurs sessions).
+    $commands = Artisan::all();
+
+    expect($commands)->toHaveKey('route:cache-atomic');
+    expect($commands['route:cache-atomic'])->toBeInstanceOf(RouteCacheAtomicCommand::class);
+
+    expect($commands)->toHaveKey('event:cache');
+    expect($commands['event:cache'])->toBeInstanceOf(EventCacheCommand::class);
+
+    expect($commands)->toHaveKey('view:cache');
+    expect($commands['view:cache'])->toBeInstanceOf(ViewCacheCommand::class);
 });

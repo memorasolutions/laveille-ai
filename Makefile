@@ -49,8 +49,15 @@ fresh:
 	@echo "WARNING: This will drop all tables and re-run all migrations with seeding"
 	php artisan migrate:fresh --seed
 
+# `php artisan optimize` n'est plus utilisé ici : il appelle `config:cache` en interne,
+# commande formellement interdite sur ce projet (ferme le module Académie en production -
+# voir docs/CONTRAINTES-SOUS-AGENTS.md et tests/Architecture/ConfigCacheForbiddenTest.php).
+# Ceci exécute exactement les mêmes caches sûrs que le pipeline de production réel
+# (.github/workflows/deploy.yml, scripts/deploy.sh) : aucun des trois ne dépend de env().
 cache:
-	php artisan optimize
+	php artisan route:cache-atomic
+	php artisan event:cache
+	php artisan view:cache
 
 cache-clear:
 	php artisan optimize:clear
@@ -70,12 +77,16 @@ docker-down:
 docker-build:
 	docker compose build --no-cache
 
+# Même motif que la cible `cache` ci-dessus : `php artisan optimize` est remplacé par ses
+# composantes sûres (appelle sinon `config:cache`, interdit - voir le commentaire de `cache`).
 deploy:
 	composer install --no-dev --optimize-autoloader --classmap-authoritative
 	npm ci --production
 	npm run build
 	php artisan migrate --force
-	php artisan optimize
+	php artisan route:cache-atomic
+	php artisan event:cache
+	php artisan view:cache
 	php artisan storage:link
 
 ide-helper:
