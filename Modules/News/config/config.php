@@ -125,6 +125,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Extraction isolee dans un sous-processus (garde-fou memoire, ticket #2110)
+    |--------------------------------------------------------------------------
+    | Mesure en production le 2026-08-31 : le garde-fou de taille brute ci-dessus n'a PAS
+    | empeche une nouvelle exhaustion memoire le jour meme de son deploiement, sur la MEME
+    | pile d'appel (Masterminds\HTML5) pour un document pourtant sous le plafond - la taille
+    | brute ne suffit pas a predire l'amplification memoire du parsing. Drapeau ACTIF par
+    | defaut : chaque extraction (ContentExtractor::extract) est lancee dans un processus PHP
+    | dedie et jetable via la commande interne news:extract-isolated - un epuisement memoire
+    | a l'interieur ne tue plus jamais le cron news:fetch parent. Ne desactiver QUE pour les
+    | tests unitaires (Http::fake() ne peut pas atteindre un vrai sous-processus) - jamais en
+    | production.
+    */
+    'extraction_isolated_process' => (bool) env('NEWS_EXTRACTION_ISOLATED_PROCESS', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Repli d'affichage (cascade "summary, sinon accroche, sinon repli")
     |--------------------------------------------------------------------------
     | Design doc "Actus - zero copie du texte source" (2026-08-13), section 4.5. Phrase de

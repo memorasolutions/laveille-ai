@@ -61,6 +61,9 @@ class NewsServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\News\Console\FetchNewsCommand::class,
+            // Isolation memoire (2026-08-31, ticket #2110) - jamais planifiee, invoquee
+            // uniquement en sous-processus par ContentExtractor::extract(), voir docblock.
+            \Modules\News\Console\ExtractIsolatedCommand::class,
             \Modules\News\Console\RescrapeImagesCommand::class,
             \Modules\News\Console\RegenerateSlugsCommand::class,
             \Modules\News\Console\RescrapeGoogleImagesCommand::class,

@@ -15,9 +15,76 @@ class ContentExtractor
     /**
      * Extraire le contenu propre d'un article web via Readability PHP.
      *
+     * ACTION : dispatcher (2026-08-31, ticket #2110) - le garde-fou de taille brute seul
+     * n'a pas empeche une nouvelle exhaustion memoire mesuree en production le jour meme
+     * de son deploiement, MEME PILE D'APPEL (Masterminds\HTML5, Scanner.php:351) sur un
+     * document pourtant sous le plafond : la taille brute ne predit pas l'amplification
+     * memoire du parsing. Isole desormais l'extraction dans un sous-processus PHP jetable
+     * (news:extract-isolated) - un epuisement memoire a l'interieur ne tue plus jamais le
+     * cron news:fetch parent. Le drapeau news.extraction_isolated_process (defaut actif)
+     * ne repasse en appel direct que pour les tests unitaires (Http::fake() ne peut pas
+     * atteindre un vrai sous-processus).
+     * MCP: SELF (dispatcher, code metier ci-dessous)
+     * RAISON: isoler ce qu'on ne peut pas borner a coup sur plutot que de continuer a
+     * deviner un plafond de taille qui vient d'echouer une fois en production.
+     *
      * @return array{title: string, content: string, html: string, image: ?string, author: ?string, word_count: int}|null
      */
     public function extract(string $url): ?array
+    {
+        if ((bool) config('news.extraction_isolated_process', true)) {
+            return $this->extractViaIsolatedProcess($url);
+        }
+
+        return $this->extractInProcess($url);
+    }
+
+    /**
+     * Lance l'extraction dans un sous-processus PHP dedie, jetable, avec sa propre memoire.
+     * Un plantage du sous-processus (OOM, timeout, sortie non-JSON) est traite comme un
+     * echec d'extraction ordinaire (retour null, repli sur l'accroche RSS deja existant) -
+     * jamais propage au processus appelant.
+     */
+    private function extractViaIsolatedProcess(string $url): ?array
+    {
+        try {
+            $process = Process::timeout(25)->run([
+                PHP_BINARY,
+                base_path('artisan'),
+                'news:extract-isolated',
+                $url,
+                '--no-ansi',
+                '--no-interaction',
+            ]);
+        } catch (\Throwable $e) {
+            Log::channel('news_fetch')->warning("ContentExtractor: lancement du sous-processus en echec pour {$url}: {$e->getMessage()}");
+
+            return null;
+        }
+
+        if (! $process->successful()) {
+            Log::channel('news_fetch')->warning(sprintf(
+                'ContentExtractor: sous-processus termine anormalement (code %s) pour %s - probable epuisement memoire isole, le cron parent est intact.',
+                $process->exitCode(),
+                $url
+            ));
+
+            return null;
+        }
+
+        $result = json_decode(trim($process->output()), true);
+
+        return is_array($result) ? $result : null;
+    }
+
+    /**
+     * Corps reel de l'extraction (HTTP + Readability) - execute soit directement (tests
+     * unitaires), soit a l'interieur du sous-processus isole lance par
+     * extractViaIsolatedProcess() via la commande news:extract-isolated.
+     *
+     * @return array{title: string, content: string, html: string, image: ?string, author: ?string, word_count: int}|null
+     */
+    public function extractInProcess(string $url): ?array
     {
         try {
             $response = Http::withoutVerifying()

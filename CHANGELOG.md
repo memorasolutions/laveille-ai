@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.244.12] - 2026-08-31
+
+### Corrigé (ticket #2110, suite - le premier correctif etait insuffisant, la preuve en production l'a dit)
+
+- **Honnêteté d'abord : le garde-fou de taille brute (v1.244.11) n'a PAS suffi.** Verification en conditions reelles, pas une simple relecture de code : environ 6 minutes apres la confirmation du deploiement de v1.244.11 en production (footer HTTP verifie), le cron `news:fetch` de 14h15 Québec a de nouveau exhibe une exhaustion memoire, sur la MEME pile d'appel exacte : `vendor/masterminds/html5/src/HTML5/Parser/Scanner.php:351`. Le garde de taille (3 000 000 octets) n'a jamais declenche - le document en cause etait sous le plafond. Conclusion : la taille brute d'un document ne predit pas l'amplification memoire du parsing HTML5, probablement une pathologie de structure (imbrication, encodage) plutot qu'un simple exces de volume.
+- **Correctif retenu : isoler l'appel a la dependance dans son propre processus, jamais deviner un nouveau plafond.** `ContentExtractor::extract()` devient un dispatcher : par defaut (`news.extraction_isolated_process`, actif), il lance le corps reel de l'extraction (`extractInProcess()`, garde de taille v1.244.11 conservee en premiere ligne de defense) dans un sous-processus PHP dedie et jetable via la nouvelle commande interne `news:extract-isolated` (jamais planifiee, jamais invoquee autrement). Si ce sous-processus est tue - par epuisement memoire ou toute autre raison - `Process::timeout(25)->run(...)` le rapporte comme un echec ordinaire : `extract()` retourne `null`, repli sur l'accroche RSS deja existant, et **le cron `news:fetch` parent, qui boucle sur des dizaines de sources, continue intact.** Le plafond de 128 Mo du processus parent redevient sans consequence pour ce risque precis : seul le sous-processus jetable peut desormais le heurter.
+- **Tests.** 3 nouveaux tests (`ContentExtractorSizeGuardTest`, couche isolation) via `Process::fake()` : sous-processus qui reussit (JSON decode correctement), sous-processus tue avec code 137 - signature SIGKILL/OOM (retourne `null`, ne remonte jamais l'echec), sortie non-JSON (retourne `null`). Suite ciblee (7 fichiers touchant directement ce chemin) verifiee verte avant deploiement.
+- **La conséquence mesurée en v1.244.11 reste juste** : delai et collecte incomplete a chaque exécution, jamais de perte du titre/lien deja collecté. Ce correctif ferme le mecanisme, pas seulement le symptome mesure une premiere fois.
+
 ## [1.244.11] - 2026-08-31
 
 ### Corrigé (ticket #2110, fuite mémoire hebdomadaire enfin identifiée - la pile pointait vers une dépendance jamais appelée directement)
