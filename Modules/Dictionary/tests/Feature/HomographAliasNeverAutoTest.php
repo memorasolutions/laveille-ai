@@ -233,3 +233,57 @@ it('lie toujours "Mistral AI" en entier (alias curé), jamais fragmenté avec un
     expect($html)->toContain('>Mistral AI</a>')
         ->and($html)->toContain('/glossaire/'.$editeur->slug);
 });
+
+// ── Cas 6 : "Mistral Large" / "Mixtral", alias CURÉS (pas dérivés) - mécanisme DISTINCT du Cas 5.
+// Ticket #2076 point 2 : ALIAS_NEVER_AUTO (Cas 5) ne bloque que la chaîne EXACTE "mistral" - un
+// alias curé "Mistral Large"/"Mixtral" sur le terme PRODUIT n'est jamais concerné par cette liste
+// et continue de lier vers le produit même après le correctif du mot seul. Migration
+// 2026_08_31_093000_relocate_mistral_family_aliases.php relocalise ces deux alias curés du terme
+// produit vers le terme éditeur (jamais une suppression : le lien continue de fonctionner, vers la
+// bonne fiche) - voir aussi Modules/Directory/database/migrations n'est PAS concerné ici, ceci est
+// uniquement le glossaire. ──
+
+it('CAS 5 NE COUVRE PAS CE DÉFAUT : "Mistral Large" en alias curé du produit lie encore vers le produit, même avec ALIAS_NEVER_AUTO actif', function () {
+    hanTerm('Mistral (Le Chat)', 'mistral-le-chat-test', aliases: ['Mistral Large', 'Mixtral']);
+    hanTerm('Mistral', 'mistral-test', aliases: ['Mistral AI'], matchStrategy: 'case_sensitive');
+
+    $html = GlossaryLinkifier::linkify('<p>Le modèle Mistral Large reste le plus performant de la gamme.</p>');
+
+    // Reproduit fidèlement le défaut mesuré en production le 2026-08-31 (avant migration) :
+    // le mot seul "Mistral" est bien bloqué (Cas 5), mais "Mistral Large" en entier passe.
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/mistral-le-chat-test');
+});
+
+it('après relocalisation, "Mistral Large" lie vers l\'ÉDITEUR, jamais vers le produit', function () {
+    hanTerm('Mistral (Le Chat)', 'mistral-le-chat-test', aliases: ['Mistral']);
+    $editeur = hanTerm('Mistral', 'mistral-test', aliases: ['Mistral AI', 'Mistral Large', 'Mixtral'], matchStrategy: 'case_sensitive');
+
+    $html = GlossaryLinkifier::linkify('<p>Le modèle Mistral Large reste le plus performant de la gamme.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$editeur->slug)
+        ->and($html)->not->toContain('/glossaire/mistral-le-chat-test')
+        ->and($html)->toContain('>Mistral Large</a>');
+});
+
+it('après relocalisation, "Mixtral" lie vers l\'ÉDITEUR, jamais vers le produit', function () {
+    hanTerm('Mistral (Le Chat)', 'mistral-le-chat-test', aliases: ['Mistral']);
+    $editeur = hanTerm('Mistral', 'mistral-test', aliases: ['Mistral AI', 'Mistral Large', 'Mixtral'], matchStrategy: 'case_sensitive');
+
+    $html = GlossaryLinkifier::linkify('<p>Mixtral utilise une architecture à mélange d\'experts.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$editeur->slug)
+        ->and($html)->not->toContain('/glossaire/mistral-le-chat-test')
+        ->and($html)->toContain('>Mixtral</a>');
+});
+
+it('après relocalisation, le produit reste trouvable par son alias "Mistral Le Chat" - la relocalisation n\'a rien retiré côté produit', function () {
+    $produit = hanTerm('Mistral (Le Chat)', 'mistral-le-chat-test', aliases: ['Mistral', 'Le Chat Mistral']);
+    hanTerm('Mistral', 'mistral-test', aliases: ['Mistral AI', 'Mistral Large', 'Mixtral'], matchStrategy: 'case_sensitive');
+
+    $html = GlossaryLinkifier::linkify('<p>Beaucoup découvrent Mistral AI par Le Chat Mistral, son assistant grand public.</p>');
+
+    expect($html)->toContain('/glossaire/'.$produit->slug);
+});

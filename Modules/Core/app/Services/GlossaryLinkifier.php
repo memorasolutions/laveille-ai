@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v15.'; // 2026-08-30 bump v15 : ALIAS_NEVER_AUTO (+ « mistral », voir docblock) - sans ce bump, un cache v14 déjà chaud servirait 1h de plus l'alias dérivé SANS cette exclusion, donc les mêmes faux liens
+    public const CACHE_KEY = 'glossary.terms.v16.'; // 2026-08-31 bump v16 : relocalisation des alias curés « Mistral Large »/« Mixtral » du terme produit vers le terme éditeur (ticket #2076 point 2, migration 2026_08_31_093000_relocate_mistral_family_aliases.php) - sans ce bump, un cache v15 déjà chaud servirait 1h de plus les DEUX alias sur le terme produit, donc les mêmes faux liens vers /glossaire/mistral-le-chat
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -902,6 +902,11 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-08-31 : v15 ajoutée ici en même temps que le bump v16 (relocalisation des alias
+            // curés « Mistral Large »/« Mixtral », ticket #2076 point 2) - même raison que les
+            // notes précédentes : sans elle, une clé v15 déjà chaude resterait servie jusqu'à
+            // l'expiration de son TTL après un flush explicite.
+            Cache::forget('glossary.terms.v15.'.$loc);
             // 2026-08-30 : v14 ajoutée ici en même temps que le bump v15 (ALIAS_NEVER_AUTO +
             // « mistral ») - même raison que les notes précédentes : sans elle, une clé v14 déjà
             // chaude resterait servie jusqu'à l'expiration de son TTL après un flush explicite.
