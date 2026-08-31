@@ -121,8 +121,20 @@ jobs:
           ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && timeout 300 php artisan migrate --force"
 
       - name: Clear caches on server
+        # ACTION: optimize:clear --except=routes (ticket #2096).
+        # MCP: SELF (diff < 5 lignes)
+        # RAISON: optimize:clear supprime le cache des routes (route:clear interne) SANS le
+        #   reconstruire - la reconstruction n'a lieu que dans l'etape "Build caches prod",
+        #   plus bas, separee de celle-ci par une etape entiere (reamorçage du heartbeat) et
+        #   une deuxieme connexion SSH. Le fichier bootstrap/cache/routes-v7.php restait donc
+        #   ABSENT du disque pendant toute cette fenetre (plusieurs secondes), et toute requete
+        #   qui demarrait l'application durant ce laps (visiteur, ou tache planifiee - le
+        #   planificateur tourne CHAQUE MINUTE et n'est pas bloque par le mode maintenance)
+        #   pouvait essuyer une erreur fatale. On exclut donc "routes" ici : l'ancien cache
+        #   reste actif et valide jusqu'a ce que route:cache-atomic le bascule d'un seul coup
+        #   plus bas (rename() atomique, cf. app/Console/Commands/RouteCacheAtomicCommand.php).
         run: |
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan optimize:clear; php artisan health:schedule-check-heartbeat; php artisan responsecache:clear; php artisan queue:restart" || true
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan optimize:clear --except=routes; php artisan health:schedule-check-heartbeat; php artisan responsecache:clear; php artisan queue:restart" || true
 
       - name: Réamorcer le battement de coeur du planificateur
         # ACTION: reposer immediatement le heartbeat efface par optimize:clear.
@@ -146,8 +158,17 @@ jobs:
         #   config reste lue en direct depuis le .env. OptimizedApp restera partiellement rouge
         #   (P3 cosmétique) — acceptable vs régression silencieuse. NE PAS réactiver config:cache
         #   sans audit exhaustif de TOUS les env() (app + vendor + runtime).
+        # RAISON (ticket #2096, complète la note ci-dessus) : route:cache (natif Laravel)
+        #   supprime d'abord le fichier de cache puis reboote toute l'application avant de le
+        #   reecrire - fenetre de plusieurs secondes ou le fichier cible est absent, aggravee
+        #   ici par la separation d'etapes deja documentee sur "Clear caches on server". On
+        #   appelle donc route:cache-atomic (app/Console/Commands/RouteCacheAtomicCommand.php),
+        #   qui ecarte l'ancien cache, reconstruit, puis bascule via Filesystem::replace() -
+        #   ecriture dans un fichier temporaire du meme dossier suivi d'un rename() atomique,
+        #   le fichier cible n'est jamais absent plus que la duree de ce seul appel systeme.
+        #   event:cache et view:cache restent inchangees (hors perimetre de ce ticket).
         run: |
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan route:cache && php artisan event:cache && php artisan view:cache" || true
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan route:cache-atomic && php artisan event:cache && php artisan view:cache" || true
 
       - name: Disable maintenance mode
         # if: always() -> le site ne reste JAMAIS bloque en mode maintenance meme si une etape

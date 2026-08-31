@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.243.3] - 2026-08-31
+
+### Corrigé
+- **Ticket #2096 : fenêtre d'erreur fatale à chaque déploiement, cache des routes absent du disque pendant sa reconstruction.** La commande native `route:cache` de Laravel supprime d'abord le fichier `bootstrap/cache/routes-v7.php` (`route:clear` interne) PUIS reboote une application complète et ne réécrit le fichier qu'à la toute fin - fenêtre mesurée localement à environ 0,5-0,7 seconde pour ce seul rappel interne. Notre pipeline l'aggravait : l'étape « Clear caches on server » supprimait déjà ce fichier via `optimize:clear` plusieurs MINUTES avant sa reconstruction dans l'étape « Build caches prod », séparées par une étape entière (réamorçage du heartbeat) et une deuxième connexion SSH. Le fichier restait donc absent tout ce temps. Le planificateur de tâches tourne CHAQUE MINUTE et n'est PAS bloqué par `php artisan down` (le mode maintenance n'arrête que les requêtes HTTP, jamais les commandes artisan lancées par cron) : chaque déploiement exposait donc une fenêtre bien réelle à une commande planifiée.
+- **Mesure honnête de l'ampleur réelle avant correctif** : recherche exhaustive (script de diagnostic autonome, self-delete, déployé puis retiré) dans le journal d'erreurs PHP de production (`/home/gmemora/logs/laveille_ai.php.error.log`, 10158 lignes, mars à août 2026) pour les motifs `routes-v7`, `RouteNotFoundException`, `bootstrap/cache`, `getCachedRoutesPath` : **zéro occurrence trouvée**, sur toute la période couverte par ce journal, y compris le jour même. Les deux incidents cités (09h04 et 09h33 Québec le 2026-08-31) n'ont donc PAS pu être confirmés mot pour mot dans ce journal - les seules erreurs fatales récentes qui y apparaissent sont des dépassements de `max_execution_time` dans `GlossaryLinkifier` (sujet distinct, non traité ici). Le mécanisme de la fenêtre absente reste néanmoins réel et prouvé par lecture directe du code du framework (`vendor/laravel/framework/.../RouteCacheCommand.php`, `RouteServiceProvider::loadCachedRoutes()`) et par chronométrage local - le correctif ci-dessous ferme ce risque structurel qu'il ait ou non déjà produit l'incident exact décrit.
+- **Nouvelle commande `route:cache-atomic`** (`app/Console/Commands/RouteCacheAtomicCommand.php`, étend la commande native) : écarte l'ancien cache par un seul `rename()` (jamais une suppression), reconstruit les routes fraîches, puis bascule le nouveau contenu via `Illuminate\Filesystem\Filesystem::replace()` - méthode native Laravel qui écrit dans un fichier temporaire du même dossier puis fait un `rename()` atomique par-dessus la cible. Le fichier cible n'est donc jamais absent plus que la durée d'un seul appel système. Restauration automatique de l'ancien cache si la reconstruction échoue en cours de route (une exception ne laisse jamais la cible vide).
+- **`optimize:clear --except=routes`** dans l'étape « Clear caches on server » du pipeline (`.github/workflows/deploy.yml`) : l'ancien cache de routes n'est plus supprimé prématurément, il reste actif et valide jusqu'à ce que `route:cache-atomic` (étape « Build caches prod ») le bascule d'un seul coup. `event:cache` et `view:cache` restent inchangées (hors périmètre de ce ticket - risque analogue non traité ici, à évaluer séparément si mesuré).
+- Aucune caution nécessaire côté `config:cache` : cette mise en cache reste interdite sur ce projet (incident Académie déjà documenté) et n'est pas concernée par ce correctif, qui porte uniquement sur le cache des routes.
+
+### Tests
+- Validation locale directe (pas de nouveau test Pest : la commande manipule `bootstrap/cache/routes-v7.php`, un fichier RÉEL partagé par ce dépôt travaillé en parallèle par plusieurs sessions - même classe de risque de collision que `modules_statuses.json`, déjà documentée dans `docs/CONTRAINTES-SOUS-AGENTS.md`. Le standard de preuve retenu pour ce ticket est explicitement le déploiement réel, pas une suite de tests) :
+  - Premier lancement (aucun cache existant) : succès, fichier créé (1 723 749 octets), 0,447 s.
+  - Second lancement (cache déjà existant, chemin de sauvegarde/restauration exercé) : succès, aucun fichier `.ancien-*` résiduel, 0,718 s.
+  - Preuve fonctionnelle : `route:list --json` lit 1190 routes depuis le cache fraîchement bâti ; `route('home')` résout correctement à travers ce même cache.
+  - `optimize:clear --except=routes` : confirmé que la tâche `routes` est bien exclue (absente de la liste des tâches exécutées) et que le fichier de cache des routes créé au préalable survit intact.
+  - `php artisan list` confirme `route:cache-atomic` correctement auto-découverte par Artisan (aucun enregistrement manuel requis, structure Laravel 11+/12 minimale sans `Kernel.php`).
+  - `php -l` sur le nouveau fichier de commande et sur `config/version.php` après bump.
+  - `.github/workflows/deploy.yml` validé syntaxiquement (`yaml.safe_load`) après les deux modifications.
+  - Dev local restauré à son état normal non caché (`route:clear`) après chaque test, aucun résidu laissé dans le dépôt partagé.
+  - Vérification post-déploiement (journal de production + site en ligne) documentée séparément après le déploiement réel déclenché par ce commit.
+
 ## [1.243.2] - 2026-08-31
 
 ### Corrigé
