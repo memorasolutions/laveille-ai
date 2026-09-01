@@ -1,0 +1,54 @@
+[
+  {
+    "slug": "bdh-cq",
+    "name": "BDH-CQ",
+    "cat_slug": "intelligence-artificielle",
+    "difficulty": "advanced",
+    "type": "ai_term",
+    "icon": "🥚",
+    "match_strategy": "loose",
+    "aliases": [],
+    "broader_slugs": [
+      "reasoning-models",
+      "reseau-de-neurones"
+    ],
+    "narrower_slugs": [],
+    "has_image": false,
+    "acronym_full": null,
+    "definition": "BDH-CQ est un modèle de raisonnement artificiel de 150 millions de paramètres, présenté par la société Pathway, avec des collaborateurs de Bielik AI et de l'Université de New York, dans un préprint déposé sur arXiv le 10 août 2026. Il combine l'apprentissage en contexte avec un raisonnement latent récurrent : après avoir assimilé les exemples fournis en contexte, il résout chaque tâche par calcul itératif dans un espace latent de grande dimension, sans jamais verbaliser son raisonnement intermédiaire comme le ferait une chaîne de pensée textuelle. Il hérite de l'architecture Dragon Hatchling (BDH), présentée par la même équipe en septembre 2025 et inspirée de réseaux de neurones biologiques à connexions locales. Son apport principal est l'efficacité coût : sur le test ARC-AGI-1, qui mesure la capacité à généraliser face à des situations inédites, il atteint 29,5 % de réussite en deux tentatives pour seulement 0,0007 $ US par tâche, un nouveau record d'efficacité coût-précision sur ce test.",
+    "analogy": "Comme un joueur d'échecs qui calcule plusieurs coups à l'avance en silence, sans jamais murmurer sa réflexion à voix haute avant de jouer.",
+    "example": "Dans son préprint du 10 août 2026, Pathway montre que la configuration à 150 millions de paramètres de BDH-CQ résout 29,5 % des tâches ARC-AGI-1 pour 0,0007 $ US chacune, contre 0,040 $ US pour GPT-5.6 Luna (Low) d'OpenAI.",
+    "did_you_know": "Un coût d'inférence plus bas, comme les 0,0007 $ US par tâche de BDH-CQ, n'équivaut pas automatiquement à une consommation électrique réduite : ce sont deux mesures distinctes, rarement rendues publiques ensemble.",
+    "one_sentence_answer": "BDH-CQ est un modèle de raisonnement de 150 millions de paramètres qui résout des tâches par calcul itératif dans un espace latent, sans verbaliser son raisonnement, pour un coût jusqu'à 11 fois inférieur à un modèle comparable d'OpenAI sur ARC-AGI-1.",
+    "faq": [
+      {
+        "question": "Pourquoi BDH-CQ coûte-t-il moins cher à faire fonctionner?",
+        "answer": "Il ne compte que 150 millions de paramètres et ne génère jamais de texte de raisonnement intermédiaire : tout le calcul reste interne, dans un espace latent, ce qui réduit le travail facturé par tâche."
+      },
+      {
+        "question": "Qu'est-ce que le test ARC-AGI-1?",
+        "answer": "Un test public qui mesure la capacité d'une IA à généraliser à partir de quelques exemples, face à des situations inédites, plutôt que sa mémorisation."
+      },
+      {
+        "question": "Est-ce que BDH-CQ remplace des modèles comme ChatGPT?",
+        "answer": "Non : le préprint évalue BDH-CQ uniquement sur des tâches de raisonnement visuel type ARC-AGI, pas comme assistant conversationnel généraliste."
+      }
+    ],
+    "sources": [
+      {
+        "label": "BDH-CQ: In-Context Learning with Recurrent Latent Reasoning (préprint)",
+        "url": "https://arxiv.org/abs/2608.09888",
+        "year": 2026,
+        "author": "Björn Engdahl et al. (Pathway)"
+      },
+      {
+        "label": "The Dragon Hatchling: The Missing Link between the Transformer and Models of the Brain (préprint)",
+        "url": "https://arxiv.org/abs/2509.26507",
+        "year": 2025,
+        "author": "Adrian Kosowski et al. (Pathway)"
+      }
+    ],
+    "reference_url": "https://arxiv.org/abs/2608.09888",
+    "reference_label": "Préprint sur arXiv (2608.09888)"
+  }
+]
