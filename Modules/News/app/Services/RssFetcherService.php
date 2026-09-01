@@ -68,6 +68,18 @@ class RssFetcherService
 
                 $itemTitle = $item->get_title() ?? 'Sans titre';
                 $itemFullUrl = $item->get_permalink() ?? $source->url;
+                // ACTION : normalisation défensive du lien extrait - certains flux RSS source
+                // servent déjà un <link> sur-échappé (ex. « &amp;amp; » au lieu de « &amp; »,
+                // constaté sur un flux BBC). SimplePie décode correctement UN niveau d'entités XML
+                // en extrayant le texte, donc un flux qui en contenait deux laisse un résidu
+                // HTML-entity dans l'URL - stocké tel quel en base sans ce correctif (audit
+                // storage/app/audits/2026-09-01-urls-surencodees.md, ~2 % des fiches mesurées).
+                // html_entity_decode() est idempotent sur une URL déjà propre (aucun effet si
+                // aucune entité n'est présente) : zéro risque de régression sur le flux nominal.
+                // MCP: SELF (<5 lignes utiles)
+                // RAISON: corrige la porte d'écriture à la source ; le passif déjà en base fait
+                // l'objet d'un correctif séparé (backfill), pas de ce correctif de pipeline.
+                $itemFullUrl = html_entity_decode($itemFullUrl, ENT_QUOTES | ENT_HTML5, 'UTF-8');
                 $itemUrl = mb_substr($itemFullUrl, 0, 240);
 
                 if (self::isDuplicate($itemUrl, $itemTitle)) {
