@@ -1,0 +1,65 @@
+[
+  {
+    "slug": "arxiv",
+    "cat_slug": "outils-et-techniques",
+    "name": "arXiv",
+    "definition": "arXiv (prononcé « archive », bien que le mot s'écrive autrement et n'ait aucun lien avec l'archivage) est un dépôt numérique ouvert de préimpressions scientifiques, fondé le 14 août 1991 par le physicien Paul Ginsparg au Los Alamos National Laboratory. D'abord réservé à la physique théorique sous le nom hep-th@xxx.lanl.gov, il couvre aujourd'hui huit domaines : physique, mathématiques, informatique, biologie quantitative, finance quantitative, statistique, génie électrique et sciences des systèmes, et économie. Hébergé par l'Université Cornell, il contient plus de trois millions d'articles en 2026, chacun identifié sous la forme arXiv :YYMM.NNNNN (année, mois, numéro séquentiel), un code que les lecteurs de laveille.ai croisent régulièrement en source d'une actualité sur l'intelligence artificielle. Contrairement à une revue scientifique, arXiv n'effectue qu'une modération technique (bonne catégorie, format, absence de plagiat évident), jamais une évaluation par les pairs. Pour un lecteur, une préimpression citée depuis arXiv prouve donc qu'une recherche existe et circule, jamais que ses conclusions ont été validées par d'autres scientifiques.",
+    "analogy": "Comme un babillard universitaire où des chercheurs épinglent leurs brouillons pour que d'autres les lisent avant toute validation officielle.",
+    "example": "Le 1er septembre 2026, une actualité de laveille.ai citait deux préimpressions arXiv (2608.09888 et 2509.26507) pour présenter BDH-CQ, un modèle d'IA de l'entreprise Pathway comparé à ceux d'OpenAI.",
+    "did_you_know": "Depuis 2025, arXiv rejette environ 2 % des soumissions jugées suspectes de contenu généré par IA, et peut désormais suspendre un an tout auteur pris avec des références inventées.",
+    "one_sentence_answer": "arXiv est un dépôt ouvert de préimpressions scientifiques modérées mais jamais évaluées par les pairs : y trouver une étude prouve qu'elle existe, pas qu'elle a été validée.",
+    "faq": [
+      {
+        "question": "Un article publié sur arXiv est-il validé scientifiquement?",
+        "answer": "Non : arXiv vérifie seulement la catégorie et le format du dépôt, jamais la validité des méthodes ou des résultats. Cette étape s'appelle la modération, pas l'évaluation par les pairs."
+      },
+      {
+        "question": "Pourquoi les journalistes et chercheurs citent-ils quand même arXiv?",
+        "answer": "Parce qu'il permet de suivre une découverte des mois, parfois des années, avant sa publication officielle dans une revue à comité de lecture."
+      },
+      {
+        "question": "arXiv lutte-t-il contre les textes rédigés par une IA?",
+        "answer": "Oui : depuis juillet 2026, un auteur peut être suspendu un an si sa soumission contient des références inventées ou des traces évidentes d'un contenu généré sans vérification."
+      }
+    ],
+    "sources": [
+      {
+        "label": "arXiv - About arXiv",
+        "url": "https://info.arxiv.org/about/index.html",
+        "year": 2026,
+        "author": "arXiv (Université Cornell)"
+      },
+      {
+        "label": "arXiv - The arXiv identifier",
+        "url": "https://info.arxiv.org/help/arxiv_identifier.html",
+        "year": 2026,
+        "author": "arXiv (Université Cornell)"
+      },
+      {
+        "label": "Nature - AI content is tainting preprints: how moderators are fighting back",
+        "url": "https://www.nature.com/articles/d41586-025-02469-y",
+        "year": 2025,
+        "author": "Traci Watson, Nature"
+      },
+      {
+        "label": "CERN Courier - arXiv's one-strike rule on AI",
+        "url": "https://cerncourier.com/arxivs-one-strike-rule-on-ai/",
+        "year": 2026,
+        "author": "CERN Courier"
+      }
+    ],
+    "aliases": [
+      "arxiv.org"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "📜",
+    "type": "outil",
+    "acronym_full": null,
+    "match_strategy": "case_sensitive",
+    "has_image": false,
+    "reference_url": "https://info.arxiv.org/about/index.html",
+    "reference_label": "Consulter la page officielle « About arXiv »"
+  }
+]
