@@ -56,37 +56,28 @@
 <!-- end of wpo-breadcumb-section-->
 
 @push('scripts')
-<script type="application/ld+json">
-{
-    "@@context": "https://schema.org",
-    "@@type": "BreadcrumbList",
-    "itemListElement": [
-        {
-            "@@type": "ListItem",
-            "position": 1,
-            "name": "{{ __('Accueil') }}",
-            "item": "{{ route('home') }}"
+@php
+    // v1.244.15 : le JSON-LD ci-dessous était un gabarit JSON écrit à la main avec {{ $item }}
+    // (échappement Blade = htmlspecialchars, prévu pour du HTML) glissé À L'INTÉRIEUR d'une
+    // chaîne JSON. Un titre avec apostrophe ressortait "L&#039;IA..." - une entité HTML que
+    // JSON ne décode jamais (le contenu d'un <script> n'est pas repassé par le parseur HTML),
+    // donc un moteur qui lit ce JSON-LD recevait littéralement les 6 caractères "&#039;" au
+    // lieu d'une apostrophe. json_encode() (via JsonLdService, déjà utilisé partout ailleurs
+    // dans ce projet pour émettre du JSON-LD) est la seule façon correcte d'émettre une valeur
+    // dans du JSON - voir MachineMarkupEscapingTest (Modules/News) pour la preuve d'injection.
+    // Items et URLs inchangés (même logique que l'ancien gabarit) : seul le mécanisme d'émission
+    // change.
+    $bcItems = [['name' => __('Accueil'), 'url' => route('home')]];
+    if (! empty($breadcrumbItems)) {
+        foreach ($breadcrumbItems as $bcIndex => $bcItem) {
+            $bcItems[] = [
+                'name' => $bcItem,
+                'url' => $bcIndex < count($breadcrumbItems) - 1
+                    ? ($breadcrumbRoutes[$bcItem] ?? url()->current())
+                    : url()->current(),
+            ];
         }
-        @if(!empty($breadcrumbItems))
-            @foreach($breadcrumbItems as $index => $item)
-                @if($index < count($breadcrumbItems) - 1)
-                    ,{
-                        "@@type": "ListItem",
-                        "position": {{ $index + 2 }},
-                        "name": "{{ $item }}",
-                        "item": "{{ $breadcrumbRoutes[$item] ?? url()->current() }}"
-                    }
-                @else
-                    ,{
-                        "@@type": "ListItem",
-                        "position": {{ $index + 2 }},
-                        "name": "{{ $item }}",
-                        "item": "{{ url()->current() }}"
-                    }
-                @endif
-            @endforeach
-        @endif
-    ]
-}
-</script>
+    }
+@endphp
+{!! \Modules\SEO\Services\JsonLdService::render(\Modules\SEO\Services\JsonLdService::breadcrumbs($bcItems)) !!}
 @endpush

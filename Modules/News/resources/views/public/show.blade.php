@@ -148,9 +148,12 @@
 @push('head')
 {{-- Résumé pour agents (design doc section 4.5) : meta_description, sinon
      NewsArticle::displayExcerpt() (résumé court, sinon rendu du résumé structuré, sinon repli
-     configuré catégorie+date) - jamais $article->description. --}}
-<meta name="llm:summary" content="{{ e($article->seo_title ?? $article->title) }} - {{ e($article->meta_description ?? $article->displayExcerpt(200)) }} ({{ e($article->displaySourceName()) }})">
-<meta name="llm:keywords" content="actualité IA, {{ e($article->displaySourceName()) }}, intelligence artificielle, francophone, Québec">
+     configuré catégorie+date) - jamais $article->description.
+     v1.244.15 : jamais e() ICI - {{ }} Blade échappe déjà tout seul (double échappement corrigé,
+     ex. l&#039; devenait l&amp;#039;). Ne jamais réintroduire un e()/htmlspecialchars() manuel
+     à l'intérieur d'un bloc {{ }} - voir MachineMarkupEscapingTest pour la preuve d'injection. --}}
+<meta name="llm:summary" content="{{ $article->seo_title ?? $article->title }} - {{ $article->meta_description ?? $article->displayExcerpt(200) }} ({{ $article->displaySourceName() }})">
+<meta name="llm:keywords" content="actualité IA, {{ $article->displaySourceName() }}, intelligence artificielle, francophone, Québec">
 <meta name="llm:url" content="{{ route('news.show', $article) }}">
 @php
     // Graphes JSON-LD de la fiche, assemblés en UN seul endroit (2026-08-21) : l'ancienne
