@@ -287,3 +287,48 @@ it('après relocalisation, le produit reste trouvable par son alias "Mistral Le 
 
     expect($html)->toContain('/glossaire/'.$produit->slug);
 });
+
+// ── Cas 7 : IA (mot générique du site) vs alias qualifier dérivé de "Autonomie (IA)" ──────────
+// Mesuré en production le 2026-09-01, sur les 4627 fiches actualités publiées, via le mécanisme
+// réel (GlossaryLinkifier::linkify() sur le contenu réel de chaque fiche, jamais un comptage en
+// base) : 105 fiches produisaient un lien vers /glossaire/autonomie-ia, dont 34 par la seule
+// ancre « IA » - un contresens à chaque fois - et 71 par l'alias dérivé « autonomie »/« Autonomie »
+// (la BASE du qualifier), légitimes. Voir ALIAS_NEVER_AUTO (GlossaryLinkifier.php) pour le détail
+// complet de la mesure et la liste des fiches touchées.
+
+it('ne lie PAS "IA" - reproduit le contresens mesuré en production sur 34 fiches (2026-09-01)', function () {
+    hanTerm('Autonomie (IA)', 'autonomie-ia-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Cette entreprise utilise l\'IA pour ses produits.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/autonomie-ia-test');
+});
+
+it('lie toujours "autonomie" (la base du qualifier, sans IA) - 71 fiches légitimes mesurées en production', function () {
+    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Anthropic veut amener Claude à un niveau de perpétuelle autonomie.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('lie toujours un sigle acronyme VOISIN (RNN) - la frontière ne doit bloquer que "ia"', function () {
+    $terme = hanTerm('Réseau récurrent (RNN)', 'reseau-recurrent-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Un RNN traite les séquences une étape à la fois.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug)
+        ->and($html)->toContain('>RNN</a>');
+});
+
+it('bloque "IA" sur une seconde fiche qualifiée "Hallucination (IA)" - même cause, repérée par audit de balayage', function () {
+    hanTerm('Hallucination (IA)', 'hallucination-ia-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Le rapport évoque un risque lié à l\'IA dans les systèmes critiques.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/hallucination-ia-test');
+});

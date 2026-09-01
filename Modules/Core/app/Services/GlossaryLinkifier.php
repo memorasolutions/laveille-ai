@@ -783,7 +783,26 @@ class GlossaryLinkifier
     // Un seul ajout neutralise les deux chemins : ni l'alias dérivé de l'ancienne fiche, ni la
     // variante morphologique de la nouvelle, n'entrent dans $terms - mais le nom PRINCIPAL de
     // CHAQUE fiche (« Mistral (Le Chat) » comme « Mistral ») reste, lui, pleinement trouvable.
-    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral'];
+    //
+    // 2026-09-01, MESURÉ : « IA » (mot générique du site) est l'alias QUALIFIER dérivé de la fiche
+    // « Autonomie (IA) » (extractQualifierAliases() sur son nom, exactement comme CNN plus haut) -
+    // il captait donc toute mention isolée du sigle vers /glossaire/autonomie-ia, une fiche étroite
+    // (autonomie décisionnelle d'un système) qui n'a pas la portée du mot générique. Mesuré en
+    // production sur les 4627 fiches actualités publiées, via le mécanisme réel
+    // (GlossaryLinkifier::linkify() sur le contenu réel de chaque fiche, jamais un comptage en
+    // base) : 105 fiches produisaient un lien vers autonomie-ia, dont 34 par la seule ancre « IA »
+    // - un contresens à chaque fois (ex. « un compte IA », « l'IA générative ») - et 71 par l'alias
+    // dérivé « autonomie »/« Autonomie » (la BASE du qualifier), légitimes et non affectés par cet
+    // ajout puisqu'il ne bloque que la chaîne exacte « ia ». Même cause, même défaut, sur une
+    // seconde fiche « Hallucination (IA) » (repérée par audit, pas encore mesurée en production).
+    // Aucune entrée générique « intelligence artificielle » n'existe sur ce site ; plutôt que d'en
+    // créer une (décision éditoriale hors périmètre de ce correctif), « IA » devient non lié plutôt
+    // que mal lié - la base de chaque qualifier (« Autonomie », « Hallucination ») et le nom
+    // PRINCIPAL de chaque fiche restent, eux, pleinement trouvables. La fiche acronyme dédiée
+    // /acronymes-education/ia (sigle « IA », déjà publiée séparément) n'est PAS affectée par cette
+    // liste : son propre sigle court est poussé dans $terms sans jamais passer par
+    // isNeverAutoAlias() (voir loadTerms(), bloc Acronymes, regroupement "Sigle court").
+    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral', 'ia'];
 
     /**
      * 2026-08-29 : vrai si cette chaîne (alias curé, qualifier dérivé, ou variante morphologique)
