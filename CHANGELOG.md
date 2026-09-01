@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.1] - 2026-09-01
+
+### Corrigé (le pic mémoire des captures d'annuaire, et ce n'était PAS une fuite)
+
+- **Une image de 375 Ko pouvait tuer la commande de recapture.** Le service de dérivation décodait la
+  source ENTIÈREMENT en mémoire avant tout redimensionnement : le coût vaut largeur × hauteur × 4
+  octets, **indépendamment du poids du fichier sur disque**. Un JPEG de 375 Ko mais de 6000 × 4000
+  pixels réclame donc 96 Mo une fois décodé, et faisait mourir le processus. Le diagnostic initial
+  parlait d'une accumulation qui grandit avec le volume : c'était faux, et trois harnais de mesure
+  indépendants (2535 appels réels sur le catalogue) l'ont démenti en montrant une mémoire plate.
+  C'était un pic par outil, sans plafond - le « 62 % du catalogue » marquait seulement l'endroit où
+  la commande rencontrait cette image-là.
+  Les dimensions sont désormais lues dans l'en-tête du fichier, et le décodage complet est refusé
+  quand le pic estimé dépasserait la marge mémoire restante. Nouveau statut absorbé sans casse par
+  les trois appelants : aucun maître local, mais une recapture réseau à la bonne taille règle le cas.
+  **Preuve par mesure avant et après, sur les mêmes 2535 appels** : comptes de classification
+  identiques au bit près (aucune image légitime rejetée, y compris une vignette retina de 2400 ×
+  1260 déjà au catalogue), et l'image pathologique termine proprement au lieu de s'arrêter en erreur.
+
+### Documenté (une impasse transformée en rambarde)
+
+- **Regroupement d'actualités : aucun assouplissement sûr n'existe, et c'est démontré.** Le cas
+  « Zoom » contre « Zoomsday » porte une signature numérique IDENTIQUE à « Meta » contre « Metabase »,
+  « Meta » contre « MetaMask » et « Zoom » contre « ZoomInfo » : même distance, même valeur
+  normalisée, même préfixe commun. Aucun seuil ne peut séparer le cas à corriger de ceux qu'il ne
+  faut surtout pas fusionner. Le risque était asymétrique : la même fonction alimente la
+  déduplication, où une erreur ne publie pas une fiche fautive mais FAIT DISPARAÎTRE un article.
+  Aucune ligne de production modifiée ; à la place, un commentaire qui documente l'investigation et
+  deux tests, dont un garde-fou sur les quatre paires pièges - si un futur assouplissement les fait
+  casser, c'est le signal qu'il reproduit l'erreur.
+
 ## [1.247.0] - 2026-09-01
 
 ### Ajouté (une capacité qui manquait)
