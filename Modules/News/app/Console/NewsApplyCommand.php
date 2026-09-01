@@ -158,7 +158,14 @@ class NewsApplyCommand extends Command
     // clé retombe sur la cascade automatique plutôt que de garder une valeur figée.
     // MCP: SELF (<5 lignes)
     // RAISON: tâche #1942 - angle mort signalé par le fondateur, mesuré sur 94 fiches.
-    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'meta_description', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'related_tool_slugs_remove', 'related_article_slugs', 'related_article_slugs_remove', 'entities', 'fact_check'];
+    // ACTION : 'url' rejoint la liste blanche (ticket #2134) - l'adresse SOURCE de la fiche
+    // (colonne 'url', distincte du slug qui reste hors de portée) n'avait AUCUNE porte
+    // d'écriture officielle : une adresse fausse ou périmée ne pouvait se corriger que par SQL
+    // direct, interdit par la doctrine du projet. Même garde-fou que original_post.url /
+    // primary_sources[].url (voir le bloc d'écriture dédié plus bas).
+    // MCP: SELF (<5 lignes)
+    // RAISON: ticket #2134 - aucun moyen officiel de corriger une adresse source fausse/périmée.
+    private const ALLOWED_PAYLOAD_KEYS = ['expected_source_hash', 'expected_updated_at', 'title', 'seo_title', 'meta_description', 'summary', 'editorial_proof_pairs', 'primary_sources', 'image_credit', 'url', 'nature_original', 'niveau_preuve', 'original_post', 'composed_summary', 'related_tool_slugs', 'related_tool_slugs_remove', 'related_article_slugs', 'related_article_slugs_remove', 'entities', 'fact_check'];
 
     /**
      * ACTION : « Article de blogue lié » (2026-08-29) - plafond applicatif STRICT du nombre
@@ -548,6 +555,36 @@ class NewsApplyCommand extends Command
             $updates['image_credit'] = $decoded['image_credit'];
         }
 
+        // ACTION : clé url (ticket #2134) - la porte de correction n'avait aucun moyen d'ajuster
+        // l'adresse SOURCE d'une fiche (colonne 'url', distincte du slug qui, lui, reste hors de
+        // portée dans tous les cas) : une adresse fausse ou périmée ne pouvait se corriger que
+        // par SQL direct, interdit par la doctrine du projet. Même garde que
+        // original_post.url / primary_sources[].url (URL absolue http/https, jamais vide - une
+        // chaîne vide écraserait la valeur existante par erreur, elle est donc refusée
+        // explicitement plutôt qu'appliquée ou ignorée en silence) plus une borne de longueur
+        // (255, largeur réelle de la colonne 'news_articles'.'url' - migration
+        // 2026_03_29_000000_create_news_tables.php, jamais un nouveau chiffre inventé), même
+        // raison que fact_check.source : refuser AVANT d'écrire plutôt que de laisser l'écriture
+        // échouer après que le reste du payload est déjà commité.
+        // MCP: SELF (<10 lignes utiles, calqué sur original_post.url / primary_sources[].url)
+        // RAISON: ticket #2134 - aucune porte d'écriture officielle sur 'url', contournement par
+        // SQL direct interdit par la doctrine du projet (docs/CONTRAINTES-SOUS-AGENTS.md,
+        // section 1).
+        if (array_key_exists('url', $decoded)) {
+            $url = is_string($decoded['url']) ? trim($decoded['url']) : '';
+            if ($url === '' || ! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url)) {
+                $this->error("url invalide : doit être une adresse absolue http/https non vide (une chaîne vide écraserait la valeur existante) : « {$url} ».");
+
+                return self::FAILURE;
+            }
+            if (mb_strlen($url) > 255) {
+                $this->error('url dépasse 255 caractères (largeur de la colonne).');
+
+                return self::FAILURE;
+            }
+            $updates['url'] = $url;
+        }
+
         // ACTION : implémentation /actu2 - volet serveur (2026-08-17) - trois clés
         // supplémentaires, mêmes garde-fous de validation stricte que les clés existantes
         // ci-dessus (refus explicite, jamais un enregistrement partiel).
@@ -855,7 +892,7 @@ class NewsApplyCommand extends Command
         // ne rend alors rien du tout.
 
         if ($updates === [] && $relatedToolSlugs === null && $relatedToolSlugsRemove === null && $relatedArticleSlugs === null && $relatedArticleSlugsRemove === null && $entities === null && $factCheckUpdates === []) {
-            $this->error('Payload sans effet : aucune des clés seo_title / meta_description / summary / editorial_proof_pairs / primary_sources / image_credit / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs / related_tool_slugs_remove / related_article_slugs / related_article_slugs_remove / entities / fact_check n\'est fournie.');
+            $this->error('Payload sans effet : aucune des clés seo_title / meta_description / summary / editorial_proof_pairs / primary_sources / image_credit / url / nature_original / niveau_preuve / original_post / composed_summary / related_tool_slugs / related_tool_slugs_remove / related_article_slugs / related_article_slugs_remove / entities / fact_check n\'est fournie.');
 
             return self::FAILURE;
         }

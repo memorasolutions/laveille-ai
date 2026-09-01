@@ -264,6 +264,96 @@ it('refuses an original_post whose text exceeds 1000 characters', function () {
     expect($article->fresh()->original_post)->toBeNull();
 });
 
+// ── url : correction de l'adresse SOURCE de la fiche (ticket #2134) ────────────────
+//
+// Avant ce ticket, 'url' n'existait dans AUCUNE liste blanche de news:apply : une adresse
+// source fausse ou périmée ne pouvait se corriger que par SQL direct, interdit par la doctrine
+// du projet (docs/CONTRAINTES-SOUS-AGENTS.md, section 1). Même garde que original_post.url /
+// primary_sources[].url (URL absolue http/https, jamais vide - une chaîne vide écraserait la
+// valeur existante par erreur, elle est donc refusée) plus une borne de longueur (255, largeur
+// réelle de la colonne 'news_articles'.'url' - migration
+// 2026_03_29_000000_create_news_tables.php).
+
+it('applies a valid url, correcting the source address (ticket #2134)', function () {
+    $article = a2pArticle(['url' => 'https://exemple.com/ancienne-adresse-perimee']);
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), [
+        'url' => 'https://exemple.com/nouvelle-adresse-corrigee',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->url)->toBe('https://exemple.com/nouvelle-adresse-corrigee');
+});
+
+it('refuses an empty url, never erasing the existing value (ticket #2134)', function () {
+    $article = a2pArticle(['url' => 'https://exemple.com/adresse-existante']);
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), ['url' => '']));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->url)->toBe('https://exemple.com/adresse-existante');
+});
+
+it('refuses a url without an http/https scheme, persisting nothing (ticket #2134)', function () {
+    $article = a2pArticle(['url' => 'https://exemple.com/adresse-existante']);
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), ['url' => 'javascript://alert(1)']));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->url)->toBe('https://exemple.com/adresse-existante');
+});
+
+it('refuses a url exceeding 255 characters, the real width of the column (ticket #2134)', function () {
+    $article = a2pArticle(['url' => 'https://exemple.com/adresse-existante']);
+    $tropLongue = 'https://exemple.com/'.str_repeat('a', 250);
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), ['url' => $tropLongue]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertFailed();
+
+    expect($article->fresh()->url)->toBe('https://exemple.com/adresse-existante');
+});
+
+it('applying url alone does not erase structured_summary (ticket #2134)', function () {
+    $article = a2pArticle([
+        'url' => 'https://exemple.com/adresse-existante',
+        'structured_summary' => ['composed' => true, 'hook' => 'Accroche à préserver.'],
+    ]);
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), [
+        'url' => 'https://exemple.com/nouvelle-adresse',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    expect($article->fresh()->structured_summary)->toBe(['composed' => true, 'hook' => 'Accroche à préserver.']);
+});
+
+it('applies url via --enrich on an already-published article without touching slug or publication state (ticket #2134)', function () {
+    $article = a2pArticle([
+        'url' => 'https://exemple.com/adresse-perimee-en-ligne',
+        'slug' => 'fiche-deja-publiee-2134',
+        'seo_title' => 'Titre publié prêt',
+        'summary' => 'Résumé publié prêt.',
+        'is_published' => true,
+        'published_at' => now(),
+    ]);
+    $payload = a2pPayloadFile(array_merge(a2pFreshMeta($article), [
+        'url' => 'https://exemple.com/adresse-corrigee-post-publication',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload, '--enrich' => true])
+        ->assertSuccessful();
+
+    $article->refresh();
+    expect($article->url)->toBe('https://exemple.com/adresse-corrigee-post-publication')
+        ->and($article->slug)->toBe('fiche-deja-publiee-2134')
+        ->and($article->is_published)->toBeTrue();
+});
+
 // ── Survie à la publication-purge (même garde-fou que primary_sources/image_credit) ─
 
 it('nature_original, niveau_preuve and original_post survive the publish-and-purge transaction', function () {
