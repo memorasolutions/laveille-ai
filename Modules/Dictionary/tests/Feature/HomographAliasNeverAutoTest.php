@@ -41,6 +41,18 @@ declare(strict_types=1);
  * (qualifier de « Déni de service (DoS) », extractQualifierAliases()) - seule la base « déni de
  * service », vérifiée ci-dessous, reste un point d'entrée automatique vers la fiche.
  *
+ * Cas 8, ajouté le 2026-09-01, AVANT mise en production (contrairement aux cas 1-7, jamais mesuré
+ * après coup) : la fiche "Pathway (entreprise d'IA)" a été testée empiriquement par
+ * GlossaryLinkifier::linkify() avant livraison, parce que "pathway" est un nom anglais courant
+ * (voie, chemin, parcours - "learning pathway", "metabolic pathway") ET que 3 entités réelles
+ * distinctes portent un nom quasi identique : Google Pathways (infrastructure ayant entraîné
+ * PaLM), Pathway Medical Inc. (plateforme clinique montréalaise rachetée par Doximity en 2025), et
+ * une fonctionnalité de coaching interne nommée "Pathway" trouvée en production sur la fiche
+ * annuaire "Debbie Rewards". Même mécanisme que le Cas 7 (extractQualifierAliases() dérive la base
+ * "Pathway" depuis "Pathway (entreprise d'IA)"), avec une variante inédite : la base dérivée
+ * subit ELLE-MÊME une dérivation morphologique (pluriel "Pathways"), d'où deux entrées dans
+ * ALIAS_NEVER_AUTO pour ce seul cas.
+ *
  * Cas 5, ajouté le 2026-08-30 : variante INÉDITE du même défaut, cette fois sur la BASE d'un
  * qualifier plutôt que sur le qualifier lui-même. La fiche réelle « Mistral (Le Chat) » (produit
  * de clavardage) dérive sa base « Mistral » de façon INCONDITIONNELLE via
@@ -331,4 +343,76 @@ it('bloque "IA" sur une seconde fiche qualifiée "Hallucination (IA)" - même ca
 
     expect($html)->not->toContain('glossary-link')
         ->and($html)->not->toContain('/glossaire/hallucination-ia-test');
+});
+
+// ── Cas 8 : Pathway (mot anglais courant + 3 homonymes réels) vs base qualifier de
+// "Pathway (entreprise d'IA)" ──────────────────────────────────────────────────────
+// Repéré AVANT mise en production (jamais mesuré après coup comme les cas précédents) : la fiche
+// "Pathway (entreprise d'IA)" a été testée empiriquement avec GlossaryLinkifier::linkify() avant
+// livraison, précisément parce que "pathway" est un nom anglais courant (voie, chemin, parcours)
+// ET que 3 entités réelles distinctes portent un nom quasi identique (Google Pathways, Pathway
+// Medical Inc., et une fonctionnalité interne nommée "Pathway" trouvée sur la fiche annuaire
+// "Debbie Rewards" en production). extractQualifierAliases('Pathway (entreprise d'IA)') dérive
+// systématiquement la base "Pathway" (même mécanisme que le Cas 7 ci-dessus), et
+// extractMorphologicalAliases() dérive à son tour un pluriel "Pathways" à partir de cette base -
+// d'où les DEUX entrées ('pathway' et 'pathways') dans ALIAS_NEVER_AUTO pour ce cas.
+it('ne lie PAS "Pathway" seul - reproduit le faux lien trouvé sur la fiche annuaire "Debbie Rewards" avant livraison', function () {
+    hanTerm("Pathway (entreprise d'IA)", 'pathway-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Des modules de formation (Pathway) sur la psychologie de l\'argent.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/pathway-test');
+});
+
+it('ne lie PAS "pathway" minuscule dans un emploi générique anglais ("learning pathway")', function () {
+    hanTerm("Pathway (entreprise d'IA)", 'pathway-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Ce cours propose un learning pathway complet pour les débutants.</p>');
+
+    expect($html)->not->toContain('glossary-link');
+});
+
+it('ne lie PAS "Pathways" (pluriel) - homonyme réel Google Pathways, infrastructure ayant entraîné PaLM', function () {
+    hanTerm("Pathway (entreprise d'IA)", 'pathway-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Google Pathways a servi à entraîner PaLM.</p>');
+
+    expect($html)->not->toContain('glossary-link');
+});
+
+it('ne lie PAS "Pathway Medical" - troisième homonyme réel, plateforme clinique montréalaise', function () {
+    hanTerm("Pathway (entreprise d'IA)", 'pathway-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Pathway Medical a été rachetée par Doximity en 2025.</p>');
+
+    expect($html)->not->toContain('glossary-link');
+});
+
+it('lie toujours l\'alias curé "Pathway AI" en entier - mécanisme DISTINCT, non affecté par le blocage', function () {
+    $terme = hanTerm("Pathway (entreprise d'IA)", 'pathway-test', aliases: ['Pathway AI'], matchStrategy: 'case_sensitive');
+
+    $html = GlossaryLinkifier::linkify('<p>La startup Pathway AI a publié un nouveau résultat.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug)
+        ->and($html)->toContain('>Pathway AI</a>');
+});
+
+it('lie toujours le nom PRINCIPAL complet "Pathway (entreprise d\'IA)" tel quel dans un texte', function () {
+    $terme = hanTerm("Pathway (entreprise d'IA)", 'pathway-test', matchStrategy: 'case_sensitive');
+
+    $html = GlossaryLinkifier::linkify('<p>La société Pathway (entreprise d\'IA) a publié BDH-CQ.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('lie toujours un terme VOISIN qualifié par parenthèse (Highway, mot proche) - la frontière ne doit bloquer que "pathway"/"pathways"', function () {
+    $terme = hanTerm('Highway (transport)', 'highway-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Le réseau Highway relie plusieurs villes.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
 });

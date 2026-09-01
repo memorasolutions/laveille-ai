@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v17.'; // 2026-08-31 bump v17 (ticket #2109, perf) : chaque entrée porte désormais 'name_lower' (mb_strtolower(nom) précalculé) — voir matchInText(), qui l'utilise comme filtre de candidats avant de construire la regex. Un cache v16 déjà chaud n'aurait pas ce champ ; matchInText() a un repli sûr (mb_strtolower à la volée) donc rien ne casse sans ce bump, mais sans lui la moitié des entrées resteraient au chemin lent jusqu'à expiration du TTL — bump pour un gain plein dès le déploiement, comme tous les bumps précédents de cette clé.
+    public const CACHE_KEY = 'glossary.terms.v18.'; // 2026-09-01 bump v18 (fiche "Pathway (entreprise d'IA)") : ALIAS_NEVER_AUTO gagne 'pathway' (voir plus bas) - sans ce bump, une entrée v17 déjà chaude continuerait de dériver et de matcher la base "Pathway" jusqu'à expiration du TTL, faux lien confirmé empiriquement (linkify() sur "modules de formation (Pathway)" AVANT ce correctif) avant d'être neutralisé.
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -802,7 +802,24 @@ class GlossaryLinkifier
     // /acronymes-education/ia (sigle « IA », déjà publiée séparément) n'est PAS affectée par cette
     // liste : son propre sigle court est poussé dans $terms sans jamais passer par
     // isNeverAutoAlias() (voir loadTerms(), bloc Acronymes, regroupement "Sigle court").
-    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral', 'ia'];
+    // 2026-09-01 (fiche "Pathway (entreprise d'IA)") : "pathway" ajouté. extractQualifierAliases()
+    // dérive systématiquement la BASE d'un nom "X (Y)" - ici "Pathway" depuis "Pathway (entreprise
+    // d'IA)" - et ce dérivé matchait bel et bien, y compris en minuscule ("learning pathway"),
+    // AVANT ce correctif (vérifié empiriquement via linkify(), pas seulement lu dans le code) :
+    // "pathway"/"Pathway" est un nom anglais courant (voie, chemin, parcours - "learning pathway",
+    // "metabolic pathway"), ET porte AU MOINS trois collisions RÉELLES trouvées en production :
+    // (1) la fiche annuaire "Debbie Rewards" contient littéralement "modules de formation
+    // (Pathway)", un nom de fonctionnalité de coaching interne sans rapport ; (2) "Pathways" (avec
+    // un s), l'infrastructure de calcul distribué de Google qui a entraîné PaLM ; (3) Pathway
+    // Medical Inc., plateforme clinique montréalaise rachetée par Doximity en 2025 - un troisième
+    // homonyme réel. "pathways" (pluriel) ajouté avec la même entrée : extractMorphologicalAliases()
+    // dérive aussi automatiquement un pluriel FR à partir de la base qualifier "Pathway" (elle-même
+    // dérivée par extractQualifierAliases(), donc bloquer seulement la forme singulière laissait
+    // passer "Pathways" - vérifié empiriquement, "Google Pathways" (infrastructure de Google,
+    // homonyme n°2 ci-dessus) matchait encore avant l'ajout du pluriel à cette liste. Le nom
+    // PRINCIPAL complet "Pathway (entreprise d'IA)" et l'alias curé "Pathway AI" restent, eux,
+    // pleinement trouvables (aucun des deux ne passe par ce mécanisme dérivé).
+    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral', 'ia', 'pathway', 'pathways'];
 
     /**
      * 2026-08-29 : vrai si cette chaîne (alias curé, qualifier dérivé, ou variante morphologique)
@@ -1015,6 +1032,10 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-09-01 : v17 ajoutée ici en même temps que le bump v18 (ALIAS_NEVER_AUTO +
+            // "pathway") - même raison que les notes précédentes : sans elle, une clé v17 déjà
+            // chaude resterait servie jusqu'à l'expiration de son TTL après un flush explicite.
+            Cache::forget('glossary.terms.v17.'.$loc);
             // 2026-08-31 : v16 ajoutée ici en même temps que le bump v17 (ticket #2109, ajout du
             // champ 'name_lower') - même raison que les notes précédentes : sans elle, une clé v16
             // déjà chaude resterait servie jusqu'à l'expiration de son TTL après un flush explicite.

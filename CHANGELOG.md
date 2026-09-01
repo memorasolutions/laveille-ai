@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.245.0] - 2026-09-01
+
+### Ajouté
+
+- **Nouvelle fiche de glossaire « Pathway (entreprise d'IA) ».** L'entreprise de Palo Alto derrière les préprints BDH (Dragon Hatchling, arXiv:2509.26507, 30 septembre 2025) et BDH-CQ (arXiv:2608.09888, 10 août 2026), sujet de la fiche d'actualité publiée le jour même sur le modèle jusqu'à onze fois moins coûteux qu'un modèle d'OpenAI sur ARC-AGI-1. Identité confirmée par trois canaux indépendants (Perplexity, Codex, lecture directe de pathway.com) - fondée en 2021 par Zuzanna Stamirowska, Jan Chorowski, Adrian Kosowski et Claire Nouet.
+- **Désambiguïsation explicite dans la fiche.** « Pathway » recoupe au moins trois entités réelles distinctes : Google Pathways (infrastructure ayant entraîné PaLM), Pathway Medical Inc. (plateforme clinique montréalaise rachetée par Doximity en 2025) et cette entreprise-ci. La fiche nomme les trois plutôt que d'ignorer la confusion.
+- **Nom qualifié plutôt que « Pathway » seul, pour éliminer un faux lien réel.** La fiche annuaire « Debbie Rewards » contient déjà, en production, la chaîne exacte « Pathway » (une fonctionnalité de coaching interne, sans rapport). `name = "Pathway (entreprise d'IA)"` retire le risque à la racine (le linkifier matche sur `name`, jamais sur `slug`, qui reste le `pathway` court pour l'URL) ; `match_strategy = case_sensitive` en défense en profondeur ; seul alias retenu : « Pathway AI » (vérifié sans collision en production). « Pathway » seul, « BDH », « Dragon Hatchling » et « BDH-CQ » explicitement écartés des alias.
+- Migration réversible (`down()` testé aller-retour), images `pathway.webp`/`pathway.jpg` livrées et suivies par git.
+
 ## [1.244.15] - 2026-09-01
 
 ### Corrigé (double échappement HTML dans le balisage machine des fiches d'actualité)

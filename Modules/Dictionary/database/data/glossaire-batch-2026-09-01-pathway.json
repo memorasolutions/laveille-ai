@@ -1,0 +1,65 @@
+[
+  {
+    "slug": "pathway",
+    "cat_slug": "intelligence-artificielle",
+    "name": "Pathway (entreprise d'IA)",
+    "definition": "Pathway est une entreprise d'intelligence artificielle établie à Palo Alto (Californie), fondée en 2021 par Zuzanna Stamirowska (CEO), Jan Chorowski (CTO, ex-Google Brain), Adrian Kosowski (CSO) et Claire Nouet (COO), d'origine franco-polonaise. Son activité initiale portait sur Pathway Live Data Framework, un cadre de données en temps réel pour le RAG. Le 30 septembre 2025, l'entreprise publie le préprint « The Dragon Hatchling » (BDH, arXiv:2509.26507), une architecture « post-Transformer », inspirée de la biologie sans l'imiter, qui fusionne mémoire et raisonnement en un seul mécanisme. Le 10 août 2026, son modèle BDH-CQ (arXiv:2608.09888, 150 millions de paramètres) réussit 29,5 % des tâches du test ARC-AGI-1 en deux essais (pass@2), pour 0,00070 $ US par tâche, contre 34,2 % à un coût jusqu'à onze fois supérieur pour GPT-5.6 Luna (Low) d'OpenAI. BDH-CQ calcule dans un état latent, sans jamais verbaliser son raisonnement. Pathway n'a aucun lien avec Google Pathways (infrastructure de Google) ni avec Pathway Medical Inc., plateforme clinique montréalaise rachetée par Doximity en 2025.",
+    "analogy": "Comme des architectes qui redessinent les fondations d'une maison, plutôt que d'empiler encore un étage sur une structure déjà tendue.",
+    "example": "Le 10 août 2026, Pathway publie BDH-CQ : 29,5 % de réussite sur ARC-AGI-1 à 0,00070 $ US la tâche, contre 34,2 % à coût onze fois supérieur pour GPT-5.6 Luna (Low) d'OpenAI.",
+    "did_you_know": "Łukasz Kaiser, coauteur du célèbre article « Attention Is All You Need » (fondement des Transformers), figure parmi les investisseurs de cette entreprise « post-Transformer ».",
+    "one_sentence_answer": "Pathway est une entreprise d'IA américaine qui a présenté, le 10 août 2026, BDH-CQ : un modèle de raisonnement jusqu'à onze fois moins coûteux par tâche qu'un modèle d'OpenAI sur le test ARC-AGI-1, sans chaîne de raisonnement explicite.",
+    "faq": [
+      {
+        "question": "Pathway est-elle liée à Google Pathways ou à Pathway Medical?",
+        "answer": "Non. Ce sont trois entités sans lien organisationnel : Pathway (Palo Alto) développe BDH et BDH-CQ; Google Pathways est une infrastructure de calcul distribué qui a servi à entraîner PaLM; Pathway Medical Inc. est une plateforme clinique montréalaise rachetée par Doximity en 2025."
+      },
+      {
+        "question": "Que signifie « post-Transformer » chez Pathway?",
+        "answer": "Son architecture BDH fusionne mémoire, adaptation et raisonnement dans un seul mécanisme de calcul, inspiré de principes biologiques, plutôt que d'ajouter une mémoire par-dessus un modèle de langage classique comme le fait un Transformer."
+      },
+      {
+        "question": "Qu'est-ce que le test ARC-AGI-1, et pourquoi le coût par tâche compte-t-il autant que le score?",
+        "answer": "ARC-AGI-1 mesure la capacité d'une IA à généraliser une règle visuelle inédite à partir de quelques exemples, plutôt qu'à réciter un savoir appris. Un score élevé obtenu à un coût très supérieur reste souvent moins utile, en pratique, qu'un score un peu plus bas obtenu à une fraction du prix."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Pathway - BDH-CQ: Reasoning at a Fraction of the Compute",
+        "url": "https://pathway.com/introducing-bdh-cq",
+        "year": 2026,
+        "author": "Pathway"
+      },
+      {
+        "label": "Engdahl et al. - BDH-CQ: In-Context Learning with Recurrent Latent Reasoning (arXiv:2608.09888)",
+        "url": "https://arxiv.org/abs/2608.09888",
+        "year": 2026,
+        "author": "Björn Engdahl et al."
+      },
+      {
+        "label": "Kosowski et al. - The Dragon Hatchling: The Missing Link between the Transformer and Models of the Brain (arXiv:2509.26507)",
+        "url": "https://arxiv.org/abs/2509.26507",
+        "year": 2025,
+        "author": "Adrian Kosowski et al."
+      },
+      {
+        "label": "Pathway - Media kit (équipe fondatrice, siège social)",
+        "url": "https://pathway.com/media-kit",
+        "year": 2026,
+        "author": "Pathway"
+      }
+    ],
+    "aliases": [
+      "Pathway AI"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "intermediate",
+    "icon": "🐉",
+    "type": "organisation",
+    "acronym_full": null,
+    "match_strategy": "case_sensitive",
+    "has_image": true,
+    "reference_url": "https://pathway.com",
+    "reference_label": "Site officiel de Pathway"
+  }
+]
