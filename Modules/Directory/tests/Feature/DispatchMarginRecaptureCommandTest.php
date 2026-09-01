@@ -84,6 +84,25 @@ function cleanupMarginDispatchTestFiles(string $slug): void
     @unlink(public_path("screenshots/{$slug}.jpg"));
 }
 
+/**
+ * Source aux dimensions demesurees (correctif #2170) - remplissage uni (jamais le bruit
+ * pseudo-aleatoire de makeMarginDispatchTestImage(), inutilement lent a cette echelle : ~375 Ko
+ * meme unie a 6000x4000, tres au-dessus du plancher de 1000 octets). Le POIDS sur disque importe
+ * peu ici - ce qui compte est que getimagesize() rapporte des dimensions dont le decodage
+ * complet (largeur x hauteur x 4 octets) depasserait toute marge memoire raisonnable.
+ */
+function makeMarginDispatchOversizedTestImage(string $absolutePath): void
+{
+    $dir = dirname($absolutePath);
+    if (! is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
+    $img = imagecreatetruecolor(6000, 4000);
+    imagefill($img, 0, 0, imagecolorallocate($img, 90, 110, 130));
+    imagejpeg($img, $absolutePath, 90);
+    imagedestroy($img);
+}
+
 it('laisse intact un outil dont le master existant depasse deja THUMB_HEIGHT (marge deja exploitable)', function () {
     $slug = 'marge-deja-ok-'.uniqid();
     $tool = makeMarginDispatchTestTool($slug);
@@ -202,4 +221,37 @@ it('--limit borne le nombre de recaptures reseau mises en file, jamais les deriv
     cleanupMarginDispatchTestFiles($slugA);
     cleanupMarginDispatchTestFiles($slugB);
     cleanupMarginDispatchTestFiles($slugGratuit);
+});
+
+it('ne meurt jamais de memoire sur une source aux dimensions demesurees et met en file une recapture reseau - correctif #2170', function () {
+    $slug = 'marge-trop-grande-'.uniqid();
+    $tool = makeMarginDispatchTestTool($slug);
+    // 6000x4000 : decoder cette source ENTIEREMENT en memoire (largeur x hauteur x 4 octets)
+    // exigerait ~91 Mo, independamment de son poids en octets sur disque (~375 Ko unie). AVANT le
+    // correctif #2170, classify() tentait quand meme ce decodage complet et faisait mourir tout
+    // le PROCESSUS par un fatal PHP non rattrapable (meme signature d'erreur mesuree en
+    // production - Allowed memory size ... exhausted - dans vendor/intervention/image/.../Gd/).
+    makeMarginDispatchOversizedTestImage(public_path("screenshots/{$slug}.jpg"));
+
+    // Marge memoire volontairement resserree AUTOUR de l'usage courant du processus de test
+    // (jamais EN-DESSOUS, pour ne jamais faire planter la suite de tests elle-meme) - juste assez
+    // pour rendre 6000x4000 sans equivoque hors budget, quel que soit le memory_limit reel du
+    // runner (souvent illimite en local/CI, ce qui neutraliserait sinon silencieusement ce test).
+    $originalMemoryLimit = ini_get('memory_limit');
+    $tightLimitMb = (int) ceil(memory_get_usage(true) / 1048576) + 20;
+    ini_set('memory_limit', $tightLimitMb.'M');
+
+    try {
+        Queue::fake();
+        $this->artisan('directory:dispatch-margin-recapture')->assertExitCode(0);
+
+        // STATUS_TOO_LARGE tombe dans la meme branche que STATUS_TOO_SMALL : aucun master local,
+        // mais une recapture reseau (a la bonne taille) est mise en file - jamais "unreadable".
+        Queue::assertPushed(CaptureScreenshotJob::class, fn (CaptureScreenshotJob $job): bool => $job->tool->is($tool));
+        expect(File::exists(public_path('screenshots/masters/'.$slug.'.jpg')))->toBeFalse();
+    } finally {
+        ini_set('memory_limit', $originalMemoryLimit);
+    }
+
+    cleanupMarginDispatchTestFiles($slug);
 });

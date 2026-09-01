@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Intervention\Image\Drivers\Gd\Driver as ImageGdDriver;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Interfaces\ImageInterface;
+use Monolog\Utils as MonologUtils;
 use Throwable;
 
 /**
@@ -23,6 +24,21 @@ use Throwable;
  * scale-puis-teste que le client (screenshot-capture.blade.php mode cadrage) : la largeur est
  * ramenee a THUMB_WIDTH EN PREMIER, puis la hauteur RESULTANTE est comparee au minimum - jamais
  * la hauteur brute de la source.
+ *
+ * Correctif #2170 (2026-09-01) - directory:dispatch-margin-recapture mourait de faim memoire en
+ * production (Allowed memory size ... exhausted, vendor/intervention/image, apres ~1450 outils
+ * sur 2336). Mesure locale (3 harnais independants, jusqu'a 2535 appels reels a memory_limit=128M
+ * identique a la prod) : classify() et la boucle complete de la commande NE FUIENT PAS - memoire
+ * plate, 0 octet reclame par gc_collect_cycles() a chaque palier. La cause reelle, confirmee par
+ * reproduction directe (meme signature d'erreur, meme famille de fichier vendor/.../Gd/) : cette
+ * methode decode la source ENTIEREMENT en memoire (largeur x hauteur x 4 octets, independant du
+ * poids en octets sur disque - un JPEG tres compresse peut peser quelques centaines de Ko et
+ * decoder a plus de 150 Mo) AVANT tout redimensionnement. Ce n'est pas une fuite qui grossit avec
+ * le nombre d'outils traites - c'est un PIC PAR OUTIL sans plafond, qui fait mourir tout le
+ * PROCESSUS (fatal PHP non rattrapable par un try/catch) des qu'une seule source aux dimensions
+ * demesurees se presente, peu importe combien d'outils sains ont deja ete traites avant elle.
+ * fitsInMemoryBudget() borne desormais ce pic AVANT le decodage complet, via un simple appel a
+ * getimagesize() (qui ne lit que l'entete, jamais les pixels).
  *
  * @author MEMORA solutions <info@memora.ca>
  */
@@ -45,6 +61,29 @@ class ScreenshotMasterDerivationService
     public const STATUS_ERROR = 'error';
 
     /**
+     * Source lisible et saine, mais dont le decodage complet en memoire (largeur x hauteur x 4
+     * octets) depasserait la marge memoire PHP disponible - correctif #2170. Traitee comme
+     * STATUS_TOO_SMALL par les deux appelants (aucun master local possible, mais une recapture
+     * reseau a la bonne taille resoudrait le cas proprement) - jamais comme STATUS_ERROR, qui
+     * suggere a tort un fichier corrompu.
+     */
+    public const STATUS_TOO_LARGE = 'too_large';
+
+    /**
+     * Facteur de securite applique a la taille brute (largeur x hauteur x 4 octets) d'une source
+     * pour estimer le pic memoire transitoire d'un decodage GD + redimensionnement Intervention :
+     * le buffer source ET la copie redimensionnee (scale(), puis crop() eventuel) coexistent
+     * brievement en memoire, plus une marge pour une eventuelle conversion de palette/orientation
+     * EXIF. Valeur choisie genereusement au-dessus de x1 (jamais x1 exact - un pic mesure a x1
+     * ferait passer des sources parfaitement raisonnables pour "trop grandes"). Cette marge x2
+     * EST le garde-fou - volontairement PAS de second rabais (ex. une fraction du memory_limit
+     * total) par-dessus : mesure locale (2026-09-01), le bootstrap Laravel a lui seul consomme
+     * deja 67 a 90 Mo sur 128 Mo - un second rabais aurait rejete a tort des sources parfaitement
+     * raisonnables (ex. une vignette "retina" 2400x1260 deja presente dans le catalogue reel).
+     */
+    private const DECODE_MEMORY_SAFETY_FACTOR = 2.0;
+
+    /**
      * Lit la source et determine si un master exploitable en resulterait, SANS RIEN ECRIRE sur
      * disque. Reutilisee par deriveFromSourcePath() (ecriture reelle) et par le mode simulation
      * de la commande de backfill - la regle de seuil (scale puis compare) n'existe qu'ICI, jamais
@@ -54,6 +93,31 @@ class ScreenshotMasterDerivationService
      */
     public function classify(string $sourcePath): array
     {
+        // ACTION: garde-fou memoire AVANT tout decodage complet - correctif #2170.
+        // RAISON: getimagesize() ne lit que l'entete du fichier (quelques octets), jamais les
+        // pixels - un moyen quasi gratuit de connaitre les dimensions REELLES avant de demander a
+        // GD d'allouer un buffer de largeur x hauteur x 4 octets. Sans ce garde-fou, une source
+        // aux dimensions demesurees (independant de son poids en octets sur disque) fait mourir
+        // tout le PROCESSUS par un fatal PHP non rattrapable (confirme par reproduction locale
+        // 2026-09-01, meme signature d'erreur qu'en production) - jamais seulement cet appel.
+        $dimensions = @getimagesize($sourcePath);
+        if (! is_array($dimensions) || $dimensions[0] <= 0 || $dimensions[1] <= 0) {
+            Log::channel('directory_screenshots')->warning("ScreenshotMasterDerivationService: dimensions illisibles ({$sourcePath})");
+
+            return ['status' => self::STATUS_ERROR, 'scaled' => null, 'scaledHeight' => null];
+        }
+
+        if (! $this->fitsInMemoryBudget((int) $dimensions[0], (int) $dimensions[1])) {
+            Log::channel('directory_screenshots')->warning(sprintf(
+                'ScreenshotMasterDerivationService: source trop grande pour la marge memoire disponible (%s, %dx%d px) - jamais decodee entierement, traitee comme trop petite (recapture reseau).',
+                $sourcePath,
+                $dimensions[0],
+                $dimensions[1]
+            ));
+
+            return ['status' => self::STATUS_TOO_LARGE, 'scaled' => null, 'scaledHeight' => null];
+        }
+
         try {
             $manager = new ImageManager(new ImageGdDriver());
             $source = $manager->read($sourcePath);
@@ -73,6 +137,26 @@ class ScreenshotMasterDerivationService
 
             return ['status' => self::STATUS_ERROR, 'scaled' => null, 'scaledHeight' => null];
         }
+    }
+
+    /**
+     * Estime le pic memoire transitoire d'un decodage GD + redimensionnement Intervention pour
+     * des dimensions donnees, et verifie qu'il tient dans ce qu'il reste de memory_limit APRES
+     * l'usage courant du processus (bootstrap Laravel deja charge inclus). Retourne toujours true
+     * si memory_limit est illimite (-1, cas de certains environnements CLI/CI) - rien a garder
+     * dans ce cas, le garde-fou n'a pas de raison d'etre.
+     */
+    private function fitsInMemoryBudget(int $width, int $height): bool
+    {
+        $limitBytes = MonologUtils::expandIniShorthandBytes((string) ini_get('memory_limit'));
+        if ($limitBytes === false || $limitBytes < 0) {
+            return true;
+        }
+
+        $estimatedPeakBytes = $width * $height * 4 * self::DECODE_MEMORY_SAFETY_FACTOR;
+        $availableBytes = $limitBytes - memory_get_usage(true);
+
+        return $estimatedPeakBytes <= $availableBytes;
     }
 
     /**

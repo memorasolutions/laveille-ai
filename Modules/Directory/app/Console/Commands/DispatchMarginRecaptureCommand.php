@@ -29,6 +29,15 @@ declare(strict_types=1);
  * Idempotente par construction : un outil qui gagne sa marge (recapture reussie ou derivation
  * locale) n'est plus jamais recompte au run suivant, donc relancer la commande REPREND
  * naturellement la ou elle s'est arretee - meme logique de reprise que le backfill du 2026-08-14.
+ *
+ * Correctif #2170 (2026-09-01) - la commande mourait de faim memoire en production avant d'avoir
+ * fini (~1450 outils sur 2336). Mesure locale (3 harnais independants, jusqu'a 2535 appels reels
+ * a memory_limit=128M identique a la prod) : ni classify() ni la boucle complete de cette
+ * commande ne fuient - memoire plate. La cause reelle, confirmee par reproduction directe :
+ * ScreenshotMasterDerivationService::classify() decodait la source ENTIEREMENT en memoire avant
+ * tout redimensionnement, sans plafond - un PIC PAR OUTIL (jamais une accumulation) qui fait
+ * mourir tout le PROCESSUS des qu'une seule source aux dimensions demesurees se presente. Voir le
+ * garde-fou (fitsInMemoryBudget()) et son detail dans ScreenshotMasterDerivationService.
  */
 
 namespace Modules\Directory\Console\Commands;
@@ -136,7 +145,12 @@ class DispatchMarginRecaptureCommand extends Command
 
                             continue;
                         }
-                        // STATUS_TOO_SMALL : tombe dans la branche recapture reseau ci-dessous.
+                        // STATUS_TOO_SMALL et STATUS_TOO_LARGE (correctif #2170 - source saine
+                        // mais dont le decodage complet en memoire depasserait la marge PHP
+                        // disponible, jamais tentee) : tombent toutes deux dans la branche
+                        // recapture reseau ci-dessous - dans les deux cas aucun master local
+                        // n'est possible, mais une nouvelle capture a la bonne taille resout le
+                        // cas proprement.
                     }
 
                     // A ce stade : aucune marge possible sans une nouvelle capture reseau.
