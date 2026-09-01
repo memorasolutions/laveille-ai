@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.0] - 2026-09-01
+
+### Ajouté (une capacité qui manquait)
+
+- **`news:apply` accepte enfin le champ `url`.** L'adresse source d'une fiche n'avait AUCUNE porte
+  d'écriture officielle : quand elle était fausse ou périmée, la corriger imposait du SQL direct,
+  que la doctrine du projet interdit. La validation posée refuse la chaîne vide plutôt que de la
+  traiter comme un effacement (leçon de la v1.235.0), rejette tout schéma autre que `http(s)`, et
+  plafonne à 255 caractères - la largeur RÉELLE de la colonne, lue dans la migration d'origine
+  plutôt que supposée. Six tests neufs, dont la preuve qu'appliquer `url` seul n'efface pas le
+  résumé structuré, et que la correction reste possible sur une fiche déjà publiée sans toucher à
+  son identifiant d'URL.
+
+### Corrigé (auto-liens : un garde-fou qui tuait plus qu'il ne protégeait)
+
+- **Le garde-fou anti-faux-composés avait 0 % de précision, mesuré.** Sur 153 occurrences réelles
+  dans 746 blocs de texte publiés, il tuait **46 liens parfaitement légitimes** (33 blocs, 24 outils
+  distincts : ChatGPT Pulse, Copilot Workspace, DeepL Write, Runway Gen-3, Brightspace Pulse...) et
+  n'en bloquait **aucun** faux. La cause n'est pas un bogue mais une erreur d'échelle : la garde
+  avait été posée pour DEUX cas réels, puis appliquée aux 479 noms d'outils via une liste fermée
+  d'environ 70 modificateurs - une énumération face à un vocabulaire de produits sans fin. Toutes
+  les autres listes du même fichier sont curées et étroites ; celle-ci était la seule généralisée.
+  Elle est désormais restreinte aux deux noms qui l'ont jamais justifiée, avec non-régression
+  explicite sur ces deux cas. 46 liens sur 46 rétablis, vérifiés par la vraie interface plutôt que
+  par simulation.
+
+### Corrigé (journalisation : deux derniers points muets en production)
+
+- Le SUCCÈS d'une capture d'écran d'annuaire était invisible en production (`Log::info()` sur le
+  canal par défaut, avalé par le niveau de journalisation), et son ÉCHEC partait au mauvais endroit.
+  Les deux passent sur le canal dédié du module, comme la ligne qui les précède.
+- Même défaut dans la commande de rattrapage des vignettes (deux lignes), corrigé dans la foulée.
+
+### Corrigé (flux RSS)
+
+- **Adresses de citation sur-encodées : 58 lignes assainies, la porte fermée.** Deux flux servaient
+  occasionnellement un lien déjà sur-échappé, que le rendu échappait une seconde fois. Normalisation
+  défensive à la lecture du flux, plus correction des 58 lignes existantes avec sauvegarde préalable
+  des valeurs. Vérifié en production sur un échantillon de 25 fiches : zéro pollution restante.
+
+### Documenté
+
+- Guide de restauration, nouvelle section : la répartition des sauvegardes (une copie récente sur le
+  serveur, sept en rotation hors serveur) est désormais ÉCRITE, avec la raison de ne pas relever le
+  plafond du serveur - elle existait par accident et se serait défaite par mégarde. Corrige au
+  passage une affirmation périmée de la section 3, qui concluait à l'absence de filet hors-site
+  alors que le contrôle visait un chemin d'avant la migration.
+
 ## [1.246.0] - 2026-09-01
 
 ### Ajouté (glossaire : neuf termes, dont six voleurs d'informations)

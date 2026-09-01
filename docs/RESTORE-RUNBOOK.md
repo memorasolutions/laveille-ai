@@ -287,3 +287,165 @@ cette section par le chiffre observé.
   les sections 4, 6 et 7 par des faits observés, preuve collée à l'appui - sur le modèle de
   `lucidnest/scripts/runbook-backup-restore.md`, section « Preuves d'exécution », pour un chantier
   différent mais un même souci de ne documenter que ce qui a réellement tourné.
+
+## 10. Répartition serveur / Mac 2 - une copie récente en production, sept sur le Mac 2
+
+Rédigé le 1er septembre 2026 entre 17h30 et 18h12 Québec (21:30-22:12 UTC), mandat #2083 (deux
+questions factuelles, lecture seule sur toute l'infrastructure).
+
+**Correction à la section 3 ci-dessus.** Elle conclut « aucun filet hors-site à jour n'existe encore »
+en vérifiant `/Volumes/BACKUP_SERV/cpanel_backups/db/laravel-auto/gmemora_laveille/` - ce chemin
+existe bel et bien et s'arrête au 23 juin 2026, mais c'est un reliquat pré-migration. Le script actif
+(`backup-cpanel-nightly.sh`, plus bas) écrit depuis le 23 juin sur un AUTRE volume,
+`/Volumes/BACKUP_MAIN_WD2`, sous le même sous-chemin `BACKUP_SERV/cpanel_backups/...`. Vérifié en
+direct le 1er septembre 2026 : cette copie-là contient des dumps `gmemora_laveille` jusqu'au 28 août
+2026 inclus. Le filet hors-site existe et est globalement à jour ; il n'était simplement pas au chemin
+que la section 3 a vérifié.
+
+**La répartition, et pourquoi le plafond serveur n'est pas relevé.**
+
+- *Serveur de production* : une copie récente seulement (`storage/app/private/La veille/*.zip`,
+  section 1), contrainte par `config/backup.php` - `MaximumStorageInMegabytes::class => 5000`
+  (moniteur Spatie, ligne 287) et `delete_oldest_backups_when_using_more_megabytes_than => 5000`
+  (stratégie de nettoyage, ligne 352). Une archive complète (code + base + fichiers non versionnés)
+  pèse à elle seule 3,4 à 4,1 Go sur les exemplaires vérifiés le 1er septembre (voir plus bas) - déjà
+  tout près du plafond de 5000 Mo (~4,88 Go). Le serveur ne peut structurellement pas en garder deux :
+  dès qu'une deuxième archive existe, la stratégie de nettoyage supprime la plus ancienne le lendemain
+  (`backup:clean`, planifié quotidiennement à 04h00 en production, `routes/console.php` ligne 17).
+- *Mac 2* : sept copies datées distinctes en rotation, confirmé en direct le 1er septembre 2026 -
+  `/Volumes/BACKUP_MAIN_WD2/BACKUP_SERV/cpanel_backups/files/daily.0/` à `daily.6/`, chacune un
+  instantané rsync complet de `public_html` (donc de `apps_diverses/laveille.ai/` en entier) à une nuit
+  différente. Vérifié directement dans 4 des 7 dossiers : `daily.6` (15 août,
+  `2026-08-15-03-00-23.zip`, 3,4 Go), `daily.3` (21 août, `2026-08-21-03-00-23.zip`, 3,6 Go), `daily.1`
+  (24 août, `2026-08-24-03-00-23.zip`, 3,7 Go), `daily.0` (29 août, `2026-08-29-03-00-24.zip`,
+  4,1 Go) - sept archives réellement distinctes (dates et poids différents, pas un même fichier
+  dupliqué), croissance cohérente avec les 4,92 Go cités pour l'archive la plus récente. En plus de
+  cette rotation par fichiers, un second mécanisme (`db/laravel-auto/gmemora_laveille/`, même script)
+  rapatrie séparément le dump SQL seul, avec une rétention de 30 jours - une profondeur supplémentaire
+  qui ne vit que sur le Mac 2.
+- *Pourquoi ne pas relever le plafond serveur* (décision prise, non rouverte ici) : la profondeur utile
+  vit déjà sur le Mac 2 (sept nuits de fichiers, jusqu'à 30 jours de base seule). Relever le plafond
+  serveur ne gagnerait qu'une ou deux archives de plus au prix d'un disque de production déjà proche de
+  sa limite pour ce poste, alors que le Mac 2 a 406 Go libres sur `BACKUP_SERV` et un disque externe
+  dédié (`BACKUP_MAIN_WD2`) pour ce trafic. Une archive de plus sur la production protégerait moins
+  qu'une de plus sur le Mac 2.
+
+**Question 1 - somme de contrôle : NON, ni sur les fichiers ni sur la base, telles que stockées.**
+
+Vérifié en lisant directement le contenu des dossiers (pas seulement leur nom) :
+
+- *Archives fichiers* (les sept `daily.N/.../La veille/*.zip` ci-dessus) : chaque dossier ne contient
+  QUE le zip Spatie. Aucun `.sha256`, `.md5` ou `.sig` à côté, dans aucun des 4 dossiers inspectés.
+- *Dumps base seule* (`db/laravel-auto/gmemora_laveille/*.sql.gz`, 19 fichiers du 31 juillet au
+  28 août 2026 vérifiés) : même constat, aucun fichier de somme à côté.
+- *Le mécanisme de rapatriement lui-même ne calcule ni ne vérifie rien après coup pour laveille.* Dans
+  `backup-cpanel-nightly.sh` (Mac 2, `/Users/memora/scripts/`), l'étape qui rapatrie les dumps Laravel
+  (dont `gmemora_laveille`) ne contrôle que le code de sortie du `rsync` - rien n'ouvre le `.sql.gz`
+  pour confirmer qu'il est lisible. Preuve la plus parlante : le MÊME script, une section plus haut, le
+  fait pour un AUTRE projet (LucidNest) - `gzip -t` + seuil de taille (< 1 000 000 octets = suspect) +
+  âge (> 26h = périmé) avant de considérer le dump sain. Ce garde-fou existe donc dans l'outillage
+  Memora, appliqué à côté de laveille, pas sur laveille.
+- *Le zip fichiers n'a pas non plus de test d'ouverture après le rsync* (pas de `unzip -t` ni
+  équivalent dans le script, pour aucun projet).
+- *Note de portée* : ce constat couvre l'archive telle que stockée sur le Mac 2, ce que le mandat
+  demande explicitement de vérifier. Le script qui génère le dump côté serveur
+  (`~/dump_laravel_dbs.sh`, exécuté par SSH depuis le Mac 2 mais hébergé sur le compte cPanel) n'a pas
+  été lu : il est hors du périmètre d'accès de ce mandat (MCP `mac2` uniquement, lecture seule).
+- *Signal voisin, mais éteint* : `config/backup.php` déclare un moniteur Spatie natif
+  (`monitor_backups`, `MaximumAgeInDays::class => 1`, notifications mail configurées -
+  `BackupHasFailedNotification`, `UnhealthyBackupWasFoundNotification`, etc.). Vérifié dans
+  `routes/console.php` : seuls `backup:run` (03h00) et `backup:clean` (04h00) sont planifiés - la
+  commande `backup:monitor`, qui déclencherait ces notifications, n'apparaît nulle part dans le
+  planificateur. Ce moniteur est configuré mais jamais exécuté ; et même actif, il ne vérifie que
+  fraîcheur et taille, pas l'intégrité du contenu (ce n'est pas un test d'ouverture).
+
+**Question 2 - signal de vie : NON pour l'arrêt total, OUI seulement pour un échec pendant une
+exécution en cours.**
+
+Le mécanisme (`backup-cpanel-nightly.sh` + `com.memora.cpanel-backup.plist`, `StartCalendarInterval`
+02h30 quotidien) envoie déjà des courriels d'alerte réels quand une brique échoue AU COURS d'une
+exécution - volume introuvable, dump LucidNest périmé/corrompu, tier-backup GDrive inactif, fichiers
+`public_html` périmés (>48h), échec rsync par répertoire - relayés par `exim` cPanel vers
+`chatgptpro@gomemora.com` (le Mac ne livre pas de courriel externe directement). Ces alertes
+fonctionnent : vérifié dans le journal du 28 août, l'échec de montage à 02h30 a suivi exactement ce
+chemin (3 tentatives de remontage par UUID, échec, abandon propre, alerte envoyée).
+
+Mais rien ne surveille que le mécanisme se déclenche et se termine tout court. Preuve en direct, pas
+hypothétique : le fichier `~/logs/cpanel-backup-heartbeat.log` - créé le 7 août 2026 précisément pour
+rendre visibles les nuits sautées par launchd - s'arrête au **28 août 2026 16h52** au moment de la
+vérification (1er septembre, 18h12 Québec) : aucune ligne pour les 29, 30, 31 août ni le 1er
+septembre, soit 4 jours sans le moindre déclenchement journalisé. Cause reconstituée à partir du
+journal détaillé `cpanel-backup-20260828.log` : la tentative de 02h30 le 28 août a échoué proprement
+(volume introuvable, alerte envoyée), mais une seconde tentative à 16h52 le même jour a démarré,
+obtenu le verrou (`flock`), puis enchaîné un blocage inexpliqué d'environ 21h (les seules opérations du
+script à cet endroit - six renommages de dossiers de rotation sur le même volume - sont normalement
+quasi instantanées et n'expliquent pas ce délai), un rsync `public_html` qui a consommé tout son
+plafond de 18h avant d'être tué par `gtimeout`, puis une dernière étape (purge des dumps de plus de
+30 jours, puis calcul de la taille totale via `du -sh` sur 903 Gio) qui a duré environ 44h - le tout ne
+s'est terminé que le 1er septembre à 05h22 (durée totale mesurée par le script lui-même : 304221s, soit
+84,5h). Pendant ces ~85 heures, le verrou est resté détenu : launchd n'a donc pas pu (et n'a pas
+cherché à) relancer une nouvelle instance aux 4 occurrences de 02h30 tombées dans cette fenêtre. Ni le
+script ni rien d'autre n'a signalé cette absence de déclenchement - elle n'était visible qu'en lisant
+le fichier de traces directement, exactement le geste que ce mandat vient de faire.
+
+Rien d'externe ne surveille non plus ce silence. Vérifié via Robotalp (déjà dans l'outillage Memora,
+lecture seule, hors périmètre Mac 2 donc consulté sans restriction particulière) : recherche « backup »
+et « mac2 » sur l'ensemble des 16 espaces de travail et 75 robots du compte - zéro résultat.
+Structurellement, les types de robots disponibles (uptime, ping, port, API, SSL, DNS, mot-clé,
+changement de page...) surveillent des services accessibles par le réseau ; le Mac 2 étant derrière un
+filtrage réseau distinct, un robot de ce genre ne peut de toute façon pas lire l'horodatage d'un
+fichier local sur le Mac 2.
+
+*Ce qu'il faudrait, sans l'installer* :
+1. Une vérification de fraîcheur indépendante sur le fichier de battements
+   (`cpanel-backup-heartbeat.log`) ou sur la dernière ligne « FIN backup » du journal daté - le même
+   patron que le script applique déjà à deux autres mécanismes dans ce même fichier (dump LucidNest
+   périmé après 26h, journal tier-backup périmé après 48h). Ironie précise à corriger : le script
+   surveille le pouls de deux mécanismes voisins, jamais le sien.
+2. Un plafond de durée totale pour l'ensemble du script (distinct des plafonds déjà en place par
+   étape), pour qu'un blocage de plusieurs jours déclenche une alerte au lieu d'absorber silencieusement
+   plusieurs nuits.
+3. Idéalement, cette vérification tournerait hors du verrou (`flock`) du script principal, pour qu'un
+   run bloqué ne bloque pas aussi le signal qui devrait avertir qu'il est bloqué.
+
+**Le script qui porte déjà les garde-fous manquants - trouvé, partiellement réutilisable.**
+
+`/Users/memora/planifize-backup/backup.sh` (Mac 2, réécrit le 29 août 2026 pour un tout autre projet,
+Planifize) porte les trois garde-fous cités dans le mandat, et son propre commentaire explique
+pourquoi il a été ajouté : un test `mount | grep` seul s'est avéré insuffisant le 29 août 2026 - le
+volume apparaissait monté (confirmé par `mount` ET `diskutil info`), mais l'écriture était quand même
+refusée (« Operation not permitted », restriction TCC probable sous launchd) - exactement la classe de
+panne silencieuse que la question 2 vise.
+
+Les trois garde-fous, littéralement dans ce script :
+1. *Double vérification de montage* : `mount | grep` ET `diskutil info`, avec tentative de remontage
+   par UUID stable avant d'abandonner.
+2. *Test d'écriture par fichier témoin* : `WD2_TEST_FILE="$DEST/.write_test_$$"`,
+   `trap 'rm -f "$WD2_TEST_FILE"' EXIT` pour un nettoyage garanti, écriture réelle testée AVANT de
+   toucher aux vraies données.
+3. *Alerte courriel* : relais SSH vers `exim` sur le compte cPanel de production (le Mac ne livre pas
+   de courriel externe directement), même destinataire que le script principal.
+
+Réutilisabilité pour laveille, honnêtement évaluée : le script lui-même n'est PAS réutilisable tel
+quel - il est câblé en dur pour Planifize (hôte distant, clé SSH, script de dump, chemin rsync source,
+rotation à 14 dumps). Mais `backup-cpanel-nightly.sh` (le mécanisme qui couvre réellement laveille) a
+déjà le garde-fou 1 (sous une forme encore plus étoffée, avec 3 tentatives espacées) et déjà le
+garde-fou 3 (alertes plus nombreuses que celles de Planifize). Le seul manquant réel est le garde-fou
+2 : `backup-cpanel-nightly.sh` vérifie le montage puis passe directement à `mkdir -p` et aux opérations
+réelles, sans jamais prouver la capacité d'écriture par un fichier témoin. Le bloc à copier (une
+dizaine de lignes) est directement transposable : `backup-cpanel-nightly.sh` a déjà les variables
+équivalentes (`$DEST`, `$WD2_MOUNT`, `$LOG`) et un patron d'alerte déjà éprouvé dans le même fichier -
+il ne s'agirait pas d'importer Planifize, mais d'ajouter localement le même test, au même endroit
+logique (juste après la vérification de montage existante, avant les premières écritures). Non fait
+ici, conformément au mandat (constat, pas déploiement).
+
+**Provenance de cette section.** Lecture seule via le MCP `mac2` (`mac2_status`, `mac2_list_dir`,
+`mac2_read_file` - jamais `mac2_exec`, bloqué côté serveur par `MAC2_READ_ONLY=true`, ni
+`mac2_upload`/`mac2_write_file`). Chemins et contenus cités ici ont tous été lus directement le jour de
+la rédaction : `backup-cpanel-nightly.sh`, `com.memora.cpanel-backup.plist`,
+`cpanel-backup-heartbeat.log`, `cpanel-backup-20260828.log`, `planifize-backup/backup.sh`, les
+listings de `cpanel_backups/files/daily.0` à `daily.6` et de `cpanel_backups/db/laravel-auto/
+gmemora_laveille`. `config/backup.php` et `routes/console.php` ont été lus dans ce dépôt local
+(fichiers de configuration versionnés, aucun secret). Robotalp interrogé en lecture seule
+(`robotalp_search`) pour confirmer l'absence de moniteur externe. Aucune écriture n'a été faite sur le
+Mac 2 ; la seule écriture de ce mandat est ce fichier.
