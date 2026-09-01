@@ -1,0 +1,8 @@
+{
+  "term_slug": "cybersecurite",
+  "title": "Octopus et le festin numérique",
+  "alt": "Bande dessinée pédagogique : Octopus, chef cuisinier, explique la cybersécurité en 5 cases : protéger ses données et ses comptes, repérer les faux liens (hameçonnage), le rôle du pare-feu et de l'antivirus, et choisir un mot de passe fort et différent pour chaque compte.",
+  "planches": [
+    { "avif": "bd-cybersecurite-2026-06-site.avif", "webp": "bd-cybersecurite-2026-06-site.webp", "jpg": "bd-cybersecurite-2026-06-site.jpg", "avif_1024": "bd-cybersecurite-2026-06-site-1024.avif", "webp_1024": "bd-cybersecurite-2026-06-site-1024.webp", "thumb": "bd-cybersecurite-2026-06-thumb.jpg", "width": 1600, "height": 2996 }
+  ]
+}

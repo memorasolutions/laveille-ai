@@ -73,9 +73,9 @@ it('ne rend aucun viewer quand il n’y a pas de BD', function () {
 it('rend la navigation multi-planches quand une BD a plusieurs pages', function () {
     // Fixture temporaire auto-nettoyée. « deepfake » (seule BD du dépôt à 2 planches) a
     // été retiré le 2026-08-30 pour motif éthique (personnage enfant, règle fondatrice
-    // 2026-08-29) - retrait définitif, aucun retour possible. Ce test vérifie le
-    // COMPORTEMENT de navigation multi-planches du composant lui-même, indépendamment de
-    // tout contenu réel (plus aucune BD du dépôt n'a plus d'une planche).
+    // 2026-08-29), puis restauré le 2026-09-01 sans personnage mineur (panneaux concernés
+    // régénérés). Ce test vérifie le COMPORTEMENT de navigation multi-planches du composant
+    // lui-même via une fixture dédiée, indépendamment de tout contenu réel.
     $slug = 'test-bd-multi-planches-'.uniqid();
     $dir = public_path('bd/'.$slug);
     File::ensureDirectoryExists($dir);
