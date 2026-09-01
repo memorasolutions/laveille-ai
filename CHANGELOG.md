@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.245.1] - 2026-09-01
+
+### Corrigé (images manquantes des trois fiches de glossaire livrées le jour même - risque de 404)
+
+- **Le défaut.** Les fiches `pathway`, `bdh-cq` et `arxiv`, rédigées par trois agents distincts dans la même session (aucun contexte de navigation Gemini partageable entre eux au moment de la rédaction - mémoire projet `session-partagee-un-contexte-par-lot-2026-09-01`), étaient toutes trois en ligne sans image. Pire, la fiche `pathway` portait déjà `hero_image='images/glossaire/pathway.webp'` en base (donnée `has_image=true` posée par erreur dans son fichier de seed) sans qu'aucun fichier n'existe sur le serveur : sa balise `og:image` répondait 404 en silence depuis sa mise en ligne (v1.245.0), le bloc visuel visible étant lui protégé par une vérification `file_exists()` côté gabarit.
+- **Correctif de frontière évité.** Les deux premiers prompts d'image rédigés séparément pour `pathway` et `bdh-cq` proposaient chacun un oeuf/une éclosion (référence à « Dragon Hatchling », l'architecture antérieure) - deux fiches voisines auraient porté la même image. Rappel avant génération : `pathway` est une ENTREPRISE (registre laboratoire de recherche - poste de travail, écrans, diagramme d'architecture flottant, aucun oeuf/dragon/éclosion), `bdh-cq` est un MODÈLE (registre organique conservé - réseau de neurones en forme d'oeuf lumineux, grille de tuiles résolue).
+- **Génération.** Trois images produites dans UN SEUL contexte de navigation Gemini (compte Google Workspace, Playwright local, `storageState` partagé en lecture seule) - session initialement invalidée (cookies périmés malgré une synchronisation antérieure), `ia-sync` relancé puis retry réussi, 3 images générées en moins de deux minutes. Extraction par lecture directe du bitmap `<img>` via `<canvas>` plutôt que par re-fetch de l'URL `blob:` source (piège rencontré : Gemini révoque le `blob:` après affichage, un `fetch()` différé échoue silencieusement `Failed to fetch`).
+- **Contrôle anti-texte.** Chaque image inspectée à fort zoom sur les zones à risque (écrans de moniteurs, panneaux flottants, surfaces de documents) avant application - aucun texte lisible, aucun logo, conforme à la consigne malgré des textures d'arrière-plan qui imitent du texte greeké illisible (données de moniteur, lignes de document).
+- **Traitement et suivi.** `1200x669` (`magick` + `cwebp -q 70`), paire `.jpg`/`.webp` par terme, `git ls-files` vérifié à 2 lignes par terme avant toute autre étape.
+- **Migration `2026_09_01_200000_backfill_hero_images_pathway_bdhcq_arxiv`** (réversible, `down()` testé aller-retour localement) : pose `hero_image` sur les 3 termes, y compris `pathway` (idempotent - déjà posé, corrige le 404 `og:image` dès que le fichier existe sur le serveur). Ne modifie aucune autre colonne, ne recrée aucun terme.
+
 ## [1.245.0] - 2026-09-01
 
 ### Ajouté
@@ -9,7 +20,7 @@ All notable changes to this project will be documented in this file.
 - **Nouvelle fiche de glossaire « Pathway (entreprise d'IA) ».** L'entreprise de Palo Alto derrière les préprints BDH (Dragon Hatchling, arXiv:2509.26507, 30 septembre 2025) et BDH-CQ (arXiv:2608.09888, 10 août 2026), sujet de la fiche d'actualité publiée le jour même sur le modèle jusqu'à onze fois moins coûteux qu'un modèle d'OpenAI sur ARC-AGI-1. Identité confirmée par trois canaux indépendants (Perplexity, Codex, lecture directe de pathway.com) - fondée en 2021 par Zuzanna Stamirowska, Jan Chorowski, Adrian Kosowski et Claire Nouet.
 - **Désambiguïsation explicite dans la fiche.** « Pathway » recoupe au moins trois entités réelles distinctes : Google Pathways (infrastructure ayant entraîné PaLM), Pathway Medical Inc. (plateforme clinique montréalaise rachetée par Doximity en 2025) et cette entreprise-ci. La fiche nomme les trois plutôt que d'ignorer la confusion.
 - **Nom qualifié plutôt que « Pathway » seul, pour éliminer un faux lien réel.** La fiche annuaire « Debbie Rewards » contient déjà, en production, la chaîne exacte « Pathway » (une fonctionnalité de coaching interne, sans rapport). `name = "Pathway (entreprise d'IA)"` retire le risque à la racine (le linkifier matche sur `name`, jamais sur `slug`, qui reste le `pathway` court pour l'URL) ; `match_strategy = case_sensitive` en défense en profondeur ; seul alias retenu : « Pathway AI » (vérifié sans collision en production). « Pathway » seul, « BDH », « Dragon Hatchling » et « BDH-CQ » explicitement écartés des alias.
-- Migration réversible (`down()` testé aller-retour), images `pathway.webp`/`pathway.jpg` livrées et suivies par git.
+- Migration réversible (`down()` testé aller-retour). **Correction (v1.245.1, même jour) :** cette ligne affirmait à tort que les images `pathway.webp`/`pathway.jpg` étaient déjà livrées et suivies par git - faux au moment du commit (`has_image=true` posé dans les données de seed alors qu'aucun fichier n'existait, donc `hero_image` déjà non nul en production sans fichier derrière : image de partage `og:image` en 404 silencieux depuis la mise en ligne). Livraison réelle des images en v1.245.1.
 
 ## [1.244.15] - 2026-09-01
 
