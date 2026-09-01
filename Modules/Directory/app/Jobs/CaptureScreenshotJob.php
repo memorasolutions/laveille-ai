@@ -40,10 +40,16 @@ class CaptureScreenshotJob implements ShouldQueue
 
         $result = $service->captureWithRetry($this->tool);
 
+        // Ticket #2086 (2026-09-01) : ces deux lignes journalisaient sur le canal par defaut,
+        // avale par LOG_LEVEL=error en production - le succes (niveau info) y restait totalement
+        // invisible, seul l'echec (niveau error, qui passe le filtre) apparaissait, mais au
+        // mauvais endroit (storage/logs/laravel.log au lieu de directory_screenshots.log). Meme
+        // canal dedie que la ligne juste au-dessus (deja correcte depuis v1.175.0) et que le reste
+        // du service ScreenshotService (correctifs #2086/#2088, v1.242.9/v1.242.10).
         if ($result) {
-            Log::info("[CaptureScreenshotJob] Screenshot capturé avec succès pour Tool #{$this->tool->id}.");
+            Log::channel('directory_screenshots')->info("[CaptureScreenshotJob] Screenshot capturé avec succès pour Tool #{$this->tool->id}.");
         } else {
-            Log::error("[CaptureScreenshotJob] Échec de la capture après 3 tentatives pour Tool #{$this->tool->id}.");
+            Log::channel('directory_screenshots')->error("[CaptureScreenshotJob] Échec de la capture après 3 tentatives pour Tool #{$this->tool->id}.");
         }
     }
 }
