@@ -184,3 +184,57 @@ it('n absorbe pas dans une fiche comparative hors de la fenetre window_hours', f
     expect($result['absorptions'])->toBeEmpty()
         ->and($result['singletons'])->toHaveCount(1);
 });
+
+// ── Ticket #1796 : entités en chaîne exacte, « Zoomsday » ne rejoint pas « Zoom » ──────────
+
+it('documente une limite mesurée et assumée : Zoom et Zoomsday ne sont pas regroupés (ticket #1796)', function () {
+    // MESURE (2026-09-01) avant ce test : sur les 12 fiches réelles de la base locale (66
+    // paires), aucune n'illustre ce défaut - l'échantillon est trop petit et trop disparate
+    // pour en tirer un taux réel. Le cas a donc été reproduit avec des titres construits mais
+    // plausibles, et vérifié via le vrai DedupService::isSameStoryCluster().
+    //
+    // « Zoom » est un préfixe de « Zoomsday » (distance de Levenshtein = 4, normalisée = 0,5).
+    // Tout assouplissement automatique (préfixe, sous-chaîne, distance de Levenshtein brute ou
+    // normalisée) assez permissif pour rapprocher cette paire rapproche EXACTEMENT de la même
+    // façon des paires réelles d'entreprises distinctes du même domaine (voir le test suivant) :
+    // Meta/Metabase, Meta/MetaMask et Zoom/ZoomInfo ont la MÊME signature numérique
+    // (Levenshtein = 4, normalisée = 0,5, préfixe = vrai) que Zoom/Zoomsday. Aucun seuil ne peut
+    // séparer ces cas : leurs nombres sont identiques. Conclusion retenue après mesure : ne pas
+    // implémenter d'assouplissement automatique de la comparaison d'entités (voir aussi le
+    // commentaire ajouté sur DedupService::keyEntitiesIntersectionCount()). Ce test verrouille
+    // la limite ; s'il redevient vert (regroupement détecté), vérifier QUEL changement l'a permis
+    // avant de s'en réjouir - il a probablement aussi cassé le test suivant.
+    $a = acsArticle('zoom-a', 'Zoom deploie une nouvelle fonction IA pour les appels video');
+    $b = acsArticle('zoom-b', "Zoomsday : ce que la panne d'aujourd'hui revele sur le teletravail");
+
+    $result = (new ArticleClusteringService())->cluster([$a, $b]);
+
+    expect($result['new_groups'])->toBeEmpty()
+        ->and($result['singletons'])->toHaveCount(2);
+});
+
+it('ne regroupe jamais des entreprises réellement distinctes qui partagent un préfixe court (garde-fou anti-assouplissement)', function () {
+    // Garde-fou direct du test précédent : ces quatre paires sont des entreprises RÉELLES et
+    // DISTINCTES du domaine tech/IA couvert par ce site, choisies parce qu'elles ont la MÊME
+    // signature de proximité de chaîne que Zoom/Zoomsday (préfixe court partagé, ou distance de
+    // Levenshtein normalisée identique - voir le test précédent). Si ce test casse, c'est qu'un
+    // changement a rendu la comparaison d'entités assez floue pour fusionner des sujets
+    // différents dans une même fiche comparative PUBLIÉE - exactement la régression que le
+    // mandat #1796 interdisait explicitement.
+    $pairs = [
+        ['Meta annonce un nouveau modele de langage open source', 'Metabase publie une mise a jour majeure de son outil analytique'],
+        ['Meta ferme plusieurs comptes lies a de la desinformation', 'MetaMask corrige une faille critique dans son portefeuille crypto'],
+        ['Zoom deploie une nouvelle fonction IA pour les appels video', "ZoomInfo devoile un outil de prospection commerciale base sur l'IA"],
+        ["Claude d'Anthropic obtient de meilleurs resultats en codage", 'Cloudflare signale une panne majeure affectant des milliers de sites'],
+    ];
+
+    foreach ($pairs as $i => [$titleA, $titleB]) {
+        $a = acsArticle("adv-{$i}-a", $titleA);
+        $b = acsArticle("adv-{$i}-b", $titleB);
+
+        $result = (new ArticleClusteringService())->cluster([$a, $b]);
+
+        expect($result['new_groups'])->toBeEmpty()
+            ->and($result['singletons'])->toHaveCount(2);
+    }
+});

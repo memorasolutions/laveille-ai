@@ -131,6 +131,20 @@ final class DedupService
         return array_values(array_unique($entities));
     }
 
+    /**
+     * INVESTIGATION #1796 (2026-09-01, non retenue) : la comparaison ci-dessous est une
+     * intersection de CHAÎNES EXACTES - « Zoomsday » ne rejoint jamais « Zoom ». Un
+     * assouplissement (préfixe, sous-chaîne, distance de Levenshtein brute ou normalisée) a été
+     * mesuré puis rejeté : Zoom/Zoomsday partage exactement la même signature numérique
+     * (Levenshtein = 4, normalisée = 0,5, préfixe = vrai) que des paires réelles d'entreprises
+     * DISTINCTES de ce domaine (Meta/Metabase, Meta/MetaMask, Zoom/ZoomInfo) - aucun seuil ne
+     * peut séparer ces cas, ils sont identiques. Cette fonction alimente à la fois
+     * isLikelyDuplicate() (déduplication - fusionner à tort PERD un article) et
+     * isSameStoryCluster() (regroupement - fusionner à tort publie une fiche comparative
+     * erronée) : un assouplissement ici les assouplit toutes les deux en même temps. Preuve et
+     * garde-fous : Modules/News/tests/Unit/ArticleClusteringServiceTest.php (section ticket
+     * #1796).
+     */
     public static function keyEntitiesIntersectionCount(string $a, string $b): int
     {
         $entA = self::extractKeyEntities($a);
