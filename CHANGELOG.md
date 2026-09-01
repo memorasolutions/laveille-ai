@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.246.0] - 2026-09-01
+
+### Ajouté (glossaire : neuf termes, dont six voleurs d'informations)
+
+- **Six fiches de voleurs d'informations** : Vidar, LummaC2, StealC, RedLine Stealer, Acreed et Atomic Stealer. La décision de granularité a été prise contre un partage d'avis des oracles : Codex et Perplexity recommandaient six fiches distinctes, DeepSeek et Gemini un mélange - mais ces deux derniers étaient en désaccord ENTRE EUX sur le découpage (DeepSeek isolait Acreed, Gemini le regroupait), ce qui a montré que leur critère « démantelé ou non » ne produisait pas un résultat stable. Six fiches retenues : six noms propres valent six requêtes distinctes, la réponse en une phrase de chaque fiche doit rester vraie hors contexte, et le précédent PamStealer (bien plus mineur) avait déjà sa fiche.
+- **Trois fiches du lot précédent** : Pathway, arXiv et BDH-CQ, avec leurs images.
+- **Enrichissement de la fiche 2FA** plutôt qu'une septième page sur la même notion : « double authentification » désigne le même mécanisme, d'après les fiches 26557344 et 26557505 du Grand dictionnaire terminologique de l'OQLF. Trois alias posés, dont « authentification à deux facteurs », qui manquait malgré sa présence dans le nom affiché. La relation avec les clés d'accès a été posée sur MFA et non sur 2FA : une clé d'accès REMPLACE le mot de passe quand le 2FA s'y AJOUTE, et un lien direct aurait affirmé au lecteur une filiation fausse.
+
+### Corrigé (images du glossaire : le dépôt n'était plus la source de vérité)
+
+- **Douze fiches servaient une image qui n'existait que sur le serveur.** Mesure exhaustive sur les 524 fiches publiées : treize n'avaient aucune image suivie par git. Douze d'entre elles affichaient pourtant correctement leur paire webp et jpg - les fichiers avaient été déposés à la main puis conservés, le déploiement par rsync ne supprimant rien. Rien ne le signalait, et une reconstruction du serveur depuis git aurait effacé vingt-quatre fichiers en silence. Les vingt-quatre sont rapatriés et versionnés.
+- **La treizième fiche, oqlf, n'avait aucune image nulle part** et servait le visuel de repli du site. Image générée et livrée. Le contrôle global passe à zéro fiche publiée sans image suivie, sur 524.
+
+### Alias volontairement ÉCARTÉS, avec leur motif
+
+- **« AMOS »** pour Atomic Stealer : **Amos est une municipalité du Québec** (Abitibi-Témiscamingue). Un nom propre capitalisé que la sensibilité à la casse ne protège pas - c'est une variante inédite du piège d'auto-lien, distincte des six déjà corrigées cette semaine, qui portaient toutes sur des noms communs.
+- **« Redline »** en une seule majuscule et **« red line »** en deux mots pour RedLine Stealer : collision réelle avec l'idiome diplomatique et avec « redlining ». Seule la forme en casse chameau est retenue.
+- **« vérification en deux étapes »** pour 2FA : le Grand dictionnaire en fait une fiche distincte, la nuance étapes contre facteurs n'a pas été aplatie.
+
 ## [1.245.3] - 2026-09-01
 
 ### Corrigé (faux lien « autonomie »/« autonomies » vers /glossaire/autonomie-ia - 81 fiches sur 137 au mauvais sens)
