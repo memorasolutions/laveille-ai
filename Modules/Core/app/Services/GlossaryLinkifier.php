@@ -234,6 +234,42 @@ class GlossaryLinkifier
     }
 
     /**
+     * 2026-09-01 (ticket #2128, MESURE avant correctif - jamais l'inverse) : buildToolSuffixGuard()
+     * ci-dessus s'appliquait, avant ce correctif, à TOUS les noms d'outils (479 entrées
+     * type='tool'/'tool_alias' au moment de la mesure), pas seulement à ceux ayant un jour produit
+     * un vrai faux rattachement. Mesuré sur un corpus de contenu RÉELLEMENT publié ou rédigé (508
+     * descriptions d'outils publiées + 161 définitions de glossaire publiées + 77 fragments
+     * d'actualités, 746 blocs de texte au total), en rejouant GlossaryLinkifier::linkify() lui-même
+     * (jamais une simulation) sur des extraits isolés : 153 occurrences réelles d'un nom d'outil
+     * suivi d'un mot à majuscule, dont 46 BLOQUÉES par la garde. Les 46 ont été vérifiées UNE PAR
+     * UNE, à la main : ce sont, sans exception, des noms de PRODUITS RÉELS du même outil («
+     * ChatGPT Pulse », « Copilot Workspace », « DeepL Write », « Reverso Context », « ChatGPT
+     * Atlas », « Runway Gen-3 », « Kling O1 », « Brightspace Pulse »...). ZÉRO des 46 n'était un
+     * vrai faux composé du genre Clark Wiethorn/Ghost Murmur - le motif qui avait justifié la
+     * garde (mandat #2091). Sur ce corpus, la garde a donc une précision mesurée de 0 % (0 blocage
+     * correct) pour 46 liens légitimes perdus - rapport complet :
+     * storage/app/audits/2026-09-01-garde-fou-auto-liens.md.
+     *
+     * Cause racine : un nom d'outil COURT, homographe d'un prénom ou d'un mot anglais courant
+     * (« Clark », « Ghost »), risque réellement cette collision. Un nom d'outil DISTINCTIF («
+     * ChatGPT », « Copilot », « DeepL »...) ne l'a jamais produite en production - et la
+     * description d'un outil est structurellement le pire endroit pour la chercher : elle parle DE
+     * cet outil, donc « NomOutil MotMajuscule » y est presque toujours son propre sous-produit,
+     * jamais un nom propre étranger qui commencerait par hasard comme lui.
+     *
+     * Correctif : même architecture que TOOL_NEVER_AUTO / TOOL_COMPOUND_EXCLUSIONS /
+     * ALIAS_NEVER_AUTO plus haut dans ce fichier - une liste CURÉE et étroite des noms PROUVÉS à
+     * risque, jamais une garde par défaut sur tout le catalogue (l'écart que ce fichier corrige
+     * systématiquement ailleurs, ici laissé ouvert par erreur lors de l'introduction du mandat
+     * #2091). Seuls les deux cas réellement mesurés en production (CHANGELOG v1.242.11 / v1.243.2)
+     * y figurent. Un futur troisième cas s'ajoute ici de la même façon, avec sa propre preuve -
+     * jamais par un élargissement du filtre lui-même (buildToolSuffixGuard() reste inchangée :
+     * NewsToolSyncAction::suggest() continue de l'utiliser telle quelle pour son propre mécanisme
+     * de recapture de TOOL_NEVER_AUTO, sans rapport avec cette liste).
+     */
+    public const TOOL_SUFFIX_RISK_NAMES = ['clark', 'ghost'];
+
+    /**
      * 2026-05-05 #141 b : tracking cumulatif inter-appels.
      * Une page peut appeler @glossarize() plusieurs fois (hook, key_points, why_important, etc.).
      * On veut first-occurrence GLOBAL et accumulation des matched terms pour Schema.org.
@@ -1245,12 +1281,19 @@ class GlossaryLinkifier
             // MCP: SELF (<5 lignes)
             // RAISON: correctif de frontiere sur le point unique ou le motif est construit.
             $finDeMot = '(?![\p{L}\p{N}_\-\/]|\.\w)';
-            // 2026-08-31 (mandat #2091) : garde SUFFIXE, symétrique de celle du prefixe ci-dessous -
-            // voir TOOL_SUFFIX_SAFE_MODIFIERS/buildToolSuffixGuard(). Portée limitée à type='tool' et
-            // 'tool_alias' : seuls les noms d'outils sont exposés au risque « nom propre composé qui
-            // commence par le nom de l'outil » (Clark Wiethorn, Ghost Murmur) - le glossaire/les
-            // acronymes n'ont pas ce risque (voir docblock de la constante).
-            $finSuffixeOutil = in_array($term['type'] ?? '', ['tool', 'tool_alias'], true)
+            // 2026-08-31 (mandat #2091), PORTÉE RESSERRÉE le 2026-09-01 (ticket #2128, voir preuve
+            // au docblock de TOOL_SUFFIX_RISK_NAMES) : garde SUFFIXE, symétrique de celle du
+            // prefixe ci-dessous - voir TOOL_SUFFIX_SAFE_MODIFIERS/buildToolSuffixGuard(). Portée
+            // limitée à type='tool'/'tool_alias' ET au nom PROUVÉ à risque (TOOL_SUFFIX_RISK_NAMES,
+            // liste curée - Clark Wiethorn, Ghost Murmur) : seuls ces noms sont exposés au risque
+            // « nom propre composé qui commence par le nom de l'outil ». Appliquer cette garde à
+            // TOUS les noms d'outils (comportement d'origine du mandat #2091) mesurait une
+            // précision de 0 % sur un corpus réel - 46 noms de produits légitimes bloqués (Copilot
+            // Workspace, DeepL Write, ChatGPT Atlas...), zéro vrai faux composé rattrapé au-delà
+            // des deux cas déjà connus. Le glossaire/les acronymes n'ont, eux, jamais eu ce risque
+            // (voir docblock de la constante TOOL_SUFFIX_SAFE_MODIFIERS).
+            $finSuffixeOutil = (in_array($term['type'] ?? '', ['tool', 'tool_alias'], true)
+                    && in_array(mb_strtolower($term['name']), self::TOOL_SUFFIX_RISK_NAMES, true))
                 ? self::buildToolSuffixGuard()
                 : '';
             // 2026-08-28 : garde de FAUX COMPOSÉ (TOOL_COMPOUND_EXCLUSIONS, ex. « Composer » dans

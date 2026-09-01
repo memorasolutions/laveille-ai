@@ -622,3 +622,56 @@ it('la garde suffixe ne touche pas un terme de glossaire suivi d un mot majuscul
 
     expect($liens)->toBe(1, 'Un terme de type glossaire ne doit jamais etre bloque par la garde suffixe des outils.');
 });
+
+/**
+ * 2026-09-01 (ticket #2128) : GlossaryLinkifier::TOOL_SUFFIX_RISK_NAMES - la garde suffixe ne
+ * s'applique plus qu'aux DEUX noms d'outils reellement prouves a risque (Clark, Ghost), jamais
+ * a tout le catalogue. Mesure sur 746 blocs de texte reellement publies (508 descriptions
+ * d'outils + 161 definitions de glossaire + 77 fragments d'actualites) : la version precedente
+ * (garde appliquee a tous les type='tool'/'tool_alias') bloquait 46 noms de produits reels sans
+ * jamais rattraper un seul vrai faux compose au-dela de Clark/Ghost - preuve complete :
+ * storage/app/audits/2026-09-01-garde-fou-auto-liens.md. Les quatre cas ci-dessous sont des
+ * exemples REELS de ce corpus (ChatGPT Pulse, DeepL Write) : avant ce correctif, ils restaient
+ * non lies faute de figurer dans TOOL_SUFFIX_SAFE_MODIFIERS - une liste qui ne peut, par
+ * construction, jamais enumerer tous les noms de produits a venir.
+ */
+it('lie ChatGPT dans ChatGPT Pulse - nom de produit reel absent de la liste de modificateurs', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Vous pouvez desormais profiter de ChatGPT Pulse, un outil d analyse.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('ChatGPT', 'chatgpt'), false, 10);
+
+    expect($liens)->toBe(1, 'ChatGPT n est pas dans TOOL_SUFFIX_RISK_NAMES : la garde suffixe ne doit plus s y appliquer.');
+    expect(str_contains($dom->saveHTML(), '/annuaire/chatgpt'))->toBeTrue();
+});
+
+it('lie DeepL dans DeepL Write - meme motif, deuxieme preuve issue du corpus reel', function () {
+    [$dom, $root] = glxDomFromHtml('<p>DeepL Write, disponible dans certaines langues, complete l offre.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('DeepL', 'deepl'), false, 10);
+
+    expect($liens)->toBe(1, 'DeepL n est pas dans TOOL_SUFFIX_RISK_NAMES : la garde suffixe ne doit plus s y appliquer.');
+    expect(str_contains($dom->saveHTML(), '/annuaire/deepl'))->toBeTrue();
+});
+
+it('bloque toujours Clark Wiethorn ET Ghost Murmur meme suivis d un mot totalement inconnu', function () {
+    // Non-regression explicite : Clark et Ghost restent dans TOOL_SUFFIX_RISK_NAMES, donc la
+    // garde continue de s'appliquer meme pour un mot n'ayant jamais figure dans aucun incident.
+    [$domClark, $rootClark] = glxDomFromHtml('<p>Le suspect Clark Delacroix a quitte les lieux.</p>');
+    $liensClark = glxWalk($domClark, $rootClark, glxTermeOutil('Clark', 'clark'), false, 10);
+    expect($liensClark)->toBe(0, 'Clark reste dans TOOL_SUFFIX_RISK_NAMES : tout nom propre compose doit rester bloque.');
+
+    [$domGhost, $rootGhost] = glxDomFromHtml('<p>L operation, nom de code Ghost Falcon, reste classifiee.</p>');
+    $liensGhost = glxWalk($domGhost, $rootGhost, glxTermeOutil('Ghost', 'ghost'), false, 10);
+    expect($liensGhost)->toBe(0, 'Ghost reste dans TOOL_SUFFIX_RISK_NAMES : tout nom propre compose doit rester bloque.');
+});
+
+it('n applique la garde suffixe a aucun outil absent de TOOL_SUFFIX_RISK_NAMES, quel que soit le mot qui suit', function () {
+    // Preuve directe de la portee resserree : un outil fictif, jamais vu dans aucun incident,
+    // suivi d'un mot totalement absent de TOOL_SUFFIX_SAFE_MODIFIERS, doit desormais lier -
+    // l'ancien comportement (garde par defaut sur tout le catalogue) l'aurait bloque.
+    [$dom, $root] = glxDomFromHtml('<p>Xyzoutil Nebuleuse est la derniere fonctionnalite annoncee.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeOutil('Xyzoutil', 'xyzoutil'), false, 10);
+
+    expect($liens)->toBe(1, 'Un outil hors TOOL_SUFFIX_RISK_NAMES ne doit plus jamais etre bloque par la garde suffixe.');
+});
