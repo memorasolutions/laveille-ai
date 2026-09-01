@@ -1,0 +1,59 @@
+[
+  {
+    "slug": "reddit",
+    "cat_slug": "outils-et-techniques",
+    "name": "Reddit",
+    "definition": "Reddit est une plateforme communautaire fondée le 23 juin 2005 par Steve Huffman et Alexis Ohanian, alors colocataires à l'Université de Virginie, dans la première cohorte de Y Combinator. Organisée en « subreddits » (communautés thématiques identifiées par le préfixe r/), elle repose sur des modérateurs bénévoles, un système de « karma » (score de réputation basé sur les votes reçus) et des séances « AMA », où des invités répondent en direct aux questions de la communauté. Filiale d'Advance Publications depuis 2011, cotée au NYSE (symbole RDDT) depuis mars 2024. Depuis 2024, Reddit joue un rôle nouveau : celui de fournisseur sous licence de données d'entraînement pour l'IA, avec des accords signés avec Google (février 2024) et OpenAI (mai 2024). En parallèle, l'entreprise a durci son fichier robots.txt en juin 2024 pour freiner le moissonnage non autorisé, et poursuit en justice des entreprises d'IA, dont Anthropic et Perplexity AI, qu'elle accuse d'avoir aspiré son contenu sans licence.",
+    "analogy": "Comme une bibliothèque vivante où chaque salle de discussion, un subreddit, est devenue une matière première recherchée pour nourrir l'intelligence artificielle.",
+    "example": "Le 4 juin 2025, Reddit a poursuivi Anthropic devant un tribunal californien, alléguant que ses robots avaient visité la plateforme plus de 100 000 fois depuis juillet 2024 pour entraîner Claude sans licence.",
+    "did_you_know": "Au premier trimestre de 2026, 74,8 millions des 126,8 millions d'utilisateurs quotidiens de Reddit n'étaient pas connectés, une part grandissante arrivant via la recherche ou les réponses d'IA.",
+    "one_sentence_answer": "Fondé en 2005 et organisé en subreddits, Reddit est devenu depuis 2024 une source de données sous licence pour l'IA, via des accords avec Google et OpenAI, tout en poursuivant en justice les entreprises qui l'auraient exploité sans autorisation.",
+    "faq": [
+      {
+        "question": "Pourquoi une réponse d'intelligence artificielle cite-t-elle parfois un fil Reddit?",
+        "answer": "Parce que Reddit a vendu à certaines entreprises, dont Google et OpenAI, une licence sur son contenu pour l'entraînement de leurs modèles. Les taux exacts de citation varient toutefois selon les études et restent contestés."
+      },
+      {
+        "question": "Reddit a-t-il autorisé toutes les entreprises d'IA à utiliser son contenu?",
+        "answer": "Non. Seules certaines entreprises, comme Google et OpenAI, ont signé une licence payante. D'autres, comme Anthropic et Perplexity AI, font l'objet de poursuites pour avoir utilisé son contenu sans autorisation, selon Reddit."
+      },
+      {
+        "question": "Qu'est-ce qu'un subreddit?",
+        "answer": "Une communauté thématique autonome de Reddit, identifiée par le préfixe r/, gérée par des modérateurs bénévoles qui fixent et font respecter ses propres règles."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Reddit, Inc. (Upvoted) - Upholding Our Public Content Policy and Updating Our robots.txt File",
+        "url": "https://redditinc.com/news/robot-txt-update",
+        "year": 2024,
+        "author": "Reddit, Inc."
+      },
+      {
+        "label": "OpenAI - OpenAI and Reddit Partnership",
+        "url": "https://openai.com/index/openai-and-reddit-partnership/",
+        "year": 2024,
+        "author": "OpenAI"
+      },
+      {
+        "label": "Reuters - Perplexity AI loses bid to toss Reddit lawsuit over data scraping",
+        "url": "https://www.reuters.com/legal/litigation/perplexity-ai-loses-bid-toss-reddit-lawsuit-over-data-scraping-2026-07-31/",
+        "year": 2026,
+        "author": "Reuters"
+      }
+    ],
+    "aliases": [
+      "reddit.com"
+    ],
+    "broader_slugs": [],
+    "narrower_slugs": [],
+    "difficulty": "beginner",
+    "icon": "🧵",
+    "type": "outil",
+    "acronym_full": null,
+    "match_strategy": "case_sensitive",
+    "reference_url": "https://redditinc.com/",
+    "reference_label": "Site officiel de Reddit, Inc.",
+    "has_image": false
+  }
+]
