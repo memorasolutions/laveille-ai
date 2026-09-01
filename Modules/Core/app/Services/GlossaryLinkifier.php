@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v18.'; // 2026-09-01 bump v18 (fiche "Pathway (entreprise d'IA)") : ALIAS_NEVER_AUTO gagne 'pathway' (voir plus bas) - sans ce bump, une entrée v17 déjà chaude continuerait de dériver et de matcher la base "Pathway" jusqu'à expiration du TTL, faux lien confirmé empiriquement (linkify() sur "modules de formation (Pathway)" AVANT ce correctif) avant d'être neutralisé.
+    public const CACHE_KEY = 'glossary.terms.v19.'; // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -819,7 +819,37 @@ class GlossaryLinkifier
     // homonyme n°2 ci-dessus) matchait encore avant l'ajout du pluriel à cette liste. Le nom
     // PRINCIPAL complet "Pathway (entreprise d'IA)" et l'alias curé "Pathway AI" restent, eux,
     // pleinement trouvables (aucun des deux ne passe par ce mécanisme dérivé).
-    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral', 'ia', 'pathway', 'pathways'];
+    // 2026-09-01, MESURÉ : « autonomie »/« autonomies » (l'alias DÉRIVÉ de la BASE du qualifier de
+    // « Autonomie (IA) », extractQualifierAliases() puis son pluriel via extractMorphologicalAliases())
+    // sont eux-mêmes des homographes, PAS seulement le qualifier « IA » corrigé plus haut (Cas 7,
+    // même jour). Le Cas 7 avait mesuré 71 des 105 fiches d'alors comme « légitimes » en ne
+    // vérifiant que « autonomie ≠ IA » - pas le SENS de chaque occurrence. Une lecture sémantique
+    // des 137 pages de production qui portent un lien vers /glossaire/autonomie-ia (mesure refaite
+    // via le même mécanisme réel, linkify() sur le contenu réel des fiches) : 60 au sens BATTERIE
+    // ou VÉHICULE (mAh, heures/jours de charge, km d'autonomie WLTP - téléphones, véhicules
+    // électriques, montres, écouteurs, drones), 21 au sens HUMAIN ou GÉOPOLITIQUE (autonomie
+    // d'élèves/d'employés, souveraineté numérique de l'Europe ou d'une entreprise face aux géants
+    // du cloud), 49 correctes (autonomie décisionnelle d'une IA, d'un agent, d'un robot), 7
+    // ambiguës (endurance ET capacités décisionnelles d'un robot humanoïde dans un marathon, les
+    // deux lectures se défendent). 81 faux sur 137 (59 %) - une majorité, pas une minorité
+    // marginale : « autonomie » est un nom commun français d'usage courant hors du sens IA,
+    // exactement le défaut déjà bloqué pour « dos » et « mistral » ci-dessus. Le pluriel
+    // « autonomies » est ajouté avec la même entrée : vu en production (« ... des autonomies
+    // dépassant 1 600 km pour les véhicules électriques »), et extractMorphologicalAliases() le
+    // dérive de toute façon automatiquement depuis la base « autonomie » si celle-ci seule était
+    // bloquée. Rattrapage : 8 alias CURÉS ajoutés directement sur le terme (colonne `aliases`,
+    // migration 2026_09_01_210000_add_autonomie_ia_curated_aliases.php, PAS ce mécanisme dérivé) -
+    // des expressions qui ne peuvent pas apparaître dans un contexte de batterie ou de véhicule,
+    // chacune vérifiée sans collision contre le contenu réel du site avant d'être retenue : « IA
+    // autonome », « IA autonomes », « autonomie de l'IA », « autonomie des agents », « autonomie de
+    // l'agent », « autonomie décisionnelle », « autonomie des modèles », « autonomie des machines ».
+    // « agent autonome »/« agents autonomes » (suggérés en premier réflexe) ont été VÉRIFIÉS puis
+    // ÉCARTÉS : ce sont déjà, en production, le nom PRINCIPAL de la fiche dédiée « Agent autonome »
+    // et un alias curé de « Agent IA » - les y ajouter ici n'aurait rien capté (le nom principal
+    // d'une autre fiche l'emporte toujours sur un alias, #199) et aurait semé une confusion
+    // éditoriale sur QUEL terme les revendique. Le nom PRINCIPAL « Autonomie (IA) » et son pluriel
+    // dérivé restent, eux, pleinement trouvables (jamais concernés par ALIAS_NEVER_AUTO).
+    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral', 'ia', 'pathway', 'pathways', 'autonomie', 'autonomies'];
 
     /**
      * 2026-08-29 : vrai si cette chaîne (alias curé, qualifier dérivé, ou variante morphologique)
@@ -1032,6 +1062,11 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-09-01 : v18 ajoutée ici en même temps que le bump v19 (ALIAS_NEVER_AUTO +
+            // "autonomie"/"autonomies") - même raison que les notes précédentes : sans elle, une
+            // clé v18 déjà chaude resterait servie jusqu'à l'expiration de son TTL après un flush
+            // explicite.
+            Cache::forget('glossary.terms.v18.'.$loc);
             // 2026-09-01 : v17 ajoutée ici en même temps que le bump v18 (ALIAS_NEVER_AUTO +
             // "pathway") - même raison que les notes précédentes : sans elle, une clé v17 déjà
             // chaude resterait servie jusqu'à l'expiration de son TTL après un flush explicite.

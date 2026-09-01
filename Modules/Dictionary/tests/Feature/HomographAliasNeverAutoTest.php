@@ -53,6 +53,21 @@ declare(strict_types=1);
  * subit ELLE-MÊME une dérivation morphologique (pluriel "Pathways"), d'où deux entrées dans
  * ALIAS_NEVER_AUTO pour ce seul cas.
  *
+ * Cas 9, ajouté le 2026-09-01, MÊME JOUR ET MÊME FICHE que le Cas 7 mais cause DISTINCTE et plus
+ * large : le Cas 7 avait qualifié de « légitimes » les 71 fiches liées via la BASE « autonomie »
+ * du qualifier, en vérifiant seulement « autonomie ≠ IA », jamais le SENS de chaque occurrence.
+ * Une lecture sémantique complète des 137 pages de production qui portent un lien vers
+ * /glossaire/autonomie-ia (corpus agrandi depuis le Cas 7) a trouvé 81 faux sur 137 (59 %) : 60 au
+ * sens BATTERIE/VÉHICULE (mAh, heures/jours de charge, km WLTP), 21 au sens HUMAIN/GÉOPOLITIQUE
+ * (autonomie d'élèves, souveraineté numérique), 49 correctes, 7 ambiguës. « autonomie » est
+ * elle-même un nom commun français d'usage courant, exactement le défaut déjà bloqué pour « dos »
+ * et « mistral ». Rattrapage : 8 alias CURÉS (migration
+ * 2026_09_01_210000_add_autonomie_ia_curated_aliases.php), chacun vérifié individuellement sans
+ * collision contre le contenu réel du site avant d'être retenu - voir son docblock pour le détail
+ * complet, y compris "agent autonome"/"agents autonomes" (suggérés en premier réflexe) ÉCARTÉS
+ * après vérification : déjà le nom PRINCIPAL, en production, de la fiche dédiée "Agent autonome".
+ * Invalide et remplace un des deux tests du Cas 7 ci-dessus (annoté à l'endroit précis).
+ *
  * Cas 5, ajouté le 2026-08-30 : variante INÉDITE du même défaut, cette fois sur la BASE d'un
  * qualifier plutôt que sur le qualifier lui-même. La fiche réelle « Mistral (Le Chat) » (produit
  * de clavardage) dérive sa base « Mistral » de façon INCONDITIONNELLE via
@@ -305,8 +320,16 @@ it('après relocalisation, le produit reste trouvable par son alias "Mistral Le 
 // réel (GlossaryLinkifier::linkify() sur le contenu réel de chaque fiche, jamais un comptage en
 // base) : 105 fiches produisaient un lien vers /glossaire/autonomie-ia, dont 34 par la seule
 // ancre « IA » - un contresens à chaque fois - et 71 par l'alias dérivé « autonomie »/« Autonomie »
-// (la BASE du qualifier), légitimes. Voir ALIAS_NEVER_AUTO (GlossaryLinkifier.php) pour le détail
-// complet de la mesure et la liste des fiches touchées.
+// (la BASE du qualifier). Voir ALIAS_NEVER_AUTO (GlossaryLinkifier.php) pour le détail complet de
+// la mesure et la liste des fiches touchées.
+//
+// CORRECTION du même jour (Cas 9 plus bas) : les 71 fiches ci-dessus avaient été qualifiées de
+// « légitimes » en ne vérifiant que « autonomie ≠ IA », jamais le SENS de chaque occurrence. Une
+// lecture sémantique complète (137 pages, le corpus ayant grossi entre-temps) a trouvé 81 des 137
+// au mauvais sens (batterie/véhicule ou humain/géopolitique) : « autonomie » seul est ELLE-MÊME un
+// homographe, pas seulement le qualifier « IA ». Le test ci-dessous, qui affirmait le lien
+// toujours actif sur "autonomie" seul, est donc remplacé par son inverse - voir Cas 9 pour le
+// détail complet et le rattrapage par alias curés.
 
 it('ne lie PAS "IA" - reproduit le contresens mesuré en production sur 34 fiches (2026-09-01)', function () {
     hanTerm('Autonomie (IA)', 'autonomie-ia-test');
@@ -317,13 +340,13 @@ it('ne lie PAS "IA" - reproduit le contresens mesuré en production sur 34 fiche
         ->and($html)->not->toContain('/glossaire/autonomie-ia-test');
 });
 
-it('lie toujours "autonomie" (la base du qualifier, sans IA) - 71 fiches légitimes mesurées en production', function () {
-    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test');
+it('ne lie PLUS "autonomie" seul (Cas 9) - remplace l\'ancienne attente du même jour, invalidée par une mesure plus fine', function () {
+    hanTerm('Autonomie (IA)', 'autonomie-ia-test');
 
     $html = GlossaryLinkifier::linkify('<p>Anthropic veut amener Claude à un niveau de perpétuelle autonomie.</p>');
 
-    expect($html)->toContain('glossary-link')
-        ->and($html)->toContain('/glossaire/'.$terme->slug);
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/autonomie-ia-test');
 });
 
 it('lie toujours un sigle acronyme VOISIN (RNN) - la frontière ne doit bloquer que "ia"', function () {
@@ -415,4 +438,173 @@ it('lie toujours un terme VOISIN qualifié par parenthèse (Highway, mot proche)
 
     expect($html)->toContain('glossary-link')
         ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+// ── Cas 9 : autonomie/autonomies (nom commun français) vs alias dérivé de la BASE du qualifier
+// de "Autonomie (IA)" - même fiche que le Cas 7, cause DISTINCTE et plus large ─────────────────
+// Mesuré en production le 2026-09-01 : sur les 137 pages qui portaient un lien vers
+// /glossaire/autonomie-ia via l'ancre "autonomie"/"autonomies" (corpus agrandi depuis le Cas 7),
+// une lecture SÉMANTIQUE de chaque occurrence (pas seulement "autonomie ≠ IA") a trouvé 81 faux
+// sur 137 (59 %) : 60 au sens BATTERIE/VÉHICULE (mAh, heures/jours de charge, km WLTP), 21 au sens
+// HUMAIN/GÉOPOLITIQUE (autonomie d'élèves, souveraineté numérique d'une région ou d'une
+// entreprise), 49 correctes, 7 ambiguës (endurance ET décision d'un robot humanoïde en marathon).
+// Rattrapage : 8 alias CURÉS (migration 2026_09_01_210000_add_autonomie_ia_curated_aliases.php),
+// chacun vérifié sans collision contre le contenu réel du site avant d'être retenu - voir le
+// docblock de la migration et de ALIAS_NEVER_AUTO pour le détail. "agent autonome"/"agents
+// autonomes" (suggérés en premier réflexe) sont explicitement ÉCARTÉS : déjà le nom PRINCIPAL, en
+// production, de la fiche dédiée "Agent autonome" et un alias curé de "Agent IA" - le dernier test
+// ci-dessous verrouille cette frontière.
+
+it('ne lie PAS "autonomie" seul dans un contexte BATTERIE - reproduit le sens le plus fréquent des 81 faux liens (smartphone/écouteurs)', function () {
+    hanTerm('Autonomie (IA)', 'autonomie-ia-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Le smartphone dispose d\'une autonomie de 16 heures et d\'une certification IP68.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/autonomie-ia-test');
+});
+
+it('ne lie PAS "autonomie" seul dans un contexte VÉHICULE - deuxième sens fréquent des 81 faux liens (autonomie WLTP)', function () {
+    hanTerm('Autonomie (IA)', 'autonomie-ia-test');
+
+    $html = GlossaryLinkifier::linkify('<p>La citadine électrique offre une autonomie de 530 kilomètres selon le cycle WLTP.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/autonomie-ia-test');
+});
+
+it('ne lie PAS "autonomie" seul dans un contexte HUMAIN - autonomie d\'élèves, pas d\'une IA', function () {
+    hanTerm('Autonomie (IA)', 'autonomie-ia-test');
+
+    $html = GlossaryLinkifier::linkify('<p>L\'université encadre l\'usage de l\'IA générative sur son campus, avec pour principe clé l\'autonomie intellectuelle des étudiants.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/autonomie-ia-test');
+});
+
+it('ne lie PAS "autonomie" seul dans un contexte GÉOPOLITIQUE - souveraineté numérique, pas une IA', function () {
+    hanTerm('Autonomie (IA)', 'autonomie-ia-test');
+
+    $html = GlossaryLinkifier::linkify('<p>L\'Europe doit retrouver son autonomie face aux géants américains du cloud.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/autonomie-ia-test');
+});
+
+it('ne lie PAS "autonomies" au PLURIEL - même défaut, vu en production sur les batteries à semi-conducteurs', function () {
+    hanTerm('Autonomie (IA)', 'autonomie-ia-test');
+
+    $html = GlossaryLinkifier::linkify('<p>Cette nouvelle génération de batteries promet des autonomies dépassant 1600 kilomètres pour les véhicules électriques.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/glossaire/autonomie-ia-test');
+});
+
+it('lie toujours l\'alias curé "IA autonome" - le plus productif des 8 (36 occurrences réelles vérifiées, zéro collision)', function () {
+    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test', aliases: [
+        'IA autonome', 'IA autonomes', "autonomie de l'IA", 'autonomie décisionnelle',
+        'autonomie des agents', "autonomie de l'agent", 'autonomie des modèles', 'autonomie des machines',
+    ]);
+
+    $html = GlossaryLinkifier::linkify('<p>Le laboratoire a présenté un nouveau système d\'IA autonome capable de gérer des tâches complexes.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('lie toujours l\'alias curé "IA autonomes" au PLURIEL - forme distincte, un alias curé ne se pluralise pas tout seul', function () {
+    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test', aliases: [
+        'IA autonome', 'IA autonomes', "autonomie de l'IA", 'autonomie décisionnelle',
+        'autonomie des agents', "autonomie de l'agent", 'autonomie des modèles', 'autonomie des machines',
+    ]);
+
+    $html = GlossaryLinkifier::linkify('<p>Ces entreprises misent désormais sur des systèmes d\'IA autonomes pour automatiser leurs opérations.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('lie toujours l\'alias curé "autonomie des agents"', function () {
+    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test', aliases: [
+        'IA autonome', 'IA autonomes', "autonomie de l'IA", 'autonomie décisionnelle',
+        'autonomie des agents', "autonomie de l'agent", 'autonomie des modèles', 'autonomie des machines',
+    ]);
+
+    $html = GlossaryLinkifier::linkify('<p>Les nouvelles capacités de raisonnement multi-étapes renforcent l\'autonomie des agents.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('lie toujours l\'alias curé "autonomie de l\'agent"', function () {
+    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test', aliases: [
+        'IA autonome', 'IA autonomes', "autonomie de l'IA", 'autonomie décisionnelle',
+        'autonomie des agents', "autonomie de l'agent", 'autonomie des modèles', 'autonomie des machines',
+    ]);
+
+    $html = GlossaryLinkifier::linkify('<p>Plusieurs modèles ont été testés pour évaluer l\'autonomie de l\'agent dans des projets open-source.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('lie toujours l\'alias curé "autonomie des modèles"', function () {
+    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test', aliases: [
+        'IA autonome', 'IA autonomes', "autonomie de l'IA", 'autonomie décisionnelle',
+        'autonomie des agents', "autonomie de l'agent", 'autonomie des modèles', 'autonomie des machines',
+    ]);
+
+    $html = GlossaryLinkifier::linkify('<p>Ce nouvel outil open source répond aux inquiétudes croissantes sur l\'autonomie des modèles linguistiques.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('lie toujours l\'alias curé "autonomie des machines"', function () {
+    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test', aliases: [
+        'IA autonome', 'IA autonomes', "autonomie de l'IA", 'autonomie décisionnelle',
+        'autonomie des agents', "autonomie de l'agent", 'autonomie des modèles', 'autonomie des machines',
+    ]);
+
+    $html = GlossaryLinkifier::linkify('<p>Ce processeur dédié à la décision pure marque une avancée majeure vers l\'autonomie des machines.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('lie toujours les alias curés "autonomie de l\'IA" et "autonomie décisionnelle" - absents du corpus actuel, ajoutés pour l\'avenir', function () {
+    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test', aliases: [
+        'IA autonome', 'IA autonomes', "autonomie de l'IA", 'autonomie décisionnelle',
+        'autonomie des agents', "autonomie de l'agent", 'autonomie des modèles', 'autonomie des machines',
+    ]);
+
+    $html1 = GlossaryLinkifier::linkify('<p>Le rapport interroge la place de l\'autonomie de l\'IA dans la prise de décision médicale.</p>');
+    GlossaryLinkifier::resetState();
+    $html2 = GlossaryLinkifier::linkify('<p>Le comité d\'éthique s\'inquiète de l\'autonomie décisionnelle croissante confiée à ces systèmes.</p>');
+
+    expect($html1)->toContain('/glossaire/'.$terme->slug)
+        ->and($html2)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('lie toujours le nom PRINCIPAL complet "Autonomie (IA)" tel quel dans un texte, alias curés ou non', function () {
+    $terme = hanTerm('Autonomie (IA)', 'autonomie-ia-test');
+
+    $html = GlossaryLinkifier::linkify('<p>La fiche Autonomie (IA) explique la capacité d\'un système à décider seul.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$terme->slug);
+});
+
+it('"agent autonome" lie la fiche DÉDIÉE "Agent autonome", jamais "Autonomie (IA)" - frontière éditoriale délibérée, vérifiée avant d\'écarter cet alias', function () {
+    hanTerm('Autonomie (IA)', 'autonomie-ia-test', aliases: [
+        'IA autonome', 'IA autonomes', "autonomie de l'IA", 'autonomie décisionnelle',
+        'autonomie des agents', "autonomie de l'agent", 'autonomie des modèles', 'autonomie des machines',
+    ]);
+    $agentAutonome = hanTerm('Agent autonome', 'agent-autonome-test', aliases: ['Autonomous agent', 'Agent IA autonome']);
+
+    $html = GlossaryLinkifier::linkify('<p>Wingman est un agent autonome permettant aux non-techniciens de créer des applications.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/glossaire/'.$agentAutonome->slug)
+        ->and($html)->not->toContain('/glossaire/autonomie-ia-test');
 });
