@@ -139,7 +139,7 @@ class BackfillScreenshotMastersCommand extends Command
                     $alreadyHasMaster,
                     $noLocalVignette
                 ));
-                \Illuminate\Support\Facades\Log::info('directory:backfill-screenshot-masters [lot]', [
+                \Illuminate\Support\Facades\Log::channel('directory_screenshots')->info('directory:backfill-screenshot-masters [lot]', [
                     'dry_run' => $dryRun,
                     'scanned' => $scanned,
                     'created' => count($created),
@@ -185,7 +185,7 @@ class BackfillScreenshotMastersCommand extends Command
             $this->comment("Limite de {$limit} atteinte - relancer la commande pour poursuivre (idempotent, reprend automatiquement là où elle s'est arrêtée).");
         }
 
-        \Illuminate\Support\Facades\Log::info('directory:backfill-screenshot-masters [résumé final]', [
+        \Illuminate\Support\Facades\Log::channel('directory_screenshots')->info('directory:backfill-screenshot-masters [résumé final]', [
             'dry_run' => $dryRun,
             'scanned_total' => $scanned,
             'processed_this_run' => $processed,
