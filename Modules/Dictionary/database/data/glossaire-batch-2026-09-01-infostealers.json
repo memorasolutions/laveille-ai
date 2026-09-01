@@ -1,0 +1,317 @@
+[
+    {
+        "slug": "vidar",
+        "name": "Vidar",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "intermediate",
+        "type": "concept",
+        "icon": "🐺",
+        "match_strategy": "case_sensitive",
+        "aliases": [
+            "Vidar Stealer"
+        ],
+        "broader_slugs": [
+            "malware"
+        ],
+        "narrower_slugs": [],
+        "has_image": true,
+        "acronym_full": null,
+        "reference_url": "https://www.trendmicro.com/fr_fr/research/25/j/soc-agentic-siem/how-vidar-stealer-2-upgrades-infostealer-capabilities.html",
+        "reference_label": "Analyse technique de Vidar Stealer 2.0 (Trend Micro)",
+        "definition": "Vidar est un logiciel malveillant de type infostealer (voleur d'informations) apparu en 2018, dérivé du cheval de Troie Arkei. Il cible exclusivement les systèmes Windows et est commercialisé en mode MaaS (malware-as-a-service) : ses opérateurs le louent par abonnement à d'autres cybercriminels sur des forums clandestins, ce qui abaisse la barrière technique nécessaire pour mener une campagne de vol de données. Contrairement à plusieurs de ses rivaux, Vidar n'a jamais été démantelé par les autorités : il connaît au contraire une recrudescence en 2026, profitant en partie du vide laissé par le démantèlement de concurrents comme Lumma Stealer. Sa version 2.0, sortie en octobre 2025, a été entièrement réécrite en langage C avec un traitement multi-thread optimisé, et se propage notamment via de faux logiciels de triche pour jeux vidéo diffusés sur GitHub et Reddit. Une fois installé, Vidar extrait des données sensibles : identifiants de navigation, portefeuilles de cryptomonnaies, cookies de session et informations système.",
+        "analogy": "Comme un pickpocket numérique qui fouille discrètement vos poches virtuelles pour voler vos clés et votre portefeuille.",
+        "example": "Un joueur télécharge un « cheat » pour un jeu populaire depuis Reddit. Le fichier contient Vidar, qui vole ses identifiants bancaires et le contenu de son portefeuille crypto avant d'envoyer les données à des serveurs pirates.",
+        "did_you_know": "En 2026, Vidar profite activement du démantèlement de concurrents comme Lumma Stealer pour étendre son influence, selon les recherches d'Acronis et de Trend Micro.",
+        "one_sentence_answer": "Vidar est un infostealer Windows vendu comme service clandestin depuis 2018, jamais démantelé, distribué via de faux logiciels de jeux, avec une version 2.0 réécrite en C depuis octobre 2025.",
+        "faq": [
+            {
+                "question": "Comment Vidar infecte-t-il un ordinateur?",
+                "answer": "Principalement via des fichiers piégés, comme de faux logiciels de triche pour jeux vidéo, partagés sur des plateformes comme GitHub ou Reddit."
+            },
+            {
+                "question": "Quelles données Vidar peut-il voler?",
+                "answer": "Les identifiants de navigation, les cryptomonnaies, les cookies de session et les informations système de l'appareil compromis."
+            },
+            {
+                "question": "Pourquoi Vidar est-il toujours actif en 2026?",
+                "answer": "Parce qu'il n'a jamais été démantelé par les autorités, contrairement à plusieurs de ses concurrents, et qu'il profite du vide laissé par leur disparition."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Acronis TRU - Vidar Stealer 2.0 distributed via fake game cheats on GitHub and Reddit",
+                "url": "https://www.acronis.com/en/tru/posts/vidar-stealer-20-distributed-via-fake-game-cheats-on-github-and-reddit/",
+                "year": 2026,
+                "author": "Acronis Threat Research Unit"
+            },
+            {
+                "label": "Trend Micro - How Vidar Stealer 2 upgrades infostealer capabilities",
+                "url": "https://www.trendmicro.com/fr_fr/research/25/j/soc-agentic-siem/how-vidar-stealer-2-upgrades-infostealer-capabilities.html",
+                "year": 2026,
+                "author": "Trend Micro (Junestherry Dela Cruz)"
+            }
+        ]
+    },
+    {
+        "slug": "lummac2",
+        "name": "LummaC2",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "intermediate",
+        "type": "concept",
+        "icon": "🕷️",
+        "match_strategy": "case_sensitive",
+        "aliases": [
+            "Lumma Stealer",
+            "Lumma"
+        ],
+        "broader_slugs": [
+            "malware"
+        ],
+        "narrower_slugs": [],
+        "has_image": true,
+        "acronym_full": null,
+        "reference_url": "https://blogs.microsoft.com/on-the-issues/2025/05/21/microsoft-leads-global-action-against-favored-cybercrime-tool/",
+        "reference_label": "Communiqué officiel Microsoft sur le démantèlement",
+        "definition": "LummaC2, aussi connu sous le nom de Lumma Stealer, est un logiciel malveillant de type infostealer (voleur d'informations) ciblant spécifiquement les systèmes Windows. Actif depuis 2022, il était distribué en mode MaaS (malware-as-a-service), ce qui permettait à des cybercriminels de l'acheter par abonnement sur des plateformes clandestines, sans compétence technique particulière. Le 21 mai 2025, une opération internationale menée par Microsoft (Digital Crimes Unit), Europol et le département de la Justice des États-Unis a démantelé son infrastructure en neutralisant ses serveurs de commande et de contrôle par sinkholing. Plus de 394 000 ordinateurs Windows infectés avaient été recensés dans le monde au moment de l'opération, ce qui en faisait l'un des infostealers les plus répandus de son époque. Techniquement, ce sinkholing a permis de rediriger le trafic destiné aux serveurs de commande et de contrôle vers des serveurs contrôlés par les enquêteurs, coupant net l'accès des opérateurs criminels aux données fraîchement volées. Malgré ce démantèlement, plusieurs analyses de sécurité rapportent une activité résiduelle, voire une résurgence partielle, en 2026.",
+        "analogy": "Comme un cambrioleur qui fouillerait dans un portefeuille numérique pour voler vos identifiants et mots de passe.",
+        "example": "Un utilisateur ouvre une pièce jointe corrompue reçue dans un courriel frauduleux. LummaC2 s'installe silencieusement et dérobe ses identifiants bancaires avant d'envoyer les données à des serveurs pirates.",
+        "did_you_know": "Lors de son démantèlement en mai 2025, LummaC2 avait infecté plus de 394 000 ordinateurs Windows à travers le monde, selon Microsoft Threat Intelligence.",
+        "one_sentence_answer": "LummaC2 (Lumma Stealer) est un infostealer Windows distribué en MaaS depuis 2022, démantelé en mai 2025 par Microsoft et Europol après avoir infecté plus de 394 000 ordinateurs, mais toujours partiellement actif en 2026.",
+        "faq": [
+            {
+                "question": "Comment LummaC2 infecte-t-il un ordinateur?",
+                "answer": "Principalement via des pièces jointes de courriel malveillantes, des téléchargements compromis ou des sites web frauduleux exploitant des failles Windows."
+            },
+            {
+                "question": "Est-ce que LummaC2 représente encore un risque aujourd'hui?",
+                "answer": "Oui : des analyses de sécurité indiquent une activité résiduelle ou des variantes qui circulent malgré son démantèlement officiel de mai 2025."
+            },
+            {
+                "question": "Comment se protéger contre ce type de menace?",
+                "answer": "En appliquant les mises à jour de sécurité Windows, en utilisant un antivirus à jour et en restant vigilant devant les courriels inconnus ou les téléchargements non vérifiés."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Microsoft - Microsoft leads global action against favored cybercrime tool",
+                "url": "https://blogs.microsoft.com/on-the-issues/2025/05/21/microsoft-leads-global-action-against-favored-cybercrime-tool/",
+                "year": 2025,
+                "author": "Microsoft Digital Crimes Unit"
+            },
+            {
+                "label": "Microsoft Security Blog - Lumma Stealer: Breaking down the delivery techniques and capabilities of a prolific infostealer",
+                "url": "https://www.microsoft.com/en-us/security/blog/2025/05/21/lumma-stealer-breaking-down-the-delivery-techniques-and-capabilities-of-a-prolific-infostealer/",
+                "year": 2025,
+                "author": "Microsoft Threat Intelligence"
+            }
+        ]
+    },
+    {
+        "slug": "stealc",
+        "name": "StealC",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "intermediate",
+        "type": "concept",
+        "icon": "🧰",
+        "match_strategy": "case_sensitive",
+        "aliases": [],
+        "broader_slugs": [
+            "malware"
+        ],
+        "narrower_slugs": [],
+        "has_image": true,
+        "acronym_full": null,
+        "reference_url": "https://www.europol.europa.eu/media-press/newsroom/news/global-cyber-strike-disrupts-socgholish-amadey-and-stealc-malware-networks",
+        "reference_label": "Communiqué officiel Europol sur l'opération ENDGAME",
+        "definition": "StealC est un logiciel malveillant de type infostealer (voleur d'informations) apparu début 2023 et documenté dès le 20 février de cette année. Conçu pour les systèmes Windows, il a d'abord été décrit par des chercheurs en sécurité comme un « copieur » (copycat) reprenant des techniques déjà employées par deux infostealers antérieurs, Vidar et Raccoon Stealer. Comme eux, il était commercialisé en mode MaaS (malware-as-a-service), ce qui permettait à des cybercriminels de louer ses capacités pour voler des données sensibles telles que des identifiants bancaires ou des mots de passe. Une version améliorée, StealC V2, est sortie en 2025 avec un chiffrement et un vol de données renforcés. Le 24 juin 2026, Europol a démantelé son infrastructure dans le cadre de l'opération internationale ENDGAME, une frappe coordonnée qui a visé simultanément StealC et deux autres réseaux de malwares, SocGholish et Amadey. ENDGAME désigne une série d'actions menées par les autorités depuis plusieurs années pour perturber l'infrastructure de diverses familles de malwares, notamment des réseaux de zombies (botnets).",
+        "analogy": "Comme un voleur qui copierait les clés de votre maison pour tout prendre sans faire de bruit.",
+        "example": "Un utilisateur reçoit un courriel frauduleux contenant une pièce jointe infectée. Après ouverture, StealC s'installe silencieusement et transmet ses identifiants bancaires à des criminels.",
+        "did_you_know": "Le 24 juin 2026, Europol a démantelé StealC lors de l'opération ENDGAME, frappant simultanément trois réseaux de malwares : StealC, SocGholish et Amadey.",
+        "one_sentence_answer": "StealC est un infostealer Windows apparu en 2023 comme copie de Vidar et Raccoon Stealer, vendu en MaaS, dont l'infrastructure a été démantelée par Europol en juin 2026.",
+        "faq": [
+            {
+                "question": "Comment StealC infecte-t-il un ordinateur?",
+                "answer": "Principalement via des pièces jointes malveillantes dans des courriels frauduleux ou des sites compromis, exploitant des failles du système Windows."
+            },
+            {
+                "question": "Quelles données StealC peut-il voler?",
+                "answer": "Il cible les identifiants bancaires, les mots de passe, les cookies de navigation et d'autres informations sensibles stockées sur l'appareil infecté."
+            },
+            {
+                "question": "StealC est-il toujours une menace aujourd'hui?",
+                "answer": "Son infrastructure principale a été démantelée par Europol en juin 2026, mais des copies ou variantes pourraient continuer à circuler; la prudence reste de mise."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Europol - Global cyber strike disrupts SocGholish, Amadey, and StealC malware networks",
+                "url": "https://www.europol.europa.eu/media-press/newsroom/news/global-cyber-strike-disrupts-socgholish-amadey-and-stealc-malware-networks",
+                "year": 2026,
+                "author": "Europol"
+            },
+            {
+                "label": "SEKOIA - Stealc: a copycat of Vidar and Raccoon infostealers gaining in popularity",
+                "url": "https://www.sekoia.io/blog/stealc-a-copycat-of-vidar-and-raccoon-infostealers-gaining-in-popularity-part-1",
+                "year": 2023,
+                "author": "SEKOIA.IO Threat & Detection Research Team"
+            }
+        ]
+    },
+    {
+        "slug": "redline",
+        "name": "RedLine Stealer",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "intermediate",
+        "type": "concept",
+        "icon": "🚨",
+        "match_strategy": "case_sensitive",
+        "aliases": [
+            "RedLine"
+        ],
+        "broader_slugs": [
+            "malware"
+        ],
+        "narrower_slugs": [],
+        "has_image": true,
+        "acronym_full": null,
+        "reference_url": "https://www.justice.gov/usao-wdtx/pr/us-joins-international-action-against-redline-and-meta-infostealers",
+        "reference_label": "Communiqué officiel du département de la Justice des États-Unis",
+        "definition": "RedLine Stealer est un logiciel malveillant de type infostealer (voleur d'informations) conçu pour cibler les systèmes Windows. Il vole des données sensibles comme les mots de passe, les informations financières et les identifiants de session. Distribué en mode MaaS (malware-as-a-service), il a longtemps été l'un des infostealers les plus répandus, permettant à des cybercriminels de l'acheter ou de le louer pour orchestrer leurs propres attaques. En octobre 2024, une opération internationale nommée Magnus, coordonnée par Europol, Eurojust, le FBI, le département de la Justice des États-Unis et la police néerlandaise, a démantelé son infrastructure : serveurs et domaines ont été saisis, tandis que le code source et les bases de données ont été récupérés par les enquêteurs. L'administrateur présumé, Maxim Rudometov, un citoyen russe, a été inculpé par les autorités américaines dans le cadre de cette opération. Depuis, sa disparition a directement contribué à l'essor de nouveaux infostealers venus combler le vide qu'il a laissé sur les marchés clandestins.",
+        "analogy": "Comme un voleur qui fouille discrètement votre portefeuille pour en copier toutes vos cartes et vos clés.",
+        "example": "Un utilisateur télécharge un fichier PDF piégé reçu par courriel : RedLine Stealer infecte son PC Windows et dérobe ses mots de passe bancaires avant d'exfiltrer les données vers des serveurs criminels.",
+        "did_you_know": "Lors de l'opération Magnus en octobre 2024, les autorités ont saisi le code source complet de RedLine Stealer, portant un coup majeur à son écosystème criminel.",
+        "one_sentence_answer": "RedLine Stealer était un infostealer Windows massivement distribué en MaaS avant son démantèlement en octobre 2024 par une coalition internationale, qui a mené à l'inculpation de son administrateur présumé.",
+        "faq": [
+            {
+                "question": "Comment RedLine Stealer infectait-il les ordinateurs?",
+                "answer": "Principalement via des pièces jointes malveillantes dans des courriels d'hameçonnage ou des logiciels piratés, exploitant des vulnérabilités des systèmes Windows."
+            },
+            {
+                "question": "Comment se protéger contre des infostealers comme RedLine Stealer?",
+                "answer": "En maintenant ses logiciels à jour, en utilisant un antivirus réputé, en se méfiant des courriels suspects et en évitant les téléchargements non vérifiés."
+            },
+            {
+                "question": "RedLine Stealer représente-t-il encore un risque après son démantèlement?",
+                "answer": "Son infrastructure principale est démantelée, mais des variantes ou des copies pourraient circuler; la vigilance reste donc essentielle."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Département de la Justice des États-Unis - US Joins International Action Against RedLine and Meta Infostealers",
+                "url": "https://www.justice.gov/usao-wdtx/pr/us-joins-international-action-against-redline-and-meta-infostealers",
+                "year": 2024,
+                "author": "Bureau du procureur des États-Unis, district ouest du Texas"
+            },
+            {
+                "label": "ESET - Opération Magnus : démantèlement de RedLine Stealer",
+                "url": "https://www.eset.com/fr/about/newsroom/press-releases/recherche/operation-magnus-demantelement-redline-stealer/",
+                "year": 2024,
+                "author": "ESET Research"
+            }
+        ]
+    },
+    {
+        "slug": "acreed",
+        "name": "Acreed",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "intermediate",
+        "type": "concept",
+        "icon": "🌱",
+        "match_strategy": "case_sensitive",
+        "aliases": [],
+        "broader_slugs": [
+            "malware"
+        ],
+        "narrower_slugs": [],
+        "has_image": true,
+        "acronym_full": null,
+        "reference_url": "https://www.bitsight.com/blog/the-rise-of-acreed-infostealer",
+        "reference_label": "Analyse Bitsight sur l'essor d'Acreed",
+        "definition": "Acreed est un infostealer (logiciel malveillant voleur d'informations) ciblant les systèmes Windows, apparu le 14 février 2025 sur Russian Market, un marché clandestin en ligne. Vendu en mode MaaS (malware-as-a-service), il automatise le tri et la catégorisation des données sensibles volées - identifiants de connexion, mots de passe, informations bancaires - tout en détectant spécifiquement les comptes à privilèges administrateur, plus payants pour les acheteurs. Son émergence comble directement le vide créé par le déclin de deux infostealers rivaux : Lumma Stealer, démantelé en mai 2025, et RedLine, démantelé en octobre 2024. Contrairement à RedLine, aucun créateur ni groupe n'a été formellement identifié derrière Acreed dans les sources publiques. Des analyses de sécurité publiées en 2025, notamment par Bitsight et Intrinsec, anticipent qu'il pourrait rapidement dépasser Lumma Stealer en popularité sur les marchés clandestins, ce qui en ferait l'une des menaces montantes les plus surveillées de cette catégorie.",
+        "analogy": "Comme un cambrioleur équipé d'un trieur automatique qui repère aussitôt les clés de voiture et les cartes de crédit dans un portefeuille volé.",
+        "example": "Un employé d'entreprise clique sur une pièce jointe malveillante reçue par courriel. Acreed s'installe silencieusement, analyse son ordinateur Windows, extrait ses identifiants professionnels et détecte son compte administrateur réseau pour les voler.",
+        "did_you_know": "Acreed est apparu précisément le jour de la Saint-Valentin 2025, profitant du démantèlement de deux infostealers majeurs en moins d'un an pour s'imposer sur le marché clandestin.",
+        "one_sentence_answer": "Acreed est un infostealer Windows apparu en février 2025, vendu en MaaS pour voler et classer automatiquement des données sensibles, émergé pour combler le vide laissé par les démantèlements de Lumma Stealer et de RedLine.",
+        "faq": [
+            {
+                "question": "Quels types de données Acreed vole-t-il?",
+                "answer": "Des informations sensibles comme les mots de passe, les identifiants de comptes et les données bancaires, en ciblant spécifiquement les identifiants à privilèges administrateur pour accéder à des systèmes protégés."
+            },
+            {
+                "question": "Comment se protéger contre Acreed?",
+                "answer": "En appliquant les mises à jour de sécurité Windows, en utilisant un antivirus réputé, en évitant les pièces jointes ou liens suspects, et en activant l'authentification multifacteur pour limiter les dégâts même si des identifiants sont volés."
+            },
+            {
+                "question": "Pourquoi Acreed a-t-il émergé aussi rapidement?",
+                "answer": "Parce que deux de ses principaux concurrents, Lumma Stealer et RedLine, ont été démantelés par les forces de l'ordre en 2024 et 2025, laissant un vide qu'Acreed a comblé presque aussitôt."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Bitsight - The Rise of Acreed Infostealer",
+                "url": "https://www.bitsight.com/blog/the-rise-of-acreed-infostealer",
+                "year": 2025,
+                "author": "Bitsight"
+            },
+            {
+                "label": "Intrinsec - Analysis of Acreed, a rising infostealer",
+                "url": "https://www.intrinsec.com/analysis-of-acreed-a-rising-infostealer/",
+                "year": 2025,
+                "author": "Intrinsec"
+            }
+        ]
+    },
+    {
+        "slug": "atomic-stealer",
+        "name": "Atomic Stealer",
+        "cat_slug": "securite-et-ethique",
+        "difficulty": "intermediate",
+        "type": "concept",
+        "icon": "🍎",
+        "match_strategy": "case_sensitive",
+        "aliases": [
+            "Atomic macOS Stealer"
+        ],
+        "broader_slugs": [
+            "malware"
+        ],
+        "narrower_slugs": [],
+        "has_image": true,
+        "acronym_full": null,
+        "reference_url": "https://www.trendmicro.com/en_us/research/25/i/an-mdr-analysis-of-the-amos-stealer-campaign.html",
+        "reference_label": "Analyse Trend Micro d'une campagne Atomic Stealer",
+        "definition": "Atomic Stealer, aussi désigné par le sigle AMOS dans les rapports de sécurité, est un logiciel malveillant de type infostealer apparu le 26 avril 2023 et spécifiquement conçu pour cibler les ordinateurs macOS d'Apple. Contrairement à la grande majorité des infostealers, qui visent principalement Windows, il est le seul de cette envergure à exploiter les vulnérabilités propres aux systèmes Mac. Distribué en mode MaaS (malware-as-a-service) via Telegram, il se propage notamment par des publicités trompeuses (malvertising), de faux installateurs de logiciels et des applications piratées destinées aux utilisateurs de Mac. Une fois installé, il extrait frauduleusement les mots de passe conservés dans le trousseau macOS, les portefeuilles de cryptomonnaies, les cookies de navigation et divers documents sensibles. Jamais démantelé par les autorités, il demeure actif et continue d'évoluer en 2026, avec de nouvelles campagnes régulièrement documentées par les chercheurs en sécurité, ce qui en fait une menace persistante pour les utilisateurs de Mac.",
+        "analogy": "Comme un voleur qui ne ciblerait que les maisons équipées d'une seule marque de serrure bien précise, en ignorant toutes les autres.",
+        "example": "Un utilisateur télécharge une version piratée d'un logiciel graphique pour Mac depuis un site douteux, ce qui déclenche à son insu l'infection par Atomic Stealer, qui lui dérobe ensuite ses identifiants bancaires.",
+        "did_you_know": "Repéré dès sa mise en vente sur Telegram en avril 2023, Atomic Stealer reste actif en 2026, avec de nouvelles campagnes documentées par des entreprises comme Trend Micro.",
+        "one_sentence_answer": "Atomic Stealer (AMOS) est le seul infostealer majeur ciblant exclusivement macOS, volant mots de passe et cryptomonnaies par malvertising et faux installateurs depuis avril 2023, jamais démantelé.",
+        "faq": [
+            {
+                "question": "Comment protéger mon Mac contre Atomic Stealer?",
+                "answer": "En évitant les logiciels piratés et les sites non officiels, en privilégiant des sources vérifiées comme l'App Store, en maintenant macOS à jour et en installant un antivirus reconnu."
+            },
+            {
+                "question": "Quelles données sont menacées par ce logiciel malveillant?",
+                "answer": "Les mots de passe enregistrés dans le trousseau macOS, les cryptomonnaies, les cookies des navigateurs et les documents personnels de l'utilisateur."
+            },
+            {
+                "question": "Est-ce qu'Atomic Stealer touche aussi les ordinateurs Windows?",
+                "answer": "Non : contrairement à la plupart des infostealers, il cible exclusivement les ordinateurs macOS d'Apple."
+            }
+        ],
+        "sources": [
+            {
+                "label": "Cyble - Threat Actor Selling New Atomic macOS (AMOS) Stealer on Telegram",
+                "url": "https://cyble.com/blog/threat-actor-selling-new-atomic-macos-amos-stealer-on-telegram/",
+                "year": 2023,
+                "author": "Cyble Research and Intelligence Labs"
+            },
+            {
+                "label": "Trend Micro - An MDR Analysis of the AMOS Stealer Campaign",
+                "url": "https://www.trendmicro.com/en_us/research/25/i/an-mdr-analysis-of-the-amos-stealer-campaign.html",
+                "year": 2025,
+                "author": "Trend Micro Research"
+            }
+        ]
+    }
+]
