@@ -63,9 +63,11 @@ class ScreenshotMasterDerivationService
     /**
      * Source lisible et saine, mais dont le decodage complet en memoire (largeur x hauteur x 4
      * octets) depasserait la marge memoire PHP disponible - correctif #2170. Traitee comme
-     * STATUS_TOO_SMALL par les deux appelants (aucun master local possible, mais une recapture
-     * reseau a la bonne taille resoudrait le cas proprement) - jamais comme STATUS_ERROR, qui
-     * suggere a tort un fichier corrompu.
+     * STATUS_TOO_SMALL par les trois appelants existants (dispatch-margin-recapture,
+     * backfill-screenshot-masters, et l'upload admin via son fallback generique deja en place) :
+     * aucun master local possible, mais une recapture/un nouvel upload a la bonne taille
+     * resoudrait le cas proprement - jamais comme STATUS_ERROR, qui suggere a tort un fichier
+     * corrompu.
      */
     public const STATUS_TOO_LARGE = 'too_large';
 
