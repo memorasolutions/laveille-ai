@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.245.2] - 2026-09-01
+
+### Corrigé (restauration de 3 BD retirées pour motif éthique + 8 images gardant du texte résiduel)
+
+- **BD : chirurgie par case, jamais la planche entière.** `biais-algorithmique`, `cybersecurite` et `deepfake` avaient été retirées en v1.242.2 (personnage enfant dans certains panneaux). Seuls les panneaux concernés sont régénérés (personnage adulte à la place, même décor, même analogie, mêmes textes de bulle et de légende inchangés) - les panneaux déjà conformes restent des fichiers intacts au pixel près, jamais retouchés. `biais-algorithmique` : 2 panneaux sur 5 (candidate à l'emploi, joueuse de hockey). `cybersecurite` : la seconde protagoniste apparaissait dans les 5 panneaux (personnage adulte récurrent regénéré sur les 5). `deepfake` : page 1 déjà entièrement conforme et non touchée ; page 2, 2 panneaux sur 4, bulles redessinées au script (police ComicNeue-Bold, style identique aux bulles déjà en place sur la page) plutôt que confiées à l'IA générative, pour éliminer le risque de texte déformé.
+- **Glossaire : `metadonnees` et `microciblage` regénérés** - le prompt « aucun texte » de leur génération précédente n'avait pas tenu (badges « METADATA/EXIF/GPS/TIMESTAMP » et néon « BUY » lisibles), remplacés par des icônes seules. Découverts par un balayage OCR exhaustif des 68 images régénérées le 30 août (`mcp__paddleocr__ocr`, jamais un échantillon) plutôt que par la liste de 2 initialement transmise - le balayage a trouvé 14 candidats, dont 12 se sont révélés être du bruit OCR (icônes, chiffres seuls, motifs décoratifs) après vérification visuelle une par une.
+- **Blogue : 6 images de couverture portaient encore du texte anglais net** (interface, alertes, panneaux), non détectées par la vérification visuelle de la passe du 30 août - `oubliez-lassistant-formez-le-centaure...`, `ia-a-lecole-et-au-gouvernement...`, `le-paradoxe-du-controle-parental...`, `la-fuite-de-donnees-scolaires...`, `lenseignant-qui-a-defie-google...`, `ia-generative-classe-guide-quebec-enseignants`. Scènes reformulées avec écrans/tableaux/kiosques à icônes ou graphiques abstraits seulement, aucune lettre. Ces images ne sont pas suivies par git (`storage/app/public/blog` et `.../articles` gitignorés) : déposées directement en production (fichier manager cPanel hors service sur ce compte - dépôt via `Fileman::upload_files`, qui fonctionne, plutôt que la lecture/suppression qui échoue), zone Cloudflare purgée, vérifiées par empreinte SHA-256 identique au fichier local et par la balise `og:image` rendue sur la page réelle.
+- **Un seul contexte de navigation Gemini par lot** (règle du 2026-09-01, mémoire projet `session-partagee-un-contexte-par-lot-2026-09-01`) : ouvert et fermé proprement pour les 3 BD + 2 images glossaire, puis un second contexte dédié pour les 6 images blogue, chaque fermeture vérifiée par `ps` (zéro processus Chrome résiduel).
+- **Interdit posé DANS le prompt, pas seulement au contrôle après coup** : « aucune personne mineure, aucun enfant, aucune salle de classe peuplée d'enfants » et « aucun texte, aucune lettre, aucun logo » sur chacune des 17 images générées, chacune vue avant application.
+
 ## [1.245.1] - 2026-09-01
 
 ### Corrigé (images manquantes des trois fiches de glossaire livrées le jour même - risque de 404)
