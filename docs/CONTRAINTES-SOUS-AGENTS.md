@@ -331,11 +331,25 @@ cours ailleurs) - dans le doute sur l'âge ou l'appartenance d'un processus, ne 
   navigateurs indépendants, aucune collision possible - exactement ce que l'outil piloté ne peut
   pas offrir (point 3). Génération du script : comme tout code de plus de 5 lignes, déléguer à
   `mcp__hermes__model_invoke` (task_type=code) plutôt que l'écrire soi-même.
-- **Session authentifiée requise (Gemini, claude.ai)** : technique déjà documentée au skill
-  `/nanobanana` - copier `~/Library/Application Support/Playwright-MCP/claude-main` vers un dossier
-  temporaire, y supprimer `SingletonLock`, `SingletonCookie` et `SingletonSocket`, puis
-  `chromium.launchPersistentContext(copie, { headless: false, channel: 'chrome' })`. **Supprimer la
-  copie après usage, sans exception : elle contient une session Google active.**
+- **Session authentifiée requise (Gemini, claude.ai) - corrigé le 2026-09-01 (tickets #2138/#2143,
+  remplace la copie de profil qu'affichait cette ligne).** Le profil
+  `~/Library/Application Support/Playwright-MCP/claude-main` est **confirmé déconnecté** :
+  troisième mesure indépendante ce jour (après deux cycles la nuit du 31 août) - `last_access_utc`
+  le plus récent sur la totalité de ses cookies = 26 juillet 2026, plus de cinq semaines sans
+  accès. Ce n'est plus le mécanisme en usage. **La technique qui fonctionne, validée par une
+  génération d'image Gemini réelle le 2026-09-01** : `ia-sync gemini` (Bash, ~10s, resynchronise le
+  VRAI Chrome `Profile 34` de l'utilisateur vers
+  `~/.claude/mcp-servers/ia-storage-states/gemini-storage-state.json` - le fichier combiné
+  `ia-combined-storage-state.json`, celui que lit le `--storage-state` du serveur MCP `playwright`,
+  est mis à jour au même moment), PUIS en Node `browser.newContext({ storageState:
+  '.../gemini-storage-state.json' })` (jamais `launchPersistentContext` sur une copie de dossier -
+  plus simple, aucun verrou, aucun risque de détection anti-abus par double session concurrente).
+  Procédure complète, et le piège d'ordre qui invalide tout (fermer le navigateur AVANT `ia-sync`,
+  jamais après - les témoins sont relus au lancement, pas en cours de session) : mémoire globale
+  `reference_gemini_playwright_secours.md`, section « MÉTHODE PRIORITAIRE ». **Si malgré un
+  `ia-sync` frais l'écran de connexion persiste** : ne pas s'acharner, laisser la fenêtre ouverte,
+  ne jamais manipuler les identifiants, signaler à l'humain - c'est une authentification qui
+  échoue côté Google, pas un verrou local.
 - **L'outil piloté `mcp__playwright__*` reste correct pour un premier essai rapide** (il peut
   fonctionner - il a fonctionné après la relance testée au point 4) et pour un flux qui doit garder
   le MÊME état de navigateur entre plusieurs appels successifs d'un seul agent isolé. **Mais au
