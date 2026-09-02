@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
 use Modules\Directory\Jobs\CaptureScreenshotJob;
 use Modules\Directory\Models\Tool;
@@ -254,4 +255,134 @@ it('ne meurt jamais de memoire sur une source aux dimensions demesurees et met e
     }
 
     cleanupMarginDispatchTestFiles($slug);
+});
+
+/**
+ * Correctif #2173 (2026-09-01) - la commande mourait d'usure memoire cumulative vers l'outil 1400
+ * sur ~2219-2336 en production (un seul processus PHP, jamais redemarre). Les 4 tests suivants
+ * couvrent le nouveau mecanisme de segment + relance (--restart-every / --after-id), en particulier
+ * la reprise par curseur exigee par le mandat : aucun outil saute, aucun traite deux fois a la
+ * frontiere d'un segment. Process::fake() est systematique ici - jamais un vrai sous-processus ne
+ * doit s'executer pendant les tests.
+ */
+it('relance un processus frais avec le curseur exact du dernier outil traite quand le segment --restart-every est atteint - correctif #2173', function () {
+    $slugA = 'marge-segment-a-'.uniqid();
+    $slugB = 'marge-segment-b-'.uniqid();
+    $slugC = 'marge-segment-c-'.uniqid();
+    makeMarginDispatchTestTool($slugA);
+    $toolB = makeMarginDispatchTestTool($slugB);
+    makeMarginDispatchTestTool($slugC);
+    // Les 3 "deja avec marge" (meme fixture que le tout premier test de ce fichier) : seule la
+    // FRONTIERE du segment est sous test ici, pas le detail des branches de classification.
+    foreach ([$slugA, $slugB, $slugC] as $slug) {
+        makeMarginDispatchTestImage(public_path("screenshots/{$slug}.jpg"), 1200, 900);
+        makeMarginDispatchTestImage(public_path('screenshots/masters/'.$slug.'.jpg'), 1200, 900);
+    }
+
+    Queue::fake();
+    Process::fake();
+
+    $this->artisan('directory:dispatch-margin-recapture', ['--restart-every' => 2])->assertExitCode(0);
+
+    // chunkById parcourt par id croissant : A puis B forment le segment plein (2 examines), C
+    // reste hors segment. Le curseur transmis a la relance doit etre EXACTEMENT l'id de B -
+    // jamais celui de A (sauterait B au hop suivant) ni celui de C (C n'a pas encore ete examine
+    // par ce processus-ci, le compter serait un saut deguise).
+    Process::assertRan(fn ($process): bool => in_array('--after-id='.$toolB->id, (array) $process->command, true));
+
+    foreach ([$slugA, $slugB, $slugC] as $slug) {
+        cleanupMarginDispatchTestFiles($slug);
+    }
+});
+
+it('ne relance jamais de processus quand tout le catalogue tient dans un seul segment', function () {
+    $slugA = 'marge-unseg-a-'.uniqid();
+    $slugB = 'marge-unseg-b-'.uniqid();
+    makeMarginDispatchTestTool($slugA);
+    makeMarginDispatchTestTool($slugB);
+    foreach ([$slugA, $slugB] as $slug) {
+        makeMarginDispatchTestImage(public_path("screenshots/{$slug}.jpg"), 1200, 900);
+        makeMarginDispatchTestImage(public_path('screenshots/masters/'.$slug.'.jpg'), 1200, 900);
+    }
+
+    Queue::fake();
+    Process::fake();
+
+    $this->artisan('directory:dispatch-margin-recapture', ['--restart-every' => 10])->assertExitCode(0);
+
+    Process::assertNothingRan();
+
+    foreach ([$slugA, $slugB] as $slug) {
+        cleanupMarginDispatchTestFiles($slug);
+    }
+});
+
+it('la limite reseau atteinte arrete toute la chaine sans jamais relancer de processus - comportement #2087 inchange', function () {
+    $slugA = 'marge-limrelance-a-'.uniqid();
+    $slugB = 'marge-limrelance-b-'.uniqid();
+    $slugC = 'marge-limrelance-c-'.uniqid();
+    makeMarginDispatchTestTool($slugA);
+    makeMarginDispatchTestTool($slugB);
+    makeMarginDispatchTestTool($slugC);
+    // Les 3 "trop courtes" : chacune part en recapture reseau (jamais en derivation locale
+    // gratuite), pour que --limit ait reellement quelque chose a plafonner.
+    foreach ([$slugA, $slugB, $slugC] as $slug) {
+        makeMarginDispatchTestImage(public_path("screenshots/{$slug}.jpg"), 400, 200);
+    }
+
+    Queue::fake();
+    Process::fake();
+
+    $this->artisan('directory:dispatch-margin-recapture', ['--limit' => 1, '--restart-every' => 2])->assertExitCode(0);
+
+    Queue::assertPushed(CaptureScreenshotJob::class, 1);
+    Process::assertNothingRan();
+
+    foreach ([$slugA, $slugB, $slugC] as $slug) {
+        cleanupMarginDispatchTestFiles($slug);
+    }
+});
+
+it('la reprise par curseur ne saute et ne retraite jamais aucun outil a la frontiere d\'un segment - correctif #2173', function () {
+    $slugA = 'marge-hop-a-'.uniqid();
+    $slugB = 'marge-hop-b-'.uniqid();
+    $slugC = 'marge-hop-c-'.uniqid();
+    $slugD = 'marge-hop-d-'.uniqid();
+    $toolA = makeMarginDispatchTestTool($slugA);
+    $toolB = makeMarginDispatchTestTool($slugB);
+    $toolC = makeMarginDispatchTestTool($slugC);
+    $toolD = makeMarginDispatchTestTool($slugD);
+    // Les 4 "trop courtes" : chacune produit un effet observable INDIVIDUELLEMENT (une mise en
+    // file), pour rendre un saut ou un retraitement visible sans ambiguite - contrairement a
+    // "deja avec marge", qui est une branche silencieuse.
+    foreach ([$slugA, $slugB, $slugC, $slugD] as $slug) {
+        makeMarginDispatchTestImage(public_path("screenshots/{$slug}.jpg"), 400, 200);
+    }
+
+    Queue::fake();
+    Process::fake();
+
+    // Hop 1 ("processus parent") : segment de 2, jamais de --after-id (premiere execution).
+    $this->artisan('directory:dispatch-margin-recapture', ['--restart-every' => 2])->assertExitCode(0);
+
+    Queue::assertPushed(CaptureScreenshotJob::class, fn (CaptureScreenshotJob $job): bool => $job->tool->is($toolA));
+    Queue::assertPushed(CaptureScreenshotJob::class, fn (CaptureScreenshotJob $job): bool => $job->tool->is($toolB));
+    Queue::assertNotPushed(CaptureScreenshotJob::class, fn (CaptureScreenshotJob $job): bool => $job->tool->is($toolC));
+    Queue::assertNotPushed(CaptureScreenshotJob::class, fn (CaptureScreenshotJob $job): bool => $job->tool->is($toolD));
+
+    // Hop 2 : simule exactement ce que le processus frere relance par le hop 1 aurait recu en
+    // --after-id - celui de B, le dernier outil REELLEMENT traite au hop 1, jamais un id devine.
+    $this->artisan('directory:dispatch-margin-recapture', ['--restart-every' => 2, '--after-id' => $toolB->id])->assertExitCode(0);
+
+    Queue::assertPushed(CaptureScreenshotJob::class, fn (CaptureScreenshotJob $job): bool => $job->tool->is($toolC));
+    Queue::assertPushed(CaptureScreenshotJob::class, fn (CaptureScreenshotJob $job): bool => $job->tool->is($toolD));
+
+    // Preuve finale, la plus forte : exactement 4 mises en file au total sur les deux hops
+    // combines - ni saut (les 4 slugs sont bien tous representes ci-dessus), ni retraitement
+    // (un doublon ferait depasser 4).
+    Queue::assertPushed(CaptureScreenshotJob::class, 4);
+
+    foreach ([$slugA, $slugB, $slugC, $slugD] as $slug) {
+        cleanupMarginDispatchTestFiles($slug);
+    }
 });

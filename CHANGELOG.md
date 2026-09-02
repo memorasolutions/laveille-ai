@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.2] - 2026-09-01
+
+### Corrigé (la reprise des captures peut enfin parcourir tout le catalogue)
+
+- **La commande de recapture mourait d'usure, pas d'un cas particulier.** Le correctif de la veille
+  bornait le pic mémoire d'UNE image, et il était juste : un JPEG de 6000 × 4000 pixels tuait bel et
+  bien le processus. Mais la mesure en production a montré qu'il restait un second défaut, distinct
+  et superposé au premier. L'allocation qui faisait déborder pesait 3 024 001 octets, soit très
+  exactement 1200 × 630 × 4 - la taille du canevas de vignette STANDARD, pas une image démesurée.
+  Le statut « trop grande » introduit la veille comptait d'ailleurs zéro occurrence sur 1400 outils :
+  le garde-fou n'avait jamais eu l'occasion de servir.
+  La vraie cause était un épuisement CUMULATIF : un unique processus traitait 1400 lignes sans jamais
+  redémarrer, et vers la fin il ne restait plus assez de budget pour l'allocation ordinaire dont
+  CHAQUE classification réussie a besoin.
+  La commande relance désormais un processus neuf tous les 250 outils, en reprenant par curseur sur
+  le dernier outil réellement examiné. La consommation d'un processus ne dépend donc plus de la
+  taille du catalogue. Le risque propre à un découpage en lots - sauter un outil ou en traiter deux
+  fois - est couvert par un test qui enchaîne deux segments consécutifs et vérifie le total exact.
+  Le dénominateur réel du catalogue est de 2219 outils publiés avec capture, et non 2336 : ce dernier
+  chiffre venait d'un commentaire de code devenu périmé.
+
 ## [1.247.1] - 2026-09-01
 
 ### Corrigé (le pic mémoire des captures d'annuaire, et ce n'était PAS une fuite)
