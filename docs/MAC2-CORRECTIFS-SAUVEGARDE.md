@@ -1,4 +1,4 @@
-# Mac 2 - deux correctifs de sauvegarde prêts à appliquer (ticket #2171)
+# Mac 2 - trois correctifs de sauvegarde prêts à appliquer (tickets #2171 et #2178)
 
 **État : rédigés et vérifiés en lecture, NON appliqués.** Le verrou `MAC2_READ_ONLY=true` bloque
 l'écriture sur le Mac 2 (mesuré le 2026-09-01 : `mac2_exec` refusé, `mac2_read_file` et
@@ -161,6 +161,79 @@ figé, mais encore faut-il aller le lire. Le rendre actif demanderait un mécani
 contrôle indépendant qui s'inquiète de sa vieillesse - et c'est un chantier séparé, pas un
 correctif de dix lignes. **Ne pas confondre les deux : ce correctif rend le problème VISIBLE, il
 ne le rend pas BRUYANT.**
+
+---
+
+## Correctif 3 - le transfert des fichiers echoue sur du cache jetable
+
+### Ce qui a ete mesure
+
+Journal du 19 aout 2026, etape de transfert de `public_html` :
+
+```
+file has vanished: .../app.monate.ca/storage/framework/views/0585f987....php   (11 occurrences)
+rsync warning: some files vanished before they could be transferred (code 24)
+ERROR: Rsync 'public_html' ECHEC definitif apres 1 tentative(s)
+```
+
+Le code 24 **n'est pas une erreur**. C'est un avertissement normal : des fichiers ont disparu
+pendant le transfert. Les fichiers en cause sont des vues Blade compilees - du cache jetable,
+regenere en permanence par les applications qui tournent. Sur un serveur vivant, leur disparition
+au cours d'un transfert de sept heures n'est pas un incident : **elle est certaine.**
+
+Le script traite pourtant ce code comme un echec definitif, et n'essaie qu'une seule fois.
+
+### La consequence, ecrite chaque nuit sans que personne la lise
+
+| Nuit | Ce que le journal dit |
+|---|---|
+| 19 aout | `ECHEC definitif` - aucun fichier transfere |
+| 22 aout | `Backup fichiers public_html perime: 93h (>48h)` |
+| 2 septembre | `Backup fichiers public_html perime: 134h (>48h)` |
+
+Les bases de donnees sont bien sauvegardees. Les **fichiers** - tout le code de tous les sites -
+ne le sont qu'irregulierement. Le script le sait, il l'ecrit, et le message se perd dans un journal
+que rien ne fait remonter.
+
+### Le bloc a modifier
+
+Dans la fonction qui lance le transfert, la comparaison du code de retour doit accepter 24 :
+
+```bash
+# --- CODE 24 = SUCCES (ajoute 2026-09-02, ticket #2178) ---
+# Pourquoi : rsync renvoie 24 quand des fichiers ont disparu pendant le transfert. Sur un serveur
+# en production, le cache Laravel (storage/framework/views) se regenere en continu : ce code est
+# donc GARANTI d apparaitre, et le traiter comme un echec a laisse public_html sans copie fraiche
+# pendant 134 h. Un fichier de cache absent d une sauvegarde n a aucune consequence : il se
+# reconstruit tout seul au premier appel.
+if [ "$rc" -eq 0 ] || [ "$rc" -eq 24 ]; then
+    [ "$rc" -eq 24 ] && echo "$(date '+%Y-%m-%d %H:%M:%S') INFO: rsync '$brique' code 24 (fichiers volatils disparus) - traite comme succes" >> "$LOG"
+    # ... chemin de succes existant, inchange ...
+```
+
+Et les exclusions, a ajouter aux options du transfert :
+
+```bash
+--exclude='storage/framework/views/' \
+--exclude='storage/framework/cache/' \
+--exclude='bootstrap/cache/' \
+```
+
+### Les deux pieges a ne pas creer en corrigeant
+
+**Ne pas transformer 24 en succes SILENCIEUX.** Le code doit rester journalise : s il se met a
+apparaitre sur des fichiers qui ne sont pas du cache, c est un signal reel qu on aurait efface.
+D ou la ligne de journal dans le bloc ci-dessus, plutot qu une simple acceptation muette.
+
+**Ne pas exclure `storage/` en entier.** Le dossier contient aussi `storage/app/`, ou vivent des
+fichiers deposes par les utilisateurs - les exclure serait une perte de donnees reelle. Les trois
+exclusions ci-dessus visent uniquement des repertoires de cache regenerables, jamais un contenu
+produit par quelqu un.
+
+### Ce que ce correctif ne fait PAS
+
+Il retablit la FIABILITE du transfert. Il ne touche pas a sa DUREE, ni aux 58 % du temps total que
+consomme le nettoyage des vieux dumps - un sujet distinct, mesure a part.
 
 ---
 
