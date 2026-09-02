@@ -115,6 +115,7 @@ class ToolComparisonService
 
         $tools = Tool::whereIn('id', $ids)
             ->where('status', 'published')
+            ->notArchived()
             ->with('categories')
             ->get();
 

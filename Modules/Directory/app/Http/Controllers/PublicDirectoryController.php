@@ -166,7 +166,7 @@ class PublicDirectoryController extends Controller
 
         if (empty($ids) && $categorySlug) {
             $category = Category::where('slug->fr_CA', $categorySlug)->firstOrFail();
-            $ids = $category->tools()->published()
+            $ids = $category->tools()->published()->notArchived()
                 ->orderByDesc('clicks_count')
                 ->limit(\Modules\Directory\Services\ToolComparisonService::MAX_TOOLS)
                 ->pluck('directory_tools.id')

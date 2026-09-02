@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.3] - 2026-09-01
+
+### Corrigé (une fiche retirée du catalogue pouvait encore être comparée)
+
+- **Le comparateur d'outils ne filtrait pas les fiches archivées.** Quatre portes publiques sur cinq
+  les excluent depuis longtemps ; celle du comparateur ne le faisait pas, ni dans le contrôleur qui
+  choisit les identifiants, ni dans le service qui charge les fiches. Une fiche à la fois publiée et
+  archivée - c'est le cas des six fusions faites à ce jour, qui restent en base et redirigent en 301 -
+  pouvait donc être comparée à des outils actifs, et le lecteur comparait sans le savoir un produit
+  retiré du catalogue.
+  Impact réel jusqu'ici : nul, mais **par hasard** - les fiches concernées passaient sous le seuil des
+  six outils les plus cliqués de leur catégorie. Un hasard n'est pas une protection, et le test le
+  prend au mot : il place une fiche archivée en TÊTE du classement, avec plus de clics que toutes les
+  actives, et vérifie qu'elle est écartée AVANT le classement - sans quoi elle volerait une place à
+  une fiche active légitime.
+  Trois tests, deux portes couvertes séparément, chacune atteinte par un chemin qui ne passe pas par
+  l'autre. Une recherche d'une troisième porte n'en a trouvé aucune.
+
 ## [1.247.2] - 2026-09-01
 
 ### Corrigé (la reprise des captures peut enfin parcourir tout le catalogue)
