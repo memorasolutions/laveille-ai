@@ -418,12 +418,30 @@ class ToolDiscoveryService
             return null;
         }
 
-        // Dédup par nom fuzzy (aliases inclus)
+        // Dédup par nom : égalité STRICTE après normalisation (aliases inclus) en plus du score
+        // flou existant ci-dessous - correctif mesuré ticket #2175 (2026-09-02). Le score flou
+        // seul manquait de façon systématique les 5 doublons réels du catalogue (Voiser AI,
+        // CaseGap AI, Thinnest AI, NoMac.app, Animos App - tous créés par CE pipeline, le dernier
+        // le 15 juillet 2026) : leur nom était pourtant identique caractère pour caractère d'une
+        // fiche à l'autre, mais le suffixe générique (« AI »/« App »/« Tool ») retiré ci-dessous
+        // n'est retiré QUE du candidat entrant, jamais du nom déjà en base - asymétrie qui
+        // abaissait le score sous le seuil de 85 (75-84 % mesurés, jamais 100 %).
+        //
+        // Volontairement fondé sur le NOM SEUL, jamais sur l'URL en plus : la mesure a montré que
+        // les 5 doublons réels n'ont JAMAIS le même domaine (site officiel vs page ProductHunt ou
+        // domaine miroir - c'est précisément pourquoi ils existent), donc une garde qui exigerait
+        // AUSSI l'égalité d'URL n'en aurait bloqué AUCUN. Vérifié sans risque nouveau pour les
+        // familles de produits légitimes qui partagent un domaine sous des noms différents (ex.
+        // Stability AI / Stable Diffusion, ElevenLabs / ElevenAgents Guardrails 2.0 - aucun des
+        // deux ne partage de nom normalisé, donc ni l'un ni l'autre n'est jamais concerné).
+        $nameNormExact = ToolNameCleanerService::normalizeForComparison($name);
+
+        // Dédup par nom fuzzy (aliases inclus) - contrôle existant, seuil et comportement inchangés.
         $nameNorm = preg_replace('/\s*(ai|tool|app)\s*$/i', '', $name);
         $existing = Tool::select('id', 'name', 'aliases')->get();
 
         foreach ($existing as $tool) {
-            if ($tool->matchesName($nameNorm) > 85) {
+            if ($tool->matchesNameExact($nameNormExact) || $tool->matchesName($nameNorm) > 85) {
                 $this->discoveryStats['refused']['doublon']++;
                 $this->lastRefusalReason = 'doublon';
 

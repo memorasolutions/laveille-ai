@@ -564,3 +564,97 @@ it('finition 2026-08-22 : motif "doublon" - le message affiché reste « Doublon
     // candidat découvert a bien été refusé, pas inséré.
     expect(Tool::count())->toBe($before);
 });
+
+// --- Ticket #2175 (mesuré 2026-09-02) : le pipeline fabrique un doublon quand le NOM est ---------
+// identique mais le DOMAINE diffère entièrement (site officiel vs page ProductHunt / domaine
+// miroir). Mesure sur les données réelles de production : 440 fiches créées par ce pipeline depuis
+// juillet 2026 (cluster horaire 04h00, signature du cron tools:discover-new->dailyAt('04:00')),
+// dont 2 auraient dû être refusées (Animos App, NoMac.app - les 3 autres paires connues, Voiser AI/
+// CaseGap AI/Thinnest AI, datent de mai 2026, hors fenêtre "depuis juillet" du mandat). Cause
+// établie par reproduction exacte du calcul de matchesName() sur les 5 paires réelles :
+// similar_text() rend 75 à 84 % - jamais 100 %, toujours sous le seuil de 85 - à cause du suffixe
+// («\u{a0}AI\u{a0}»/«\u{a0}App\u{a0}») retiré du SEUL candidat entrant (ligne ~422), jamais du nom déjà
+// en base. La forme suggérée par le mandat (bloquer sur URL normalisée ET nom normalisé, les deux)
+// a été mesurée et ÉCARTÉE : les 5 doublons réels n'ont JAMAIS le même domaine (c'est précisément
+// pourquoi ils existent), une garde qui exige aussi l'URL n'en aurait bloqué AUCUN. D'où un
+// contrôle par nom SEUL - vérifié séparément ci-dessous pour ne pas bloquer à tort deux produits
+// d'une même famille qui partagent un domaine.
+it('#2175 : refuse un second candidat dont le nom est identique mais dont le domaine diffère entièrement (motif réel juillet 2026)', function () {
+    $service = new ToolDiscoveryService();
+
+    $first = $service->ingest([
+        'name' => 'Zumbrota AI',
+        'url' => 'https://zumbrota.ai/product',
+        'source' => 'producthunt',
+    ]);
+    expect($first)->not->toBeNull();
+
+    // Même nom exact, domaine totalement différent (mimique un miroir/domaine secondaire, comme
+    // « bagel.ai » vs « getbagel.com » observé pour de vrai le 2026-05-07 sur la fiche Bagel AI).
+    // AVANT correctif : similar_text('zumbrota', 'zumbrota ai') = 80 % < 85 -> accepté à tort.
+    $second = $service->ingest([
+        'name' => 'Zumbrota AI',
+        'url' => 'https://getzumbrota.example.net',
+        'source' => 'rss:producthunt',
+    ]);
+
+    expect($second)->toBeNull();
+    expect($service->getLastRefusalReason())->toBe('doublon');
+});
+
+it('#2175 : matchesNameExact() distingue Stability AI de Stable Diffusion, et ElevenLabs de ElevenAgents Guardrails 2.0, même avec une URL identique', function () {
+    // Reproduction directe des DEUX cas légitimes trouvés en production (mêmes noms, même URL
+    // réelle stability.ai / elevenlabs.io) : une garde par URL seule les aurait bloqués à tort: ce
+    // test vérifie explicitement que la garde par NOM (celle réellement livrée) ne les confond pas.
+    $stableDiffusion = new Tool;
+    $stableDiffusion->setTranslation('name', 'fr_CA', 'Stable Diffusion');
+    $stableDiffusion->url = 'https://stability.ai';
+
+    $elevenAgents = new Tool;
+    $elevenAgents->setTranslation('name', 'fr_CA', 'ElevenAgents Guardrails 2.0');
+    $elevenAgents->url = 'https://elevenlabs.io';
+
+    $stabilityAiCandidate = ToolNameCleanerService::normalizeForComparison('Stability AI');
+    $elevenLabsCandidate = ToolNameCleanerService::normalizeForComparison('ElevenLabs');
+
+    expect($stableDiffusion->matchesNameExact($stabilityAiCandidate))->toBeFalse();
+    expect($elevenAgents->matchesNameExact($elevenLabsCandidate))->toBeFalse();
+
+    // Non-régression : ce même mécanisme reconnaît bien un nom réellement identique.
+    $sameNameDifferentCase = ToolNameCleanerService::normalizeForComparison('stable diffusion');
+    expect($stableDiffusion->matchesNameExact($sameNameDifferentCase))->toBeTrue();
+});
+
+it('#2175 : matchesNameExact() reconnaît aussi un alias normalisé, pas seulement le nom principal', function () {
+    $tool = new Tool;
+    $tool->setTranslation('name', 'fr_CA', 'GPT Chat Pro');
+    $tool->aliases = ['ChatGPT Plus', 'GPT-4 Turbo'];
+
+    expect($tool->matchesNameExact(ToolNameCleanerService::normalizeForComparison('chatgpt plus')))->toBeTrue();
+    expect($tool->matchesNameExact(ToolNameCleanerService::normalizeForComparison('Something Else Entirely')))->toBeFalse();
+});
+
+it('#2175 (portée) : documente un comportement PRÉ-EXISTANT et hors mandat - le contrôle par domaine (host-substring, inchangé par ce correctif) bloque déjà un produit-frère qui partagerait EXACTEMENT le même domaine, même à nom différent', function () {
+    // Ne prouve rien sur LE NOUVEAU contrôle (les noms diffèrent, il ne s'en mêle pas) : montre
+    // que si Stability AI et Stable Diffusion partageaient un domaine ET arrivaient via CE
+    // pipeline, le contrôle par domaine déjà en place (identique au cas « Zibsonic Metrics »
+    // plus haut) les refuserait quand même - un fait pré-existant, pas un effet de bord de #2175.
+    // Le corriger exigerait sa propre mesure de faux positifs, hors périmètre de ce ticket.
+    $service = new ToolDiscoveryService();
+
+    $first = $service->ingest([
+        'name' => 'Stability AI',
+        'url' => 'https://stability-demo.example.org',
+        'source' => 'rss:test',
+    ]);
+    expect($first)->not->toBeNull();
+
+    $second = $service->ingest([
+        'name' => 'Stable Diffusion',
+        'url' => 'https://stability-demo.example.org/stable-diffusion',
+        'source' => 'rss:test',
+    ]);
+
+    expect($second)->toBeNull();
+    expect($service->getLastRefusalReason())->toBe('doublon');
+});

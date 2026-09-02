@@ -118,13 +118,13 @@ class Tool extends Model implements Searchable
         return $this->belongsTo(self::class, 'lifecycle_replacement_tool_id');
     }
 
-    public function matchesName(string $candidate): int
+    /**
+     * Nom principal (locale fr_CA) + tous les alias non vides, bruts (pas encore normalisés).
+     * Extrait partagé par matchesName() (score flou) et matchesNameExact() (égalité stricte,
+     * ticket #2175) - avant ce partage, chaque méthode reconstruisait la même liste séparément.
+     */
+    protected function comparableNames(): array
     {
-        $candidate = mb_strtolower(trim($candidate));
-        if ($candidate === '') {
-            return 0;
-        }
-
         $names = [(string) ($this->getTranslation('name', 'fr_CA', false) ?? '')];
 
         if (is_array($this->aliases)) {
@@ -135,9 +135,19 @@ class Tool extends Model implements Searchable
             }
         }
 
+        return $names;
+    }
+
+    public function matchesName(string $candidate): int
+    {
+        $candidate = mb_strtolower(trim($candidate));
+        if ($candidate === '') {
+            return 0;
+        }
+
         $best = 0;
 
-        foreach ($names as $n) {
+        foreach ($this->comparableNames() as $n) {
             $n = mb_strtolower(trim($n));
             if ($n === '') {
                 continue;
@@ -147,6 +157,34 @@ class Tool extends Model implements Searchable
         }
 
         return $best;
+    }
+
+    /**
+     * Égalité STRICTE (après normalisation accents/casse/ponctuation, voir
+     * ToolNameCleanerService::normalizeForComparison()) entre $normalizedCandidate et le nom
+     * principal ou un alias de cette fiche. Ticket #2175 (mesuré 2026-09-02) : matchesName() seul
+     * (score flou, seuil 85) manquait les 5 doublons réels du catalogue créés par
+     * ToolDiscoveryService - leur nom était pourtant identique caractère pour caractère d'une
+     * fiche à l'autre. $normalizedCandidate doit déjà être passé par
+     * ToolNameCleanerService::normalizeForComparison() par l'appelant (évite de le recalculer à
+     * chaque fiche comparée dans une boucle).
+     */
+    public function matchesNameExact(string $normalizedCandidate): bool
+    {
+        if ($normalizedCandidate === '') {
+            return false;
+        }
+
+        foreach ($this->comparableNames() as $n) {
+            if ($n === '') {
+                continue;
+            }
+            if (\Modules\Directory\Services\ToolNameCleanerService::normalizeForComparison($n) === $normalizedCandidate) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function childTools(): HasMany

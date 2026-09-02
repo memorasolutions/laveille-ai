@@ -52,6 +52,29 @@ final class ToolNameCleanerService
     }
 
     /**
+     * Normalise un nom pour une comparaison d'ÉGALITÉ STRICTE entre deux fiches (minuscules, sans
+     * accents, sans ponctuation, espaces multiples réduits à un seul). Utilisé par
+     * Tool::matchesNameExact() / ToolDiscoveryService::ingest() (ticket #2175, mesuré 2026-09-02).
+     *
+     * N'ALTÈRE PAS ToolDiscoveryService::ingest() : la mesure a établi que les 5 doublons réels du
+     * catalogue (Voiser AI, CaseGap AI, Thinnest AI, NoMac.app, Animos App) portaient un nom
+     * RIGOUREUSEMENT identique d'une fiche à l'autre - le contrôle flou existant (matchesName(),
+     * seuil 85) les manquait quand même, car le suffixe générique («\u{a0}AI\u{a0}»/«\u{a0}App\u{a0}»/
+     * «\u{a0}Tool\u{a0}») n'était retiré QUE du candidat entrant, jamais du nom déjà en base -
+     * asymétrie qui abaissait artificiellement le score sous le seuil (75-84 % mesurés, jamais
+     * 100 %). Volontairement SANS ce genre de troncature de suffixe : une égalité stricte n'a pas
+     * besoin d'heuristique, et une heuristique asymétrique est précisément ce qui a causé le bug.
+     */
+    public static function normalizeForComparison(string $name): string
+    {
+        $ascii = \Illuminate\Support\Str::ascii($name);
+        $lower = mb_strtolower($ascii);
+        $alnumOnly = preg_replace('/[^a-z0-9]+/', ' ', $lower);
+
+        return trim(preg_replace('/\s+/', ' ', $alnumOnly));
+    }
+
+    /**
      * Signale un titre qui ressemble à une commande shell ou une instruction d'installation
      * plutôt qu'à un nom de produit (ex. « npm i -g hotcell » depuis le flux hnrss.org/show).
      * N'altère PAS le comportement de clean() : les appelants existants (FixHnSlugsCommand)

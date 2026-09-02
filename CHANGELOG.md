@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.4] - 2026-09-02
+
+### Corrige
+
+- **La decouverte automatique ne fabrique plus de doublons d'annuaire** (ticket #2175). Le
+  pipeline creait une fiche pour le site propre d'un outil ET une seconde pour sa page
+  ProductHunt, sous des noms quasi identiques. Cinq doublons du catalogue viennent de la, le plus
+  recent du 15 juillet 2026 - contrairement au semeur ponctuel qu'on soupconnait, qui n'a tourne
+  qu'une fois le 9 mai et dort depuis.
+
+  **Cause exacte, etablie par reproduction du calcul existant** : le controle de nom retirait le
+  suffixe generique (« AI », « App », « Tool ») du candidat entrant, jamais du nom deja en base.
+  Cette asymetrie abaissait la similarite a 75-84 % sur les cinq paires, toujours sous le seuil de
+  85 - le controle passait donc a cote de noms identiques caractere pour caractere.
+
+  **La garde ajoutee porte sur le NOM SEUL, jamais sur l'URL en plus** : la mesure a montre que
+  les cinq doublons reels n'ont JAMAIS le meme domaine (site officiel contre page ProductHunt -
+  c'est precisement pourquoi ils existent). Une garde exigeant aussi l'egalite d'URL n'en aurait
+  bloque aucun.
+
+  **Zero faux positif mesure.** Les familles de produits legitimes qui partagent un domaine sous
+  des noms differents passent toujours : Stability AI et Stable Diffusion, ElevenLabs et
+  ElevenAgents Guardrails 2.0 - verifie par test explicite, pas suppose.
+
+  Le controle flou preexistant reste inchange : la garde exacte s'y ajoute en filet, plutot que de
+  modifier un mecanisme dont les faux positifs n'ont pas ete mesures separement.
+
+  300 tests Directory verts, 779 assertions.
+
 ## [1.247.3] - 2026-09-01
 
 ### Corrigé (une fiche retirée du catalogue pouvait encore être comparée)
