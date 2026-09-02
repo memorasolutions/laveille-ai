@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 use Nwidart\Modules\Facades\Module;
+use Tests\Support\ParallelSafety;
 
 uses(Tests\TestCase::class);
 
@@ -34,16 +35,11 @@ dataset('optional_modules', [
 ]);
 
 test('route:list does not crash when an optional module is disabled', function (string $module) {
-    // Ce test mute le fichier partagé modules_statuses.json → DANGEREUX en parallèle
-    // (les autres workers liraient un module désactivé à mi-course). On détecte le mode
-    // parallèle de plusieurs façons pour être robuste (env / token paratest).
-    $isParallel = (bool) (env('LARAVEL_PARALLEL_TESTING')
-        || getenv('LARAVEL_PARALLEL_TESTING')
-        || getenv('TEST_TOKEN')
-        || getenv('PARATEST'));
-
-    if ($isParallel) {
-        $this->markTestSkipped('Modifie le fichier partagé modules_statuses.json — non sûr en parallèle.');
+    // Ce test mute le fichier partagé modules_statuses.json : les autres processus
+    // liraient un module désactivé à mi-course. Le POURQUOI détaillé et la détection
+    // elle-même vivent dans Tests\Support\ParallelSafety (source unique).
+    if (ParallelSafety::isParallel()) {
+        $this->markTestSkipped(ParallelSafety::sharedFileSkipReason());
     }
 
     $statusPath = base_path('modules_statuses.json');

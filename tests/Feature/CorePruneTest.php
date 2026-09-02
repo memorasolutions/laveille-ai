@@ -10,12 +10,36 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
+use Tests\Support\ParallelSafety;
 
 beforeEach(function (): void {
+    // Ces tests mutent le fichier PARTAGÉ modules_statuses.json (base_path, pas une copie).
+    // Le POURQUOI complet (course reproduite, absence de verrou Laravel) vit dans
+    // Tests\Support\ParallelSafety - une seule source, pour que les trois fichiers
+    // concernés ne puissent pas diverger sur une règle de sécurité.
+    // Le sauvegarder et le restaurer ne protège que CE processus : un autre processus qui
+    // boote pendant la fenêtre de mutation lit un instantané tronqué et échoue, avec un
+    // message qui varie selon la clé absente au moment exact (« No hint path defined for
+    // [fronttheme] », « Module [AI] requires [Settings] »...). Course reproduite le
+    // 2026-09-02 en faisant tourner ce fichier et BlogAdminTest dans deux processus
+    // concurrents : échec après ~11 itérations. Aucun verrou dans la chaîne Laravel
+    // (Filesystem::put/get ont $lock = false), et FileActivator ne lit le fichier
+    // qu'UNE fois, au boot.
+    //
+    // Même garde que Modules/Core/tests/Feature/ModuleIsolationTest.php, qui mute le
+    // même fichier et se protège déjà ainsi. Détection large : les quatre variables
+    // couvrent paratest et le mode parallèle natif de Laravel.
+    // ORDRE IMPORTANT : initialiser AVANT de sauter. Le afterEach s'exécute même sur un
+    // test sauté ; s'il ne trouve pas $this->originalModulesStatus, les 8 tests échouent
+    // au lieu d'être ignorés (mesuré le 2026-09-02 en écrivant ce garde-fou).
     $this->modulesStatusPath = base_path('modules_statuses.json');
     $this->originalModulesStatus = File::exists($this->modulesStatusPath)
         ? File::get($this->modulesStatusPath)
         : null;
+
+    if (ParallelSafety::isParallel()) {
+        $this->markTestSkipped(ParallelSafety::sharedFileSkipReason());
+    }
 });
 
 afterEach(function (): void {

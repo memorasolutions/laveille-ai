@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.6] - 2026-09-02
+
+### Corrigé
+- **Course entre processus sur `modules_statuses.json`** : trois fichiers de test écrivaient dans
+  le VRAI fichier du dépôt sans se protéger du mode parallèle. Un autre processus qui démarrait
+  pendant la fenêtre de mutation lisait un instantané tronqué et échouait, avec un message qui
+  changeait selon la clé absente à cet instant (« No hint path defined for [fronttheme] »,
+  « Module [AI] requires [Settings] »...) - d'où des échecs qui semblaient aléatoires et sans
+  rapport entre eux. Course reproduite en faisant tourner deux de ces fichiers en concurrence :
+  échec après une dizaine d'itérations. Aucun verrou n'existe dans la chaîne Laravel
+  (`Filesystem::put()/get()` ont `$lock = false`), et `FileActivator` ne lit le fichier qu'une
+  fois, au démarrage.
+- Nouvelle classe `Tests\Support\ParallelSafety` : source unique de la détection du mode
+  parallèle, plutôt que le bloc de quatre variables recopié dans chaque fichier. La règle DRY du
+  projet impose l'extraction quand la duplication porte une règle de SÉCURITÉ dont la divergence
+  serait dangereuse - ici, une copie qui oublierait une variable redeviendrait vulnérable en
+  silence. Autoloadée par le PSR-4 `Tests\` déjà déclaré, donc sans toucher à `composer.json`
+  ni exiger de `dump-autoload` au déploiement, et absente d'une installation `--no-dev`.
+- Le garde est posé APRÈS l'initialisation des propriétés, jamais avant : le `afterEach`
+  s'exécute même sur un test ignoré, et sauter trop tôt faisait ÉCHOUER les huit tests au lieu
+  de les ignorer (mesuré en écrivant le correctif, première version rejetée).
+- `NewProjectCommandTest` mutait aussi `.env`, en plus de `modules_statuses.json` : il est
+  désormais couvert par le même garde.
+- Deux tirets cadratins retirés d'un commentaire de `ModuleIsolationTest` (règle de typographie
+  du projet).
+
+Preuve, fichier par fichier, dans les deux modes : `CorePruneTest` 8 réussis en série / 8 ignorés
+en parallèle ; `ModuleIsolationTest` 18 / 17 ignorés + 1 réussi ; `NewProjectCommandTest` 9 / 9
+ignorés. `modules_statuses.json` et `.env` intacts après les six exécutions.
+
 ## [1.247.5] - 2026-09-02
 
 ### Ajoute

@@ -9,6 +9,7 @@ declare(strict_types=1);
  */
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\ParallelSafety;
 
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
@@ -18,6 +19,14 @@ beforeEach(function () {
     $this->envBackup = file_get_contents($this->envPath);
     $this->modulesPath = base_path('modules_statuses.json');
     $this->modulesBackup = file_get_contents($this->modulesPath);
+
+    // ORDRE IMPORTANT : le garde vient APRÈS l'initialisation, parce que le afterEach
+    // s'exécute même sur un test sauté - s'il ne trouve pas $this->modulesBackup, les
+    // tests échouent au lieu d'être ignorés (mesuré le 2026-09-02 en écrivant ce garde).
+    // Ce fichier mute .env ET modules_statuses.json, deux fichiers PARTAGÉS du dépôt.
+    if (ParallelSafety::isParallel()) {
+        $this->markTestSkipped(ParallelSafety::sharedFileSkipReason('modules_statuses.json et .env'));
+    }
 });
 
 afterEach(function () {
