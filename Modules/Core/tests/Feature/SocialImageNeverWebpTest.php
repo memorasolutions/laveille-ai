@@ -121,3 +121,27 @@ it('integration : la vue du blogue ne sert jamais og:image en .webp', function (
         ->not()->toContain('.webp')
         ->toContain('og-image.png');
 });
+
+it("l'accesseur Article::featured_image_shareable_url sert l'URL publique correcte pour un chemin à slash initial existant sous public/", function () {
+    // 2026-09-02 : même correctif que featured_image_url (voir ArticleFeaturedImageUrlTest) -
+    // avant, un chemin à slash initial (ex. /images/blog/{slug}.jpg écrit par /actu2) ressortait
+    // en "storage//images/blog/x.jpg" (préfixe erroné + double barre oblique), 404 chez l'aperçu
+    // Facebook/LinkedIn alors que le fichier existe bel et bien sous public/.
+    $dir = 'images/_test_social_image_resolver/'.uniqid('shareable_slash_');
+    sirTouchFile("{$dir}/photo.jpg");
+
+    $article = Article::factory()->make(['featured_image' => "/{$dir}/photo.jpg"]);
+
+    expect($article->featured_image_shareable_url)
+        ->toContain("{$dir}/photo.jpg")
+        ->not->toContain('/storage/')
+        ->not->toContain('og-image.png');
+});
+
+it("l'accesseur Article::featured_image_shareable_url conserve le repli générique quand un chemin à slash initial est réellement absent", function () {
+    $article = Article::factory()->make([
+        'featured_image' => '/images/_test_social_image_resolver/fantome-'.uniqid().'/photo.jpg',
+    ]);
+
+    expect($article->featured_image_shareable_url)->toContain('og-image.png');
+});

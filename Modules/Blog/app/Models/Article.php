@@ -276,7 +276,10 @@ class Article extends Model implements SearchableContract
 
     /**
      * URL affichable de l'image mise en avant, quelle que soit la convention de stockage
-     * (upload admin: "articles/x.jpg" sans préfixe ; import WordPress: "storage/blog/x.jpg" déjà préfixé).
+     * (upload admin: "articles/x.jpg" sans préfixe ; import WordPress: "storage/blog/x.jpg" déjà
+     * préfixé ; pipeline d'illustration /actu2 et Concentré hebdo: "images/blog/x.jpg" ou
+     * "/images/blog/x.jpg", avec ou sans slash initial, fichier physique SOUS public/ directement
+     * - jamais via le disque Storage "public").
      */
     public function getFeaturedImageUrlAttribute(): ?string
     {
@@ -300,6 +303,20 @@ class Article extends Model implements SearchableContract
                 : asset('images/og-image.png');
         }
 
+        // 2026-09-02 : convention "servi directement depuis public/" (ex. /images/blog/{slug}.jpg
+        // écrit par le pipeline d'illustration /actu2, ou images/blog/concentre-hebdo-...jpg écrit
+        // par ConcentreBuilderController) - avec ou sans slash initial, ce fichier ne vit NULLE
+        // PART sur le disque Storage "public" (storage/app/public/...), c'est un fichier physique
+        // sous public/ lui-même. Sans cette vérification, le repli Storage::disk ci-dessous
+        // cherchait à la mauvaise racine et déclarait à tort l'image absente (repli sur le visuel
+        // générique) alors qu'elle existe bel et bien sur le serveur - défaut mesuré en prod le
+        // 2026-09-02 (aperçu og:image `/storage//images/blog/...` en 404 sur un fichier `/images/
+        // blog/...` qui répond 200).
+        $publicRelativePath = ltrim($this->featured_image, '/');
+        if (file_exists(public_path($publicRelativePath))) {
+            return asset($publicRelativePath);
+        }
+
         return \Illuminate\Support\Facades\Storage::disk('public')->exists($this->featured_image)
             ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->featured_image)
             : asset('images/og-image.png');
@@ -317,6 +334,13 @@ class Article extends Model implements SearchableContract
      * vers sa forme relative à public_path() - un featured_image d'upload admin ("articles/x.jpg")
      * vit sur le disque Storage "public", accessible publiquement via le lien symbolique
      * public/storage/, donc "storage/articles/x.jpg" du point de vue de public_path().
+     *
+     * 2026-09-02 : AVANT de supposer cette convention Storage "public" par défaut, vérifier si le
+     * chemin relève plutôt de la convention "servi directement depuis public/" (voir le
+     * commentaire de getFeaturedImageUrlAttribute() ci-dessus, ex. /images/blog/{slug}.jpg écrit
+     * par /actu2) - avec ou sans slash initial. Sans cette vérification, un chemin à slash initial
+     * ressortait en "storage//images/blog/x.jpg" (préfixe erroné + double barre oblique), 404 chez
+     * l'aperçu Facebook/LinkedIn alors que le fichier existe bel et bien sous public/.
      */
     public function getFeaturedImageShareableUrlAttribute(): ?string
     {
@@ -327,7 +351,21 @@ class Article extends Model implements SearchableContract
         $path = $this->featured_image;
 
         if (!str_starts_with($path, 'http') && !str_starts_with($path, 'storage/')) {
-            $path = 'storage/' . $path;
+            $publicRelativePath = ltrim($path, '/');
+
+            if (file_exists(public_path($publicRelativePath))) {
+                // Fichier réel sous public/ : jamais de préfixe storage/ ici, ce serait la
+                // mauvaise racine (voir commentaire ci-dessus).
+                $path = $publicRelativePath;
+            } elseif (str_starts_with($path, '/')) {
+                // Chemin à slash initial dont le fichier est RÉELLEMENT absent : cette convention
+                // ne vit jamais sur le disque Storage "public", reconstituer un "storage/..." à
+                // l'aveugle ne résoudrait donc rien - repli générique direct, comme
+                // getFeaturedImageUrlAttribute() ci-dessus.
+                $path = 'images/og-image.png';
+            } else {
+                $path = 'storage/' . $path;
+            }
         }
 
         $shareablePath = SocialImageResolver::shareable($path);

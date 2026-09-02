@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.5] - 2026-09-02
+
+### Ajoute
+
+- **Article de fond : « Est-ce que l'intelligence artificielle boit toute l'eau de la planete ? »**
+  8 648 mots, publie apres relecture et feu vert du fondateur. Repond a la peur d'une bouteille
+  d'eau par requete - la mesure reelle est de 0,32 millilitre - et explique que le probleme n'est
+  pas ce volume mais sa CONCENTRATION locale autour de certains centres de donnees. Onze sources,
+  chacune verifiee par requete reelle ; le chiffre des 14,2 millions de metres cubes reconstitues
+  par Microsoft, introuvable dans les deux sources initialement citees, a ete localise dans un
+  troisieme document officiel et reattribue.
+  Image de couverture produite via le compte Gemini du fondateur, 1200x630.
+
+### Corrige
+
+- **Aucun article du blogue n'affichait sa vraie image** (ticket #2183). Mesure en production sur
+  un article dont le fichier existe pourtant :
+
+  ```
+  /images/blog/ia-locale-partie-3-mcp.jpg           -> 200   (le fichier est la)
+  /storage//images/blog/ia-locale-partie-3-mcp.jpg  -> 404   (ce que le site publiait)
+  ```
+
+  **Cause** : les deux accesseurs d'image ignoraient la convention « fichier servi directement
+  depuis `public/` ». L'affichage testait `storage/` SANS slash initial, alors que nos chemins
+  commencent par `/images/` ; il retombait donc sur le disque `public` de Laravel, qui pointe
+  vers `storage/app/public/` - la mauvaise racine. La variante og:image, elle, prefixait
+  aveuglement `storage/` sur un chemin deja a slash initial, produisant la double barre oblique.
+
+  **Portee** : tout article suivant la convention `/images/blog/{slug}.jpg`. L'affichage retombait
+  sur l'image generique du site, et les apercus de partage LinkedIn et Facebook servaient une URL
+  qui repond 404.
+
+  **Ce qui a rendu ce defaut invisible pendant des semaines** : un repli sur l'image generique
+  ajoute en juillet pour eviter les images cassees. Il faisait son travail - aucune page n'etait
+  laissee sans illustration - et c'est precisement pour cela que personne ne voyait rien. Un
+  correctif qui masquait son propre symptome. Le repli est CONSERVE : il reste utile quand un
+  fichier est reellement absent.
+
+  Les deux accesseurs sont corriges, verrouilles par 4 tests qui echouaient d'abord et
+  reproduisent le motif `storage//images/...` mesure en production. La protection WebP/AVIF des
+  apercus sociaux est intacte. 88 tests Blog verts, 204 assertions.
+
 ## [1.247.4] - 2026-09-02
 
 ### Corrige
