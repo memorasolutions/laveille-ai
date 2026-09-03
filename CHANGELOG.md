@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.251.1] - 2026-09-03
+
+### Corrigé
+- **La suite de tests JavaScript s'arrêtait au premier échec, et masquait donc les fichiers suivants** - le lanceur `test:js` enchaînait `node "$f" || exit 1`, si bien qu'un seul fichier rouge interrompait la boucle et que tout ce qui venait après lui, dans l'ordre alphabétique, n'était jamais exécuté. Le lanceur parcourt désormais TOUS les fichiers, nomme précisément ceux qui échouent, et **conserve un code de sortie non nul** : la suite reste rouge quand elle doit l'être, elle devient seulement complète. Mesure avant/après : 42 fichiers exécutés au lieu de 42 dont un jamais atteint, `user-prompts-core.test.cjs` (17 assertions) enfin lancé.
+- **Retrait d'un test devenu orphelin** - `tests/js/prompt-verifier-rules-detect.test.cjs` vérifiait `public/assets/tools/constructeur-prompts/prompt-verifier-rules.js`, fichier supprimé volontairement par le revert `fad32772` (« ajouté par la réécriture, non utilisé ailleurs - vérifié »). Le test avait survécu au revert et échouait en `ENOENT` à chaque exécution : c'était un résidu de nettoyage incomplet, pas une régression.
+
+### Note de méthode
+- L'ampleur annoncée au ticket était plus large que la réalité mesurée : « tous les tests situés après » se réduisait à **un seul** fichier. Le mécanisme était bien réel, son coût ne l'était pas autant - d'où la mesure avant l'annonce.
+
 ## [1.251.0] - 2026-09-03
 
 ### Ajouté

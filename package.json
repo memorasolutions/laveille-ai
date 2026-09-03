@@ -6,7 +6,7 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "test:js": "for f in tests/js/*.test.cjs; do echo \"== $f\"; node \"$f\" || exit 1; done"
+    "test:js": "fails=''; for f in tests/js/*.test.cjs; do echo \"== $f\"; node \"$f\" || fails=\"$fails $f\"; done; if [ -n \"$fails\" ]; then echo \"ÉCHECS JS :$fails\"; exit 1; fi; echo 'Tous les tests JS sont verts'"
   },
   "devDependencies": {
     "@fontsource/inter": "^5.2.8",
