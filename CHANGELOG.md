@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.248.3] - 2026-09-03
+
+### Corrigé
+- **Actualités : la ligne de provenance cite les DEUX sources primaires quand deux existent** - la ligne compacte en haut de fiche affichait « D'après X » même lorsque la fiche portait deux sources primaires complémentaires, alors que la section « Sources » du bas les listait toutes les deux. Le lecteur pressé, qui ne lit que le haut, voyait donc une seule provenance là où le travail éditorial en avait établi deux. La ligne affiche désormais « D'après X et Y », et la deuxième source est jugée sur la présence de son URL plutôt que sur le nombre d'entrées : une donnée historique portant une entrée sans lien utilisable reste traitée comme une absence, sans « et » orphelin. Volet D du design doc « extension de l'écran de composition des actualités » (2026-09-03), verrouillé par `NewsProvenanceTwoSourcesTest` (4 tests) dont le test central passe au rouge si on retire le correctif, vérifié.
+
 ## [1.248.2] - 2026-09-03
 
 ### Modifié

@@ -436,7 +436,14 @@
                          « Sources » plus bas (design doc section 7). --}}
                     @unless($isDigest)
                     @if(!empty($primarySources[0]['url'] ?? null))
-                        <p class="nw-provenance">{{ __("D'après") }} <a href="{{ $primarySources[0]['url'] }}" target="_blank" rel="noopener nofollow">{{ $primarySources[0]['label'] ?? __('la source primaire') }}</a>@if($nwRelay = $article->displayRelayName()), {{ __('relayé par') }} {{ $nwRelay }}@endif</p>
+                        {{-- Design doc « extension de l'écran de composition des actualités » (2026-09-03),
+                             volet D : la ligne compacte cite DEUX sources primaires quand deux existent.
+                             La section « Sources » du bas reste le lieu exhaustif (jusqu'à 10) - au-delà de
+                             deux, la ligne compacte ne s'allonge pas, c'est un non-objectif explicite.
+                             La deuxième source est testée par la MÊME garde que la première (l'URL elle-même,
+                             pas count()) : une entrée d'indice 1 à l'URL vide est possible en donnée
+                             historique, et se comporte alors comme une absence. --}}
+                        <p class="nw-provenance">{{ __("D'après") }} <a href="{{ $primarySources[0]['url'] }}" target="_blank" rel="noopener nofollow">{{ $primarySources[0]['label'] ?? __('la source primaire') }}</a>@if(!empty($primarySources[1]['url'] ?? null)) {{ __('et') }} <a href="{{ $primarySources[1]['url'] }}" target="_blank" rel="noopener nofollow">{{ $primarySources[1]['label'] ?? __('une autre source primaire') }}</a>@endif@if($nwRelay = $article->displayRelayName()), {{ __('relayé par') }} {{ $nwRelay }}@endif</p>
                     @endif
                     @endunless
 
