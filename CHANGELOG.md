@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.249.1] - 2026-09-03
+
+### Ajouté
+- **Annuaire : la file des vignettes sans marge de recadrage se resorbe toute seule, la nuit** - nouvelle planification `directory:dispatch-margin-recapture --limit=150 --restart-every=0` a 02h05 (America/Toronto, fuseau force explicitement pour ne pas dependre de la configuration d'environnement), `withoutOverlapping()` et `runInBackground()`, calquee sur la planification voisine de `directory:capture-screenshots`. Ticket #2087.
+
+  **Pourquoi 150 et non les ~551 restants d'un coup**, alors que le plan ecrit disait « lancer les ~551 restants » : le worker de la file `screenshots` digere environ 1,2 job a la minute (mesure du lot 1, 100 jobs entre 04h02 et 04h32 Quebec). A ce rythme, 551 jobs occupent plus de sept heures et retombent en pleine journee, bien au-dela de la fenetre calme - c'est exactement la contention qui a rendu la moitie des pages du site indisponibles le 31 aout (#2100, #2107). La fenetre reellement libre va de 02h05 a 04h30, ou `directory:capture-screenshots` prend le relais : environ 2 h 25, soit ~174 jobs. 150 tient dedans avec de la marge, et la file s'epuise en quatre nuits au lieu de menacer une journee de service.
+
+  Effet de bord voulu : le filtre anti-futiles livre en v1.248.1 ecarte 30 jours un outil deja tente sans succes, puis le retente. Cette planification devient donc un entretien continu plutot qu'une operation unique - un site protege par un CAPTCHA aujourd'hui redevient candidat dans un mois, sans intervention.
+
 ## [1.249.0] - 2026-09-03
 
 ### Modifié
