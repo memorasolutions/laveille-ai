@@ -110,6 +110,10 @@ Route::prefix('admin/news/composition')
         Route::post('/{article}/generate-prompt', [NewsCompositionController::class, 'generatePrompt'])->name('generate-prompt');
         Route::post('/{article}/proof-pairs', [NewsCompositionController::class, 'storeProofPair'])->name('proof-pairs.store');
         Route::delete('/{article}/proof-pairs/{pair}', [NewsCompositionController::class, 'destroyProofPair'])->name('proof-pairs.destroy');
+        // ── Lot 4b (design doc 2026-09-03, section 2.5) - outils liés, deux routes dédiées,
+        // symétriques des paires de preuve ci-dessus (action immédiate, jamais dans update()) ──
+        Route::post('/{article}/related-tools', [NewsCompositionController::class, 'storeRelatedTool'])->name('related-tools.store');
+        Route::delete('/{article}/related-tools/{slug}', [NewsCompositionController::class, 'destroyRelatedTool'])->name('related-tools.destroy');
         // ── Phase D (design doc 2026-08-15, sections 5.3 et 5.4) - standard d'images ──
         Route::post('/{article}/generate-image-prompt', [NewsCompositionController::class, 'generateImagePrompt'])->name('generate-image-prompt');
         Route::post('/{article}/image', [NewsCompositionController::class, 'uploadImage'])->name('upload-image');

@@ -137,6 +137,75 @@ it('update() refuses an empty or null title with 422, writes nothing', function 
     expect($article->fresh()->title)->toBe('Titre initial intact');
 });
 
+// ── slug renvoyé dans la réponse JSON de update() (défaut mesuré en QC visuelle, 2026-09-03) ──
+// Sans ce renvoi, l'écran gardait l'ancien slug après un changement de titre et son PROCHAIN
+// enregistrement visait une URL périmée (404 « Ressource introuvable »), modifications perdues
+// dès le second enregistrement consécutif sur un brouillon fraîchement renommé.
+
+it('update() JSON response echoes the fresh slug matching the new title, on a DRAFT article', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['is_published' => false, 'title' => 'Ancien titre echo', 'slug' => 'ancien-slug-echo-crf']);
+
+    $response = $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'title' => 'Titre frais pour verifier l echo du slug',
+        'expected_updated_at' => crfToken($article),
+    ]);
+
+    $response->assertOk();
+    // Le slug renvoyé doit être celui EFFECTIVEMENT écrit en base, pas une reconstruction locale
+    // recalculée côté client à partir du titre (l'unique source de vérité reste le serveur).
+    expect($response->json('slug'))
+        ->toBe($article->fresh()->slug)
+        ->toContain('titre-frais-pour-verifier-l-echo-du-slug');
+});
+
+it('update() JSON response echoes the UNCHANGED slug on an ALREADY PUBLISHED article', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['is_published' => true, 'title' => 'Titre publie echo original', 'slug' => 'slug-fige-echo-crf']);
+
+    $response = $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'title' => 'Titre publie echo corrige',
+        'expected_updated_at' => crfToken($article),
+    ]);
+
+    $response->assertOk();
+    // La garde `if (! $article->is_published)` protège les URL publiques : le slug ne doit JAMAIS
+    // bouger ici, ni en base ni dans la réponse échoée - c'est elle qui rend ce test 2 pertinent en
+    // plus du test 1 : le renvoi du slug ne doit pas devenir un second chemin qui le ferait bouger.
+    expect($response->json('slug'))
+        ->toBe('slug-fige-echo-crf')
+        ->and($article->fresh()->slug)->toBe('slug-fige-echo-crf');
+});
+
+it('two consecutive update() calls on a draft both succeed when the second targets the slug from the first response', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['is_published' => false, 'title' => 'Titre depart chainage', 'slug' => 'slug-depart-chainage-crf']);
+
+    $first = $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'title' => 'Premier changement de titre du chainage',
+        'expected_updated_at' => crfToken($article),
+    ]);
+    $first->assertOk();
+    $slugAfterFirst = $first->json('slug');
+    expect($slugAfterFirst)->not->toBeNull()->not->toBe('slug-depart-chainage-crf');
+
+    // Reproduction exacte du défaut mesuré : l'écran enchaîne sur le slug RENVOYÉ par le premier
+    // appel, jamais sur celui capturé à l'ouverture de l'écran - sans le correctif, cette URL
+    // pointait vers l'ANCIEN slug et ne résolvait plus (404 « Ressource introuvable »).
+    $second = $this->actingAs($admin)->putJson(
+        route('admin.news.composition.update', ['article' => $slugAfterFirst]),
+        [
+            'title' => 'Second changement de titre, enchaine sur le slug frais',
+            'expected_updated_at' => crfToken($article),
+        ]
+    );
+
+    $second->assertOk();
+    $fresh = $article->fresh();
+    expect($fresh->title)->toBe('Second changement de titre, enchaine sur le slug frais')
+        ->and($fresh->slug)->toBe($second->json('slug'));
+});
+
 // ── image_credit (design doc section 2.5) ───────────────────────────────────────
 
 it('update() writes and then clears image_credit', function () {
@@ -339,7 +408,7 @@ it('storeProofPair() and destroyProofPair() report a fresh updated_at, so a foll
         'expected_updated_at' => $afterStore,
     ])->assertOk();
 
-    // destroyProofPair() doit reporter exactement le meme mecanisme : son jeton, lui aussi,
+    // destroyProofPair() doit reporter exactement le même mécanisme : son jeton, lui aussi,
     // doit reussir le prochain update() riche.
     $pairId = $article->fresh()->editorial_proof_pairs[0]['id'];
     $destroyResponse = $this->actingAs($admin)->deleteJson(
@@ -374,4 +443,384 @@ it('the composition screen renders the always-visible panel fields, outside the 
         ->toContain('primary_fact')
         ->toContain('id="nc-pair-source-url"')
         ->toContain('Titre SEO (balise');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════════
+// LOT 4B (design doc "extension de l'écran de composition des actualités", 2026-09-03,
+// section 2.5 et section 11) - composed_summary, primary_sources, related_tool_slugs.
+// ═══════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Même convention que nacTool() de NewsApplyCommandTest.php (préfixée crf, pas nac : Pest
+ * charge tous les fichiers de test dans un seul processus, un nom nu entrerait en collision).
+ * Tableau associatif (PAS json_encode) pour que Spatie appelle setTranslations() correctement -
+ * même piège déjà documenté par nacTool().
+ */
+function crfTool(string $slug): \Modules\Directory\Models\Tool
+{
+    $name = 'Outil crf '.$slug;
+
+    return \Modules\Directory\Models\Tool::withoutEvents(fn () => \Modules\Directory\Models\Tool::create([
+        'name' => ['fr_CA' => $name, 'en' => $name],
+        'slug' => ['fr_CA' => $slug, 'en' => $slug],
+        'status' => 'published',
+        'pricing' => 'free',
+    ]));
+}
+
+// ── composed_summary (design doc section 2.5) - fusion sous-clé par sous-clé ─────────
+
+it('update() writes a fresh composed_summary and flags the fiche as composed', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['structured_summary' => null]);
+
+    $response = $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'composed_summary' => [
+            'hook' => 'Une accroche composee par un humain.',
+            'key_points' => ['Premier point.', 'Deuxieme point.'],
+            'why_important' => 'Parce que ca compte.',
+        ],
+        'expected_updated_at' => crfToken($article),
+    ]);
+
+    $response->assertOk();
+    $fresh = $article->fresh();
+    expect($fresh->structured_summary['hook'])->toBe('Une accroche composee par un humain.')
+        ->and($fresh->structured_summary['key_points'])->toBe(['Premier point.', 'Deuxieme point.'])
+        ->and($fresh->structured_summary['why_important'])->toBe('Parce que ca compte.')
+        ->and($fresh->structured_summary['composed'])->toBeTrue()
+        ->and($fresh->hasComposedSummary())->toBeTrue();
+});
+
+it('update() FUSES composed_summary sub-key by sub-key, preserving what the payload omits', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['structured_summary' => [
+        'composed' => true,
+        'hook' => 'Accroche existante.',
+        'why_important' => 'Raison existante.',
+    ]]);
+
+    $response = $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'composed_summary' => ['key_number' => '5 millions de dollars'],
+        'expected_updated_at' => crfToken($article),
+    ]);
+
+    $response->assertOk();
+    $fresh = $article->fresh();
+    expect($fresh->structured_summary['hook'])->toBe('Accroche existante.')
+        ->and($fresh->structured_summary['why_important'])->toBe('Raison existante.')
+        ->and($fresh->structured_summary['key_number'])->toBe('5 millions de dollars');
+});
+
+it('update() clears a single composed_summary sub-key sent explicitly null, without touching the others', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['structured_summary' => [
+        'composed' => true,
+        'hook' => 'Accroche a effacer.',
+        'why_important' => 'Raison qui doit survivre.',
+    ]]);
+
+    $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'composed_summary' => ['hook' => null],
+        'expected_updated_at' => crfToken($article),
+    ])->assertOk();
+
+    $fresh = $article->fresh();
+    expect($fresh->structured_summary)->not->toHaveKey('hook')
+        ->and($fresh->structured_summary['why_important'])->toBe('Raison qui doit survivre.');
+});
+
+it('update() rejects an unknown composed_summary sub-key with 422, writes nothing', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['structured_summary' => null]);
+
+    $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'composed_summary' => ['cle_qui_nexiste_pas' => 'valeur'],
+        'expected_updated_at' => crfToken($article),
+    ])->assertStatus(422);
+
+    expect($article->fresh()->structured_summary)->toBeNull();
+});
+
+it('update() treats a top-level composed_summary null as a no-op - never wipes an existing machine summary', function () {
+    $admin = crfAdmin();
+    // Résumé MACHINE (jamais composé) - mêmes noms de sous-clés que composed_summary :
+    // AiSummaryService écrit hook/key_points/why_important/angle_qc_ca (piège identifié en
+    // revue de ce lot - voir le commentaire de composed_summary_active dans le contrôleur).
+    $article = crfArticle(['structured_summary' => [
+        'hook' => 'Accroche machine, jamais composee.',
+        'key_points' => ['Fait machine 1.', 'Fait machine 2.'],
+        'why_important' => 'Importance calculee par la machine.',
+    ]]);
+
+    $response = $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'composed_summary' => null,
+        'image_credit' => 'Credit ajoute en meme temps',
+        'expected_updated_at' => crfToken($article),
+    ]);
+
+    $response->assertOk();
+    $fresh = $article->fresh();
+    expect($fresh->structured_summary['hook'])->toBe('Accroche machine, jamais composee.')
+        ->and($fresh->structured_summary['key_points'])->toBe(['Fait machine 1.', 'Fait machine 2.'])
+        ->and($fresh->hasComposedSummary())->toBeFalse()
+        ->and($fresh->image_credit)->toBe('Credit ajoute en meme temps');
+});
+
+it('update() with composed_summary entirely absent from the payload never touches an existing machine summary', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['structured_summary' => ['hook' => 'Accroche machine intacte.']]);
+
+    $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'image_credit' => 'Credit seul, sans composed_summary du tout',
+        'expected_updated_at' => crfToken($article),
+    ])->assertOk();
+
+    expect($article->fresh()->structured_summary['hook'])->toBe('Accroche machine intacte.');
+});
+
+it('update() with composed_summary and a stale expected_updated_at is refused with 409, writes nothing', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['structured_summary' => null]);
+
+    $response = $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'composed_summary' => ['hook' => 'Ne doit jamais s ecrire'],
+        'expected_updated_at' => '2000-01-01T00:00:00-05:00',
+    ]);
+
+    $response->assertStatus(409);
+    expect($article->fresh()->structured_summary)->toBeNull();
+});
+
+// ── primary_sources (design doc section 2.5) - remplacement complet, plafond 10 ──────
+
+it('update() replaces primary_sources completely, not an accumulation', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['primary_sources' => [
+        ['label' => 'Ancienne source', 'url' => 'https://exemple.com/ancienne', 'note' => null],
+    ]]);
+
+    $response = $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'primary_sources' => [
+            ['label' => 'Nouvelle source', 'url' => 'https://exemple.com/nouvelle'],
+        ],
+        'expected_updated_at' => crfToken($article),
+    ]);
+
+    $response->assertOk();
+    $sources = $article->fresh()->primary_sources;
+    expect($sources)->toHaveCount(1)
+        ->and($sources[0]['label'])->toBe('Nouvelle source')
+        ->and($sources[0]['url'])->toBe('https://exemple.com/nouvelle');
+});
+
+it('update() accepts an empty primary_sources array to clear all sources', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['primary_sources' => [
+        ['label' => 'Source a vider', 'url' => 'https://exemple.com/a-vider', 'note' => null],
+    ]]);
+
+    $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'primary_sources' => [],
+        'expected_updated_at' => crfToken($article),
+    ])->assertOk();
+
+    expect($article->fresh()->primary_sources)->toBe([]);
+});
+
+it('update() rejects a primary_sources entry without a valid url with 422, writes nothing', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['primary_sources' => []]);
+
+    $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'primary_sources' => [
+            ['label' => 'Source sans url valide', 'url' => 'pas-une-url'],
+        ],
+        'expected_updated_at' => crfToken($article),
+    ])->assertStatus(422);
+
+    expect($article->fresh()->primary_sources)->toBe([]);
+});
+
+it('update() rejects more than 10 primary_sources with 422, writes nothing', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['primary_sources' => []]);
+
+    $tropDeSources = array_map(
+        fn (int $i) => ['label' => "Source {$i}", 'url' => "https://exemple.com/source-{$i}"],
+        range(1, 11)
+    );
+
+    $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'primary_sources' => $tropDeSources,
+        'expected_updated_at' => crfToken($article),
+    ])->assertStatus(422);
+
+    expect($article->fresh()->primary_sources)->toBe([]);
+});
+
+it('update() with primary_sources and a stale expected_updated_at is refused with 409, writes nothing', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['primary_sources' => []]);
+
+    $response = $this->actingAs($admin)->putJson(route('admin.news.composition.update', $article), [
+        'primary_sources' => [['label' => 'Ne doit jamais s ecrire', 'url' => 'https://exemple.com/x']],
+        'expected_updated_at' => '2000-01-01T00:00:00-05:00',
+    ]);
+
+    $response->assertStatus(409);
+    expect($article->fresh()->primary_sources)->toBe([]);
+});
+
+// ── related-tools.store / related-tools.destroy (design doc section 2.5) - additif/soustractif, jamais un remplacement ──
+
+it('storeRelatedTool() attaches a published tool by slug', function () {
+    $admin = crfAdmin();
+    $article = crfArticle();
+    $tool = crfTool('outil-crf-un');
+
+    $response = $this->actingAs($admin)->postJson(
+        route('admin.news.composition.related-tools.store', $article),
+        ['tool_slug' => 'outil-crf-un']
+    );
+
+    $response->assertOk()->assertJson(['success' => true]);
+    expect($article->fresh()->tools->pluck('id')->all())->toBe([$tool->id]);
+});
+
+it('storeRelatedTool() with an unknown slug refuses with 422, attaches nothing', function () {
+    $admin = crfAdmin();
+    $article = crfArticle();
+
+    $this->actingAs($admin)->postJson(
+        route('admin.news.composition.related-tools.store', $article),
+        ['tool_slug' => 'slug-qui-nexiste-pas']
+    )->assertStatus(422);
+
+    expect($article->fresh()->tools)->toHaveCount(0);
+});
+
+it('storeRelatedTool() is purely additive - adding a second tool never detaches the first', function () {
+    $admin = crfAdmin();
+    $article = crfArticle();
+    $premier = crfTool('outil-crf-premier');
+    $second = crfTool('outil-crf-second');
+
+    $this->actingAs($admin)->postJson(route('admin.news.composition.related-tools.store', $article), ['tool_slug' => 'outil-crf-premier'])->assertOk();
+    $this->actingAs($admin)->postJson(route('admin.news.composition.related-tools.store', $article), ['tool_slug' => 'outil-crf-second'])->assertOk();
+
+    $ids = $article->fresh()->tools->pluck('id')->sort()->values()->all();
+    $expected = collect([$premier->id, $second->id])->sort()->values()->all();
+    expect($ids)->toBe($expected);
+});
+
+it('destroyRelatedTool() detaches only the targeted tool, leaves the others intact', function () {
+    $admin = crfAdmin();
+    $article = crfArticle();
+    $aGarder = crfTool('outil-crf-a-garder');
+    $aRetirer = crfTool('outil-crf-a-retirer');
+    $article->tools()->attach([$aGarder->id, $aRetirer->id], ['source' => 'manual']);
+
+    $response = $this->actingAs($admin)->deleteJson(
+        route('admin.news.composition.related-tools.destroy', ['article' => $article, 'slug' => 'outil-crf-a-retirer'])
+    );
+
+    $response->assertOk();
+    expect($article->fresh()->tools->pluck('id')->all())->toBe([$aGarder->id]);
+});
+
+it('destroyRelatedTool() on a valid but not-attached slug is idempotent - 200, nothing breaks', function () {
+    $admin = crfAdmin();
+    $article = crfArticle();
+    crfTool('outil-crf-jamais-lie');
+
+    $response = $this->actingAs($admin)->deleteJson(
+        route('admin.news.composition.related-tools.destroy', ['article' => $article, 'slug' => 'outil-crf-jamais-lie'])
+    );
+
+    $response->assertOk()->assertJson(['success' => true]);
+});
+
+it('destroyRelatedTool() on a slug unknown to the directory refuses with 422', function () {
+    $admin = crfAdmin();
+    $article = crfArticle();
+
+    $this->actingAs($admin)->deleteJson(
+        route('admin.news.composition.related-tools.destroy', ['article' => $article, 'slug' => 'slug-totalement-inconnu'])
+    )->assertStatus(422);
+});
+
+it('storeRelatedTool() and destroyRelatedTool() never require an optimistic-lock token - narrow endpoints, not update()', function () {
+    $admin = crfAdmin();
+    $article = crfArticle();
+    crfTool('outil-crf-sans-verrou');
+
+    // Aucun expected_updated_at fourni, et il n'y a même pas de clé riche dans un update() ici :
+    // ces deux endpoints étroits ne portent pas le verrou optimiste (design doc section 2.6).
+    $this->actingAs($admin)->postJson(
+        route('admin.news.composition.related-tools.store', $article),
+        ['tool_slug' => 'outil-crf-sans-verrou']
+    )->assertOk();
+
+    $this->actingAs($admin)->deleteJson(
+        route('admin.news.composition.related-tools.destroy', ['article' => $article, 'slug' => 'outil-crf-sans-verrou'])
+    )->assertOk();
+});
+
+// ── show() expose composed_summary, composed_summary_active et related_tools (design doc 2.8) ──
+
+it('show() exposes composed_summary mirroring structured_summary, and composed_summary_active true when already composed', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['structured_summary' => [
+        'composed' => true,
+        'hook' => 'Accroche exposee par show().',
+    ]]);
+
+    $this->actingAs($admin)->getJson(route('admin.news.composition.show', $article))
+        ->assertOk()
+        ->assertJson([
+            'composed_summary' => ['composed' => true, 'hook' => 'Accroche exposee par show().'],
+            'composed_summary_active' => true,
+        ]);
+});
+
+it('show() reports composed_summary_active as false for a machine (non-composed) summary', function () {
+    $admin = crfAdmin();
+    $article = crfArticle(['structured_summary' => ['hook' => 'Accroche machine.']]);
+
+    $this->actingAs($admin)->getJson(route('admin.news.composition.show', $article))
+        ->assertOk()
+        ->assertJson(['composed_summary_active' => false]);
+});
+
+it('show() exposes the tools already linked to the fiche, by slug and label', function () {
+    $admin = crfAdmin();
+    $article = crfArticle();
+    crfTool('outil-crf-affiche');
+    $article->tools()->attach(\Modules\Directory\Models\Tool::where('slug->fr_CA', 'outil-crf-affiche')->first()->id, ['source' => 'manual']);
+
+    $response = $this->actingAs($admin)->getJson(route('admin.news.composition.show', $article));
+    $response->assertOk();
+    $related = $response->json('related_tools');
+    expect($related)->toHaveCount(1)
+        ->and($related[0]['slug'])->toBe('outil-crf-affiche');
+});
+
+// ── rendu (Lot 4b, design doc section 2.7) - résumé structuré, sources primaires, outils liés ──
+
+it('the composition screen renders the Lot 4b panel fields - composed summary, primary sources, related tools', function () {
+    $admin = crfAdmin();
+
+    $response = $this->actingAs($admin)->get(route('admin.news.composition.index'));
+    $response->assertOk();
+    $html = $response->getContent();
+
+    expect($html)
+        ->toContain('id="nc-composed-summary"')
+        ->toContain('id="nc-summary-hook"')
+        ->toContain('x-model="formHook"')
+        ->toContain('id="nc-primary-sources"')
+        ->toContain('x-model="source.label"')
+        ->toContain('id="nc-related-tool-select"')
+        ->toContain('initRelatedToolPicker');
 });

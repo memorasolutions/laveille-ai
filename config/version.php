@@ -12,7 +12,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 250;
+$lvMinor = 251;
 $lvPatch = 0;
 
 return [
@@ -21,7 +21,7 @@ return [
     'patch' => $lvPatch,
 
     // Codename optionnel (nom de la release courante). Vide ou null si pas de codename.
-    'codename' => 'seo-piliers-veille-generative',
+    'codename' => 'composition-resume-structure',
 
     // Format du SemVer assemblé — DÉRIVÉ automatiquement de major.minor.patch (source unique).
     // NE JAMAIS figer cette valeur en dur (incident déjà survenu — voir archive, #319).

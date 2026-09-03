@@ -91,6 +91,10 @@
         publishEndpointTemplate: @js($publishEndpointTemplate),
         markReviewedEndpointTemplate: @js($markReviewedEndpointTemplate),
         articlesIndexUrl: @js($articlesIndexUrl),
+        {{-- Lot 4b (design doc 2026-09-03, section 2.5/2.7) - outils liés, action immédiate. --}}
+        relatedToolsStoreEndpointTemplate: @js($relatedToolsStoreEndpointTemplate),
+        relatedToolsDestroyEndpointTemplate: @js($relatedToolsDestroyEndpointTemplate),
+        availableTools: @js($availableTools),
     })"
     x-init="init()"
 >
@@ -239,11 +243,11 @@
                             <span class="nc-hint" style="display:block; margin-top:6px;">Colle /actu2 dans Claude Code : il retrouve l'original, rédige, prouve, révise, choisit la photo et publie - puis te donne le lien.</span>
                         </div>
 
-                        {{-- Lot 4a (design doc "extension de l'écran de composition des actualités",
-                             2026-09-03, section 2.7) : panneau TOUJOURS VISIBLE (pas de <details>
-                             replié) - la façon normale de composer une fiche depuis l'admin, plus
-                             un filet de secours. Résumé structuré / sources primaires / outils liés
-                             rejoindront ce même panneau au lot 4b (hors périmètre ici). --}}
+                        {{-- Lot 4a puis 4b (design doc "extension de l'écran de composition des
+                             actualités", 2026-09-03, section 2.7) : panneau TOUJOURS VISIBLE (pas de
+                             <details> replié) - la façon normale de composer une fiche depuis
+                             l'admin, plus un filet de secours. Résumé structuré, sources primaires
+                             et outils liés (Lot 4b) vivent dans ce même panneau, plus bas. --}}
                         <div class="nc-composition-panel">
                             <div class="cb-section-title" style="font-size:14px; margin-top:0;">🗂️ Détails de la fiche</div>
 
@@ -251,6 +255,76 @@
                                 <label for="nc-title-publie">Titre publié</label>
                                 <input id="nc-title-publie" type="text" class="form-control" x-model="formTitle" maxlength="200" placeholder="Titre affiché sur la fiche publique">
                                 <span class="nc-hint" x-show="selectedArticle && selectedArticle.is_published" x-cloak style="display:block; margin-top:4px;">Fiche déjà publiée : l'adresse (URL) ne change jamais, même si tu corriges ce titre.</span>
+                            </div>
+
+                            {{-- Lot 4b (design doc "extension de l'écran de composition des actualités",
+                                 2026-09-03, section 2.5/2.7) : résumé structuré, huit sous-clés de
+                                 composed_summary. Le formulaire renvoie l'état complet à save() (voir
+                                 plus bas) UNIQUEMENT si l'admin y a touché ou si la fiche porte déjà
+                                 un résumé composé (hasTouchedComposedSummary()) - sans cette garde,
+                                 un enregistrement qui ne touche QUE image_credit enverrait quand même
+                                 un résumé reconstruit et poserait composed:true sur un résumé encore
+                                 MACHINE (voir le commentaire de show(), NewsCompositionController.php). --}}
+                            <div class="nc-summary-section" id="nc-composed-summary">
+                                <div class="cb-section-title" style="font-size:14px; margin-top:14px;">📝 Résumé structuré</div>
+
+                                <div class="nc-field">
+                                    <label for="nc-summary-hook">Accroche</label>
+                                    <textarea id="nc-summary-hook" class="form-control" rows="2" x-model="formHook" maxlength="600" placeholder="La phrase d'ouverture qui donne envie de lire"></textarea>
+                                </div>
+
+                                <div class="nc-field">
+                                    <label id="nc-summary-key-points-label">Points clés <span class="nc-hint">(5 maximum)</span></label>
+                                    <template x-for="(point, index) in formKeyPoints" :key="index">
+                                        <div class="d-flex gap-2 align-items-start" style="margin-bottom:8px;">
+                                            <input type="text" class="form-control" x-model="formKeyPoints[index]" maxlength="300" placeholder="Un point clé, tiré du texte">
+                                            <button type="button" class="nc-proof-remove" @click="removeKeyPoint(index)" aria-label="Retirer ce point clé">🗑</button>
+                                        </div>
+                                    </template>
+                                    <button type="button" class="cb-btn cb-btn-secondary" @click="addKeyPoint()" :disabled="formKeyPoints.length >= 5">➕ Ajouter un point clé</button>
+                                </div>
+
+                                <div class="nc-field">
+                                    <label for="nc-summary-why-important">Pourquoi c'est important</label>
+                                    <textarea id="nc-summary-why-important" class="form-control" rows="2" x-model="formWhyImportant" maxlength="600" placeholder="L'enjeu concret, en une ou deux phrases"></textarea>
+                                </div>
+
+                                <div class="nc-field">
+                                    <label for="nc-summary-key-number">Chiffre clé</label>
+                                    <input id="nc-summary-key-number" type="text" class="form-control" x-model="formKeyNumber" maxlength="600" placeholder="Ex. 5 millions de dollars">
+                                </div>
+
+                                <div class="nc-field">
+                                    <label for="nc-summary-quote-text">Citation</label>
+                                    <textarea id="nc-summary-quote-text" class="form-control" rows="2" x-model="formQuoteText" maxlength="400" placeholder="Citation exacte, courte et attribuée"></textarea>
+                                    <label for="nc-summary-quote-author" class="visually-hidden">Auteur de la citation</label>
+                                    <input id="nc-summary-quote-author" type="text" class="form-control" style="margin-top:6px; max-width:340px;" x-model="formQuoteAuthor" maxlength="120" placeholder="Auteur de la citation">
+                                </div>
+
+                                <div class="nc-field">
+                                    <label for="nc-summary-angle-qc-ca">Angle Québec/Canada</label>
+                                    <textarea id="nc-summary-angle-qc-ca" class="form-control" rows="2" x-model="formAngleQcCa" maxlength="600" placeholder="Ce que ça change ici - jamais inventé, laisse vide si aucun angle vérifiable"></textarea>
+                                </div>
+
+                                <div class="nc-field">
+                                    <label for="nc-summary-action-concrete">Action concrète</label>
+                                    <textarea id="nc-summary-action-concrete" class="form-control" rows="2" x-model="formActionConcrete" maxlength="600" placeholder="Ce que le lecteur peut faire de cette information"></textarea>
+                                </div>
+
+                                <div class="nc-field">
+                                    <label id="nc-summary-reperes-dates-label">Repères dans le temps <span class="nc-hint">(4 maximum, juxtaposés jamais causaux)</span></label>
+                                    <template x-for="(repere, index) in formReperesDates" :key="index">
+                                        <div class="nc-repere-row" style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+                                            <div class="d-flex gap-2" style="margin-bottom:6px;">
+                                                <input type="text" class="form-control" x-model="repere.date" maxlength="40" placeholder="Date (ex. 2024)" style="max-width:160px;">
+                                                <button type="button" class="nc-proof-remove" @click="removeRepereDate(index)" aria-label="Retirer ce repère">🗑</button>
+                                            </div>
+                                            <input type="text" class="form-control" x-model="repere.texte" maxlength="200" placeholder="Ce qui s'est passé" style="margin-bottom:6px;">
+                                            <input type="url" class="form-control" x-model="repere.url" maxlength="2000" placeholder="Lien (optionnel)">
+                                        </div>
+                                    </template>
+                                    <button type="button" class="cb-btn cb-btn-secondary" @click="addRepereDate()" :disabled="formReperesDates.length >= 4">➕ Ajouter un repère</button>
+                                </div>
                             </div>
 
                             <div class="nc-proof-section">
@@ -314,6 +388,26 @@
                                 </div>
                             </div>
 
+                            {{-- Lot 4b (section 2.5/2.7) - sources primaires : REMPLACEMENT complet à
+                                 l'enregistrement (pas une accumulation, contrairement aux preuves et
+                                 aux outils ci-dessus/dessous), plafonnées à 10 côté client, miroir du
+                                 plafond serveur (pas une nouvelle règle). --}}
+                            <div class="nc-field" id="nc-primary-sources">
+                                <div class="cb-section-title" style="font-size:14px; margin-top:0;">🔗 Sources primaires</div>
+                                <template x-for="(source, index) in formPrimarySources" :key="index">
+                                    <div class="nc-repere-row" style="border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:8px;">
+                                        <div class="d-flex gap-2" style="margin-bottom:6px;">
+                                            <input type="text" class="form-control" x-model="source.label" maxlength="255" placeholder="Nom de la source">
+                                            <button type="button" class="nc-proof-remove" @click="removePrimarySource(index)" aria-label="Retirer cette source primaire">🗑</button>
+                                        </div>
+                                        <input type="url" class="form-control" x-model="source.url" maxlength="2000" placeholder="https://…" style="margin-bottom:6px;">
+                                        <input type="text" class="form-control" x-model="source.note" maxlength="255" placeholder="Note (optionnelle)">
+                                    </div>
+                                </template>
+                                <button type="button" class="cb-btn cb-btn-secondary" @click="addPrimarySource()" :disabled="formPrimarySources.length >= 10">➕ Ajouter une source primaire</button>
+                                <span class="nc-hint" style="display:block; margin-top:6px;">Remplace intégralement les sources primaires à l'enregistrement - une ligne laissée incomplète (nom ou lien manquant) n'est pas envoyée.</span>
+                            </div>
+
                             <div class="nc-field">
                                 <label for="nc-image-credit">Crédit photo</label>
                                 <input id="nc-image-credit" type="text" class="form-control" x-model="formImageCredit" maxlength="255" placeholder="Ex. Photo : Untel, Agence Untelle">
@@ -339,6 +433,34 @@
                                 </select>
                             </div>
 
+                            {{-- Lot 4b (section 2.5/2.7) - outils liés : action IMMÉDIATE (une
+                                 sélection appelle related-tools.store, un retrait de puce appelle
+                                 related-tools.destroy), même patron que les preuves éditoriales
+                                 ci-dessus - pas un troisième patron d'interaction sur cet écran.
+                                 TomSelect (déjà une dépendance du projet, déjà utilisée pour
+                                 tool_ids[] sur l'écran classique) sert ici de simple sélecteur "un
+                                 outil à la fois", vidé après chaque ajout - les outils déjà liés
+                                 s'affichent en puces retirables juste en dessous, jamais dans
+                                 TomSelect lui-même. --}}
+                            <div class="nc-field">
+                                <label for="nc-related-tool-select">Outils liés</label>
+                                {{-- Pas d'attribut "placeholder" ici : un <select> natif ne le supporte pas,
+                                     le vrai placeholder vit dans la config TomSelect (initRelatedToolPicker()). --}}
+                                <select id="nc-related-tool-select" x-init="$nextTick(() => initRelatedToolPicker($el))"></select>
+                                <div id="nc-related-tools-list" style="margin-top:8px;">
+                                    <template x-if="!relatedTools.length">
+                                        <p class="nc-hint" style="display:block; font-style:italic;">Aucun outil lié pour l'instant.</p>
+                                    </template>
+                                    <template x-for="tool in relatedTools" :key="tool.slug">
+                                        <span class="nc-internal-badge" style="display:inline-flex; align-items:center; gap:6px; margin:0 6px 6px 0;">
+                                            <span x-text="tool.label"></span>
+                                            <button type="button" @click="removeRelatedTool(tool.slug)" style="background:none; border:none; cursor:pointer; color:#92400e; font-weight:700; min-height:24px;" :aria-label="'Retirer ' + tool.label">×</button>
+                                        </span>
+                                    </template>
+                                </div>
+                                <span class="nc-status-error" x-show="relatedToolError" x-cloak x-text="relatedToolError" style="display:block; margin-top:6px;"></span>
+                            </div>
+
                             {{-- Le bouton d'enregistrement vit DANS le panneau toujours visible, et non
                                  dans le <details> « filet de secours » plus bas. Un panneau permanent dont
                                  le bouton de sauvegarde est caché derrière un accordéon oblige à ouvrir une
@@ -350,7 +472,7 @@
                                     <span x-show="!loading.saving">💾 Enregistrer</span>
                                     <span x-show="loading.saving" x-cloak>⏳ Enregistrement…</span>
                                 </button>
-                                <span class="nc-hint">Titre publié, crédit photo, nature de la source et niveau de preuve.</span>
+                                <span class="nc-hint">Titre publié, résumé structuré, sources primaires, crédit photo, nature de la source et niveau de preuve.</span>
                             </div>
                             <span class="nc-status-ok" x-show="saveOk" x-cloak x-transition style="display:block; margin-top:6px;">✓ Enregistré</span>
                             <span class="nc-status-error" x-show="saveError" x-cloak x-text="saveError" style="display:block; margin-top:6px;"></span>
@@ -535,6 +657,9 @@ function compositionBuilder(opts) {
             publishTemplate: opts.publishEndpointTemplate,
             markReviewedTemplate: opts.markReviewedEndpointTemplate,
             articlesIndexUrl: opts.articlesIndexUrl,
+            // Lot 4b (design doc 2026-09-03, section 2.5/2.7) - outils liés, action immédiate.
+            relatedToolsStoreTemplate: opts.relatedToolsStoreEndpointTemplate,
+            relatedToolsDestroyTemplate: opts.relatedToolsDestroyEndpointTemplate,
         },
         loading: { news: false, article: false, saving: false, deleting: false },
         selectedArticle: null,
@@ -551,6 +676,35 @@ function compositionBuilder(opts) {
         formNiveauPreuve: '',
         natureOriginalOptions: [],
         niveauPreuveOptions: [],
+        // Lot 4b (design doc 2026-09-03, section 2.5/2.7) - huit sous-clés de composed_summary.
+        // formReperesDates/formKeyPoints sont des tableaux de longueur variable (5/4 max, addXxx()/
+        // removeXxx() plus bas) - jamais un nombre fixe de champs vides pré-remplis.
+        formHook: '',
+        formKeyPoints: [],
+        formWhyImportant: '',
+        formKeyNumber: '',
+        formQuoteText: '',
+        formQuoteAuthor: '',
+        formAngleQcCa: '',
+        formActionConcrete: '',
+        formReperesDates: [],
+        // Garde anti-écrasement silencieux (voir le commentaire de composed_summary_active dans
+        // NewsCompositionController::show()) : reflète l'état SERVEUR au chargement, mis à jour
+        // localement après un save() qui a effectivement touché le résumé structuré.
+        composedSummaryActive: false,
+        // Sérialisation des 8 champs telle qu'ils ont été CHARGÉS. hasTouchedComposedSummary()
+        // s'y compare pour distinguer « pré-rempli » de « modifié par un humain ».
+        composedSummarySnapshot: 'null',
+        // Sources primaires (remplacement complet, plafond 10 - miroir du plafond serveur).
+        formPrimarySources: [],
+        // Outils liés (action immédiate, jamais dans save()). availableTools est CHARGÉ UNE FOIS
+        // depuis opts (catalogue indépendant de la fiche sélectionnée, voir index()) ; relatedTools
+        // est propre à la fiche COURANTE, rechargé à chaque loadArticle().
+        availableTools: opts.availableTools || [],
+        relatedTools: [],
+        newRelatedToolSlug: '',
+        relatedToolSaving: false,
+        relatedToolError: '',
         // Verrou optimiste (section 2.6) : true après un 409 - affiche le bouton "Recharger".
         saveConflict: false,
         saveOk: false,
@@ -673,6 +827,38 @@ function compositionBuilder(opts) {
                 this.formNiveauPreuve = data.niveau_preuve || '';
                 this.natureOriginalOptions = Object.entries(data.nature_original_options || {}).map(([value, label]) => ({ value, label }));
                 this.niveauPreuveOptions = Object.entries(data.niveau_preuve_options || {}).map(([value, label]) => ({ value, label }));
+                // Lot 4b (design doc 2026-09-03, section 2.5/2.7) - résumé structuré : pré-rempli
+                // depuis composed_summary QUE la fiche soit déjà composée ou encore machine (les
+                // deux partagent les mêmes noms de sous-clés, voir le commentaire de show()) -
+                // composedSummaryActive distingue les deux pour hasTouchedComposedSummary() plus
+                // bas, jamais le CONTENU affiché ici.
+                const cs = data.composed_summary || {};
+                this.formHook = cs.hook || '';
+                this.formKeyPoints = Array.isArray(cs.key_points) ? cs.key_points.slice(0, 5) : [];
+                this.formWhyImportant = cs.why_important || '';
+                this.formKeyNumber = cs.key_number || '';
+                this.formQuoteText = (cs.quote && cs.quote.text) || '';
+                this.formQuoteAuthor = (cs.quote && cs.quote.author) || '';
+                this.formAngleQcCa = cs.angle_qc_ca || '';
+                this.formActionConcrete = cs.action_concrete || '';
+                this.formReperesDates = Array.isArray(cs.reperes_dates)
+                    ? cs.reperes_dates.slice(0, 4).map(r => ({ date: r.date || '', texte: r.texte || '', url: r.url || '' }))
+                    : [];
+                this.composedSummaryActive = Boolean(data.composed_summary_active);
+                // Instantané de l'état CHARGÉ des 8 champs. C'est la référence à laquelle
+                // hasTouchedComposedSummary() compare : sans lui, la garde testait un champ NON
+                // VIDE et non un champ MODIFIÉ - or les 8 champs sont pré-remplis ci-dessus, y
+                // compris pour un résumé encore machine. Défaut mesuré en QC visuelle le
+                // 2026-09-03 : enregistrer le seul crédit photo faisait basculer composed à true
+                // dans le dos de l'administrateur.
+                this.composedSummarySnapshot = JSON.stringify(this.buildComposedSummaryPayload());
+                // Sources primaires (remplacement complet à save(), voir plus bas).
+                this.formPrimarySources = Array.isArray(data.primary_sources)
+                    ? data.primary_sources.slice(0, 10).map(s => ({ label: s.label || '', url: s.url || '', note: s.note || '' }))
+                    : [];
+                // Outils déjà liés (action immédiate, jamais dans save()).
+                this.relatedTools = Array.isArray(data.related_tools) ? data.related_tools.slice() : [];
+                this.relatedToolError = '';
                 this.saveConflict = false;
                 this.formAngle = '';
                 this.generatedPrompt = '';
@@ -1085,6 +1271,157 @@ function compositionBuilder(opts) {
             }
         },
 
+        // ── Résumé structuré - lignes répétables (Lot 4b, section 2.7) ───────────────────
+        addKeyPoint() {
+            if (this.formKeyPoints.length >= 5) return;
+            this.formKeyPoints.push('');
+        },
+        removeKeyPoint(index) {
+            this.formKeyPoints.splice(index, 1);
+        },
+        addRepereDate() {
+            if (this.formReperesDates.length >= 4) return;
+            this.formReperesDates.push({ date: '', texte: '', url: '' });
+        },
+        removeRepereDate(index) {
+            this.formReperesDates.splice(index, 1);
+        },
+
+        // Construit le payload complet des 8 sous-clés de composed_summary à partir de l'état du
+        // formulaire (Lot 4b, section 2.5) - un champ vide part comme `null` explicite (retrait
+        // volontaire d'une sous-clé, jamais un silence), exactement la sémantique attendue par
+        // CompositionPayloadNormalizer::overlayComposedSummary() côté serveur. `author`/`url`
+        // absents (plutôt que vides) quand non renseignés : ce sont des sous-clés FACULTATIVES du
+        // service (voir normalizeComposedQuote()/normalizeComposedReperesDates()), une chaîne
+        // vide n'y est pas une valeur valide pour `url`.
+        buildComposedSummaryPayload() {
+            const keyPoints = this.formKeyPoints.map(p => (p || '').trim()).filter(p => p !== '');
+            const reperes = this.formReperesDates
+                .map(r => ({ date: (r.date || '').trim(), texte: (r.texte || '').trim(), url: (r.url || '').trim() }))
+                .filter(r => r.date !== '' && r.texte !== '')
+                .map(r => (r.url !== '' ? r : { date: r.date, texte: r.texte }));
+            const quoteText = (this.formQuoteText || '').trim();
+            const quoteAuthor = (this.formQuoteAuthor || '').trim();
+
+            return {
+                hook: this.formHook.trim() ? this.formHook.trim() : null,
+                key_points: keyPoints.length ? keyPoints : null,
+                why_important: this.formWhyImportant.trim() ? this.formWhyImportant.trim() : null,
+                key_number: this.formKeyNumber.trim() ? this.formKeyNumber.trim() : null,
+                quote: quoteText ? (quoteAuthor ? { text: quoteText, author: quoteAuthor } : { text: quoteText }) : null,
+                angle_qc_ca: this.formAngleQcCa.trim() ? this.formAngleQcCa.trim() : null,
+                action_concrete: this.formActionConcrete.trim() ? this.formActionConcrete.trim() : null,
+                reperes_dates: reperes.length ? reperes : null,
+            };
+        },
+
+        // Garde anti-écrasement silencieux (Lot 4b, section 2.5-2.6) - vrai si l'admin a
+        // effectivement rempli au moins un des 8 champs OU si la fiche portait déjà un résumé
+        // composé au chargement (composedSummaryActive, reflet de NewsArticle::hasComposedSummary()
+        // côté serveur). Faux pour une fiche encore MACHINE que l'admin n'a jamais touchée : dans
+        // ce cas, save() n'envoie PAS composed_summary du tout, pour ne jamais poser composed:true
+        // dans le dos de l'admin sur un résumé qu'il n'a pas composé (voir le commentaire de
+        // composed_summary_active dans NewsCompositionController::show()).
+        hasTouchedComposedSummary() {
+            if (this.composedSummaryActive) return true;
+
+            // Comparaison à l'INSTANTANÉ du chargement, jamais au vide : les 8 champs arrivent
+            // pré-remplis quand la fiche porte un résumé machine, donc « non vide » ne veut pas
+            // dire « touché ». Tant que l'administrateur n'a rien changé, la sérialisation est
+            // identique et composed_summary n'est pas envoyé du tout - le résumé machine garde
+            // son statut. Voir l'instantané posé dans loadArticle().
+            return JSON.stringify(this.buildComposedSummaryPayload()) !== this.composedSummarySnapshot;
+        },
+
+        // ── Sources primaires - lignes répétables (Lot 4b, section 2.7) ──────────────────
+        addPrimarySource() {
+            if (this.formPrimarySources.length >= 10) return;
+            this.formPrimarySources.push({ label: '', url: '', note: '' });
+        },
+        removePrimarySource(index) {
+            this.formPrimarySources.splice(index, 1);
+        },
+
+        // ── Outils liés - action immédiate (Lot 4b, section 2.5/2.7) ─────────────────────
+        // TomSelect sert de simple sélecteur "un outil à la fois" : le catalogue complet
+        // (availableTools, chargé une seule fois, indépendant de la fiche) alimente ses options ;
+        // aucun item n'y est jamais pré-sélectionné (les outils DÉJÀ liés s'affichent en puces
+        // retirables dans le template, jamais dans TomSelect lui-même). Se réinitialise après
+        // chaque ajout réussi - prêt pour le suivant.
+        initRelatedToolPicker(el) {
+            if (!el || el.tomselect || typeof TomSelect === 'undefined') return;
+
+            const instance = new TomSelect(el, {
+                valueField: 'slug',
+                labelField: 'label',
+                searchField: ['label'],
+                options: this.availableTools,
+                maxOptions: null,
+                sortField: { field: 'label', direction: 'asc' },
+                placeholder: 'Rechercher un outil de l\'annuaire…',
+            });
+
+            instance.on('item_add', (slug) => {
+                this.addRelatedTool(slug);
+                instance.clear(true);
+            });
+        },
+        async addRelatedTool(slug) {
+            if (!this.selectedArticle || !slug) return;
+            this.relatedToolSaving = true;
+            this.relatedToolError = '';
+            try {
+                const url = this.endpoints.relatedToolsStoreTemplate.replace('__SLUG__', this.selectedArticle.slug);
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ tool_slug: slug }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.relatedToolError = data.error || data.message || ('Erreur HTTP ' + res.status);
+                    return;
+                }
+                this.relatedTools = data.related_tools;
+                if (data.updated_at) { this.selectedArticle.updated_at = data.updated_at; }
+            } catch (e) {
+                this.relatedToolError = 'Erreur réseau : ' + e.message;
+            } finally {
+                this.relatedToolSaving = false;
+            }
+        },
+        async removeRelatedTool(slug) {
+            if (!this.selectedArticle || !slug) return;
+            this.relatedToolError = '';
+            try {
+                const url = this.endpoints.relatedToolsDestroyTemplate.replace('__SLUG__', this.selectedArticle.slug).replace('__TOOL_SLUG__', encodeURIComponent(slug));
+                const res = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    this.relatedToolError = data.error || data.message || ('Impossible de retirer cet outil (HTTP ' + res.status + ').');
+                    return;
+                }
+                this.relatedTools = data.related_tools;
+                if (data.updated_at) { this.selectedArticle.updated_at = data.updated_at; }
+            } catch (e) {
+                this.relatedToolError = 'Erreur réseau : ' + e.message;
+            }
+        },
+
         // Phase D (design doc 2026-08-15, section 5.3) : génère le prompt d'image côté serveur
         // (style fixe + titre + angle), le copie dans le presse-papiers, PUIS ouvre Gemini dans
         // un nouvel onglet - libellé assumé "copier le prompt et ouvrir Gemini", aucun bouton
@@ -1190,6 +1527,20 @@ function compositionBuilder(opts) {
                         image_credit: this.formImageCredit || null,
                         nature_original: this.formNatureOriginal || null,
                         niveau_preuve: this.formNiveauPreuve || null,
+                        // Lot 4b (section 2.5) - primary_sources REMPLACE intégralement à chaque
+                        // save() (jamais une accumulation) : une ligne label/url incomplète n'est
+                        // jamais envoyée (mirroir client du "chaque source exige label et url").
+                        primary_sources: this.formPrimarySources
+                            .map(s => ({ label: (s.label || '').trim(), url: (s.url || '').trim(), note: (s.note || '').trim() }))
+                            .filter(s => s.label !== '' && s.url !== ''),
+                        // Lot 4b (section 2.5) - composed_summary n'est envoyé QUE si l'admin y a
+                        // touché ou si la fiche porte déjà un résumé composé
+                        // (hasTouchedComposedSummary() plus bas) : sinon, un save() qui ne touche
+                        // QUE image_credit par exemple enverrait quand même un résumé reconstruit
+                        // depuis les 8 champs pré-remplis, et poserait composed:true sur un résumé
+                        // encore MACHINE - voir le commentaire de composed_summary_active dans
+                        // NewsCompositionController::show().
+                        ...(this.hasTouchedComposedSummary() ? { composed_summary: this.buildComposedSummaryPayload() } : {}),
                         // Verrou optimiste (section 2.6) - comparé tel quel, côté serveur, à
                         // l'updated_at COURANT de la fiche.
                         expected_updated_at: this.selectedArticle.updated_at,
@@ -1213,10 +1564,18 @@ function compositionBuilder(opts) {
                 // enregistrés - même patron léger que publishArticle() plus haut (qui reflète
                 // déjà internal_source_text côté client sans réponse serveur dédiée).
                 if (data.updated_at) { this.selectedArticle.updated_at = data.updated_at; }
+                // Le slug d'un brouillon suit son titre côté serveur : sans ce report, le PROCHAIN
+                // enregistrement viserait une URL périmée (404, travail perdu). Défaut mesuré en
+                // QC visuelle le 2026-09-03.
+                if (data.slug) { this.selectedArticle.slug = data.slug; }
                 this.selectedArticle.title = this.formTitle;
                 this.selectedArticle.image_credit = this.formImageCredit || null;
                 this.selectedArticle.nature_original = this.formNatureOriginal || null;
                 this.selectedArticle.niveau_preuve = this.formNiveauPreuve || null;
+                // Lot 4b (section 2.6) - reflet local du même garde-fou que
+                // hasTouchedComposedSummary() plus bas : si ce save() a envoyé composed_summary,
+                // la fiche est désormais composée pour de bon (même si elle ne l'était pas avant).
+                if (this.hasTouchedComposedSummary()) { this.composedSummaryActive = true; }
                 const item = this.itemById(this.selectedIds[0]);
                 if (item) { item.already_used = this.formSourceText.trim() !== ''; }
                 if (typeof Livewire !== 'undefined') {
@@ -1316,6 +1675,22 @@ function compositionBuilder(opts) {
         this.formNiveauPreuve = '';
         this.natureOriginalOptions = [];
         this.niveauPreuveOptions = [];
+        // Lot 4b (design doc 2026-09-03, section 2.5/2.7) - même remise à zéro que les champs
+        // riches ci-dessus, pour ne jamais laisser le résumé/les sources/les outils de la fiche
+        // précédente visibles pendant l'état "aucune fiche sélectionnée".
+        this.formHook = '';
+        this.formKeyPoints = [];
+        this.formWhyImportant = '';
+        this.formKeyNumber = '';
+        this.formQuoteText = '';
+        this.formQuoteAuthor = '';
+        this.formAngleQcCa = '';
+        this.formActionConcrete = '';
+        this.formReperesDates = [];
+        this.composedSummaryActive = false;
+        this.formPrimarySources = [];
+        this.relatedTools = [];
+        this.relatedToolError = '';
         this.saveConflict = false;
         this.saveError = '';
         this.saveOk = false;
@@ -1338,3 +1713,14 @@ function compositionBuilder(opts) {
 }
 </script>
 @endsection
+
+{{-- Lot 4b (design doc 2026-09-03, section 2.5/2.7) - TomSelect pour le sélecteur "Outils liés",
+     même paquet déjà chargé par Modules/News/resources/views/admin/articles/edit.blade.php pour
+     tool_ids[] (DRY : aucune nouvelle dépendance, réutilisation stricte de l'existant). --}}
+@push('plugin-styles')
+<link href="{{ asset('build/nobleui/plugins/tom-select/tom-select.bootstrap5.min.css') }}" rel="stylesheet">
+@endpush
+
+@push('custom-scripts')
+<script src="{{ asset('build/nobleui/plugins/tom-select/tom-select.complete.min.js') }}"></script>
+@endpush

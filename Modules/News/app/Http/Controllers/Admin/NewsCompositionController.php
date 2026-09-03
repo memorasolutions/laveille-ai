@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Modules\Core\Services\TranslationService;
+use Modules\News\Actions\NewsToolSyncAction;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Services\CompositionPayloadNormalizer;
 use Modules\News\Services\CompositionPromptBuilder;
@@ -91,8 +92,18 @@ use Modules\News\Services\SourceMarkdownFetcher;
  * storeProofPair() délègue désormais à CompositionPayloadNormalizer::validateProofPair() (section
  * 2.2), qui fusionne ce qui était ici et la boucle équivalente de NewsApplyCommand::
  * normalizeProofPairs() - une seule règle de validation, jamais deux copies qui pourraient
- * diverger. Hors périmètre de ce lot (4b, son propre chantier) : composed_summary,
- * primary_sources, related_tool_slugs.
+ * diverger.
+ *
+ * LOT 4b (même design doc, section 2.5 et section 11) : update() accepte en plus 'composed_summary'
+ * (fusion sous-clé par sous-clé sur le résumé déjà en base via CompositionPayloadNormalizer::
+ * normalizeComposedSummary()/overlayComposedSummary(), même doctrine que NewsApplyCommand
+ * --payload) et 'primary_sources' (remplacement complet, plafond 10, via
+ * CompositionPayloadNormalizer::normalizePrimarySources()) - les deux rejoignent RICH_FIELDS,
+ * donc le verrou optimiste de la section 2.6 s'applique déjà à eux sans rien à changer là. Deux
+ * routes dédiées, symétriques de proof-pairs.store/destroy, complètent ce lot :
+ * storeRelatedTool()/destroyRelatedTool(), qui délèguent à NewsToolSyncAction::attachBySlug()/
+ * detachBySlug() (section 2.4, méthodes promues au Lot 1) - additif/soustractif par slug UNIQUE,
+ * jamais un remplacement de la liste complète (contrairement à tool_ids[] de l'écran classique).
  *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
@@ -100,13 +111,11 @@ use Modules\News\Services\SourceMarkdownFetcher;
 class NewsCompositionController extends Controller
 {
     /**
-     * Lot 4a (design doc 2026-09-03, section 2.6) - clés dont la présence dans le payload de
-     * update() active le verrou optimiste. Liste complète telle que donnée par le design (y
-     * compris composed_summary/primary_sources, qui rejoindront la validation de update() au lot
-     * 4b) : le verrou porte sur la RICHESSE du champ écrit, pas sur l'ordre de livraison des
-     * lots - une clé absente de $validated aujourd'hui (4b non livré) ne peut de toute façon
-     * jamais apparaître dans array_keys($validated), donc rester dans cette liste est inerte tant
-     * que 4b n'ajoute pas sa propre règle de validation, jamais un comportement actif prématuré.
+     * Clés dont la présence dans le payload de update() active le verrou optimiste (design doc
+     * 2026-09-03, section 2.6) : le verrou porte sur la RICHESSE du champ écrit, pas sur l'ordre
+     * de livraison des lots. 'composed_summary'/'primary_sources' rejoignent la validation de
+     * update() au Lot 4b (voir plus bas) - cette liste était déjà complète depuis le Lot 4a, elle
+     * n'a rien à changer ici.
      */
     private const RICH_FIELDS = ['title', 'composed_summary', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve'];
 
@@ -114,6 +123,7 @@ class NewsCompositionController extends Controller
         private readonly CompositionPromptBuilder $promptBuilder,
         private readonly NewsImageService $imageService,
         private readonly SourceMarkdownFetcher $sourceFetcher,
+        private readonly NewsToolSyncAction $toolSync,
     ) {
     }
 
@@ -139,8 +149,50 @@ class NewsCompositionController extends Controller
             'proofPairsDestroyEndpointTemplate' => route('admin.news.composition.proof-pairs.destroy', ['article' => '__SLUG__', 'pair' => '__PAIR_ID__']),
             'generateImagePromptEndpointTemplate' => route('admin.news.composition.generate-image-prompt', ['article' => '__SLUG__']),
             'uploadImageEndpointTemplate' => route('admin.news.composition.upload-image', ['article' => '__SLUG__']),
+            // Lot 4b (design doc 2026-09-03, section 2.5) - outils liés, action immédiate comme
+            // les preuves éditoriales (2 routes dédiées, pas dans update()).
+            'relatedToolsStoreEndpointTemplate' => route('admin.news.composition.related-tools.store', ['article' => '__SLUG__']),
+            'relatedToolsDestroyEndpointTemplate' => route('admin.news.composition.related-tools.destroy', ['article' => '__SLUG__', 'slug' => '__TOOL_SLUG__']),
             'articlesIndexUrl' => route('admin.news.articles.index'),
+            // Catalogue des outils publiés pour le sélecteur TomSelect (Lot 4b, section 2.7) -
+            // chargé UNE FOIS ici (indépendant de la fiche sélectionnée), jamais recopié dans
+            // show() qui, lui, ne renvoie que les outils DÉJÀ liés à la fiche courante. Garde
+            // module_enabled : Directory reste désactivable (règle projet "un module retiré ne
+            // casse jamais le site").
+            'availableTools' => $this->availableToolsForPicker(),
         ]);
+    }
+
+    /**
+     * Catalogue des outils PUBLIÉS de l'annuaire, sous la forme {slug, label} attendue par le
+     * sélecteur TomSelect du panneau « Outils liés » (Lot 4b, design doc 2026-09-03, section
+     * 2.7). Le slug voyage dans la locale COURANTE de l'admin (cohérent avec l'URL publique de
+     * l'outil) ; attachBySlug()/detachBySlug() résolvent de toute façon contre TOUTES les
+     * traductions du slug (Modules\News\Actions\NewsToolSyncAction), donc ce choix d'affichage
+     * n'a aucune incidence sur ce qui est réellement accepté à l'écriture.
+     *
+     * @return array<int, array{slug: string, label: string}>
+     */
+    private function availableToolsForPicker(): array
+    {
+        if (! class_exists(\Modules\Directory\Models\Tool::class)) {
+            return [];
+        }
+
+        $locale = app()->getLocale();
+
+        return \Modules\Directory\Models\Tool::published()
+            ->get(['id', 'slug', 'name'])
+            ->map(fn (\Modules\Directory\Models\Tool $t) => [
+                'slug' => $t->getTranslation('slug', $locale, false) ?: (string) $t->slug,
+                'label' => $t->getTranslation('name', $locale, false)
+                    ?: $t->getTranslation('name', 'fr_CA', false)
+                    ?: $t->getTranslation('name', 'en', false)
+                    ?: (string) $t->slug,
+            ])
+            ->sortBy('label', SORT_FLAG_CASE | SORT_STRING)
+            ->values()
+            ->all();
     }
 
     /**
@@ -391,6 +443,40 @@ class NewsCompositionController extends Controller
             // RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
             'primary_sources' => $article->primary_sources ?? [],
             'image_credit' => $article->image_credit,
+            // ACTION : Lot 4b (design doc 2026-09-03, section 2.8) - composed_summary rejoint le
+            // bloc lecture pour devenir ÉDITABLE (voir update() plus bas). C'est le MÊME tableau
+            // que structured_summary (résumé MACHINE OU composé - NewsArticle::hasComposedSummary()
+            // reste le seul point qui distingue les deux) : exposé sous ce nom de payload pour que
+            // le panneau de composition n'ait jamais besoin de connaître le nom de la colonne
+            // interne, exactement comme update() ci-dessous accepte 'composed_summary' en entrée
+            // et écrit 'structured_summary' en sortie.
+            // MCP: SELF (<5 lignes)
+            // RAISON: design doc 2026-09-03, section 2.5 - même nom des deux côtés du contrat HTTP.
+            'composed_summary' => is_array($article->structured_summary) ? $article->structured_summary : [],
+            // ACTION : garde-fou anti-écrasement silencieux (mesuré en revue de ce lot) - le
+            // client a besoin de savoir si ce résumé est DÉJÀ composé (humain/agent) ou encore
+            // MACHINE (collecte RSS, mêmes noms de sous-clés que composed_summary - AiSummaryService
+            // écrit hook/key_points/why_important/angle_qc_ca) pour décider s'il doit envoyer
+            // 'composed_summary' à update() : hasComposedSummary() est le point UNIQUE de cette
+            // distinction (DRY, même méthode que NewsApplyCommand). Sans ce signal, un
+            // enregistrement qui ne touche QUE image_credit enverrait quand même un
+            // composed_summary reconstruit depuis les 8 champs pré-remplis, et
+            // overlayComposedSummary() poserait composed:true sur un résumé encore machine -
+            // jamais une perte de contenu (les valeurs machine sont réécrites identiques), mais un
+            // changement de statut interne fait dans le dos de l'admin, qui protégerait ensuite ce
+            // résumé d'un remplacement légitime par un futur `summary` (même piège que celui déjà
+            // documenté deux fois pour ce module - CONTRAINTES-SOUS-AGENTS.md, "une nouvelle clé
+            // est soit du contenu, soit une méta-donnée").
+            // MCP: SELF (<10 lignes utiles)
+            // RAISON: zéro casse (CLAUDE.md règle 1) - jamais de changement de statut hors du geste explicite de l'admin.
+            'composed_summary_active' => $article->hasComposedSummary(),
+            // Outils DÉJÀ liés (Lot 4b, section 2.7) - jamais la liste des outils disponibles
+            // (celle-ci voyage une seule fois, indépendante de la fiche, voir index() et
+            // availableToolsForPicker() ci-dessus). Le slug renvoyé ici est celui qui identifie
+            // réellement le lien pour destroyRelatedTool() (route DELETE .../related-tools/{slug}).
+            // MCP: SELF (<5 lignes)
+            // RAISON: design doc 2026-09-03, section 2.8 - "outils déjà liés".
+            'related_tools' => $this->relatedToolsPayload($article),
             // ACTION : Lot 4a (design doc 2026-09-03, section 2.8) - nature_original/niveau_preuve
             // rejoignent le bloc lecture pour devenir ÉDITABLES (voir update() plus bas) ; les
             // listes d'options voyagent avec CHAQUE fiche plutôt que par un endpoint séparé, pour
@@ -460,6 +546,17 @@ class NewsCompositionController extends Controller
             'image_credit' => ['sometimes', 'nullable', 'string', 'max:255'],
             'nature_original' => ['sometimes', 'nullable', 'string'],
             'niveau_preuve' => ['sometimes', 'nullable', 'string'],
+            // ── Lot 4b (design doc 2026-09-03, section 2.5) ──────────────────────────────────
+            // 'nullable' sur composed_summary couvre uniquement la FORME du payload JSON (un
+            // objet ou son absence explicite null) - un null de premier niveau est traité plus
+            // bas comme un NO-OP (rien à fusionner), jamais comme un ordre d'effacer tout le
+            // résumé composé : la fiche de test le prouve. Vider une SOUS-clé précise se fait en
+            // envoyant l'objet complet avec cette sous-clé à null (même doctrine que le CLI,
+            // CompositionPayloadNormalizer::normalizeComposedSummary()). primary_sources n'est PAS
+            // nullable (remplacement complet, une fiche sans aucune source envoie [], jamais
+            // null) ; max:10 miroir serveur du plafond déjà imposé par normalizePrimarySources().
+            'composed_summary' => ['sometimes', 'nullable', 'array'],
+            'primary_sources' => ['sometimes', 'array', 'max:10'],
             // Verrou optimiste (2.6) : chaîne ISO 8601 comparée telle quelle à l'updated_at
             // courant de la fiche - jamais interprétée comme une date par Laravel (une
             // différence de fuseau/format ferait alors échouer une comparaison pourtant valide).
@@ -499,6 +596,44 @@ class NewsCompositionController extends Controller
             ], 422);
         }
 
+        // ACTION : composed_summary (Lot 4b, section 2.5) - même service que NewsApplyCommand
+        // --payload (CompositionPayloadNormalizer::normalizeComposedSummary() puis
+        // overlayComposedSummary()), jamais une seconde implémentation. Un objet composed_summary
+        // ABSENT du payload ne touche à rien (comportement 'sometimes' déjà en place) ; un objet
+        // présent mais littéralement `null` est un NO-OP délibéré, pas un effacement - le
+        // formulaire envoie toujours un objet aux 8 sous-clés, jamais null au premier niveau ;
+        // traiter null comme "efface tout structured_summary" romprait la règle absolue "zéro
+        // suppression de données utilisateur" sur un signal ambigu (ex. un état non encore
+        // hydraté côté client). Effacer une SOUS-clé précise reste possible : voir la note de la
+        // règle de validation ci-dessus.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: design doc 2026-09-03, section 2.5 - "fusion sous-clé par sous-clé identique au CLI".
+        if (array_key_exists('composed_summary', $validated) && $validated['composed_summary'] !== null) {
+            $composedResult = CompositionPayloadNormalizer::normalizeComposedSummary($validated['composed_summary']);
+            if (! $composedResult['ok']) {
+                return response()->json(['error' => $composedResult['error']], 422);
+            }
+
+            $existing = $article->hasComposedSummary() ? (array) $article->structured_summary : [];
+            $validated['structured_summary'] = CompositionPayloadNormalizer::overlayComposedSummary($existing, $composedResult['value']);
+        }
+        unset($validated['composed_summary']);
+
+        // ACTION : primary_sources (Lot 4b, section 2.5) - remplacement complet (pas une fusion,
+        // contrairement à composed_summary ci-dessus), même normalisation que le CLI
+        // (CompositionPayloadNormalizer::normalizePrimarySources(), plafond 10 déjà imposé une
+        // première fois par la règle de validation 'max:10' au-dessus - défense en profondeur,
+        // jamais la seule garde).
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc 2026-09-03, section 2.5 - "même sémantique que normalizePrimarySources()".
+        if (array_key_exists('primary_sources', $validated)) {
+            $sourcesResult = CompositionPayloadNormalizer::normalizePrimarySources($validated['primary_sources']);
+            if (! $sourcesResult['ok']) {
+                return response()->json(['error' => $sourcesResult['error']], 422);
+            }
+            $validated['primary_sources'] = $sourcesResult['value'];
+        }
+
         // ACTION : title (2.5) - le slug ne doit JAMAIS bouger sur une fiche déjà publiée. C'est
         // la condition --enrich du CLI (NewsApplyCommand.php:382), transposée : ici, la fiche
         // déjà publiée EST la condition (aucun flag à passer). Un titre vide/blanc est refusé
@@ -523,9 +658,17 @@ class NewsCompositionController extends Controller
 
         $article->update($validated);
 
+        $frais = $article->fresh();
+
         return response()->json([
             'success' => true,
-            'updated_at' => $article->fresh()->updated_at?->toIso8601String(),
+            'updated_at' => $frais->updated_at?->toIso8601String(),
+            // Le slug suit le titre tant que la fiche n'est PAS publiée (garde ci-dessus). Sans ce
+            // renvoi, l'interface garde l'ancien slug et son PROCHAIN enregistrement part vers une
+            // URL qui ne résout plus : 404 « Ressource introuvable » et modifications perdues dès
+            // le second enregistrement consécutif. Mesuré en QC visuelle le 2026-09-03 ; le défaut
+            // est actif en production depuis v1.250.0, où l'écriture du titre est apparue.
+            'slug' => $frais->slug,
         ]);
     }
 
@@ -812,6 +955,95 @@ class NewsCompositionController extends Controller
             'pairs' => $pairs,
             'updated_at' => $article->fresh()->updated_at?->toIso8601String(),
         ]);
+    }
+
+    /**
+     * Ajoute UN outil lié par son slug (Lot 4b, design doc 2026-09-03, section 2.5) - action
+     * immédiate, même patron d'interaction que storeProofPair() ci-dessus (pas de troisième
+     * patron inventé sur cet écran). Délègue entièrement à
+     * Modules\News\Actions\NewsToolSyncAction::attachBySlug() (section 2.4, méthode promue au
+     * Lot 1, v1.248.2) - additif PUR, ne touche jamais aux liens déjà existants.
+     *
+     * Choix (non explicité au mot près par le design, tranché ici pour rester cohérent avec le
+     * reste de ce contrôleur) : un slug inconnu renvoie 422, comme toute autre valeur invalide de
+     * update() (nature_original/niveau_preuve) - contrairement à destroyRelatedTool() ci-dessous,
+     * une TENTATIVE D'AJOUT qui n'attache rien n'atteint pas l'intention de l'admin et doit être
+     * visible comme un échec, jamais un succès silencieux.
+     */
+    public function storeRelatedTool(Request $request, NewsArticle $article): JsonResponse
+    {
+        $validated = $request->validate([
+            'tool_slug' => ['required', 'string', 'max:120'],
+        ]);
+
+        $result = $this->toolSync->attachBySlug($article, [$validated['tool_slug']]);
+
+        if ($result['module_disabled']) {
+            return response()->json(['error' => 'Le module Directory est désactivé - aucun outil ne peut être lié.'], 422);
+        }
+
+        if ($result['unknown'] !== []) {
+            return response()->json([
+                'error' => "Slug introuvable dans l'annuaire publié : ".implode(', ', $result['unknown']).'.',
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'related_tools' => $this->relatedToolsPayload($article->fresh()),
+            'updated_at' => $article->fresh()->updated_at?->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Retire UN outil lié par son slug (Lot 4b, section 2.5) - additif/soustractif STRICT,
+     * jamais un remplacement : seul le slug demandé est détaché (Modules\News\Actions\
+     * NewsToolSyncAction::detachBySlug(), section 2.4). Une DELETE reste idempotente ici, par
+     * choix délibéré (même esprit que related_tool_slugs_remove côté CLI, défaut 3 du
+     * 2026-08-28, qui AVERTIT sans jamais faire échouer la commande) : un slug déjà détaché ou
+     * jamais lié (`not_attached`) renvoie 200, la fiche est bien dans l'état voulu par l'admin
+     * (cet outil n'est plus lié) - seul un slug qui n'existe même pas dans l'annuaire (`unknown`)
+     * renvoie 422, cas qui ne devrait survenir que si l'outil a disparu de l'annuaire entre le
+     * chargement de l'écran et le clic.
+     */
+    public function destroyRelatedTool(NewsArticle $article, string $slug): JsonResponse
+    {
+        $result = $this->toolSync->detachBySlug($article, [$slug]);
+
+        if ($result['module_disabled']) {
+            return response()->json(['error' => 'Le module Directory est désactivé - aucun outil ne peut être détaché.'], 422);
+        }
+
+        if ($result['unknown'] !== []) {
+            return response()->json([
+                'error' => "Slug introuvable dans l'annuaire : ".implode(', ', $result['unknown']).'.',
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'related_tools' => $this->relatedToolsPayload($article->fresh()),
+            'updated_at' => $article->fresh()->updated_at?->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Forme {slug, label} des outils DÉJÀ liés à la fiche (Lot 4b, section 2.8) - extrait pour
+     * être réutilisé tel quel par show(), storeRelatedTool() et destroyRelatedTool() (DRY : 3e
+     * occurrence de la même projection, seuil d'abstraction du projet atteint, CLAUDE.md section
+     * "DRY et anti-sur-ingénierie").
+     *
+     * @return \Illuminate\Support\Collection<int, array{slug: string, label: string}>
+     */
+    private function relatedToolsPayload(NewsArticle $article): \Illuminate\Support\Collection
+    {
+        return $article->tools->map(fn ($t) => [
+            'slug' => (string) $t->slug,
+            'label' => $t->getTranslation('name', app()->getLocale(), false)
+                ?: $t->getTranslation('name', 'fr_CA', false)
+                ?: $t->getTranslation('name', 'en', false)
+                ?: (string) $t->slug,
+        ])->values();
     }
 
     /**

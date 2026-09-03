@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.251.0] - 2026-09-03
+
+### Ajouté
+- **Actualités : le résumé structuré se compose enfin depuis l'écran, sans passer par la ligne de commande** - les huit sous-clés du résumé riche (accroche, points clés, pourquoi c'est important, chiffre clé, citation, angle québécois, action concrète, repères de dates) sont éditables dans le panneau permanent. Elles empruntent le MÊME service que la porte de l'agent, `CompositionPayloadNormalizer::normalizeComposedSummary()` puis `overlayComposedSummary()` : une seule règle de fusion, jamais deux implémentations qui divergent. Lot 4b du design doc « extension de l'écran de composition des actualités » (2026-09-03).
+- **Sources primaires répétables** (dix maximum, plafond du serveur reflété à l'écran) et **outils liés** ajoutables ou retirables à l'unité, sans rechargement, via deux points d'écriture dédiés (`related-tools.store` / `related-tools.destroy`). Là encore, la normalisation est celle du CLI, pas une copie.
+
+### Corrigé
+- **Enregistrer un champ ordinaire convertissait un résumé MACHINE en résumé « composé par un humain », dans le dos de l'administrateur.** Défaut trouvé par la vérification visuelle, pas par la lecture du code : l'écran pré-remplit les huit champs avec le contenu machine, et la garde testait si les champs avaient du CONTENU au lieu de vérifier s'ils avaient été MODIFIÉS - elle était donc toujours vraie. Modifier le seul crédit photo suffisait à faire basculer le statut. L'interface compare désormais l'état courant à un instantané pris au chargement : tant que rien n'a bougé, `composed_summary` n'est pas envoyé du tout. Le statut d'un résumé distingue une fiche écrite par l'agent d'une fiche encore automatique, et il gouverne l'ordre des sections de la page publique : le corrompre en silence fausse les deux.
+- **Deux enregistrements de suite sur un brouillon : le second échouait en 404 « Ressource introuvable » et le travail était perdu.** Actif en production depuis v1.250.0, où l'écriture du titre est apparue. Sur un brouillon, le slug suit le titre (comportement voulu, et la garde `is_published` protège correctement les URL des fiches déjà en ligne) - mais l'interface gardait l'ancien slug et adressait donc sa requête suivante à une URL qui ne résolvait plus. La réponse du serveur renvoie maintenant le slug frais, que l'écran reporte.
+
+### Note de méthode
+- Les deux correctifs sont verrouillés par des tests vus ÉCHOUER d'abord contre le code sans eux : trois tests Pest et un test JavaScript qui exerce la vraie fonction extraite de la vue, jamais une réimplémentation. Suite du module News : 754 tests, 2470 assertions, zéro échec.
+
 ## [1.250.0] - 2026-09-03
 
 ### Ajouté
