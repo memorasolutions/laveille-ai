@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.250.0] - 2026-09-03
+
+### Ajouté
+- **Actualités : l'écran de composition devient une vraie porte d'écriture pour l'humain** - le panneau toujours visible accepte désormais le titre publié, le crédit photo, la nature de la source et le niveau de preuve, avec exactement les mêmes bornes et les mêmes règles que la porte de l'agent (`php artisan news:apply --payload`). Jusqu'ici, ces quatre champs n'étaient modifiables que par la ligne de commande : un humain devait passer par un agent pour corriger une classification erronée. Lot 4a du design doc « extension de l'écran de composition des actualités » (2026-09-03).
+- **Les paires de preuve acceptent enfin le type « fait primaire » depuis l'interface.** Le serveur le supportait depuis le 2026-08-17, seule l'interface manquait. Au passage, la validation cesse d'exister en double : `storeProofPair()` délègue à `CompositionPayloadNormalizer::validateProofPair()`, la méthode que la porte de l'agent appelle déjà - une seule règle, plus deux copies qui pouvaient diverger.
+- **Verrou optimiste sur ces champs riches.** Si la fiche a été modifiée ailleurs depuis l'ouverture de l'écran, l'enregistrement est refusé (409) au lieu d'écraser en silence le travail de l'autre, et un bouton « Recharger la fiche » apparaît. Le verrou ne s'active QUE pour ces champs neufs : le chemin historique (titre pour Google, résumé, texte source) garde un comportement strictement inchangé, ce qu'un test verrouille explicitement.
+
+### Corrigé
+- **Le verrou optimiste s'auto-infligeait un refus sur le cas le plus courant.** Défaut trouvé pendant l'implémentation, absent du design : l'écran appelle automatiquement la récupération du texte source à l'ouverture de toute fiche qui n'en a pas. Cet appel écrit en base et fait donc bouger l'horodatage AVANT que l'administrateur ait touché quoi que ce soit - la toute première sauvegarde aurait échoué à chaque fois, alors que personne d'autre n'avait rien modifié. Les quatre points d'écriture de l'écran renvoient désormais l'horodatage frais, que l'interface reporte : le verrou détecte une écriture EXTERNE, jamais la sienne.
+- **Le bouton « Enregistrer » du panneau permanent n'était pas dans le panneau permanent.** Il ne vivait que dans l'accordéon « Édition manuelle (filet de secours) », si bien qu'enregistrer une saisie ordinaire obligeait à ouvrir une section de secours. Un second bouton est posé dans le panneau visible, appelant la même fonction - aucune logique dupliquée.
+- Deux tirets cadratins introduits dans les libellés des menus déroulants ont été remplacés par des parenthèses, conformément à la typographie du projet.
+
 ## [1.249.1] - 2026-09-03
 
 ### Ajouté

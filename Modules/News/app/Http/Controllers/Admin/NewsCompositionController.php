@@ -9,12 +9,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\Core\Services\TranslationService;
 use Modules\News\Models\NewsArticle;
+use Modules\News\Services\CompositionPayloadNormalizer;
 use Modules\News\Services\CompositionPromptBuilder;
-use Modules\News\Services\EditorialProofNormalizer;
 use Modules\News\Services\NewsImageService;
 use Modules\News\Services\SourceMarkdownFetcher;
 
@@ -82,11 +81,35 @@ use Modules\News\Services\SourceMarkdownFetcher;
  * DRY avec NewsApplyCommand --payload), pour que la composition manuelle soit enfin visible.
  * VOLONTAIREMENT PAS dans update() : l'admin peut retoucher le texte sans forcer la bascule.
  *
+ * LOT 4a (design doc "extension de l'écran de composition des actualités", 2026-09-03, section 2
+ * et section 11) : l'écran devient une PORTE D'ÉCRITURE de plein droit pour l'humain, avec les
+ * mêmes règles que la porte de l'agent (`php artisan news:apply`). update() accepte désormais
+ * 'title', 'image_credit', 'nature_original', 'niveau_preuve' (mêmes bornes que
+ * NewsApplyCommand, section 2.5) sous un verrou optimiste proportionné ('expected_updated_at',
+ * section 2.6, actif SEULEMENT si le payload porte au moins une de ces clés riches - zéro
+ * changement de comportement sur le chemin seo_title/summary/internal_source_text déjà stable).
+ * storeProofPair() délègue désormais à CompositionPayloadNormalizer::validateProofPair() (section
+ * 2.2), qui fusionne ce qui était ici et la boucle équivalente de NewsApplyCommand::
+ * normalizeProofPairs() - une seule règle de validation, jamais deux copies qui pourraient
+ * diverger. Hors périmètre de ce lot (4b, son propre chantier) : composed_summary,
+ * primary_sources, related_tool_slugs.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
 class NewsCompositionController extends Controller
 {
+    /**
+     * Lot 4a (design doc 2026-09-03, section 2.6) - clés dont la présence dans le payload de
+     * update() active le verrou optimiste. Liste complète telle que donnée par le design (y
+     * compris composed_summary/primary_sources, qui rejoindront la validation de update() au lot
+     * 4b) : le verrou porte sur la RICHESSE du champ écrit, pas sur l'ordre de livraison des
+     * lots - une clé absente de $validated aujourd'hui (4b non livré) ne peut de toute façon
+     * jamais apparaître dans array_keys($validated), donc rester dans cette liste est inerte tant
+     * que 4b n'ajoute pas sa propre règle de validation, jamais un comportement actif prématuré.
+     */
+    private const RICH_FIELDS = ['title', 'composed_summary', 'primary_sources', 'image_credit', 'nature_original', 'niveau_preuve'];
+
     public function __construct(
         private readonly CompositionPromptBuilder $promptBuilder,
         private readonly NewsImageService $imageService,
@@ -368,6 +391,17 @@ class NewsCompositionController extends Controller
             // RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
             'primary_sources' => $article->primary_sources ?? [],
             'image_credit' => $article->image_credit,
+            // ACTION : Lot 4a (design doc 2026-09-03, section 2.8) - nature_original/niveau_preuve
+            // rejoignent le bloc lecture pour devenir ÉDITABLES (voir update() plus bas) ; les
+            // listes d'options voyagent avec CHAQUE fiche plutôt que par un endpoint séparé, pour
+            // que le <select> du panneau de composition ne recopie JAMAIS ces valeurs en dur côté
+            // Blade (source unique : NewsArticle::NATURE_ORIGINAL_VALUES/NIVEAU_PREUVE_VALUES).
+            // MCP: SELF (<5 lignes)
+            // RAISON: design doc 2026-09-03, section 2.7 - "jamais recopiés en dur dans le Blade".
+            'nature_original' => $article->nature_original,
+            'niveau_preuve' => $article->niveau_preuve,
+            'nature_original_options' => NewsArticle::NATURE_ORIGINAL_VALUES,
+            'niveau_preuve_options' => NewsArticle::NIVEAU_PREUVE_VALUES,
             'is_published' => (bool) $article->is_published,
             // ACTION : signature éditoriale (2026-08-21) - l'écran doit savoir si la fiche est
             // DÉJÀ signée, pour n'offrir le bouton « J'ai relu » qu'à celles qui ne le sont pas.
@@ -391,9 +425,19 @@ class NewsCompositionController extends Controller
     }
 
     /**
-     * Sauvegarde le titre publié (seo_title), le résumé publié (summary) et/ou le texte source
-     * interne (internal_source_text) d'une actualité déjà collectée. N'écrit jamais dans
-     * 'description' (colonne purgée, ne plus jamais réutiliser - voir la migration).
+     * Sauvegarde le titre publié (seo_title), le résumé publié (summary), le texte source
+     * interne (internal_source_text) et, depuis le Lot 4a (design doc 2026-09-03, section 2.5),
+     * les champs riches 'title', 'image_credit', 'nature_original' et 'niveau_preuve' - mêmes
+     * bornes et mêmes règles de validation que la porte de l'agent (NewsApplyCommand --payload).
+     * N'écrit jamais dans 'description' (colonne purgée, ne plus jamais réutiliser - voir la
+     * migration).
+     *
+     * ACTION : verrou optimiste (design doc, section 2.6) - actif UNIQUEMENT si le payload porte
+     * au moins une clé de self::RICH_FIELDS ; les trois champs historiques continuent de
+     * s'écrire sans aucun verrou, comportement observable strictement inchangé pour eux.
+     * MCP: SELF (<5 lignes utiles, le reste est validation/contrat HTTP)
+     * RAISON: design doc 2026-09-03, section 2.6 - le risque d'écrasement concurrent humain/agent
+     *         n'existe qu'à partir des champs que ce lot ouvre à l'admin.
      */
     public function update(Request $request, NewsArticle $article): JsonResponse
     {
@@ -407,7 +451,73 @@ class NewsCompositionController extends Controller
             // Borne large mais finie : évite un payload démesuré côté admin sans empêcher de
             // coller l'intégralité d'un article de fond.
             'internal_source_text' => ['sometimes', 'nullable', 'string', 'max:200000'],
+            // ── Lot 4a (design doc 2026-09-03, section 2.5) ──────────────────────────────────
+            // Mêmes bornes que NewsApplyCommand.php : 200 pour 'title' (pas 255, comme
+            // 'seo_title'), 255 pour 'image_credit'. 'nullable' laisse passer un titre vide
+            // JUSQU'AU garde ci-dessous (colonne 'title' NOT NULL en base - un titre vide y
+            // échouerait en 500 plutôt qu'en 422 propre sans ce garde explicite).
+            'title' => ['sometimes', 'nullable', 'string', 'max:200'],
+            'image_credit' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'nature_original' => ['sometimes', 'nullable', 'string'],
+            'niveau_preuve' => ['sometimes', 'nullable', 'string'],
+            // Verrou optimiste (2.6) : chaîne ISO 8601 comparée telle quelle à l'updated_at
+            // courant de la fiche - jamais interprétée comme une date par Laravel (une
+            // différence de fuseau/format ferait alors échouer une comparaison pourtant valide).
+            'expected_updated_at' => ['sometimes', 'nullable', 'string'],
         ]);
+
+        if (array_intersect(array_keys($validated), self::RICH_FIELDS) !== []) {
+            if (($validated['expected_updated_at'] ?? null) !== $article->updated_at?->toIso8601String()) {
+                return response()->json([
+                    'error' => "Cette fiche a été modifiée depuis l'ouverture de cet écran - recharge-la avant d'enregistrer.",
+                ], 409);
+            }
+        }
+        unset($validated['expected_updated_at']);
+
+        // ACTION : nature_original/niveau_preuve (2.2 - "choix de ne pas envelopper cette
+        // ligne") - une valeur NULLE explicite est un retrait volontaire (le <select> du panneau
+        // propose une option vide pour corriger une classification erronée) et saute la
+        // vérification ; une valeur NON NULLE doit appartenir au vocabulaire du modèle, sans
+        // quoi la fiche porterait une étiquette qu'aucune vue ne sait traduire.
+        // MCP: SELF (<5 lignes)
+        // RAISON: design doc 2026-09-03, section 2.5 - même garde-fou que NewsApplyCommand,
+        //         élargi ici pour permettre à un humain d'effacer une classification erronée.
+        if (array_key_exists('nature_original', $validated)
+            && $validated['nature_original'] !== null
+            && ! array_key_exists($validated['nature_original'], NewsArticle::NATURE_ORIGINAL_VALUES)) {
+            return response()->json([
+                'error' => 'nature_original invalide (attendu : '.implode(', ', array_keys(NewsArticle::NATURE_ORIGINAL_VALUES)).').',
+            ], 422);
+        }
+
+        if (array_key_exists('niveau_preuve', $validated)
+            && $validated['niveau_preuve'] !== null
+            && ! array_key_exists($validated['niveau_preuve'], NewsArticle::NIVEAU_PREUVE_VALUES)) {
+            return response()->json([
+                'error' => 'niveau_preuve invalide (attendu : '.implode(', ', array_keys(NewsArticle::NIVEAU_PREUVE_VALUES)).').',
+            ], 422);
+        }
+
+        // ACTION : title (2.5) - le slug ne doit JAMAIS bouger sur une fiche déjà publiée. C'est
+        // la condition --enrich du CLI (NewsApplyCommand.php:382), transposée : ici, la fiche
+        // déjà publiée EST la condition (aucun flag à passer). Un titre vide/blanc est refusé
+        // explicitement (422) plutôt que laissé heurter la contrainte NOT NULL de la colonne en
+        // base (500 muette) - la colonne ne peut de toute façon jamais être vidée.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: design doc 2026-09-03, section 2.5.
+        if (array_key_exists('title', $validated)) {
+            if ($validated['title'] === null || trim($validated['title']) === '') {
+                return response()->json([
+                    'error' => 'title doit être une chaîne non vide de 200 caractères maximum.',
+                ], 422);
+            }
+
+            $validated['title'] = lv_strip_em_dash(trim($validated['title']));
+            if (! $article->is_published) {
+                $validated['slug'] = NewsArticle::generateUniqueSlug($validated['title'], $article->id);
+            }
+        }
 
         $this->applySourceProvenance($validated, $article);
 
@@ -461,7 +571,18 @@ class NewsCompositionController extends Controller
         // RAISON: garde-fou explicite, la même méthode gérait déjà seulement ce champ.
         $article->update(['internal_source_text' => null]);
 
-        return response()->json(['success' => true]);
+        // ACTION : Lot 4a (design doc 2026-09-03, section 2.6) - 'updated_at' renvoyé pour que le
+        // front puisse le reporter sur selectedArticle : sans cela, cette écriture (comme celle
+        // de fetchSource() et des paires de preuve, voir plus bas) ferait échouer le PROCHAIN
+        // update() riche avec un 409 auto-infligé, alors qu'aucun autre acteur n'a touché la
+        // fiche.
+        // MCP: SELF (<5 lignes)
+        // RAISON: le verrou optimiste (2.6) doit détecter une écriture EXTERNE, jamais la propre
+        //         écriture de l'onglet ouvert.
+        return response()->json([
+            'success' => true,
+            'updated_at' => $article->fresh()->updated_at?->toIso8601String(),
+        ]);
     }
 
     /**
@@ -527,10 +648,20 @@ class NewsCompositionController extends Controller
         $this->applySourceProvenance($update, $article);
         $article->update($update);
 
+        // ACTION : Lot 4a (design doc 2026-09-03, section 2.6) - 'updated_at' renvoyé, même
+        // raison que destroySourceText() ci-dessus. Ce point compte le PLUS : loadArticle()
+        // (front) appelle fetchSource() AUTOMATIQUEMENT dès qu'une fiche sans texte source est
+        // ouverte - sans ce report, la toute première sauvegarde de champs riches sur une fiche
+        // fraîchement collectée échouerait TOUJOURS en 409, alors que personne d'autre n'a rien
+        // modifié.
+        // MCP: SELF (<5 lignes)
+        // RAISON: le verrou optimiste (2.6) doit détecter une écriture EXTERNE, jamais la propre
+        //         écriture automatique de l'écran qu'on vient d'ouvrir.
         return response()->json([
             'success' => true,
             'markdown' => $result['markdown'],
             'acquisition' => $result['acquisition'],
+            'updated_at' => $article->fresh()->updated_at?->toIso8601String(),
         ]);
     }
 
@@ -617,12 +748,20 @@ class NewsCompositionController extends Controller
      * que la vraie cause est l'absence de texte à comparer. Ce chemin reste ATTEIGNABLE en
      * production (aucune garde is_published ici ni côté route, contrairement à `news:apply` hors
      * --enrich) : un onglet resté ouvert depuis avant la publication, ou tout appel direct à cette
-     * route, y arrive toujours. Délègue désormais à EditorialProofNormalizer::verifyFactPair()
-     * (RÉUTILISÉE, jamais réécrite - même règle que le correctif déjà appliqué à
-     * NewsApplyCommand::normalizeProofPairs()) : source absente -> paire ACCEPTÉE, signalée
-     * 'source_verified' => false plutôt que refusée en silence.
+     * route, y arrive toujours. La revalidation (verifyFactPair(), source absente -> paire
+     * ACCEPTÉE et signalée 'source_verified' => false plutôt que refusée en silence) vit
+     * désormais dans CompositionPayloadNormalizer::validateProofPair() - voir la note Lot 4a
+     * ci-dessous.
      * MCP: SELF (<5 lignes utiles)
      * RAISON: todo #1984, même famille de défaut que son premier correctif.
+     *
+     * LOT 4a (design doc 2026-09-03, section 2.2) : la vérification de forme, le type autorisé
+     * et la revalidation "fait"/"fait primaire" ne sont plus écrites ICI - elles sont DÉLÉGUÉES à
+     * CompositionPayloadNormalizer::validateProofPair(), la même méthode que
+     * NewsApplyCommand::normalizeProofPairs() appelle pour un LOT de paires (Lot 1, v1.248.2).
+     * Diff minimal sur un endpoint déjà correct : la validation Laravel ci-dessous reste
+     * inchangée (elle protège la FORME de la requête HTTP, hors du périmètre du service partagé),
+     * seule la logique métier qui suivait est remplacée par un seul appel.
      */
     public function storeProofPair(Request $request, NewsArticle $article): JsonResponse
     {
@@ -633,43 +772,25 @@ class NewsCompositionController extends Controller
             'source_url' => ['required_if:type,primary_fact', 'nullable', 'url:http,https', 'max:2000'],
         ]);
 
-        $sourceVerifiedFalse = false;
+        $result = CompositionPayloadNormalizer::validateProofPair((string) $article->internal_source_text, $validated);
 
-        if ($validated['type'] === 'fact') {
-            $source = (string) $article->internal_source_text;
-            $verdict = EditorialProofNormalizer::verifyFactPair($source, $validated['excerpt']);
-
-            if (! $verdict['accepted']) {
-                return response()->json([
-                    'error' => 'Cet extrait n\'est pas une sous-chaîne exacte du texte source : reprends-le mot pour mot, ou déclare cette paire comme « analyse ».',
-                ], 422);
-            }
-
-            $sourceVerifiedFalse = $verdict['source_verified'] === false;
+        if (! $result['ok']) {
+            return response()->json(['error' => $result['reason']], 422);
         }
 
         $pairs = $article->editorial_proof_pairs ?? [];
-        $newPair = [
-            'id' => (string) Str::uuid(),
-            'statement' => $validated['statement'],
-            'excerpt' => $validated['excerpt'],
-            'type' => $validated['type'],
-            'created_at' => now('America/Toronto')->toIso8601String(),
-        ];
-        if ($validated['type'] === 'primary_fact') {
-            $newPair['source_url'] = $validated['source_url'];
-        }
-        // Signale, sans jamais l'accepter en silence, qu'une paire "fact" n'a pas pu être
-        // revérifiée faute de texte source (voir verifyFactPair() ci-dessus) - même clé et même
-        // sémantique que NewsApplyCommand::normalizeProofPairs() (todo #1984).
-        if ($sourceVerifiedFalse) {
-            $newPair['source_verified'] = false;
-        }
-        $pairs[] = $newPair;
+        $pairs[] = $result['entry'];
 
         $article->update(['editorial_proof_pairs' => $pairs]);
 
-        return response()->json(['success' => true, 'pairs' => $pairs]);
+        // 'updated_at' reporté côté front (voir le commentaire de fetchSource() ci-dessus, même
+        // raison, Lot 4a section 2.6) : un ajout de preuve ne doit jamais auto-infliger un 409 à
+        // la sauvegarde des champs riches qui suivrait dans le même onglet.
+        return response()->json([
+            'success' => true,
+            'pairs' => $pairs,
+            'updated_at' => $article->fresh()->updated_at?->toIso8601String(),
+        ]);
     }
 
     /**
@@ -685,7 +806,12 @@ class NewsCompositionController extends Controller
 
         $article->update(['editorial_proof_pairs' => $pairs]);
 
-        return response()->json(['success' => true, 'pairs' => $pairs]);
+        // Même report de 'updated_at' que storeProofPair() ci-dessus (Lot 4a, section 2.6).
+        return response()->json([
+            'success' => true,
+            'pairs' => $pairs,
+            'updated_at' => $article->fresh()->updated_at?->toIso8601String(),
+        ]);
     }
 
     /**

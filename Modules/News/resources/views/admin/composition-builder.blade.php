@@ -56,6 +56,13 @@
     .nc-proof-type { display:inline-block; font-size:10.5px; font-weight:800; letter-spacing:.04em; padding:2px 8px; border-radius:10px; margin-bottom:6px; }
     .nc-proof-type-fact { background:#dcfce7; color:#166534; }
     .nc-proof-type-analysis { background:#e0e7ff; color:#3730a3; }
+    /* Lot 4a (design doc 2026-09-03, section 2.7) - 3e type de paire, « fait primaire » (citation
+       exacte de l'original, distincte du texte source collé pour l'agent). */
+    .nc-proof-type-primary { background:#fef3c7; color:#92400e; }
+    /* Lot 4a - nouveau panneau toujours visible (title/preuves/crédit/nature/niveau), positionné
+       hors du <details> "filet de secours" (design doc section 2.7). Même séparation visuelle
+       (bordure supérieure) que .nc-manual-details, sans dupliquer sa mécanique de repli. */
+    .nc-composition-panel { margin-top:18px; border-top:1px solid #e2e8f0; padding-top:14px; }
     .nc-proof-statement { font-weight:600; color:#064E5A; font-size:13px; margin-bottom:4px; }
     .nc-proof-excerpt { font-style:italic; color:#374151; font-size:12.5px; background:#f8fafc; padding:6px 8px; border-radius:6px; }
     .nc-proof-remove { background:none; border:none; color:#dc2626; text-decoration:underline; cursor:pointer; padding:10px 4px; font-size:12px; min-height:44px; display:inline-flex; align-items:center; }
@@ -232,6 +239,124 @@
                             <span class="nc-hint" style="display:block; margin-top:6px;">Colle /actu2 dans Claude Code : il retrouve l'original, rédige, prouve, révise, choisit la photo et publie - puis te donne le lien.</span>
                         </div>
 
+                        {{-- Lot 4a (design doc "extension de l'écran de composition des actualités",
+                             2026-09-03, section 2.7) : panneau TOUJOURS VISIBLE (pas de <details>
+                             replié) - la façon normale de composer une fiche depuis l'admin, plus
+                             un filet de secours. Résumé structuré / sources primaires / outils liés
+                             rejoindront ce même panneau au lot 4b (hors périmètre ici). --}}
+                        <div class="nc-composition-panel">
+                            <div class="cb-section-title" style="font-size:14px; margin-top:0;">🗂️ Détails de la fiche</div>
+
+                            <div class="nc-field">
+                                <label for="nc-title-publie">Titre publié</label>
+                                <input id="nc-title-publie" type="text" class="form-control" x-model="formTitle" maxlength="200" placeholder="Titre affiché sur la fiche publique">
+                                <span class="nc-hint" x-show="selectedArticle && selectedArticle.is_published" x-cloak style="display:block; margin-top:4px;">Fiche déjà publiée : l'adresse (URL) ne change jamais, même si tu corriges ce titre.</span>
+                            </div>
+
+                            <div class="nc-proof-section">
+                                <div class="cb-section-title" style="font-size:14px; margin-top:14px;">🔍 Passages à vérifier</div>
+                                <p class="nc-hint" style="display:block; margin:0 0 10px;">
+                                    Pour chaque passage risqué du résumé publié : colle la phrase, colle l'extrait exact
+                                    qui l'appuie, et déclare-le « fait » (sous-chaîne exacte du texte source collé),
+                                    « fait primaire » (citation exacte de l'original, avec son lien - jamais vérifiée
+                                    contre le texte source collé) ou « analyse » (ton propre liant éditorial, non vérifié).
+                                </p>
+
+                                <template x-if="!proofPairs.length">
+                                    <p class="nc-hint" style="display:block; font-style:italic;">Aucun passage vérifié pour l'instant.</p>
+                                </template>
+
+                                <div class="nc-proof-pair" x-show="proofPairs.length" x-cloak>
+                                    <template x-for="pair in proofPairs" :key="pair.id">
+                                        <div class="nc-proof-card">
+                                            <div class="nc-proof-type" :class="proofTypeClass(pair.type)" x-text="proofTypeLabel(pair.type)"></div>
+                                            <div class="nc-proof-statement" x-text="pair.statement"></div>
+                                            <div class="nc-proof-excerpt" x-text="'« ' + pair.excerpt + ' »'"></div>
+                                            <div x-show="pair.type === 'primary_fact' && pair.source_url" x-cloak style="margin-top:4px;">
+                                                <a :href="pair.source_url" target="_blank" rel="noopener nofollow" style="font-size:12px; color:#0B7285; font-weight:600;">🔗 Voir la source primaire</a>
+                                            </div>
+                                            <button type="button" class="nc-proof-remove" @click="$dispatch('confirm-action', {
+                                                title: 'Confirmer',
+                                                message: 'Retirer ce passage de la fiche de preuve éditoriale ?',
+                                                action: () => removeProofPair(pair.id)
+                                            })">🗑 Retirer</button>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <div class="nc-proof-form">
+                                    <div class="nc-field">
+                                        <label for="nc-pair-statement">Phrase du résumé</label>
+                                        <input id="nc-pair-statement" type="text" class="form-control" x-model="newPairStatement" maxlength="1000" placeholder="La phrase publiée qui doit être appuyée">
+                                    </div>
+                                    <div class="nc-field">
+                                        <label for="nc-pair-excerpt">Extrait de la source</label>
+                                        <textarea id="nc-pair-excerpt" class="form-control nc-source-textarea" rows="3" x-model="newPairExcerpt" maxlength="2000" placeholder="Copie-colle l'extrait exact du texte source (ou de l'original, pour un fait primaire)"></textarea>
+                                        <span class="nc-hint" x-show="newPairType === 'fact' && newPairExcerpt" x-cloak x-text="excerptFoundInSource() ? '✓ trouvé tel quel dans le texte source' : '⚠ introuvable tel quel dans le texte source'" :style="excerptFoundInSource() ? 'color:#059669' : 'color:#dc2626'"></span>
+                                    </div>
+                                    <div class="nc-field">
+                                        <label for="nc-pair-type">Décision</label>
+                                        <select id="nc-pair-type" class="form-control" x-model="newPairType" style="max-width:260px;">
+                                            <option value="fact">Fait (sous-chaîne exacte exigée)</option>
+                                            <option value="analysis">Analyse (liant éditorial)</option>
+                                            <option value="primary_fact">Fait primaire (cite l'original, lien exigé)</option>
+                                        </select>
+                                    </div>
+                                    <div class="nc-field" x-show="newPairType === 'primary_fact'" x-cloak>
+                                        <label for="nc-pair-source-url">Lien de la source primaire</label>
+                                        <input id="nc-pair-source-url" type="url" class="form-control" x-model="newPairSourceUrl" maxlength="2000" placeholder="https://…">
+                                    </div>
+                                    <button type="button" class="cb-btn cb-btn-secondary" @click="addProofPair()" :disabled="pairSaving || !newPairStatement || !newPairExcerpt || (newPairType === 'fact' && !excerptFoundInSource()) || (newPairType === 'primary_fact' && !newPairSourceUrl)">
+                                        <span x-show="!pairSaving">➕ Ajouter le passage</span>
+                                        <span x-show="pairSaving" x-cloak>⏳ Ajout…</span>
+                                    </button>
+                                    <span class="nc-status-error" x-show="pairError" x-cloak x-text="pairError" style="display:block; margin-top:6px;"></span>
+                                </div>
+                            </div>
+
+                            <div class="nc-field">
+                                <label for="nc-image-credit">Crédit photo</label>
+                                <input id="nc-image-credit" type="text" class="form-control" x-model="formImageCredit" maxlength="255" placeholder="Ex. Photo : Untel, Agence Untelle">
+                            </div>
+
+                            <div class="nc-field">
+                                <label for="nc-nature-original">Nature de la source <span class="nc-hint">(interne, jamais affichée telle quelle)</span></label>
+                                <select id="nc-nature-original" class="form-control" x-model="formNatureOriginal" style="max-width:340px;">
+                                    <option value="">(non classée)</option>
+                                    <template x-for="opt in natureOriginalOptions" :key="opt.value">
+                                        <option :value="opt.value" x-text="opt.label"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div class="nc-field">
+                                <label for="nc-niveau-preuve">Niveau de preuve <span class="nc-hint">(affiché sur la fiche publique)</span></label>
+                                <select id="nc-niveau-preuve" class="form-control" x-model="formNiveauPreuve" style="max-width:340px;">
+                                    <option value="">(non classé)</option>
+                                    <template x-for="opt in niveauPreuveOptions" :key="opt.value">
+                                        <option :value="opt.value" x-text="opt.label"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            {{-- Le bouton d'enregistrement vit DANS le panneau toujours visible, et non
+                                 dans le <details> « filet de secours » plus bas. Un panneau permanent dont
+                                 le bouton de sauvegarde est caché derrière un accordéon oblige à ouvrir une
+                                 section « secours » pour valider une saisie ordinaire : le geste normal
+                                 passerait par le chemin d'exception. Même fonction save() appelée des deux
+                                 endroits (aucune logique dupliquée), même état de chargement. --}}
+                            <div class="d-flex flex-wrap gap-2 align-items-center" style="margin-top:10px;">
+                                <button type="button" class="cb-btn" @click="save()" :disabled="loading.saving">
+                                    <span x-show="!loading.saving">💾 Enregistrer</span>
+                                    <span x-show="loading.saving" x-cloak>⏳ Enregistrement…</span>
+                                </button>
+                                <span class="nc-hint">Titre publié, crédit photo, nature de la source et niveau de preuve.</span>
+                            </div>
+                            <span class="nc-status-ok" x-show="saveOk" x-cloak x-transition style="display:block; margin-top:6px;">✓ Enregistré</span>
+                            <span class="nc-status-error" x-show="saveError" x-cloak x-text="saveError" style="display:block; margin-top:6px;"></span>
+                            <button type="button" class="cb-btn cb-btn-secondary" x-show="saveConflict" x-cloak @click="reloadAfterConflict()" style="margin-top:6px;">🔄 Recharger la fiche</button>
+                        </div>
+
                         <div class="nc-field">
                             <button type="button"
                                     class="cb-btn"
@@ -305,9 +430,13 @@
                                 </template>
                             </div>
 
+                            {{-- Lot 4a (design doc 2026-09-03, section 2.7) - libellé corrigé : ce
+                                 champ pointe vers seo_title, pas vers le titre publié (qui vit
+                                 maintenant dans le panneau toujours visible ci-dessus, formTitle).
+                                 Les deux coexistent : ce sont deux champs distincts du modèle. --}}
                             <div class="nc-field">
-                                <label for="nc-title">Titre publié</label>
-                                <input id="nc-title" type="text" class="form-control" x-model="formSeoTitle" maxlength="255" placeholder="Titre affiché sur la fiche publique">
+                                <label for="nc-seo-title">Titre SEO (balise &lt;title&gt;)</label>
+                                <input id="nc-seo-title" type="text" class="form-control" x-model="formSeoTitle" maxlength="255" placeholder="Titre affiché dans l'onglet du navigateur et les résultats de recherche">
                             </div>
 
                             <div class="nc-field">
@@ -340,57 +469,10 @@
                                 <span class="nc-status-error" x-show="saveError" x-cloak x-text="saveError"></span>
                             </div>
 
-                            <div class="nc-proof-section">
-                                <div class="cb-section-title" style="font-size:14px; margin-top:20px;">🔍 Passages à vérifier</div>
-                                <p class="nc-hint" style="display:block; margin:0 0 10px;">
-                                    Pour chaque passage risqué du résumé publié : colle la phrase, colle l'extrait exact de la
-                                    source qui l'appuie, et déclare-le « fait » (l'extrait doit être une sous-chaîne exacte
-                                    du texte source) ou « analyse » (ton propre liant éditorial, non vérifié).
-                                </p>
-
-                                <template x-if="!proofPairs.length">
-                                    <p class="nc-hint" style="display:block; font-style:italic;">Aucun passage vérifié pour l'instant.</p>
-                                </template>
-
-                                <div class="nc-proof-pair" x-show="proofPairs.length" x-cloak>
-                                    <template x-for="pair in proofPairs" :key="pair.id">
-                                        <div class="nc-proof-card">
-                                            <div class="nc-proof-type" :class="pair.type === 'fact' ? 'nc-proof-type-fact' : 'nc-proof-type-analysis'" x-text="pair.type === 'fact' ? 'FAIT' : 'ANALYSE'"></div>
-                                            <div class="nc-proof-statement" x-text="pair.statement"></div>
-                                            <div class="nc-proof-excerpt" x-text="'« ' + pair.excerpt + ' »'"></div>
-                                            <button type="button" class="nc-proof-remove" @click="$dispatch('confirm-action', {
-                                                title: 'Confirmer',
-                                                message: 'Retirer ce passage de la fiche de preuve éditoriale ?',
-                                                action: () => removeProofPair(pair.id)
-                                            })">🗑 Retirer</button>
-                                        </div>
-                                    </template>
-                                </div>
-
-                                <div class="nc-proof-form">
-                                    <div class="nc-field">
-                                        <label for="nc-pair-statement">Phrase du résumé</label>
-                                        <input id="nc-pair-statement" type="text" class="form-control" x-model="newPairStatement" maxlength="1000" placeholder="La phrase publiée qui doit être appuyée">
-                                    </div>
-                                    <div class="nc-field">
-                                        <label for="nc-pair-excerpt">Extrait de la source</label>
-                                        <textarea id="nc-pair-excerpt" class="form-control nc-source-textarea" rows="3" x-model="newPairExcerpt" maxlength="2000" placeholder="Copie-colle l'extrait exact du texte source"></textarea>
-                                        <span class="nc-hint" x-show="newPairType === 'fact' && newPairExcerpt" x-cloak x-text="excerptFoundInSource() ? '✓ trouvé tel quel dans le texte source' : '⚠ introuvable tel quel dans le texte source'" :style="excerptFoundInSource() ? 'color:#059669' : 'color:#dc2626'"></span>
-                                    </div>
-                                    <div class="nc-field">
-                                        <label for="nc-pair-type">Décision</label>
-                                        <select id="nc-pair-type" class="form-control" x-model="newPairType" style="max-width:220px;">
-                                            <option value="fact">Fait (sous-chaîne exacte exigée)</option>
-                                            <option value="analysis">Analyse (liant éditorial)</option>
-                                        </select>
-                                    </div>
-                                    <button type="button" class="cb-btn cb-btn-secondary" @click="addProofPair()" :disabled="pairSaving || !newPairStatement || !newPairExcerpt || (newPairType === 'fact' && !excerptFoundInSource())">
-                                        <span x-show="!pairSaving">➕ Ajouter le passage</span>
-                                        <span x-show="pairSaving" x-cloak>⏳ Ajout…</span>
-                                    </button>
-                                    <span class="nc-status-error" x-show="pairError" x-cloak x-text="pairError" style="display:block; margin-top:6px;"></span>
-                                </div>
-                            </div>
+                            {{-- Lot 4a (design doc 2026-09-03, section 2.7) : la fiche de preuve
+                                 éditoriale a déménagé dans le panneau toujours visible ci-dessus
+                                 (même endpoints storeProofPair/destroyProofPair, action immédiate
+                                 - jamais deux UI pour la même donnée). --}}
 
                             <div class="nc-image-section">
                                 <div class="cb-section-title" style="font-size:14px; margin-top:20px;">🖼️ Image</div>
@@ -459,6 +541,18 @@ function compositionBuilder(opts) {
         formSeoTitle: '',
         formSummary: '',
         formSourceText: '',
+        // Lot 4a (design doc "extension de l'écran de composition des actualités", 2026-09-03,
+        // section 2.5/2.7) : champs riches du panneau toujours visible. natureOriginalOptions/
+        // niveauPreuveOptions sont des tableaux {value, label} dérivés de show(), jamais recopiés
+        // en dur ici (source unique : NewsArticle::NATURE_ORIGINAL_VALUES/NIVEAU_PREUVE_VALUES).
+        formTitle: '',
+        formImageCredit: '',
+        formNatureOriginal: '',
+        formNiveauPreuve: '',
+        natureOriginalOptions: [],
+        niveauPreuveOptions: [],
+        // Verrou optimiste (section 2.6) : true après un 409 - affiche le bouton "Recharger".
+        saveConflict: false,
         saveOk: false,
         saveError: '',
 
@@ -508,6 +602,9 @@ function compositionBuilder(opts) {
         newPairStatement: '',
         newPairExcerpt: '',
         newPairType: 'fact',
+        // Lot 4a (section 2.7) - 3e type de paire « fait primaire » : lien exigé, affiché
+        // seulement quand newPairType === 'primary_fact' (même patron que le formulaire).
+        newPairSourceUrl: '',
         pairError: '',
         pairSaving: false,
 
@@ -565,12 +662,25 @@ function compositionBuilder(opts) {
                 this.formSummary = data.summary || '';
                 this.formSourceText = data.internal_source_text || '';
                 this.proofPairs = data.editorial_proof_pairs || [];
+                // Lot 4a (design doc 2026-09-03, section 2.5/2.7) - champs riches, mêmes
+                // conventions que les trois champs historiques ci-dessus (chaîne vide si absent,
+                // jamais null dans un x-model). natureOriginalOptions/niveauPreuveOptions : objet
+                // {clé: libellé} renvoyé par show() converti en tableau {value, label} pour
+                // x-for, source unique NewsArticle::NATURE_ORIGINAL_VALUES/NIVEAU_PREUVE_VALUES.
+                this.formTitle = data.title || '';
+                this.formImageCredit = data.image_credit || '';
+                this.formNatureOriginal = data.nature_original || '';
+                this.formNiveauPreuve = data.niveau_preuve || '';
+                this.natureOriginalOptions = Object.entries(data.nature_original_options || {}).map(([value, label]) => ({ value, label }));
+                this.niveauPreuveOptions = Object.entries(data.niveau_preuve_options || {}).map(([value, label]) => ({ value, label }));
+                this.saveConflict = false;
                 this.formAngle = '';
                 this.generatedPrompt = '';
                 this.promptError = '';
                 this.newPairStatement = '';
                 this.newPairExcerpt = '';
                 this.newPairType = 'fact';
+                this.newPairSourceUrl = '';
                 this.pairError = '';
                 this.imagePromptError = '';
                 this.imagePromptCopied = false;
@@ -636,6 +746,14 @@ function compositionBuilder(opts) {
                 if (data.acquisition?.warning) {
                     this.fetchWarning = data.acquisition.warning;
                 }
+                // Lot 4a (design doc 2026-09-03, section 2.6) - report obligatoire : cette
+                // récupération se déclenche AUTOMATIQUEMENT à l'ouverture de toute fiche sans
+                // texte source (loadArticle() ci-dessus). Sans ce report, le verrou optimiste
+                // refuserait la toute première sauvegarde de champs riches avec un 409
+                // auto-infligé, alors que personne d'autre n'a touché la fiche.
+                if (data.updated_at && this.selectedArticle) {
+                    this.selectedArticle.updated_at = data.updated_at;
+                }
             } catch (e) {
                 if (e.name === 'AbortError') return;
                 this.fetchError = 'erreur réseau (' + e.message + ')';
@@ -653,7 +771,11 @@ function compositionBuilder(opts) {
         // 2026-08-17) : lu par le template pour désactiver le bouton et lister ce qui manque.
         publishMissingList() {
             const missing = [];
-            if (!this.formSeoTitle || !this.formSeoTitle.trim()) missing.push('titre publié');
+            // Lot 4a (design doc 2026-09-03, section 2.7) - libellé corrigé : ce contrôle porte
+            // sur formSeoTitle (colonne seo_title, exigée par NewsArticle::publishReadinessCheck())
+            // et non sur le nouveau champ "titre publié" (formTitle) - même confusion que celle
+            // corrigée sur le libellé du champ lui-même, fermée ici aussi.
+            if (!this.formSeoTitle || !this.formSeoTitle.trim()) missing.push('titre SEO');
             if (!this.formSummary || !this.formSummary.trim()) missing.push('résumé');
             if (!this.proofPairs.length) missing.push('au moins une paire de preuve');
             return missing;
@@ -757,6 +879,21 @@ function compositionBuilder(opts) {
             const needle = this.normalizeForCompare(this.newPairExcerpt);
             if (!needle) return false;
             return this.normalizeForCompare(this.formSourceText).includes(needle);
+        },
+
+        // Lot 4a (design doc 2026-09-03, section 2.7) - 3e type de paire, « fait primaire »,
+        // ajouté au badge existant (fait/analyse) sans dupliquer le gabarit de carte.
+        proofTypeClass(type) {
+            if (type === 'fact') return 'nc-proof-type-fact';
+            if (type === 'primary_fact') return 'nc-proof-type-primary';
+
+            return 'nc-proof-type-analysis';
+        },
+        proofTypeLabel(type) {
+            if (type === 'fact') return 'FAIT';
+            if (type === 'primary_fact') return 'FAIT PRIMAIRE';
+
+            return 'ANALYSE';
         },
 
         async generatePrompt() {
@@ -873,10 +1010,22 @@ function compositionBuilder(opts) {
 
         async addProofPair() {
             if (!this.selectedArticle || !this.newPairStatement || !this.newPairExcerpt) return;
+            // Lot 4a (design doc 2026-09-03, section 2.7) - 'source_url' exigé pour le 3e type,
+            // miroir client du 'required_if:type,primary_fact' du contrôleur (défense en
+            // profondeur, jamais la seule garde).
+            if (this.newPairType === 'primary_fact' && !this.newPairSourceUrl) return;
             this.pairSaving = true;
             this.pairError = '';
             try {
                 const url = this.endpoints.proofPairsStoreTemplate.replace('__SLUG__', this.selectedArticle.slug);
+                const body = {
+                    statement: this.newPairStatement,
+                    excerpt: this.newPairExcerpt,
+                    type: this.newPairType,
+                };
+                if (this.newPairType === 'primary_fact') {
+                    body.source_url = this.newPairSourceUrl;
+                }
                 const res = await fetch(url, {
                     method: 'POST',
                     headers: {
@@ -886,11 +1035,7 @@ function compositionBuilder(opts) {
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                     credentials: 'same-origin',
-                    body: JSON.stringify({
-                        statement: this.newPairStatement,
-                        excerpt: this.newPairExcerpt,
-                        type: this.newPairType,
-                    }),
+                    body: JSON.stringify(body),
                 });
                 const data = await res.json();
                 if (!res.ok) {
@@ -898,9 +1043,14 @@ function compositionBuilder(opts) {
                     return;
                 }
                 this.proofPairs = data.pairs;
+                // Report du verrou optimiste (section 2.6) - voir le commentaire de fetchSource()
+                // plus haut, même raison : cette écriture ne doit jamais auto-infliger un 409 à
+                // la prochaine sauvegarde des champs riches dans le même onglet.
+                if (data.updated_at) { this.selectedArticle.updated_at = data.updated_at; }
                 this.newPairStatement = '';
                 this.newPairExcerpt = '';
                 this.newPairType = 'fact';
+                this.newPairSourceUrl = '';
             } catch (e) {
                 this.pairError = 'Erreur réseau : ' + e.message;
             } finally {
@@ -928,6 +1078,8 @@ function compositionBuilder(opts) {
                     return;
                 }
                 this.proofPairs = data.pairs;
+                // Report du verrou optimiste (section 2.6) - même raison qu'addProofPair() ci-dessus.
+                if (data.updated_at) { this.selectedArticle.updated_at = data.updated_at; }
             } catch (e) {
                 this.pairError = 'Erreur réseau : ' + e.message;
             }
@@ -1014,6 +1166,7 @@ function compositionBuilder(opts) {
             this.loading.saving = true;
             this.saveError = '';
             this.saveOk = false;
+            this.saveConflict = false;
             try {
                 const url = this.endpoints.updateTemplate.replace('__SLUG__', this.selectedArticle.slug);
                 const res = await fetch(url, {
@@ -1029,15 +1182,41 @@ function compositionBuilder(opts) {
                         seo_title: this.formSeoTitle,
                         summary: this.formSummary,
                         internal_source_text: this.formSourceText,
+                        // Lot 4a (design doc 2026-09-03, section 2.5/2.7) - champs riches du
+                        // panneau toujours visible, rejoignent ce même appel PUT (jamais un
+                        // second bouton/endpoint). Chaîne vide -> null : le <select>/l'input vidé
+                        // exprime un retrait volontaire, jamais une chaîne vide en base.
+                        title: this.formTitle,
+                        image_credit: this.formImageCredit || null,
+                        nature_original: this.formNatureOriginal || null,
+                        niveau_preuve: this.formNiveauPreuve || null,
+                        // Verrou optimiste (section 2.6) - comparé tel quel, côté serveur, à
+                        // l'updated_at COURANT de la fiche.
+                        expected_updated_at: this.selectedArticle.updated_at,
                     }),
                 });
                 const data = await res.json();
                 if (!res.ok) {
+                    // 409 = verrou optimiste (section 2.6) : la fiche a bougé depuis l'ouverture
+                    // de cet écran (agent /actu2 ou un autre onglet) - on ne réessaie jamais tout
+                    // seul, on propose de recharger (bouton lié à saveConflict, plus haut dans le
+                    // template).
+                    if (res.status === 409) {
+                        this.saveConflict = true;
+                    }
                     this.saveError = data.error || data.message || ('Erreur HTTP ' + res.status);
                     return;
                 }
                 this.saveOk = true;
                 setTimeout(() => { this.saveOk = false; }, 2500);
+                // Report du verrou optimiste + reflet local des champs riches tout juste
+                // enregistrés - même patron léger que publishArticle() plus haut (qui reflète
+                // déjà internal_source_text côté client sans réponse serveur dédiée).
+                if (data.updated_at) { this.selectedArticle.updated_at = data.updated_at; }
+                this.selectedArticle.title = this.formTitle;
+                this.selectedArticle.image_credit = this.formImageCredit || null;
+                this.selectedArticle.nature_original = this.formNatureOriginal || null;
+                this.selectedArticle.niveau_preuve = this.formNiveauPreuve || null;
                 const item = this.itemById(this.selectedIds[0]);
                 if (item) { item.already_used = this.formSourceText.trim() !== ''; }
                 if (typeof Livewire !== 'undefined') {
@@ -1048,6 +1227,16 @@ function compositionBuilder(opts) {
             } finally {
                 this.loading.saving = false;
             }
+        },
+
+        // Lot 4a (design doc 2026-09-03, section 2.6) - "un 409 propose de recharger la fiche" :
+        // réutilise loadArticle() tel quel (même endpoint show(), même remplissage des
+        // formulaires), plutôt qu'un second chemin de rechargement.
+        async reloadAfterConflict() {
+            if (!this.selectedArticle) return;
+            this.saveConflict = false;
+            this.saveError = '';
+            await this.loadArticle(this.selectedArticle.id);
         },
 
         async deleteSourceText() {
@@ -1069,8 +1258,13 @@ function compositionBuilder(opts) {
                     this.saveError = 'Impossible de supprimer le texte source (HTTP ' + res.status + ').';
                     return;
                 }
+                const data = await res.json();
                 this.formSourceText = '';
                 this.selectedArticle.internal_source_text = null;
+                // Report du verrou optimiste (section 2.6) - même raison que fetchSource()/
+                // addProofPair() plus haut : cette suppression ne doit jamais auto-infliger un
+                // 409 à la prochaine sauvegarde des champs riches dans le même onglet.
+                if (data.updated_at) { this.selectedArticle.updated_at = data.updated_at; }
                 const item = this.itemById(this.selectedIds[0]);
                 if (item) { item.already_used = false; }
                 if (typeof Livewire !== 'undefined') {
@@ -1113,6 +1307,16 @@ function compositionBuilder(opts) {
         this.formSeoTitle = '';
         this.formSummary = '';
         this.formSourceText = '';
+        // Lot 4a (design doc 2026-09-03, section 2.5/2.7) - même remise à zéro que les champs
+        // historiques ci-dessus, pour ne jamais laisser de valeur de la fiche précédente visible
+        // pendant l'état "aucune fiche sélectionnée".
+        this.formTitle = '';
+        this.formImageCredit = '';
+        this.formNatureOriginal = '';
+        this.formNiveauPreuve = '';
+        this.natureOriginalOptions = [];
+        this.niveauPreuveOptions = [];
+        this.saveConflict = false;
         this.saveError = '';
         this.saveOk = false;
         this.fetchLoading = false;
