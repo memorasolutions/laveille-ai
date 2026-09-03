@@ -104,15 +104,15 @@ class DirectoryServiceProvider extends ServiceProvider
             $schedule->command('queue:work database --queue=screenshots --once --max-time=340 --timeout=330 --tries=1 --stop-when-empty')->everyThreeMinutes()->withoutOverlapping()->runInBackground();
             $schedule->command('directory:capture-screenshots --missing')->dailyAt('04:30')->timezone('America/Toronto')->withoutOverlapping()->runInBackground(); // auto-remplissage screenshots des nouveaux outils
             $schedule->command('tools:enrich-tutorials --batch=5')->dailyAt('05:00');
-            // Ticket #2087 - resorption de la file des vignettes sans marge de recadrage.
-            // Borne a 150 par nuit, et non aux ~551 restants d'un coup : le worker de la file
-            // screenshots digere ~1,2 job/minute, donc 551 deborderaient de plus de quatre heures
-            // hors de la fenetre calme et retomberaient en pleine journee - exactement la
-            // contention qui a fait tomber le site le 31 aout (#2100, #2107). 02h05 laisse
+            // Ticket #2087 - résorption de la file des vignettes sans marge de recadrage.
+            // Bornée à 150 par nuit, et non aux ~551 restants d'un coup : le worker de la file
+            // screenshots digère ~1,2 job/minute, donc 551 déborderaient de plus de quatre heures
+            // hors de la fenêtre calme et retomberaient en pleine journée - exactement la
+            // contention qui a fait tomber le site le 31 août (#2100, #2107). 02h05 laisse
             // 2 h 25 libres avant directory:capture-screenshots de 04h30.
-            // Le filtre anti-futiles de v1.248.1 empeche le rebouclage : un outil deja tente
-            // sans succes est ecarte 30 jours, puis retente - ce qui transforme ce lot en
-            // entretien continu plutot qu'en operation unique.
+            // Le filtre anti-futiles de v1.248.1 empêche le rebouclage : un outil déjà tenté
+            // sans succès est écarté 30 jours, puis retenté - ce qui transforme ce lot en
+            // entretien continu plutôt qu'en opération unique.
             $schedule->command('directory:dispatch-margin-recapture --limit=150 --restart-every=0')
                 ->dailyAt('02:05')->timezone('America/Toronto')->withoutOverlapping()->runInBackground();
             $schedule->command('tools:audit-tutorials --fix --email=stephane@memora.ca')->dailyAt('06:00'); // alerte qualité quotidienne (langue FR/EN + pertinence) + auto-correction
