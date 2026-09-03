@@ -165,19 +165,42 @@ class YouTubeService
         return true;
     }
 
+    /**
+     * Garde de PERTINENCE pour les outils dont le nom est un mot commun - liste CURÉE par cas
+     * PROUVÉ en production (mandat #2201, mesure du 2026-09-03), jamais une garde générale : la
+     * même doctrine que les exclusions du GlossaryLinkifier. str_contains(titre, nom) ne suffit
+     * pas pour ces noms : « Monologue » (outil de dictée) récoltait du théâtre et le synthétiseur
+     * Korg Monologue, « Motion » (gestion de tâches) du motion design Premiere/CapCut/Kdenlive,
+     * « Make » (automatisation) un dessin animé Cartoon Network, « Handy » (dictée) du bricolage.
+     * Pour ces noms, le titre doit AUSSI contenir un mot du domaine de l'outil. Compromis assumé :
+     * un tutoriel pertinent sans mot de domaine dans son titre est manqué (rappel sacrifié), mais
+     * un tutoriel faux affiché est un défaut alors qu'un tutoriel manqué n'en est pas un.
+     * Clé = nom de l'outil en minuscules (mb_strtolower).
+     */
+    public const GENERIC_NAME_DOMAIN_KEYWORDS = [
+        'monologue' => ['dictation', 'dictée', 'dictee', 'voice', 'transcription', 'typing', 'speech'],
+        'motion' => ['app', 'task', 'project', 'calendar', 'productivity', 'usemotion', 'workflow', 'schedule', ' ai '],
+        'make' => ['make.com', 'integromat', 'automation', 'automatisation', 'workflow', 'no-code', 'nocode', 'scenario', 'scénario'],
+        'handy' => ['dictation', 'dictée', 'dictee', 'voice', 'transcription', 'typing', 'speech', 'whisper'],
+    ];
+
     public function scoreAndFilter(array $videos, ?string $toolName = null, int $minViews = 5000): array
     {
         $filtered = array_values(array_filter($videos, function (array $v) use ($toolName, $minViews) {
             if ($v['view_count'] < $minViews || $v['duration_seconds'] < 180 || $v['duration_seconds'] > 7200) {
                 return false;
             }
-            // Langue : signal API fiable (defaultAudioLanguage) en priorité, sinon heuristique sur le titre
+            // Langue : signal API (defaultAudioLanguage) ET heuristique sur le titre - les DEUX,
+            // plus seulement l'un OU l'autre. Mesuré le 2026-09-03 : « Como Usar Moodle (2026) »
+            // et « Cómo usar Genially en 2026 » sont passés parce que leur api_lang mentait
+            // (créateur qui règle mal la langue audio) et que l'heuristique n'était consultée
+            // qu'en ABSENCE de signal API. Or le titre est ce que le lecteur voit : un titre
+            // manifestement ES/PT/DE/IT reste inutilisable pour notre public, peu importe l'audio.
             $apiLang = strtolower((string) ($v['api_lang'] ?? ''));
-            if ($apiLang !== '') {
-                if (! str_starts_with($apiLang, 'fr') && ! str_starts_with($apiLang, 'en')) {
-                    return false;
-                }
-            } elseif (! $this->isLikelyFrOrEn($v['title'] ?? '')) {
+            if ($apiLang !== '' && ! str_starts_with($apiLang, 'fr') && ! str_starts_with($apiLang, 'en')) {
+                return false;
+            }
+            if (! $this->isLikelyFrOrEn($v['title'] ?? '')) {
                 return false;
             }
             // anti-collision : écarte le contenu manifestement non-tutoriel (jeux/films/musique)
@@ -192,6 +215,21 @@ class YouTubeService
                 $nameLower = mb_strtolower($toolName);
                 if (! str_contains($titleLower, $nameLower)) {
                     return false;
+                }
+                // Nom d'outil = mot commun (liste curée ci-dessus) : exiger AUSSI un mot du
+                // domaine dans le titre, sinon n'importe quelle vidéo contenant le mot passe.
+                $domainKeywords = self::GENERIC_NAME_DOMAIN_KEYWORDS[$nameLower] ?? null;
+                if ($domainKeywords !== null) {
+                    $hasDomainKeyword = false;
+                    foreach ($domainKeywords as $keyword) {
+                        if (str_contains($titleLower, $keyword)) {
+                            $hasDomainKeyword = true;
+                            break;
+                        }
+                    }
+                    if (! $hasDomainKeyword) {
+                        return false;
+                    }
                 }
             }
 

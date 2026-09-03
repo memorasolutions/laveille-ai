@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.248.0] - 2026-09-03
+
+### Ajouté
+- **Annuaire : commande `tools:moderate-tutorials`** - porte officielle de modération des
+  tutoriels YouTube par identifiant vidéo (`--videos=id1,id2`, `--restore`, `--dry-run`).
+  Désapprouve sans jamais supprimer : la ressource reste en base, invisible au public, et le
+  re-scan ne peut pas la recréer (la détection de doublon porte sur `video_id` seul). Créée
+  après mesure : 20 tutoriels affichés en production n'avaient aucun lien avec leur outil.
+
+### Corrigé
+- **Annuaire : garde de pertinence pour les outils au nom commun** (`YouTubeService`) - liste
+  curée par cas prouvé (Monologue, Motion, Make, Handy) : le titre doit contenir un mot du
+  domaine de l'outil en plus du nom, sinon « Monologue » (dictée vocale) récolte du théâtre et
+  le synthétiseur Korg, « Motion » (gestion de tâches) du motion design Premiere/CapCut.
+- **Annuaire : heuristique de langue appliquée même quand l'API prétend fr/en** - « Como Usar
+  Moodle » passait parce que le créateur avait mal réglé la langue audio et que le titre n'était
+  vérifié qu'en absence de signal API. Le titre est ce que le lecteur voit : il prime.
+
 ## [1.247.9] - 2026-09-03
 
 ### Corrigé

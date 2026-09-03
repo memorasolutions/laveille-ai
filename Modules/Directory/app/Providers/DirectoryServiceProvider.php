@@ -86,6 +86,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\CheckImagesCommand::class,
             \Modules\Directory\Console\HealthCheckReportCommand::class,
             \Modules\Directory\Console\AuditTutorialsCommand::class,
+            \Modules\Directory\Console\ModerateTutorialsCommand::class,
         ]);
     }
 
