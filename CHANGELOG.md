@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.8] - 2026-09-03
+
+### Corrigé
+- **Faux lien « Astra » déplacé dans une citation anglaise verbatim (fiche 42244) - suite directe de v1.247.7.** Le correctif éditorial avait ajouté « modèle » devant les mentions françaises, mais le linkifier a alors posé le lien DANS la citation d'un chercheur (« that Astra uses opaque recurrence ») - intouchable éditorialement, puisqu'une citation ne se réécrit pas. Le préfixe `'that'` rejoint l'exclusion : mot anglais, il ne précède jamais une mention française légitime du Project Astra, donc aucun lien vrai perdu.
+- **L'hypothèse « Astra employé seul = mention Google légitime » (commentaire de v1.247.7) est DÉMENTIE et le commentaire corrigé** : une fiche OpenAI peut employer « Astra » nu, en particulier dans une citation en anglais.
+- **Clé de cache montée en v21** - sans ce bump, une entrée v20 chaude aurait servi le faux lien jusqu'au TTL.
+- **Côté données, même fiche : l'outil Astra était aussi ATTACHÉ à la fiche 42244** (widget « Outils mentionnés ») par auto-détection - détaché par la porte officielle (`related_tool_slugs_remove`, mécanisme v1.235.0), vérifié dans le rendu.
+- **Couverture :** les 61 tests du linkifier (111 assertions) restent verts.
+
 ## [1.247.7] - 2026-09-02
 
 ### Corrigé
