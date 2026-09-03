@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.9] - 2026-09-03
+
+### Corrigé
+- **7e variante du motif « nom d'outil ouvrant un nom propre composé » fermée (ticket #2202) : « l'Atlas danois » liait vers l'outil Atlas de l'annuaire.** « Atlas danois » désignait l'atlas MYCOLOGIQUE du Danemark (fiche 42271, corrigée côté données le soir même) - « atlas » y est le nom commun français, jamais l'outil. Aucune garde existante ne couvrait ce cas : `TOOL_COMPOUND_EXCLUSIONS` ne regarde que le mot d'AVANT, et la garde suffixe (`TOOL_SUFFIX_RISK_NAMES`) ne rejette que les suffixes à MAJUSCULE initiale - un adjectif accordé minuscule passait au travers.
+- **Nouvelle constante `TOOL_SUFFIX_COMPOUND_EXCLUSIONS`, symétrique exact de `TOOL_COMPOUND_EXCLUSIONS` côté suffixe** : liste CURÉE par-outil (`'atlas' => ['danois', 'danoise']`), lookahead négatif dans le motif - le composé précis ne lie jamais, le nom seul (y compris suivi d'un verbe minuscule, « Atlas propose... ») continue de lier. Jamais une garde générale « tout mot minuscule qui suit » : la leçon du ticket #2128 (garde générale = 0 % de précision mesurée, 46 liens légitimes perdus) est explicitement inscrite au docblock.
+- **Clé de cache montée en v22** + rattrapage dans `flushCache()` : la purge v20 avait été OUBLIÉE lors du bump v21 du même jour - v20 ET v21 sont désormais purgées explicitement.
+- **Couverture :** 2 tests ajoutés à `ComposerParagraphFauxComposeTest` (« Atlas danois » ne lie pas / « Atlas propose » lie), 8/8 verts, et les 69 tests du linkifier (130 assertions) restent verts.
+
 ## [1.247.8] - 2026-09-03
 
 ### Corrigé

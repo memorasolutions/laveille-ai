@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v21.'; // 2026-09-03 bump v21 (préfixe « that » ajouté à l'exclusion astra, fiche 42244 : faux lien déplacé dans une citation anglaise verbatim) - sans ce bump, une entrée v20 chaude servirait encore le faux lien jusqu'au TTL. Historique v20 : // 2026-09-02 bump v20 (TOOL_COMPOUND_EXCLUSIONS « modèle Astra », 7e récidive homonyme) - sans ce bump, une entrée v19 chaude servirait le faux lien vers /annuaire/astra jusqu'au TTL. Historique v19 : // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
+    public const CACHE_KEY = 'glossary.terms.v22.'; // 2026-09-03 bump v22 (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202 - garde suffixe minuscule) - sans ce bump, une entrée v21 chaude servirait des entrées sans le champ exclude_suffix jusqu'au TTL. Historique v21 : // 2026-09-03 bump v21 (préfixe « that » ajouté à l'exclusion astra, fiche 42244 : faux lien déplacé dans une citation anglaise verbatim) - sans ce bump, une entrée v20 chaude servirait encore le faux lien jusqu'au TTL. Historique v20 : // 2026-09-02 bump v20 (TOOL_COMPOUND_EXCLUSIONS « modèle Astra », 7e récidive homonyme) - sans ce bump, une entrée v19 chaude servirait le faux lien vers /annuaire/astra jusqu'au TTL. Historique v19 : // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -177,6 +177,30 @@ class GlossaryLinkifier
         // du Project Astra (mot anglais) : le perdre ne coûte aucun lien vrai, doctrine du
         // fichier (un lien perdu n'est jamais une régression, un lien faux oui).
         'astra' => ['modèle', 'modele', 'model', 'that'],
+    ];
+
+    /**
+     * 2026-09-03 (ticket #2202, 7e variante du motif « nom d'outil ouvrant un nom propre
+     * composé », fiche 42271) : « l'Atlas danois » désignait l'atlas MYCOLOGIQUE du Danemark -
+     * « atlas » y est le nom commun français (recueil de cartes ou de planches), jamais l'outil
+     * « Atlas » de l'annuaire. Aucune des deux gardes existantes ne couvrait ce cas :
+     * TOOL_COMPOUND_EXCLUSIONS ne regarde que le mot d'AVANT, et la garde suffixe
+     * (buildToolSuffixGuard/TOOL_SUFFIX_RISK_NAMES) ne rejette que les suffixes à MAJUSCULE
+     * initiale (\p{Lu}) - un adjectif accordé MINUSCULE passe au travers.
+     *
+     * Symétrique exact de TOOL_COMPOUND_EXCLUSIONS, côté suffixe : clé = nom d'outil en
+     * minuscules ; valeur = mots-suffixes (comparaison insensible à la casse) qui invalident le
+     * match s'ils SUIVENT immédiatement le terme. Implémenté en lookahead négatif dans
+     * matchInText() - le composé précis ne lie jamais, le nom employé seul continue de lier.
+     *
+     * Liste CURÉE des cas PROUVÉS, jamais une garde générale « tout mot minuscule qui suit » :
+     * la mention légitime d'un outil est très souvent suivie d'un verbe minuscule (« Atlas est
+     * le navigateur... ») - une garde générale aurait la précision de 0 % déjà mesurée sur la
+     * garde majuscule appliquée à tout le catalogue (ticket #2128, 46 liens légitimes perdus
+     * pour 0 vrai blocage). Un futur cas s'ajoute ici avec sa propre preuve.
+     */
+    public const TOOL_SUFFIX_COMPOUND_EXCLUSIONS = [
+        'atlas' => ['danois', 'danoise'],
     ];
 
     /**
@@ -646,6 +670,9 @@ class GlossaryLinkifier
                                     'origin_rank' => self::ORIGIN_PRIMARY,
                                     // 2026-08-28 : faux composés (« Paragraph Composer ») - voir TOOL_COMPOUND_EXCLUSIONS.
                                     'exclude_after' => self::TOOL_COMPOUND_EXCLUSIONS[$lower] ?? [],
+                                    // 2026-09-03 : faux composés côté SUFFIXE minuscule (« Atlas danois ») -
+                                    // voir TOOL_SUFFIX_COMPOUND_EXCLUSIONS (ticket #2202).
+                                    'exclude_suffix' => self::TOOL_SUFFIX_COMPOUND_EXCLUSIONS[$lower] ?? [],
                                 ];
                                 $takenLower[$lower] = true;
 
@@ -1110,6 +1137,13 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-09-03 : v20 et v21 ajoutées ici en même temps que le bump v22
+            // (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202) - v20 avait été
+            // OUBLIÉE lors du bump v21 du même jour (préfixe « that »), rattrapée ici : sans ces
+            // lignes, une clé v20/v21 déjà chaude resterait servie jusqu'à l'expiration de son
+            // TTL après un flush explicite.
+            Cache::forget('glossary.terms.v21.'.$loc);
+            Cache::forget('glossary.terms.v20.'.$loc);
             // 2026-09-02 : v19 ajoutée ici en même temps que le bump v20 (TOOL_COMPOUND_EXCLUSIONS
             // « modèle Astra ») - même raison que les notes précédentes.
             Cache::forget('glossary.terms.v19.'.$loc);
@@ -1320,10 +1354,21 @@ class GlossaryLinkifier
             foreach (($term['exclude_after'] ?? []) as $prefixExclu) {
                 $debutDeMot .= '(?<!(?i:'.preg_quote($prefixExclu, '/').')[\s\x{00A0}])';
             }
+            // 2026-09-03 (ticket #2202) : garde de FAUX COMPOSÉ côté SUFFIXE MINUSCULE
+            // (TOOL_SUFFIX_COMPOUND_EXCLUSIONS, ex. « Atlas danois » = l'atlas mycologique du
+            // Danemark, jamais l'outil). Lookahead négatif par suffixe exclu (espace ou insécable
+            // + le mot, casse insensible sur le seul suffixe) : rejette UNIQUEMENT le composé
+            // précis, le terme employé seul (ou suivi d'un autre mot) continue de lier. La garde
+            // suffixe MAJUSCULE ($finSuffixeOutil ci-dessus) ne voit pas ce cas : \p{Lu} ignore
+            // un adjectif accordé minuscule.
+            $finComposeMinuscule = '';
+            foreach (($term['exclude_suffix'] ?? []) as $suffixeExclu) {
+                $finComposeMinuscule .= '(?![\s\x{00A0}](?i:'.preg_quote($suffixeExclu, '/').')\b)';
+            }
             if ($strategy === 'partial_case_sensitive') {
-                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.self::buildPartialCasePattern($name).$finDeMot.$finSuffixeOutil.'/u';
+                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.self::buildPartialCasePattern($name).$finDeMot.$finSuffixeOutil.$finComposeMinuscule.'/u';
             } else {
-                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.preg_quote($name, '/').$finDeMot.$finSuffixeOutil.'/u';
+                $pattern = '/(?<![\p{L}\p{N}._\-\/])'.$debutDeMot.preg_quote($name, '/').$finDeMot.$finSuffixeOutil.$finComposeMinuscule.'/u';
                 if ($strategy === 'loose') $pattern .= 'i';
             }
             // case_sensitive ET exact_phrase : pas de flag i (casse exacte)

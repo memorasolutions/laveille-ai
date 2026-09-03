@@ -173,3 +173,39 @@ it('attache loutil Composer quand il est mentionne seul, en contexte reel', func
     $pivot = DB::table('news_article_tool')->where('news_article_id', $article->id)->first();
     expect($pivot->source)->toBe('auto');
 });
+
+// ── 2026-09-03 : garde suffixe MINUSCULE, entree « Atlas » (ticket #2202, fiche 42271) ────────
+// « l'Atlas danois » designait l'atlas MYCOLOGIQUE du Danemark (nom commun francais), jamais
+// l'outil « Atlas » de l'annuaire. La garde suffixe majuscule (TOOL_SUFFIX_RISK_NAMES) ne voit
+// pas un adjectif accorde minuscule ; TOOL_SUFFIX_COMPOUND_EXCLUSIONS ferme ce cas precis.
+// Meme trade-off que les deux entrees ci-dessus : le composé precis est rejete, la mention
+// seule (ou suivie d'un autre mot, verbe compris) continue de lier.
+
+function pcfcAtlasTool(): Tool
+{
+    return Tool::withoutEvents(fn () => Tool::create([
+        'name' => ['fr_CA' => 'Atlas', 'en' => 'Atlas'],
+        'slug' => ['fr_CA' => 'atlas', 'en' => 'atlas'],
+        'status' => 'published',
+        'pricing' => 'free',
+    ]));
+}
+
+it('ne lie PAS "Atlas" a linterieur de "Atlas danois" (atlas mycologique du Danemark)', function () {
+    pcfcAtlasTool();
+
+    $html = GlossaryLinkifier::linkify('<p>Les chercheurs ont puise dans l\'Atlas danois des champignons, riche de 1040 photos.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/annuaire/atlas');
+});
+
+it('lie "Atlas" employe seul, y compris suivi d\'un verbe minuscule', function () {
+    pcfcAtlasTool();
+
+    $html = GlossaryLinkifier::linkify('<p>Le navigateur Atlas propose une navigation assistee par IA.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/annuaire/atlas')
+        ->and($html)->toContain('>Atlas</a>');
+});
