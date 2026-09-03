@@ -11,11 +11,11 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Modules\Core\Services\ScreenshotUploadService;
 use Modules\News\Actions\NewsToolSyncAction;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
 use Modules\News\Services\AiSummaryService;
+use Modules\News\Services\NewsImageService;
 use Modules\News\Services\RssFetcherService;
 use Modules\Directory\Models\Tool;
 use Modules\Settings\Facades\Settings;
@@ -283,23 +283,73 @@ class AdminNewsController extends Controller
         return back()->with('success', __('Article supprimé.'));
     }
 
-    public function uploadArticleImage(Request $request, NewsArticle $article, ScreenshotUploadService $uploader)
+    /**
+     * Volet B du design doc « extension de l'écran de composition des actualités » (2026-09-03).
+     *
+     * Cet écran écrivait ses images par un TROISIÈME pipeline (ScreenshotUploadService), avec un
+     * standard différent des deux autres portes : `.jpg` seul sans le `.webp` compagnon, plafond
+     * de poids à 5120 Ko au lieu de 8192, et une convention de nommage à part
+     * (`news-screenshots/{slug}.jpg` contre `{id}.webp`/`.jpg`). Le cadrage, lui, était déjà
+     * identique (cover 1200x630) - c'est ce qui rend cette unification sans risque visuel.
+     *
+     * Conséquence concrète du format : `SocialImageResolver::shareable()` cherche le jumeau `.jpg`
+     * pour construire og:image (Facebook et LinkedIn n'affichent pas d'aperçu WebP), et cet écran
+     * le produisait par hasard, sans jamais produire le `.webp` que la page publique, elle, sert
+     * aux visiteurs. Les trois portes produisent désormais la paire complète.
+     *
+     * ScreenshotUploadService n'est PAS modifié : il reste le service de Modules/Directory et de
+     * la modération, avec son propre contrat, et son avenir a été tranché ailleurs
+     * (docs/specs/2026-08-10-screenshots-annuaire-design.md, section 5).
+     *
+     * Contrat de réponse INCHANGÉ, parce que le composant partagé en dépend : le JS de
+     * `x-core::screenshot-capture` exige `ok === true` et lit `message` (ou `error`) en cas
+     * d'échec - voir screenshot-capture.blade.php:246-249.
+     */
+    public function uploadArticleImage(Request $request, NewsArticle $article, NewsImageService $imageService)
     {
-        $request->validate(['screenshot' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120']);
+        $request->validate([
+            'screenshot' => 'required|image|mimes:jpg,jpeg,png,webp|max:'.NewsImageService::MAX_UPLOAD_KB,
+        ]);
 
         $wantsJson = $request->expectsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest';
-        $slug = $article->slug ?: (string) $article->id;
-        $result = $uploader->upload($request->file('screenshot'), "news-screenshots/{$slug}.jpg", $article, 'image_url');
+        $file = $request->file('screenshot');
 
-        if ($result['ok']) {
+        [$width, $height] = array_pad((array) @getimagesize($file->getRealPath()), 2, 0);
+        if ($width < NewsImageService::MIN_WIDTH || $height < NewsImageService::MIN_HEIGHT) {
+            $message = __('Image trop petite (reçue :w×:hpx, minimum :minw×:minhpx).', [
+                'w' => $width, 'h' => $height,
+                'minw' => NewsImageService::MIN_WIDTH, 'minh' => NewsImageService::MIN_HEIGHT,
+            ]);
+
             return $wantsJson
-                ? response()->json(['ok' => true, 'message' => $result['message'], 'screenshot_url' => $result['url']])
-                : back()->with('success', $result['message']);
+                ? response()->json(['ok' => false, 'message' => $message], 422)
+                : back()->with('error', $message);
         }
 
+        try {
+            $imageUrl = $imageService->processFromUploadedFile($file, $article->id);
+        } catch (\Throwable $e) {
+            $message = __("Le traitement de l'image a échoué : :raison", ['raison' => $e->getMessage()]);
+
+            return $wantsJson
+                ? response()->json(['ok' => false, 'message' => $message], 422)
+                : back()->with('error', $message);
+        }
+
+        // Fermeture du même trou que celui déjà corrigé côté CLI (news:apply --image, fiche 33530) :
+        // ScreenshotUploadService écrivait image_url à CHAQUE appel, ce qui masquait le cas d'une
+        // fiche créée hors collecte RSS, donc sans valeur initiale. NewsImageService résout l'image
+        // par convention de chemin et ne touche jamais cette colonne - on ne l'écrit donc QUE si
+        // elle est vide, plutôt que de déplacer le trou sans le refermer.
+        if (blank($article->image_url)) {
+            $article->update(['image_url' => $imageUrl]);
+        }
+
+        $message = __('Image enregistrée.');
+
         return $wantsJson
-            ? response()->json(['ok' => false, 'message' => $result['message']], 422)
-            : back()->with('error', $result['message']);
+            ? response()->json(['ok' => true, 'message' => $message, 'screenshot_url' => asset($imageUrl).'?v='.time()])
+            : back()->with('success', $message);
     }
 
     /**

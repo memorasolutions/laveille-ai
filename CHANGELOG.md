@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.249.0] - 2026-09-03
+
+### Modifié
+- **Actualités : l'écran d'administration classique n'a plus son propre pipeline d'images** - `AdminNewsController::uploadArticleImage()` passe de `ScreenshotUploadService` à `NewsImageService`, le service déjà utilisé par les deux autres portes (CLI `news:apply --image` et écran de composition). Le troisième pipeline différait sur trois points : format de sortie (`.jpg` seul, sans le `.webp` que la page publique sert aux visiteurs), plafond de poids (5120 Ko au lieu de 8192) et convention de nommage (`news-screenshots/{slug}.jpg` au lieu de `news/images/{id}`). Le cadrage, lui, était déjà identique (cover 1200x630) - c'est ce qui rend l'unification sans risque visuel. Conséquence pour le partage social : `SocialImageResolver` cherche le jumeau `.jpg` pour og:image, et cet écran le produisait par hasard sans jamais produire le `.webp` compagnon ; les trois portes livrent désormais la paire complète. `ScreenshotUploadService` n'est PAS modifié - il reste le service de l'annuaire et de la modération, dont l'avenir a été tranché ailleurs. Volet B du design doc « extension de l'écran de composition des actualités » (2026-09-03), verrouillé par `NewsAdminImageUploadUnifiedTest` (5 tests) dont les 5 passent au rouge si on rétablit l'ancien service, vérifié.
+- **`image_url` n'est plus réécrit à chaque dépôt** - l'ancien service l'écrasait systématiquement, ce qui masquait le cas d'une fiche créée hors collecte RSS, donc sans valeur initiale. La colonne n'est désormais renseignée que si elle est vide, exactement comme le fait déjà `news:apply --image` : le trou est refermé au lieu d'être déplacé.
+
+### Ajouté
+- **Le plafond de dépôt de l'écran classique passe de 5120 à 8192 Ko**, aligné sur celui des deux autres portes. C'est la seule chose qu'un humain peut faire aujourd'hui et ne pouvait pas faire hier - et c'est la raison du bump MINEUR. Le design doc classait ce lot en CORRECTIF au motif que la capacité « existait déjà ailleurs » ; la règle de version du projet tranche autrement (« un utilisateur peut-il faire quelque chose qu'il ne pouvait pas faire avant ? »), et le design lui-même qualifiait ce plafond de « seul effet visible de ce lot pour un humain ». Divergence relevée et arbitrée en faveur de la règle, pas masquée.
+
 ## [1.248.3] - 2026-09-03
 
 ### Corrigé
