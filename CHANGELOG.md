@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.248.2] - 2026-09-03
+
+### Modifié
+- **Actualités : la normalisation des charges utiles vit désormais dans UN seul service** - `Modules\News\Services\CompositionPayloadNormalizer` (créé) absorbe les sept normalisations qui n'existaient qu'à l'intérieur de `news:apply` (résumé structuré et ses sous-parties, superposition, sources primaires, listes de slugs, validation d'une paire de preuve). La commande passe de 2058 à 1525 lignes et appelle le service ; son comportement observable est strictement inchangé, verrouillé par les 697 tests du module relancés avant et après. Lot 1 du design doc « extension de l'écran de composition des actualités » (2026-09-03) : ce service est le préalable qui évitera d'écrire une seconde fois la même validation côté administration.
+- **`niveau_preuve` a une source unique de vocabulaire** - `NewsArticle::NIVEAU_PREUVE_VALUES` + `niveauPreuveLabel()`, comme `nature_original` depuis le ticket #1915. La liste vivait en double : validation dans la commande, traduction française recopiée en dur dans la vue publique, sans lien entre les deux.
+- **Rattachement et détachement d'un outil par slug promus dans `NewsToolSyncAction`** (`attachBySlug()`/`detachBySlug()`), au lieu de rester enfermés dans la commande.
+
+### Corrigé
+- **Le champ mort `description` ne peut plus être réécrit par un update massif sur une fiche déjà publiée** - la colonne a été purgée le 2026-08-13 (design doc « Actus - zéro copie du texte source ») et aucun code n'y écrit plus, mais rien n'empêchait un futur `update(['description' => $texteBrut])` de rouvrir la fuite. Le retrait pur et simple de `$fillable` était impossible : la colonne est NOT NULL sans défaut, et deux écrivains de production la fournissent à la création. La garde distingue donc la création (valeur acceptée) de la mise à jour d'une fiche persistée (valeur ignorée), et son comportement est verrouillé par `NewsArticleDescriptionGuardTest` - dont 3 tests sur 4 passent au rouge si on retire la garde, vérifié.
+
 ## [1.248.1] - 2026-09-03
 
 ### Corrigé

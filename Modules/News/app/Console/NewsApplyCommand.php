@@ -7,11 +7,10 @@ namespace Modules\News\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Modules\News\Actions\NewsToolSyncAction;
 use Modules\News\Models\NewsArticle;
+use Modules\News\Services\CompositionPayloadNormalizer;
 use Modules\News\Services\CompositionPromptBuilder;
-use Modules\News\Services\EditorialProofNormalizer;
 use Modules\News\Services\NewsImageService;
 
 /**
@@ -181,21 +180,6 @@ class NewsApplyCommand extends Command
      */
     private const MAX_RELATED_ARTICLES = 1;
 
-    /**
-     * Richesse v1.188.0 - sous-clés autorisées de composed_summary (design doc, section
-     * "Richesse v1.188.0"). Toute autre sous-clé fait refuser tout le payload, même règle que
-     * ALLOWED_PAYLOAD_KEYS ci-dessus.
-     */
-    private const ALLOWED_COMPOSED_SUMMARY_KEYS = ['hook', 'key_points', 'why_important', 'key_number', 'quote', 'angle_qc_ca', 'action_concrete', 'reperes_dates'];
-
-    /**
-     * Richesse v1.188.0 - borne par défaut d'une chaîne simple de composed_summary (hook,
-     * why_important, key_number, angle_qc_ca, action_concrete) - "~600 max chacune sauf indiqué"
-     * (design doc). quote.text/quote.author, les éléments de key_points et les champs de
-     * reperes_dates ont leurs propres bornes, plus courtes, validées séparément.
-     */
-    private const COMPOSED_SUMMARY_STRING_MAX = 600;
-
     // ACTION : 'nature_original' (design doc, section "Implémentation /actu2 - volet serveur
     // (2026-08-17)", élargie ticket #1915, 2026-08-30) n'a PLUS de liste blanche dupliquée ici -
     // la validation (plus bas, dans handle()) lit directement NewsArticle::NATURE_ORIGINAL_VALUES,
@@ -204,13 +188,25 @@ class NewsApplyCommand extends Command
     // trois clés en liste blanche qui n'y étaient pas).
     // MCP: SELF (<5 lignes)
     // RAISON: ticket #1915, mesure du 2026-08-30 - DRY sur le vocabulaire, pas de duplication.
-
-    /**
-     * Valeurs acceptées pour 'niveau_preuve' (même section) - degré auquel la fiche s'appuie sur
-     * l'original plutôt que sur un texte secondaire. PUBLIC, traduit côté fiche (jamais
-     * l'étiquette technique brute) par Modules\News\resources\views\public\show.blade.php.
-     */
-    private const ALLOWED_NIVEAU_PREUVE = ['primaire', 'mixte', 'relais'];
+    //
+    // ACTION : 'niveau_preuve' (même section) suit désormais EXACTEMENT le même précédent
+    // (design doc "extension de l'écran de composition des actualités", 2026-09-03, section
+    // 2.3) - l'ancienne liste privée ALLOWED_NIVEAU_PREUVE est retirée, la validation (plus bas,
+    // dans handle()) lit directement NewsArticle::NIVEAU_PREUVE_VALUES, source unique du
+    // vocabulaire ET de sa traduction française (reprise aussi par show.blade.php via
+    // $article->niveauPreuveLabel(), jamais recopiée en dur).
+    // MCP: SELF (<5 lignes)
+    // RAISON: design doc 2026-09-03, section 2.3 - fermer le même défaut que celui déjà corrigé
+    //         sur nature_original, avant qu'il ne se reproduise.
+    //
+    // ACTION : ALLOWED_COMPOSED_SUMMARY_KEYS et COMPOSED_SUMMARY_STRING_MAX (Richesse v1.188.0)
+    // déménagent dans Modules\News\Services\CompositionPayloadNormalizer, avec les méthodes qui
+    // les utilisaient (design doc 2026-09-03, section 2.2) - source unique, partagée avec le
+    // futur écran de composition. Le seul usage qui restait ICI (message « sous-clé(s)
+    // conservée(s) » de handle(), plus bas) lit désormais CompositionPayloadNormalizer::
+    // ALLOWED_COMPOSED_SUMMARY_KEYS.
+    // MCP: SELF (<5 lignes)
+    // RAISON: design doc 2026-09-03, section 2.2 - DRY, une seule source pour cette liste.
 
     protected $signature = 'news:apply {article : id de la fiche news_articles} {--payload= : chemin d\'un fichier JSON de charge utile texte - efface aussi structured_summary (résumé machine), qui prime sinon sur ta composition côté fiche publique} {--image= : chemin d\'un fichier image local à appliquer} {--credit= : crédit photo appliqué avec --image (le payload exige la fraîcheur, qui change après la 1re écriture - le crédit voyage donc avec l\'image)} {--publish : publie la fiche - mêmes prérequis que le bouton manuel Publier-et-purger, refuse si déjà publiée} {--enrich : recompose une fiche DÉJÀ PUBLIÉE sans jamais changer son slug ni la dépublier (chantier enrichissement AdSense) - la clé title corrige le titre affiché, slug toujours intact}';
 
@@ -533,12 +529,25 @@ class NewsApplyCommand extends Command
         // MCP: SELF (<5 lignes)
         // RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
         if (array_key_exists('primary_sources', $decoded)) {
-            $normalizedSources = $this->normalizePrimarySources($decoded['primary_sources']);
-            if ($normalizedSources === null) {
-                // Message d'erreur déjà émis par normalizePrimarySources().
+            if (! is_array($decoded['primary_sources'])) {
+                $this->error('primary_sources doit être un tableau de sources.');
+
                 return self::FAILURE;
             }
-            $updates['primary_sources'] = $normalizedSources;
+
+            // ACTION : validation déléguée au service partagé (design doc 2026-09-03, section
+            // 2.2) - CompositionPayloadNormalizer::normalizePrimarySources() reproduit à
+            // l'identique l'ancienne méthode privée de cette commande, désormais réutilisée
+            // aussi par le futur écran de composition.
+            // MCP: SELF (<5 lignes)
+            // RAISON: design doc 2026-09-03, section 2.2.
+            $sourcesResult = CompositionPayloadNormalizer::normalizePrimarySources($decoded['primary_sources']);
+            if (! $sourcesResult['ok']) {
+                $this->error($sourcesResult['error']);
+
+                return self::FAILURE;
+            }
+            $updates['primary_sources'] = $sourcesResult['value'];
         }
 
         if (array_key_exists('image_credit', $decoded)) {
@@ -600,8 +609,8 @@ class NewsApplyCommand extends Command
         }
 
         if (array_key_exists('niveau_preuve', $decoded)) {
-            if (! is_string($decoded['niveau_preuve']) || ! in_array($decoded['niveau_preuve'], self::ALLOWED_NIVEAU_PREUVE, true)) {
-                $this->error('niveau_preuve invalide (attendu : '.implode(', ', self::ALLOWED_NIVEAU_PREUVE).').');
+            if (! is_string($decoded['niveau_preuve']) || ! array_key_exists($decoded['niveau_preuve'], NewsArticle::NIVEAU_PREUVE_VALUES)) {
+                $this->error('niveau_preuve invalide (attendu : '.implode(', ', array_keys(NewsArticle::NIVEAU_PREUVE_VALUES)).').');
 
                 return self::FAILURE;
             }
@@ -742,11 +751,24 @@ class NewsApplyCommand extends Command
         // MCP: SELF (<5 lignes)
         // RAISON: design doc, section "Richesse v1.188.0 - structure fixe composée (2026-08-17 soir)".
         if (array_key_exists('composed_summary', $decoded)) {
-            $normalizedComposed = $this->normalizeComposedSummary($decoded['composed_summary']);
-            if ($normalizedComposed === null) {
-                // Message d'erreur déjà émis par normalizeComposedSummary().
+            if (! is_array($decoded['composed_summary'])) {
+                $this->error('composed_summary doit être un objet.');
+
                 return self::FAILURE;
             }
+
+            // ACTION : validation déléguée au service partagé (design doc 2026-09-03, section
+            // 2.2) - CompositionPayloadNormalizer::normalizeComposedSummary() reproduit à
+            // l'identique l'ancienne méthode privée de cette commande.
+            // MCP: SELF (<5 lignes)
+            // RAISON: design doc 2026-09-03, section 2.2.
+            $composedResult = CompositionPayloadNormalizer::normalizeComposedSummary($decoded['composed_summary']);
+            if (! $composedResult['ok']) {
+                $this->error($composedResult['error']);
+
+                return self::FAILURE;
+            }
+            $normalizedComposed = $composedResult['value'];
 
             // ACTION : défaut 2 (2026-08-28) - FUSION sous-clé par sous-clé quand la fiche porte
             // déjà un résumé composé (hasComposedSummary(), point unique de la distinction, DRY -
@@ -763,7 +785,7 @@ class NewsApplyCommand extends Command
             // bloquée par ce même défaut (aucun moyen de ne toucher qu'une phrase).
             $avaitDejaUneComposition = $article->hasComposedSummary();
             $existing = $avaitDejaUneComposition ? (array) $article->structured_summary : [];
-            $updates['structured_summary'] = $this->overlayComposedSummary($existing, $normalizedComposed);
+            $updates['structured_summary'] = CompositionPayloadNormalizer::overlayComposedSummary($existing, $normalizedComposed);
 
             // ACTION : défaut 2 (2026-08-28) - une fusion muette est presque aussi mauvaise qu'un
             // effacement muet (mandat) : l'auteur voit explicitement ce qu'il n'a pas réécrit.
@@ -771,7 +793,7 @@ class NewsApplyCommand extends Command
             // RAISON: mandat 2026-08-28 - « La console DIT ce qui a été conservé ».
             if ($avaitDejaUneComposition) {
                 $sousClesConservees = array_values(array_filter(
-                    self::ALLOWED_COMPOSED_SUMMARY_KEYS,
+                    CompositionPayloadNormalizer::ALLOWED_COMPOSED_SUMMARY_KEYS,
                     fn (string $subKey) => ! array_key_exists($subKey, $normalizedComposed) && array_key_exists($subKey, $existing)
                 ));
 
@@ -791,11 +813,18 @@ class NewsApplyCommand extends Command
         //         sait quels outils sont réellement au coeur de l'actu.
         $relatedToolSlugs = null;
         if (array_key_exists('related_tool_slugs', $decoded)) {
-            $relatedToolSlugs = $this->normalizeSlugsList($decoded['related_tool_slugs'], 'related_tool_slugs', 10);
-            if ($relatedToolSlugs === null) {
-                // Message d'erreur déjà émis par normalizeSlugsList().
+            if (! is_array($decoded['related_tool_slugs'])) {
+                $this->error('related_tool_slugs doit être un tableau de slugs.');
+
                 return self::FAILURE;
             }
+            $slugsResult = CompositionPayloadNormalizer::normalizeSlugsList($decoded['related_tool_slugs'], 'related_tool_slugs', 10);
+            if (! $slugsResult['ok']) {
+                $this->error($slugsResult['error']);
+
+                return self::FAILURE;
+            }
+            $relatedToolSlugs = $slugsResult['value'];
         }
 
         // ACTION : défaut 3 (2026-08-28) - contrepartie de related_tool_slugs : la porte savait
@@ -810,11 +839,18 @@ class NewsApplyCommand extends Command
         // composé « Paragraph Composer », aucun moyen de le détacher par la porte officielle.
         $relatedToolSlugsRemove = null;
         if (array_key_exists('related_tool_slugs_remove', $decoded)) {
-            $relatedToolSlugsRemove = $this->normalizeSlugsList($decoded['related_tool_slugs_remove'], 'related_tool_slugs_remove', 10);
-            if ($relatedToolSlugsRemove === null) {
-                // Message d'erreur déjà émis par normalizeSlugsList().
+            if (! is_array($decoded['related_tool_slugs_remove'])) {
+                $this->error('related_tool_slugs_remove doit être un tableau de slugs.');
+
                 return self::FAILURE;
             }
+            $slugsResult = CompositionPayloadNormalizer::normalizeSlugsList($decoded['related_tool_slugs_remove'], 'related_tool_slugs_remove', 10);
+            if (! $slugsResult['ok']) {
+                $this->error($slugsResult['error']);
+
+                return self::FAILURE;
+            }
+            $relatedToolSlugsRemove = $slugsResult['value'];
         }
 
         // ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT du bloc
@@ -825,11 +861,18 @@ class NewsApplyCommand extends Command
         // RAISON: mandat 2026-08-29 - calqué sur related_tool_slugs plutôt qu'inventé.
         $relatedArticleSlugs = null;
         if (array_key_exists('related_article_slugs', $decoded)) {
-            $relatedArticleSlugs = $this->normalizeSlugsList($decoded['related_article_slugs'], 'related_article_slugs', self::MAX_RELATED_ARTICLES);
-            if ($relatedArticleSlugs === null) {
-                // Message d'erreur déjà émis par normalizeSlugsList().
+            if (! is_array($decoded['related_article_slugs'])) {
+                $this->error('related_article_slugs doit être un tableau de slugs.');
+
                 return self::FAILURE;
             }
+            $slugsResult = CompositionPayloadNormalizer::normalizeSlugsList($decoded['related_article_slugs'], 'related_article_slugs', self::MAX_RELATED_ARTICLES);
+            if (! $slugsResult['ok']) {
+                $this->error($slugsResult['error']);
+
+                return self::FAILURE;
+            }
+            $relatedArticleSlugs = $slugsResult['value'];
         }
 
         // ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT de
@@ -839,11 +882,18 @@ class NewsApplyCommand extends Command
         // RAISON: mandat 2026-08-29 - même doctrine que le défaut 3 du 2026-08-28 sur les outils.
         $relatedArticleSlugsRemove = null;
         if (array_key_exists('related_article_slugs_remove', $decoded)) {
-            $relatedArticleSlugsRemove = $this->normalizeSlugsList($decoded['related_article_slugs_remove'], 'related_article_slugs_remove', self::MAX_RELATED_ARTICLES);
-            if ($relatedArticleSlugsRemove === null) {
-                // Message d'erreur déjà émis par normalizeSlugsList().
+            if (! is_array($decoded['related_article_slugs_remove'])) {
+                $this->error('related_article_slugs_remove doit être un tableau de slugs.');
+
                 return self::FAILURE;
             }
+            $slugsResult = CompositionPayloadNormalizer::normalizeSlugsList($decoded['related_article_slugs_remove'], 'related_article_slugs_remove', self::MAX_RELATED_ARTICLES);
+            if (! $slugsResult['ok']) {
+                $this->error($slugsResult['error']);
+
+                return self::FAILURE;
+            }
+            $relatedArticleSlugsRemove = $slugsResult['value'];
         }
 
         // ACTION : clé entities (connexes par entités partagées, arbitrage panel 2026-08-17) -
@@ -1017,12 +1067,41 @@ class NewsApplyCommand extends Command
             $this->info("Fiche {$article->id} : verdict de vérification {$factCheckMessage}.");
         }
 
+        // ACTION : résolution/attache-détache déléguée à NewsToolSyncAction::attachBySlug()/
+        // detachBySlug() (design doc 2026-09-03, section 2.4) - ces méthodes retournent des
+        // données plutôt que d'imprimer directement ; cette commande traduit exactement les
+        // mêmes messages qu'avant ce déplacement (comportement console inchangé au mot près).
+        // MCP: SELF (<15 lignes utiles)
+        // RAISON: design doc 2026-09-03, section 2.4.
         if ($relatedToolSlugs !== null) {
-            $this->attachRelatedTools($article, $relatedToolSlugs);
+            $attachResult = app(NewsToolSyncAction::class)->attachBySlug($article, $relatedToolSlugs);
+            if ($attachResult['module_disabled']) {
+                $this->warn('related_tool_slugs ignoré : le module Directory est désactivé.');
+            } else {
+                if ($attachResult['unknown'] !== []) {
+                    $this->warn('related_tool_slugs ignoré(s) - slug(s) introuvable(s) dans l\'annuaire publié : '.implode(', ', $attachResult['unknown']).'.');
+                }
+                if ($attachResult['attached_names'] !== []) {
+                    $this->info("Fiche {$article->id} : {$attachResult['attached_count']} outil(s) lié(s) (".implode(', ', $attachResult['attached_names']).').');
+                }
+            }
         }
 
         if ($relatedToolSlugsRemove !== null) {
-            $this->detachRelatedTools($article, $relatedToolSlugsRemove);
+            $detachResult = app(NewsToolSyncAction::class)->detachBySlug($article, $relatedToolSlugsRemove);
+            if ($detachResult['module_disabled']) {
+                $this->warn('related_tool_slugs_remove ignoré : le module Directory est désactivé.');
+            } else {
+                if ($detachResult['unknown'] !== []) {
+                    $this->warn('related_tool_slugs_remove : slug(s) introuvable(s) dans l\'annuaire : '.implode(', ', $detachResult['unknown']).' - rien à détacher pour ce ou ces slugs.');
+                }
+                if ($detachResult['not_attached'] !== []) {
+                    $this->warn('related_tool_slugs_remove : outil(s) demandé(s) mais non attaché(s) à cette fiche : '.implode(', ', $detachResult['not_attached']).'.');
+                }
+                if ($detachResult['detached_names'] !== []) {
+                    $this->info("Fiche {$article->id} : {$detachResult['detached_count']} outil(s) détaché(s) (".implode(', ', $detachResult['detached_names']).').');
+                }
+            }
         }
 
         // ACTION : « Article de blogue lié » (2026-08-29) - DÉTACHE avant d'ATTACHER, ordre
@@ -1054,136 +1133,18 @@ class NewsApplyCommand extends Command
     }
 
     /**
-     * ACTION : intégration « Outils liés » - résout les slugs (traduisibles Spatie) contre les
-     * outils PUBLIÉS de l'annuaire et les attache en ajout PUR (source=auto, attachAuto() ne
-     * touche jamais une liaison existante, manuelle ou automatique). Slugs introuvables signalés
-     * explicitement en sortie - jamais un échec (l'auto-détection à la publication complète), et
-     * jamais un silence.
-     * MCP: multi-ai-mcp→qwen3-max (validé + corrigé par le superviseur)
-     * RAISON: demande fondateur 2026-08-17 - « actu2 doit aussi bien intégrer Outils liés ».
-     */
-    private function attachRelatedTools(NewsArticle $article, array $slugs): void
-    {
-        if (! class_exists(\Modules\Directory\Models\Tool::class)) {
-            $this->warn('related_tool_slugs ignoré : le module Directory est désactivé.');
-
-            return;
-        }
-
-        $tools = \Modules\Directory\Models\Tool::published()->get(['id', 'slug', 'name']);
-        $resolvedIds = [];
-        $resolvedNames = [];
-        $unknownSlugs = [];
-
-        foreach ($slugs as $slug) {
-            $match = $tools->first(fn ($tool) => in_array($slug, $tool->getTranslations('slug'), true));
-            if ($match === null) {
-                $unknownSlugs[] = $slug;
-
-                continue;
-            }
-            $resolvedIds[] = (int) $match->id;
-            $resolvedNames[] = $match->getTranslation('name', 'fr_CA', false)
-                ?: $match->getTranslation('name', 'en', false)
-                ?: $slug;
-        }
-
-        if ($unknownSlugs !== []) {
-            $this->warn('related_tool_slugs ignoré(s) - slug(s) introuvable(s) dans l\'annuaire publié : '.implode(', ', $unknownSlugs).'.');
-        }
-
-        if ($resolvedIds !== []) {
-            $attached = app(\Modules\News\Actions\NewsToolSyncAction::class)
-                ->attachAuto($article, collect($resolvedIds));
-            \Modules\News\Actions\NewsToolSyncAction::invalidatePublicCache($article);
-            $this->info("Fiche {$article->id} : {$attached} outil(s) lié(s) (".implode(', ', $resolvedNames).').');
-        }
-    }
-
-    /**
-     * ACTION : défaut 3 (2026-08-28) - contrepartie de attachRelatedTools() : détache les outils
-     * visés par related_tool_slugs_remove, et EUX SEULS - jamais un remplacement de la liste
-     * complète, une omission ne doit JAMAIS pouvoir supprimer un lien. Résout les slugs contre
-     * TOUS les outils de l'annuaire (pas seulement les PUBLIÉS, contrairement à
-     * attachRelatedTools()) : un outil attaché à tort puis dépublié doit rester détachable, sans
-     * quoi ce correctif recréerait le même piège qu'il referme. NewsToolSyncAction n'expose aucune
-     * méthode de retrait (hors périmètre de ce correctif) : cette méthode agit directement sur la
-     * relation Eloquent $article->tools(), la même porte déjà ouverte par attachRelatedTools().
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: fiche 38933 - l'outil "Composer" attaché à tort (texte contenant « Paragraph
-     * Composer »), aucun moyen de le détacher par la porte officielle jusqu'à ce correctif.
-     *
-     * @param  array<int, string>  $slugs
-     */
-    private function detachRelatedTools(NewsArticle $article, array $slugs): void
-    {
-        if (! class_exists(\Modules\Directory\Models\Tool::class)) {
-            $this->warn('related_tool_slugs_remove ignoré : le module Directory est désactivé.');
-
-            return;
-        }
-
-        $tools = \Modules\Directory\Models\Tool::query()->get(['id', 'slug', 'name']);
-        $resolvedIds = [];
-        $resolvedNames = [];
-        $unknownSlugs = [];
-
-        foreach ($slugs as $slug) {
-            $match = $tools->first(fn ($tool) => in_array($slug, $tool->getTranslations('slug'), true));
-            if ($match === null) {
-                $unknownSlugs[] = $slug;
-
-                continue;
-            }
-            $resolvedIds[] = (int) $match->id;
-            $resolvedNames[$match->id] = $match->getTranslation('name', 'fr_CA', false)
-                ?: $match->getTranslation('name', 'en', false)
-                ?: $slug;
-        }
-
-        if ($unknownSlugs !== []) {
-            $this->warn('related_tool_slugs_remove : slug(s) introuvable(s) dans l\'annuaire : '.implode(', ', $unknownSlugs).' - rien à détacher pour ce ou ces slugs.');
-        }
-
-        if ($resolvedIds === []) {
-            return;
-        }
-
-        // ACTION : un slug demandé mais non attaché produit un avertissement, pas une erreur
-        // (mandat) - detach() sur un pivot absent est un no-op silencieux côté Eloquent, donc le
-        // signal doit être posé AVANT, en comparant aux liaisons réellement existantes.
-        // MCP: SELF (<5 lignes utiles)
-        // RAISON: mandat 2026-08-28 - « un slug demandé mais non attaché produit un
-        //         avertissement, pas une erreur ».
-        $attachedIds = $article->tools()->whereIn('directory_tools.id', $resolvedIds)->pluck('directory_tools.id')->map(fn ($id) => (int) $id)->all();
-        $notAttachedIds = array_diff($resolvedIds, $attachedIds);
-
-        if ($notAttachedIds !== []) {
-            $notAttachedNames = array_values(array_intersect_key($resolvedNames, array_flip($notAttachedIds)));
-            $this->warn('related_tool_slugs_remove : outil(s) demandé(s) mais non attaché(s) à cette fiche : '.implode(', ', $notAttachedNames).'.');
-        }
-
-        if ($attachedIds === []) {
-            return;
-        }
-
-        $article->tools()->detach($attachedIds);
-        \Modules\News\Actions\NewsToolSyncAction::invalidatePublicCache($article);
-        $detachedNames = array_values(array_intersect_key($resolvedNames, array_flip($attachedIds)));
-        $this->info("Fiche {$article->id} : ".count($attachedIds)." outil(s) détaché(s) (".implode(', ', $detachedNames).').');
-    }
-
-    /**
-     * ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT de attachRelatedTools() :
-     * résout les slugs (traduisibles Spatie, même mécanique que Tool) contre les articles de
-     * blogue PUBLIÉS (Modules\Blog\Models\Article::published()) et les attache en ajout PUR
-     * (source=auto, n'écrase jamais une liaison manuelle existante côté pivot). Slugs
-     * introuvables SIGNALÉS explicitement (warn), jamais un échec - un article en BROUILLON
-     * n'apparaît simplement pas dans l'ensemble résolu (résolution contre published() only),
-     * donc tombe dans ce même panier : strictement le mécanisme demandé par le point 3 du
+     * ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT de
+     * Modules\News\Actions\NewsToolSyncAction::attachBySlug() (méthode soeur pour les outils,
+     * promue depuis l'ancienne attachRelatedTools() de cette même commande - design doc
+     * 2026-09-03, section 2.4) : résout les slugs (traduisibles Spatie, même mécanique que Tool)
+     * contre les articles de blogue PUBLIÉS (Modules\Blog\Models\Article::published()) et les
+     * attache en ajout PUR (source=auto, n'écrase jamais une liaison manuelle existante côté
+     * pivot). Slugs introuvables SIGNALÉS explicitement (warn), jamais un échec - un article en
+     * BROUILLON n'apparaît simplement pas dans l'ensemble résolu (résolution contre published()
+     * only), donc tombe dans ce même panier : strictement le mécanisme demandé par le point 3 du
      * mandat (« Ne jamais lier un article non publié : filtre published() »).
      *
-     * SEULE divergence réelle avec attachRelatedTools() : le plafond MAX_RELATED_ARTICLES (1),
+     * SEULE divergence réelle avec attachBySlug() : le plafond MAX_RELATED_ARTICLES (1),
      * cumulé sur l'ÉTAT RÉEL en base (pas seulement la forme du payload, déjà bornée par
      * normalizeSlugsList() en amont) - retourne false et REFUSE toute écriture pour cette clé si
      * l'attache ferait dépasser ce plafond, jamais une attache partielle. Un slug déjà lié
@@ -1254,12 +1215,14 @@ class NewsApplyCommand extends Command
     }
 
     /**
-     * ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT de detachRelatedTools() :
-     * détache l'article visé par related_article_slugs_remove, et LUI SEUL - jamais un
-     * remplacement de la liste complète, une omission ne doit JAMAIS pouvoir supprimer un lien.
-     * Résout les slugs contre TOUS les articles de blogue (pas seulement les PUBLIÉS,
-     * contrairement à attachRelatedArticles()) : un article lié à tort puis dépublié doit
-     * rester détachable, même raison que detachRelatedTools().
+     * ACTION : « Article de blogue lié » (2026-08-29) - jumeau EXACT de
+     * Modules\News\Actions\NewsToolSyncAction::detachBySlug() (méthode soeur pour les outils,
+     * promue depuis l'ancienne detachRelatedTools() de cette même commande - design doc
+     * 2026-09-03, section 2.4) : détache l'article visé par related_article_slugs_remove, et LUI
+     * SEUL - jamais un remplacement de la liste complète, une omission ne doit JAMAIS pouvoir
+     * supprimer un lien. Résout les slugs contre TOUS les articles de blogue (pas seulement les
+     * PUBLIÉS, contrairement à attachRelatedArticles()) : un article lié à tort puis dépublié
+     * doit rester détachable, même raison que detachBySlug().
      * MCP: SELF (<5 lignes utiles)
      * RAISON: mandat 2026-08-29 - même doctrine que le défaut 3 du 2026-08-28 sur les outils.
      *
@@ -1300,7 +1263,7 @@ class NewsApplyCommand extends Command
         }
 
         // ACTION : un slug demandé mais non attaché produit un avertissement, pas une erreur -
-        // même garde-fou que detachRelatedTools() (detach() sur un pivot absent est un no-op
+        // même garde-fou que NewsToolSyncAction::detachBySlug() (detach() sur un pivot absent est un no-op
         // silencieux côté Eloquent, donc le signal doit être posé AVANT, en comparant aux
         // liaisons réellement existantes).
         // MCP: SELF (<5 lignes utiles)
@@ -1324,96 +1287,14 @@ class NewsApplyCommand extends Command
     }
 
     /**
-     * ACTION : défaut 3 (2026-08-28) - validation PARTAGÉE des deux clés de payload qui
-     * manipulent related_tool_slugs (ajout et retrait) : mêmes bornes (chaînes non vides de 120
-     * caractères maximum chacune), donc une SEULE méthode plutôt que deux validations jumelles
-     * vouées à diverger tôt ou tard.
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: mandat 2026-08-28 - « réutilise les helpers de validation déjà présents pour
-     *         related_tool_slugs plutôt que d'en écrire des jumeaux ».
-     *
-     * ACTION : généralisée (2026-08-29, « Article de blogue lié ») - $maxCount devient un
-     * paramètre explicite plutôt qu'une limite de 10 codée en dur : related_article_slugs et
-     * related_article_slugs_remove réutilisent cette MÊME méthode avec MAX_RELATED_ARTICLES (1)
-     * plutôt qu'un jumeau de 24 lignes pour une seule différence (le plafond). Les deux appels
-     * existants (related_tool_slugs / related_tool_slugs_remove) passent désormais 10
-     * explicitement - comportement inchangé, rien ne divergeait avant ce renommage.
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: DRY - même règle de FORME (liste de slugs bornée), seul le plafond diffère selon
-     *         le domaine (outils vs articles de blogue) ; les règles du projet (section "DRY et
-     *         anti-sur-ingénierie" - fusion légitime, même connaissance encodée deux fois.
-     *
-     * @return array<int, string>|null
-     */
-    private function normalizeSlugsList(mixed $value, string $fieldName, int $maxCount): ?array
-    {
-        if (! is_array($value)) {
-            $this->error("{$fieldName} doit être un tableau de slugs.");
-
-            return null;
-        }
-
-        if (count($value) > $maxCount) {
-            $this->error("{$fieldName} dépasse la limite de {$maxCount} slug(s).");
-
-            return null;
-        }
-
-        foreach ($value as $slug) {
-            if (! is_string($slug) || trim($slug) === '' || mb_strlen($slug) > 120) {
-                $this->error("Chaque slug de {$fieldName} doit être une chaîne non vide de 120 caractères maximum.");
-
-                return null;
-            }
-        }
-
-        return array_values($value);
-    }
-
-    /**
-     * Valide et normalise le tableau de paires de preuve éditoriale du payload. Retourne null (et
-     * émet le message d'erreur) uniquement si $pairsInput n'est même pas un tableau - un défaut
-     * structurel du payload entier, rien à évaluer paire par paire. Sinon, retourne TOUJOURS un
-     * tableau avec deux clés 'accepted' et 'rejected' : chaque paire est jugée INDÉPENDAMMENT.
-     *
-     * ACTION : correctif todo #1984 (2026-08-28) - AVANT ce correctif, cette méthode retournait
-     * null (et arrêtait la boucle) dès la PREMIÈRE paire invalide, rejetant même les paires
-     * valides du même lot qui n'avaient pas encore été atteintes par le foreach. Défaut mesuré à
-     * l'usage : sur un lot de 15 paires soumises, 2 paires invalides faisaient échouer les 15,
-     * aucune des 13 valides n'était jamais appliquée. Chaque paire est désormais acceptée ou
-     * refusée pour elle-même, avec le motif précis du refus - jamais un rejet muet, jamais un lot
-     * qui meurt entier pour un seul élément invalide. L'appelant (applyPayload()) décide ensuite :
-     * les paires 'accepted' sont appliquées, les 'rejected' sont rapportées mais n'empêchent plus
-     * rien - SAUF si le lot entier est rejeté (zéro paire valide), auquel cas l'issue reste
-     * exactement celle d'avant ce correctif (voir applyPayload()).
-     *
-     * ACTION : correctif todo #1984 (même mandat) - une paire "fact" exige normalement que son
-     * excerpt soit une sous-chaîne exacte de $sourceText (règle inchangée, toujours appliquée dès
-     * que ce texte est présent - AUCUNE régression sur ce chemin). MAIS sur une fiche DÉJÀ
-     * PUBLIÉE, NewsArticle::publishAndPurgeSource() met internal_source_text à null (chantier
-     * « zéro copie ») : $sourceText arrive alors vide, et EditorialProofNormalizer::containsExact()
-     * contre une chaîne vide ne peut JAMAIS réussir (needle non vide contre haystack vide) - quelle
-     * que soit la légitimité de la citation. Ce n'est pas un échec de validation, c'est un
-     * contrôle qui ne PEUT plus s'exécuter : quand $sourceText est vide, la paire "fact" est
-     * ACCEPTÉE sans revalidation, mais marquée 'source_verified' => false - jamais acceptée en
-     * silence comme si elle avait été vérifiée. applyPayload() relaie ce marqueur dans sa sortie
-     * console ; il survit aussi dans les données persistées (visible pour toute relecture future).
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: todo #1984 - hypothèse confirmée par lecture du code ; deux causes distinctes,
-     *         corrigées ensemble car elles cohabitent dans la même méthode.
-     *
-     * Réutilise EditorialProofNormalizer::containsExact(), même règle que
-     * NewsCompositionController::storeProofPair() : une paire "fact" doit être une sous-chaîne
-     * exacte du texte source (quand ce texte existe encore).
-     *
-     * ACTION : bonification panel 2026-08-17 (soir) - 3e type accepté, « primary_fact » (fait
-     * confirmé à la SOURCE PRIMAIRE) : exige un 'source_url' (URL http/https valide) ; son excerpt
-     * N'EST JAMAIS revalidé en sous-chaîne du texte source ($sourceText, le texte collé pour
-     * l'agent) - c'est la citation exacte de l'ORIGINAL, potentiellement absente d'un texte
-     * secondaire paraphrasé ou incomplet. Même règle que
-     * NewsCompositionController::storeProofPair() - aucune divergence entre les deux portes.
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
+     * Valide le tableau de paires de preuve éditoriale du payload en déléguant CHAQUE paire à
+     * CompositionPayloadNormalizer::validateProofPair() (design doc 2026-09-03, section 2.2) -
+     * cette méthode ne fait plus que router le lot et traduire le verdict de chaque paire dans
+     * la forme accepted/rejected attendue par applyPayload(). Retourne null (et émet le message
+     * d'erreur) uniquement si $pairsInput n'est même pas un tableau - un défaut structurel du
+     * payload entier, rien à évaluer paire par paire. Sinon, retourne TOUJOURS un tableau avec
+     * deux clés 'accepted' et 'rejected' : chaque paire est jugée INDÉPENDAMMENT (todo #1984,
+     * comportement inchangé par ce déplacement).
      *
      * @return array{
      *     accepted: array<int, array{id: string, statement: string, excerpt: string, type: string, created_at: string, source_url?: string, source_verified?: bool}>,
@@ -1428,10 +1309,6 @@ class NewsApplyCommand extends Command
             return null;
         }
 
-        // Texte source purgé (fiche déjà publiée) : trim() évite qu'une chaîne blanche
-        // ("   ") soit traitée comme une source exploitable - même exigence que blank().
-        $sourceTextDisponible = trim($sourceText) !== '';
-
         $accepted = [];
         $rejected = [];
 
@@ -1439,118 +1316,20 @@ class NewsApplyCommand extends Command
             $position = $index + 1;
             $libelle = (is_array($pair) && is_string($pair['statement'] ?? null)) ? $pair['statement'] : '(paire malformée)';
 
-            if (! is_array($pair) || ! isset($pair['statement'], $pair['excerpt'], $pair['type'])
-                || ! is_string($pair['statement']) || ! is_string($pair['excerpt']) || ! is_string($pair['type'])) {
-                $rejected[] = ['position' => $position, 'statement' => $libelle, 'reason' => 'doit contenir statement, excerpt et type (chaînes).'];
+            $verdict = is_array($pair)
+                ? CompositionPayloadNormalizer::validateProofPair($sourceText, $pair)
+                : ['ok' => false, 'entry' => null, 'reason' => 'doit contenir statement, excerpt et type (chaînes).'];
+
+            if (! $verdict['ok']) {
+                $rejected[] = ['position' => $position, 'statement' => $libelle, 'reason' => $verdict['reason']];
 
                 continue;
             }
 
-            if (! in_array($pair['type'], ['fact', 'analysis', 'primary_fact'], true)) {
-                $rejected[] = ['position' => $position, 'statement' => $libelle, 'reason' => "type invalide : « {$pair['type']} » (attendu : fact, analysis ou primary_fact)."];
-
-                continue;
-            }
-
-            // null = type autre que "fact" (vérification sans objet) ; true/false sinon.
-            $sourceVerifiee = null;
-
-            if ($pair['type'] === 'fact') {
-                if (! $sourceTextDisponible) {
-                    $sourceVerifiee = false;
-                } elseif (! EditorialProofNormalizer::containsExact($sourceText, $pair['excerpt'])) {
-                    $rejected[] = ['position' => $position, 'statement' => $libelle, 'reason' => "extrait déclaré « fait » absent du texte source (sous-chaîne exacte attendue) : {$pair['excerpt']}"];
-
-                    continue;
-                } else {
-                    $sourceVerifiee = true;
-                }
-            }
-
-            $entry = [
-                'id' => (string) Str::uuid(),
-                'statement' => $pair['statement'],
-                'excerpt' => $pair['excerpt'],
-                'type' => $pair['type'],
-                'created_at' => now('America/Toronto')->toIso8601String(),
-            ];
-
-            if ($pair['type'] === 'primary_fact') {
-                $sourceUrl = is_string($pair['source_url'] ?? null) ? trim($pair['source_url']) : '';
-                if ($sourceUrl === '' || ! filter_var($sourceUrl, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $sourceUrl)) {
-                    $rejected[] = ['position' => $position, 'statement' => $libelle, 'reason' => 'paire « primary_fact » sans URL de source primaire valide (http/https).'];
-
-                    continue;
-                }
-                $entry['source_url'] = $sourceUrl;
-            }
-
-            if ($sourceVerifiee === false) {
-                $entry['source_verified'] = false;
-            }
-
-            $accepted[] = $entry;
+            $accepted[] = $verdict['entry'];
         }
 
         return ['accepted' => $accepted, 'rejected' => $rejected];
-    }
-
-    /**
-     * ACTION : bonification panel 2026-08-17 (soir) - valide et normalise le tableau de sources
-     * primaires du payload. REMPLACE intégralement la valeur existante (contrairement aux paires
-     * de preuve, accumulées) : voir le commentaire d'appel dans applyPayload(). Borne à 10
-     * sources : une fiche cite ses sources primaires, elle n'en dresse pas un annuaire.
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: design doc, section "Bonification panel 2026-08-17 (soir)".
-     *
-     * @return array<int, array{label: string, url: string, note: string|null}>|null
-     */
-    private function normalizePrimarySources(mixed $sourcesInput): ?array
-    {
-        if (! is_array($sourcesInput)) {
-            $this->error('primary_sources doit être un tableau de sources.');
-
-            return null;
-        }
-
-        if (count($sourcesInput) > 10) {
-            $this->error('primary_sources dépasse la limite de 10 sources.');
-
-            return null;
-        }
-
-        $normalized = [];
-
-        foreach ($sourcesInput as $source) {
-            if (! is_array($source) || ! isset($source['label'], $source['url'])
-                || ! is_string($source['label']) || ! is_string($source['url'])) {
-                $this->error('Chaque source de primary_sources doit contenir label et url (chaînes).');
-
-                return null;
-            }
-
-            $url = trim($source['url']);
-            if (! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url)) {
-                $this->error("URL de source primaire invalide (http/https attendu) : « {$url} ».");
-
-                return null;
-            }
-
-            $note = $source['note'] ?? null;
-            if ($note !== null && ! is_string($note)) {
-                $this->error('note de primary_sources doit être une chaîne de caractères si fournie.');
-
-                return null;
-            }
-
-            $normalized[] = [
-                'label' => $source['label'],
-                'url' => $url,
-                'note' => $note,
-            ];
-        }
-
-        return $normalized;
     }
 
     /**
@@ -1615,318 +1394,6 @@ class NewsApplyCommand extends Command
                 return null;
             }
             $normalized['url'] = $url;
-        }
-
-        return $normalized;
-    }
-
-    /**
-     * Richesse v1.188.0 (design doc "Actus - composition manuelle assistée" 2026-08-15, section
-     * "Richesse v1.188.0 - structure fixe composée") - valide et normalise composed_summary :
-     * huit sous-clés nullables (hook, key_points, why_important, key_number, quote, angle_qc_ca,
-     * action_concrete, reperes_dates), toute sous-clé inconnue fait refuser tout le payload,
-     * chaînes bornées (~600 caractères sauf indication contraire par sous-structure). Le
-     * marqueur `composed: true` N'EST PAS ajouté ici - il l'est par l'appelant (applyPayload()),
-     * pour que cette méthode reste une simple validation/normalisation sans connaître le
-     * contexte de stockage.
-     * MCP: SELF (<5 lignes utiles par branche)
-     * RAISON: design doc, section "Richesse v1.188.0" - liste blanche stricte, même doctrine que
-     * les autres normalizeXxx() de cette commande.
-     *
-     * @return array<string, mixed>|null
-     */
-    private function normalizeComposedSummary(mixed $input): ?array
-    {
-        if (! is_array($input)) {
-            $this->error('composed_summary doit être un objet.');
-
-            return null;
-        }
-
-        $unknownKeys = array_diff(array_keys($input), self::ALLOWED_COMPOSED_SUMMARY_KEYS);
-        if ($unknownKeys !== []) {
-            $this->error('Clé(s) non autorisée(s) dans composed_summary : '.implode(', ', $unknownKeys).'. Clés permises : '.implode(', ', self::ALLOWED_COMPOSED_SUMMARY_KEYS).'.');
-
-            return null;
-        }
-
-        $normalized = [];
-
-        foreach (['hook', 'why_important', 'key_number', 'angle_qc_ca', 'action_concrete'] as $key) {
-            if (! array_key_exists($key, $input)) {
-                continue;
-            }
-            // ACTION : défaut 2 (2026-08-28) - `null` explicite est le signal de retrait délibéré
-            // d'une sous-clé (voir overlayComposedSummary() dans applyPayload()), distinct d'une
-            // sous-clé ABSENTE qui, elle, n'entre jamais dans $normalized et ne touche à rien.
-            // MCP: SELF (<5 lignes utiles)
-            // RAISON: mandat 2026-08-28 - « pour vider délibérément une sous-clé, il faut la
-            //         fournir explicitement à null - un effacement doit être demandé, jamais
-            //         déduit d'un silence ».
-            if ($input[$key] === null) {
-                $normalized[$key] = null;
-
-                continue;
-            }
-            if (! is_string($input[$key])) {
-                $this->error("composed_summary.{$key} doit être une chaîne de caractères (ou null pour vider cette sous-clé).");
-
-                return null;
-            }
-            if (mb_strlen($input[$key]) > self::COMPOSED_SUMMARY_STRING_MAX) {
-                $this->error("composed_summary.{$key} dépasse ".self::COMPOSED_SUMMARY_STRING_MAX.' caractères.');
-
-                return null;
-            }
-            // ACTION : tiret cadratin retiré (fiche freecore, 2026-08-30) - ces cinq sous-clés
-            // sont TOUJOURS de la prose composée par le site (accroche, pourquoi ça compte,
-            // chiffre-clé, angle QC/CA, action concrète), jamais une citation. `quote` (plus bas,
-            // normalizeComposedQuote()) reste délibérément HORS de cette boucle : voir le
-            // docblock de lv_strip_em_dash().
-            // MCP: SELF (<5 lignes)
-            // RAISON: CLAUDE.md #10 - structural, pas ponctuel (aucun mécanisme existant ne
-            //         nettoyait composed_summary, ni à l'écriture ni au rendu).
-            $normalized[$key] = lv_strip_em_dash($input[$key]);
-        }
-
-        if (array_key_exists('key_points', $input)) {
-            if ($input['key_points'] === null) {
-                $normalized['key_points'] = null;
-            } else {
-                $points = $this->normalizeComposedKeyPoints($input['key_points']);
-                if ($points === null) {
-                    // Message d'erreur déjà émis par normalizeComposedKeyPoints().
-                    return null;
-                }
-                $normalized['key_points'] = $points;
-            }
-        }
-
-        if (array_key_exists('quote', $input)) {
-            if ($input['quote'] === null) {
-                $normalized['quote'] = null;
-            } else {
-                $quote = $this->normalizeComposedQuote($input['quote']);
-                if ($quote === null) {
-                    // Message d'erreur déjà émis par normalizeComposedQuote().
-                    return null;
-                }
-                $normalized['quote'] = $quote;
-            }
-        }
-
-        if (array_key_exists('reperes_dates', $input)) {
-            if ($input['reperes_dates'] === null) {
-                $normalized['reperes_dates'] = null;
-            } else {
-                $reperes = $this->normalizeComposedReperesDates($input['reperes_dates']);
-                if ($reperes === null) {
-                    // Message d'erreur déjà émis par normalizeComposedReperesDates().
-                    return null;
-                }
-                $normalized['reperes_dates'] = $reperes;
-            }
-        }
-
-        return $normalized;
-    }
-
-    /**
-     * ACTION : défaut 2 (2026-08-28, mandat "elle écrit sans permettre de relire ni de défaire")
-     * - superpose $normalizedComposed (sortie de normalizeComposedSummary() ci-dessus, peut
-     * contenir des valeurs `null` explicites) sur $existing sous-clé par sous-clé : une sous-clé
-     * PRÉSENTE dans le payload réécrit $existing ; une valeur `null` explicite RETIRE la sous-clé
-     * de $existing (effacement demandé, jamais déduit d'un silence) ; une sous-clé ABSENTE du
-     * payload laisse $existing intact pour cette sous-clé (fusion, jamais un remplacement).
-     * $existing = [] (fiche sans résumé composé) retombe naturellement sur l'ancien comportement
-     * de remplacement intégral : rien à conserver, seules les sous-clés fournies apparaissent.
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: mandat 2026-08-28 - un composed_summary partiel effaçait tout le résumé riche
-     * (key_points/why_important/key_number/quote/angle_qc_ca/action_concrete/reperes_dates) au
-     * lieu de ne toucher qu'aux sous-clés vraiment fournies ; défaut mesuré sur deux fiches
-     * publiées citant 125 et 180 milliards de paramètres pour le même modèle.
-     *
-     * @param  array<string, mixed>  $existing
-     * @param  array<string, mixed>  $normalizedComposed
-     * @return array<string, mixed>
-     */
-    private function overlayComposedSummary(array $existing, array $normalizedComposed): array
-    {
-        foreach (self::ALLOWED_COMPOSED_SUMMARY_KEYS as $subKey) {
-            if (! array_key_exists($subKey, $normalizedComposed)) {
-                continue;
-            }
-            if ($normalizedComposed[$subKey] === null) {
-                unset($existing[$subKey]);
-
-                continue;
-            }
-            $existing[$subKey] = $normalizedComposed[$subKey];
-        }
-
-        $existing['composed'] = true;
-
-        return $existing;
-    }
-
-    /**
-     * Richesse v1.188.0 - composed_summary.key_points : au plus 5 puces, chacune au plus 300
-     * caractères (design doc : "3-5 puces factuelles attribuées, 20-35 mots chacune").
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: design doc, section "Richesse v1.188.0".
-     *
-     * @return array<int, string>|null
-     */
-    private function normalizeComposedKeyPoints(mixed $input): ?array
-    {
-        if (! is_array($input)) {
-            $this->error('composed_summary.key_points doit être un tableau de chaînes.');
-
-            return null;
-        }
-
-        if (count($input) > 5) {
-            $this->error('composed_summary.key_points dépasse la limite de 5 puces.');
-
-            return null;
-        }
-
-        $normalized = [];
-        foreach ($input as $point) {
-            if (! is_string($point)) {
-                $this->error('Chaque élément de composed_summary.key_points doit être une chaîne de caractères.');
-
-                return null;
-            }
-            if (mb_strlen($point) > 300) {
-                $this->error('Un élément de composed_summary.key_points dépasse 300 caractères.');
-
-                return null;
-            }
-            // ACTION : tiret cadratin retiré (fiche freecore, 2026-08-30) - une puce « à retenir »
-            // est de la prose composée par le site, jamais une citation. Voir normalizeComposedSummary().
-            // MCP: SELF (<5 lignes) / RAISON: CLAUDE.md #10, même correctif structurel.
-            $normalized[] = lv_strip_em_dash($point);
-        }
-
-        return $normalized;
-    }
-
-    /**
-     * Richesse v1.188.0 - composed_summary.quote : objet {text, author}, text obligatoire (une
-     * citation sans texte n'a pas de sens), author facultatif. Bornes propres à cette
-     * sous-structure (design doc : "une seule citation, locuteur et fonction identifiés").
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: design doc, section "Richesse v1.188.0".
-     *
-     * @return array{text: string, author?: string}|null
-     */
-    private function normalizeComposedQuote(mixed $input): ?array
-    {
-        if (! is_array($input)) {
-            $this->error('composed_summary.quote doit être un objet {text, author}.');
-
-            return null;
-        }
-
-        $allowedKeys = ['text', 'author'];
-        $unknownKeys = array_diff(array_keys($input), $allowedKeys);
-        if ($unknownKeys !== []) {
-            $this->error('Clé(s) non autorisée(s) dans composed_summary.quote : '.implode(', ', $unknownKeys).'. Clés permises : '.implode(', ', $allowedKeys).'.');
-
-            return null;
-        }
-
-        $text = $input['text'] ?? null;
-        if (! is_string($text) || trim($text) === '') {
-            $this->error('composed_summary.quote.text est obligatoire (citation).');
-
-            return null;
-        }
-        if (mb_strlen($text) > 400) {
-            $this->error('composed_summary.quote.text dépasse 400 caractères.');
-
-            return null;
-        }
-
-        $normalized = ['text' => $text];
-
-        if (array_key_exists('author', $input)) {
-            if (! is_string($input['author'])) {
-                $this->error('composed_summary.quote.author doit être une chaîne de caractères.');
-
-                return null;
-            }
-            if (mb_strlen($input['author']) > 120) {
-                $this->error('composed_summary.quote.author dépasse 120 caractères.');
-
-                return null;
-            }
-            $normalized['author'] = $input['author'];
-        }
-
-        return $normalized;
-    }
-
-    /**
-     * Richesse v1.188.0 - composed_summary.reperes_dates : au plus 4 jalons {date, texte, url?},
-     * juxtaposés jamais causaux (design doc). date/texte obligatoires par jalon, url facultative
-     * mais doit être http/https valide si fournie - même règle que primary_sources.
-     * MCP: SELF (<5 lignes utiles)
-     * RAISON: design doc, section "Richesse v1.188.0".
-     *
-     * @return array<int, array{date: string, texte: string, url?: string}>|null
-     */
-    private function normalizeComposedReperesDates(mixed $input): ?array
-    {
-        if (! is_array($input)) {
-            $this->error('composed_summary.reperes_dates doit être un tableau.');
-
-            return null;
-        }
-
-        if (count($input) > 4) {
-            $this->error('composed_summary.reperes_dates dépasse la limite de 4 repères.');
-
-            return null;
-        }
-
-        $normalized = [];
-        foreach ($input as $repere) {
-            if (! is_array($repere) || ! isset($repere['date'], $repere['texte'])
-                || ! is_string($repere['date']) || ! is_string($repere['texte'])) {
-                $this->error('Chaque repère de composed_summary.reperes_dates doit contenir date et texte (chaînes).');
-
-                return null;
-            }
-            if (mb_strlen($repere['date']) > 40) {
-                $this->error('composed_summary.reperes_dates : une date dépasse 40 caractères.');
-
-                return null;
-            }
-            if (mb_strlen($repere['texte']) > 200) {
-                $this->error('composed_summary.reperes_dates : un texte dépasse 200 caractères.');
-
-                return null;
-            }
-
-            // ACTION : tiret cadratin retiré (fiche freecore, 2026-08-30) - un jalon de
-            // chronologie est de la prose composée par le site (date + description factuelle),
-            // jamais une citation. Voir normalizeComposedSummary().
-            // MCP: SELF (<5 lignes) / RAISON: CLAUDE.md #10, même correctif structurel.
-            $entry = ['date' => lv_strip_em_dash($repere['date']), 'texte' => lv_strip_em_dash($repere['texte'])];
-
-            if (array_key_exists('url', $repere)) {
-                $url = is_string($repere['url']) ? trim($repere['url']) : '';
-                if ($url === '' || ! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url)) {
-                    $this->error("composed_summary.reperes_dates : url invalide (http/https attendu) : « {$url} ».");
-
-                    return null;
-                }
-                $entry['url'] = $url;
-            }
-
-            $normalized[] = $entry;
         }
 
         return $normalized;

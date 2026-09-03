@@ -426,13 +426,10 @@
                         $isGoogleNewsUnresolved = str_contains(parse_url($externalUrl, PHP_URL_HOST) ?? '', 'news.google.com');
                         $primarySources = is_array($article->primary_sources ?? null) ? $article->primary_sources : [];
                         // niveau_preuve est PUBLIC mais TOUJOURS traduit en français courant,
-                        // jamais l'étiquette technique brute.
-                        $niveauPreuveLabels = [
-                            'primaire' => __('Fondée sur la source originale'),
-                            'mixte' => __('Sources originale et média'),
-                            'relais' => __('D\'après un média relais'),
-                        ];
-                        $niveauPreuveLabel = $niveauPreuveLabels[$article->niveau_preuve ?? ''] ?? null;
+                        // jamais l'étiquette technique brute - source unique du vocabulaire :
+                        // NewsArticle::NIVEAU_PREUVE_VALUES (design doc 2026-09-03, section 2.3,
+                        // même précédent que NATURE_ORIGINAL_VALUES/natureOriginalLabel()).
+                        $niveauPreuveLabel = $article->niveauPreuveLabel();
                     @endphp
                     {{-- Ligne de provenance compacte (point 4) - fiche à source unique
                          uniquement : une fiche comparative affiche déjà sa propre liste

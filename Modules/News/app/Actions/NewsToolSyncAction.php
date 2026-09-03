@@ -71,6 +71,127 @@ final class NewsToolSyncAction
     }
 
     /**
+     * ACTION : intégration « Outils liés », promue depuis
+     * Modules\News\Console\NewsApplyCommand::attachRelatedTools() (design doc 2026-09-03,
+     * section 2.4) - résout les slugs (traduisibles Spatie) contre les outils PUBLIÉS de
+     * l'annuaire et les attache en ajout PUR (source=auto, attachAuto() ne touche jamais une
+     * liaison existante, manuelle ou automatique). Retourne des DONNÉES plutôt que d'imprimer
+     * sur une sortie console : chaque appelant (CLI, futur écran admin) traduit dans son propre
+     * format - même patron que CompositionPayloadNormalizer.
+     *
+     * `attached_count` (nombre RÉELLEMENT nouvellement attaché par attachAuto()) et
+     * `attached_names` (TOUS les noms résolus, qu'ils aient été nouvellement attachés ou déjà
+     * liés) sont volontairement DEUX champs distincts, jamais un seul recalculé depuis l'autre :
+     * c'est exactement la paire utilisée par le message console d'origine
+     * ("{$attached} outil(s) lié(s) (noms...)"), reproduite ici au mot près.
+     *
+     * @param  array<int, string>  $slugs
+     * @return array{attached_count: int, attached_names: array<int, string>, unknown: array<int, string>, module_disabled: bool}
+     */
+    public function attachBySlug(NewsArticle $article, array $slugs): array
+    {
+        if (! class_exists(\Modules\Directory\Models\Tool::class)) {
+            return ['attached_count' => 0, 'attached_names' => [], 'unknown' => [], 'module_disabled' => true];
+        }
+
+        $tools = Tool::published()->get(['id', 'slug', 'name']);
+        $resolvedIds = [];
+        $resolvedNames = [];
+        $unknownSlugs = [];
+
+        foreach ($slugs as $slug) {
+            $match = $tools->first(fn ($tool) => in_array($slug, $tool->getTranslations('slug'), true));
+            if ($match === null) {
+                $unknownSlugs[] = $slug;
+
+                continue;
+            }
+            $resolvedIds[] = (int) $match->id;
+            $resolvedNames[] = $match->getTranslation('name', 'fr_CA', false)
+                ?: $match->getTranslation('name', 'en', false)
+                ?: $slug;
+        }
+
+        $attachedCount = 0;
+        if ($resolvedIds !== []) {
+            $attachedCount = $this->attachAuto($article, collect($resolvedIds));
+            self::invalidatePublicCache($article);
+        }
+
+        return [
+            'attached_count' => $attachedCount,
+            'attached_names' => $resolvedNames,
+            'unknown' => $unknownSlugs,
+            'module_disabled' => false,
+        ];
+    }
+
+    /**
+     * ACTION : défaut 3 (2026-08-28), promue depuis
+     * Modules\News\Console\NewsApplyCommand::detachRelatedTools() (design doc 2026-09-03,
+     * section 2.4) - détache les outils visés par $slugs, et EUX SEULS - jamais un remplacement
+     * de la liste complète, une omission ne doit JAMAIS pouvoir supprimer un lien. Résout les
+     * slugs contre TOUS les outils de l'annuaire (pas seulement les PUBLIÉS, contrairement à
+     * attachBySlug() ci-dessus) : un outil attaché à tort puis dépublié doit rester détachable,
+     * sans quoi ce mécanisme recréerait le même piège qu'il referme. Retourne des DONNÉES
+     * plutôt que d'imprimer sur une sortie console - même patron que attachBySlug() ci-dessus.
+     *
+     * @param  array<int, string>  $slugs
+     * @return array{detached_count: int, detached_names: array<int, string>, unknown: array<int, string>, not_attached: array<int, string>, module_disabled: bool}
+     */
+    public function detachBySlug(NewsArticle $article, array $slugs): array
+    {
+        if (! class_exists(\Modules\Directory\Models\Tool::class)) {
+            return ['detached_count' => 0, 'detached_names' => [], 'unknown' => [], 'not_attached' => [], 'module_disabled' => true];
+        }
+
+        $tools = Tool::query()->get(['id', 'slug', 'name']);
+        $resolvedIds = [];
+        $resolvedNames = [];
+        $unknownSlugs = [];
+
+        foreach ($slugs as $slug) {
+            $match = $tools->first(fn ($tool) => in_array($slug, $tool->getTranslations('slug'), true));
+            if ($match === null) {
+                $unknownSlugs[] = $slug;
+
+                continue;
+            }
+            $resolvedIds[] = (int) $match->id;
+            $resolvedNames[$match->id] = $match->getTranslation('name', 'fr_CA', false)
+                ?: $match->getTranslation('name', 'en', false)
+                ?: $slug;
+        }
+
+        if ($resolvedIds === []) {
+            return ['detached_count' => 0, 'detached_names' => [], 'unknown' => $unknownSlugs, 'not_attached' => [], 'module_disabled' => false];
+        }
+
+        // Un slug demandé mais non attaché est signalé à part (jamais confondu avec un slug
+        // détaché) - detach() sur un pivot absent est un no-op silencieux côté Eloquent, donc le
+        // signal doit être posé AVANT, en comparant aux liaisons réellement existantes.
+        $attachedIds = $article->tools()->whereIn('directory_tools.id', $resolvedIds)->pluck('directory_tools.id')->map(fn ($id) => (int) $id)->all();
+        $notAttachedIds = array_diff($resolvedIds, $attachedIds);
+        $notAttachedNames = array_values(array_intersect_key($resolvedNames, array_flip($notAttachedIds)));
+
+        if ($attachedIds === []) {
+            return ['detached_count' => 0, 'detached_names' => [], 'unknown' => $unknownSlugs, 'not_attached' => $notAttachedNames, 'module_disabled' => false];
+        }
+
+        $article->tools()->detach($attachedIds);
+        self::invalidatePublicCache($article);
+        $detachedNames = array_values(array_intersect_key($resolvedNames, array_flip($attachedIds)));
+
+        return [
+            'detached_count' => count($attachedIds),
+            'detached_names' => $detachedNames,
+            'unknown' => $unknownSlugs,
+            'not_attached' => $notAttachedNames,
+            'module_disabled' => false,
+        ];
+    }
+
+    /**
      * Invalidation ciblée du cache de la page publique de l'actualité (visiteurs anonymes),
      * après un changement du pivot outils. Extrait du pattern déjà utilisé par
      * ArticleToolsEditor::persist() (Livewire) pour rester réutilisable (jobs, futurs

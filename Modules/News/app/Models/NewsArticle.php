@@ -58,8 +58,20 @@ class NewsArticle extends Model implements Searchable
     {
         return url('/actualites/' . $this->slug);
     }
+    // ACTION : 'description' retiré de $fillable (design doc "extension de l'écran de
+    // composition des actualités", 2026-09-03, section 4.2) - durcissement DÉFENSIF, pas la
+    // correction d'un défaut actif : la colonne a déjà été purgée par requête SQL directe
+    // (design doc "Actus - zéro copie du texte source", 2026-08-13, section 5) et aucun chemin
+    // de code actuel n'y écrit plus rien (audit confirmé par ce même design doc, section 3).
+    // La colonne reste dans le schéma (aucune migration dropColumn ici, hors mandat) ; seul son
+    // accès en écriture applicative via un tableau d'update() massif est fermé - un futur code
+    // qui inclurait par inadvertance 'description' => $texteBrut échouera désormais
+    // silencieusement (assignation ignorée) plutôt que de rouvrir la fuite d'origine.
+    // MCP: SELF (<5 lignes)
+    // RAISON: design doc 2026-09-03, section 4.2 - fermer avant qu'il ne se reproduise le
+    //         défaut déjà purgé le 2026-08-13.
     protected $fillable = [
-        'news_source_id', 'title', 'slug', 'guid', 'url', 'resolved_url', 'description',
+        'news_source_id', 'title', 'slug', 'guid', 'url', 'resolved_url',
         'summary', 'image_url', 'author', 'pub_date', 'is_published',
         'relevance_score', 'score_justification', 'structured_summary',
         'category_tag', 'impact_level', 'feed_type', 'seo_title', 'meta_description',
@@ -185,11 +197,61 @@ class NewsArticle extends Model implements Searchable
         'fact_check_inconclusive_at' => 'datetime',
     ];
 
+    /**
+     * ACTION : corollaire NÉCESSAIRE du retrait de 'description' hors de $fillable ci-dessus
+     * (design doc "extension de l'écran de composition des actualités", 2026-09-03, section
+     * 4.2) - mesuré à l'implémentation, le retrait PUR et SIMPLE contredisait l'hypothèse du
+     * design doc (« aucun écrivain existant ne sera affecté ») : la colonne reste
+     * `text('description')` SANS `->nullable()` ET sans défaut (migration
+     * 2026_03_29_000000_create_news_tables.php:30, jamais modifiée depuis), donc NOT NULL au
+     * niveau du schéma - retirer 'description' de $fillable fait alors échouer, avec une
+     * violation de contrainte NOT NULL, TOUTE création de fiche qui la fournit par assignation
+     * de masse. Deux écrivains PRODUCTION le font déjà (Modules\News\Services\
+     * RssFetcherService::fetchSource(), createManualDraft() plus bas), ainsi qu'une bonne
+     * partie des fixtures de test du module (~70 fichiers, mesuré par recherche).
+     *
+     * Cette surcharge referme la fuite RÉELLEMENT visée par 4.2 (un futur
+     * $article->update(['description' => $texteBrut, ...]) sur une fiche DÉJÀ EXISTANTE, qui
+     * rouvrirait la fuite déjà purgée le 2026-08-13) sans casser l'initialisation légitime
+     * d'une fiche NEUVE : 'description' n'est laissée passer en assignation de masse que
+     * lorsque $this->exists est encore faux (create()/new+fill(), jamais update() sur une
+     * fiche déjà persistée) - exactement la distinction que $fillable seul ne sait pas faire
+     * (il s'applique identiquement à create() et à update()).
+     *
+     * @param  array<string, mixed>  $attributes
+     * @return $this
+     */
+    public function fill(array $attributes)
+    {
+        if (! $this->exists && array_key_exists('description', $attributes)) {
+            $this->setAttribute('description', $attributes['description']);
+            unset($attributes['description']);
+        }
+
+        return parent::fill($attributes);
+    }
+
     protected static function booted(): void
     {
         static::creating(function (self $article) {
             if (empty($article->slug)) {
                 $article->slug = self::generateUniqueSlug($article->seo_title ?? $article->title ?? 'article');
+            }
+
+            // ACTION : filet défensif du retrait de 'description' hors de $fillable (voir
+            // fill() plus haut, et son docblock pour le raisonnement complet) - la colonne reste
+            // `text('description')` SANS `->nullable()` ET sans défaut (migration
+            // 2026_03_29_000000_create_news_tables.php:30, jamais modifiée depuis), donc NOT
+            // NULL au niveau du schéma. fill() ci-dessus couvre déjà le cas normal (une valeur
+            // explicite fournie à la création) ; ce filet ne couvre que le cas résiduel d'une
+            // création qui ne mentionnerait 'description' d'aucune façon - jamais observé dans
+            // le code actuel, mais une violation de contrainte NOT NULL avec un message obscur
+            // vaut moins qu'une valeur vide explicite et volontaire.
+            // MCP: SELF (<5 lignes utiles)
+            // RAISON: défense en profondeur - fill() est la garde principale, ceci n'est qu'un
+            //         second filet.
+            if ($article->description === null) {
+                $article->description = '';
             }
         });
 
@@ -1090,6 +1152,32 @@ class NewsArticle extends Model implements Searchable
     public function natureOriginalLabel(): ?string
     {
         return self::NATURE_ORIGINAL_VALUES[$this->nature_original] ?? null;
+    }
+
+    /**
+     * Design doc "extension de l'écran de composition des actualités" (2026-09-03, section 2.3)
+     * - SOURCE UNIQUE du vocabulaire de 'niveau_preuve', même précédent que
+     * NATURE_ORIGINAL_VALUES ci-dessus (ticket #1915) : avant ce correctif, la liste des valeurs
+     * vivait en double - une fois dans Modules\News\Console\NewsApplyCommand::ALLOWED_NIVEAU_PREUVE
+     * (validation), une fois recopiée en dur dans Modules\News\resources\views\public\
+     * show.blade.php (traduction française), sans aucun lien entre les deux. Champ PUBLIC
+     * (contrairement à 'nature_original') - traduit ici en français courant, jamais l'étiquette
+     * technique brute affichée telle quelle.
+     */
+    public const NIVEAU_PREUVE_VALUES = [
+        'primaire' => 'Fondée sur la source originale',
+        'mixte' => 'Sources originale et média',
+        'relais' => "D'après un média relais",
+    ];
+
+    /**
+     * Libellé français de 'niveau_preuve', ou null si absente/inconnue - même garde-fou que
+     * natureOriginalLabel() : une valeur retirée du vocabulaire après coup se comporte comme une
+     * absence.
+     */
+    public function niveauPreuveLabel(): ?string
+    {
+        return self::NIVEAU_PREUVE_VALUES[$this->niveau_preuve] ?? null;
     }
 
     /**

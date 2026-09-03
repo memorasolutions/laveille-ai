@@ -308,3 +308,136 @@ it('suggest() détecte un outil mentionné SEULEMENT dans le titre optimisé (af
 
     expect($suggested->all())->toContain($tool->id);
 });
+
+// ── attachBySlug() / detachBySlug() - promues depuis NewsApplyCommand::attachRelatedTools()/
+// detachRelatedTools() (design doc "extension de l'écran de composition des actualités",
+// 2026-09-03, section 2.4, Lot 1 « fondations »). Verrouille le contrat de données que
+// NewsApplyCommand::handle() traduit désormais en $this->warn()/$this->info(), et que le
+// futur écran de composition (Lot 4) traduira en JSON - même service, deux présentations.
+
+function ntsaArticle(int $sourceId): NewsArticle
+{
+    return NewsArticle::create([
+        'news_source_id' => $sourceId,
+        'title'          => 'Article ntsa attach/detach '.uniqid(),
+        'guid'           => 'guid-ntsa-attach-'.uniqid(),
+        'url'            => 'https://exemple.com/ntsa-attach-'.uniqid(),
+        'description'    => '',
+        'slug'           => 'article-ntsa-attach-'.uniqid(),
+        'pub_date'       => now()->subDay(),
+        'is_published'   => true,
+        'seo_status'     => 'index',
+    ]);
+}
+
+it('attachBySlug() résout un slug publié, l\'attache et rapporte le nom résolu', function () {
+    $source = ntsaSource();
+    $tool = ntsaTool('Redigeo', 'redigeo');
+    $article = ntsaArticle($source->id);
+
+    $result = app(NewsToolSyncAction::class)->attachBySlug($article, ['redigeo']);
+
+    expect($result['module_disabled'])->toBeFalse()
+        ->and($result['unknown'])->toBe([])
+        ->and($result['attached_count'])->toBe(1)
+        ->and($result['attached_names'])->toBe(['Redigeo'])
+        ->and($article->tools()->pluck('directory_tools.id')->all())->toBe([$tool->id]);
+});
+
+it('attachBySlug() rapporte les slugs introuvables sans rien attacher pour eux', function () {
+    $source = ntsaSource();
+    $article = ntsaArticle($source->id);
+
+    $result = app(NewsToolSyncAction::class)->attachBySlug($article, ['slug-inexistant']);
+
+    expect($result['unknown'])->toBe(['slug-inexistant'])
+        ->and($result['attached_count'])->toBe(0)
+        ->and($result['attached_names'])->toBe([])
+        ->and($article->tools()->count())->toBe(0);
+});
+
+it('attachBySlug() ne résout que contre les outils PUBLIÉS - un outil en brouillon reste introuvable', function () {
+    $source = ntsaSource();
+    Tool::withoutEvents(fn () => Tool::create([
+        'name' => ['fr_CA' => 'Brouillon Outil', 'en' => 'Draft Tool'],
+        'slug' => ['fr_CA' => 'brouillon-outil', 'en' => 'brouillon-outil'],
+        'status' => 'draft',
+        'pricing' => 'free',
+    ]));
+    $article = ntsaArticle($source->id);
+
+    $result = app(NewsToolSyncAction::class)->attachBySlug($article, ['brouillon-outil']);
+
+    expect($result['unknown'])->toBe(['brouillon-outil'])
+        ->and($article->tools()->count())->toBe(0);
+});
+
+it('attachBySlug() est un ajout PUR : un second appel sur le même outil déjà lié n\'attache rien de plus', function () {
+    $source = ntsaSource();
+    ntsaTool('Scriptomax', 'scriptomax');
+    $article = ntsaArticle($source->id);
+
+    app(NewsToolSyncAction::class)->attachBySlug($article, ['scriptomax']);
+    $second = app(NewsToolSyncAction::class)->attachBySlug($article, ['scriptomax']);
+
+    // Reproduit fidèlement le comportement d'origine de NewsApplyCommand::attachRelatedTools() :
+    // attached_count (issu d'attachAuto(), le nombre RÉELLEMENT nouveau) tombe à 0, mais
+    // attached_names liste quand même le slug résolu - c'est ce doublon exact que le message
+    // console historique ("Fiche X : 0 outil(s) lié(s) (Scriptomax).") affichait déjà.
+    expect($second['attached_count'])->toBe(0)
+        ->and($second['attached_names'])->toBe(['Scriptomax'])
+        ->and($article->tools()->count())->toBe(1);
+});
+
+it('detachBySlug() détache un outil réellement lié et rapporte son nom', function () {
+    $source = ntsaSource();
+    $tool = ntsaTool('Detachable', 'detachable');
+    $article = ntsaArticle($source->id);
+    $article->tools()->attach($tool->id, ['source' => 'manual']);
+
+    $result = app(NewsToolSyncAction::class)->detachBySlug($article, ['detachable']);
+
+    expect($result['detached_count'])->toBe(1)
+        ->and($result['detached_names'])->toBe(['Detachable'])
+        ->and($result['not_attached'])->toBe([])
+        ->and($article->tools()->count())->toBe(0);
+});
+
+it('detachBySlug() signale (avertissement, pas une erreur) un outil résolu mais non attaché à cette fiche', function () {
+    $source = ntsaSource();
+    ntsaTool('JamaisLie', 'jamais-lie');
+    $article = ntsaArticle($source->id);
+
+    $result = app(NewsToolSyncAction::class)->detachBySlug($article, ['jamais-lie']);
+
+    expect($result['not_attached'])->toBe(['JamaisLie'])
+        ->and($result['detached_count'])->toBe(0)
+        ->and($result['detached_names'])->toBe([]);
+});
+
+it('detachBySlug() résout contre TOUS les outils, y compris dépubliés depuis - un outil attaché à tort reste détachable', function () {
+    $source = ntsaSource();
+    $tool = Tool::withoutEvents(fn () => Tool::create([
+        'name' => ['fr_CA' => 'Depublie Depuis', 'en' => 'Unpublished Since'],
+        'slug' => ['fr_CA' => 'depublie-depuis', 'en' => 'depublie-depuis'],
+        'status' => 'draft',
+        'pricing' => 'free',
+    ]));
+    $article = ntsaArticle($source->id);
+    $article->tools()->attach($tool->id, ['source' => 'auto']);
+
+    $result = app(NewsToolSyncAction::class)->detachBySlug($article, ['depublie-depuis']);
+
+    expect($result['detached_count'])->toBe(1)
+        ->and($article->tools()->count())->toBe(0);
+});
+
+it('detachBySlug() rapporte un slug introuvable dans l\'annuaire sans rien détacher', function () {
+    $source = ntsaSource();
+    $article = ntsaArticle($source->id);
+
+    $result = app(NewsToolSyncAction::class)->detachBySlug($article, ['jamais-existe']);
+
+    expect($result['unknown'])->toBe(['jamais-existe'])
+        ->and($result['detached_count'])->toBe(0);
+});
