@@ -240,6 +240,22 @@ class NewsCompositionController extends Controller
             }
         }
 
+        // ACTION : rattacher les brouillons D'UN AUTRE JOUR sur lesquels un humain a déjà
+        // travaillé (ticket #2208, 2026-09-03). Le filtre du jour reste INTACT pour les candidats
+        // BRUTS - c'est la demande du 2026-08-23 et elle ne bouge pas. Mais une fiche déjà
+        // composée ou déjà relue n'est pas un candidat : c'est du travail en cours, et la faire
+        // disparaître de l'écran le fait perdre. La définition de « fiche à valeur » n'est pas
+        // réinventée ici : c'est celle que PruneDraftsCommand refuse déjà de supprimer, lue par le
+        // MÊME helper du modèle. Ce que la purge protège, l'écran doit le montrer.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: DRY sur la règle métier - un seul endroit décide ce qu'est une fiche à valeur.
+        $horsJour = $this->brouillonsAvecTravailEditorial($jour);
+        $idsHorsJour = $horsJour->pluck('id')->flip();
+        $articles = $articles->concat($horsJour)
+            ->unique('id')
+            ->sortByDesc(fn (NewsArticle $a) => $a->pub_date?->timestamp ?? 0)
+            ->values();
+
         $traduction = $this->titresTraduits($articles);
 
         return response()->json([
@@ -273,8 +289,54 @@ class NewsCompositionController extends Controller
                 // Réutilise le badge "🔁 déjà utilisée" du partial partagé pour signaler qu'une
                 // composition a déjà été commencée sur cette fiche (texte source déjà collé).
                 'already_used' => filled($a->internal_source_text),
+                // Vrai quand la fiche vient d'un AUTRE jour que celui affiché : l'écran doit
+                // pouvoir le dire, sinon l'admin ne comprend pas pourquoi elle est là.
+                'hors_jour' => $idsHorsJour->has($a->id),
             ])->values(),
         ]);
+    }
+
+    /**
+     * Fenêtre, en jours de collecte, dans laquelle on va rechercher un travail éditorial commencé.
+     * Choisie LARGE devant la fenêtre de la purge nocturne (news:prune-drafts) pour qu'aucune
+     * fiche encore protégée de la suppression ne puisse être invisible à l'écran.
+     */
+    private const TRAVAIL_EN_COURS_FENETRE_JOURS = 30;
+
+    /**
+     * Plafond de sécurité sur cette seconde requête. Le nombre réel de brouillons portant un
+     * travail éditorial se compte sur les doigts d'une main ; ce plafond n'existe que pour qu'une
+     * anomalie de données ne puisse jamais alourdir l'écran.
+     */
+    private const TRAVAIL_EN_COURS_PLAFOND = 100;
+
+    /**
+     * ACTION : les brouillons d'un AUTRE jour que celui affiché, sur lesquels un humain a déjà
+     * travaillé - résumé composé, ou fiche relue. Le tri final se fait chez l'appelant.
+     *
+     * Le critère « composé » vit dans une colonne JSON : comme PruneDraftsCommand, on charge un
+     * lot borné puis on filtre en PHP via NewsArticle::hasComposedSummary(), plutôt que de tenter
+     * une condition SQL sur du JSON. Ici le risque est d'ailleurs ASYMÉTRIQUE et joue en notre
+     * faveur : à l'affichage, une fiche de trop est bénigne, c'est l'omission qui fait perdre du
+     * travail - l'inverse exact de la purge, où l'omission est ce qui protège.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: ticket #2208 - même définition de « fiche à valeur » que la purge, jamais une seconde.
+     *
+     * @return \Illuminate\Support\Collection<int, NewsArticle>
+     */
+    private function brouillonsAvecTravailEditorial(string $jourAffiche): \Illuminate\Support\Collection
+    {
+        return NewsArticle::query()
+            ->with('source')
+            ->where('is_published', false)
+            ->whereNull('retired_at')
+            ->whereDate('created_at', '!=', $jourAffiche)
+            ->where('created_at', '>=', now(config('app.timezone', 'America/Toronto'))->subDays(self::TRAVAIL_EN_COURS_FENETRE_JOURS))
+            ->orderByDesc('updated_at')
+            ->limit(self::TRAVAIL_EN_COURS_PLAFOND)
+            ->get()
+            ->filter(fn (NewsArticle $a) => $a->hasComposedSummary() || $a->reviewed_at !== null)
+            ->values();
     }
 
     /**

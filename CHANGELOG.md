@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.252.0] - 2026-09-03
+
+### Ajouté
+- **Un brouillon commencé un autre jour reste accessible dans l'écran de composition** - jusqu'ici, l'écran ne listait que les fiches collectées LE JOUR MÊME, et son repli automatique ne jouait que si la journée courante était entièrement vide. Le cron de collecte tournant à l'heure, un seul article récolté après minuit suffisait à faire disparaître de l'écran un brouillon de la veille - avec le travail éditorial déjà investi dedans. L'écran affiche désormais AUSSI les brouillons d'un autre jour sur lesquels un humain a déjà travaillé, marqués d'un badge « 📌 commencée un autre jour » pour que leur présence s'explique d'elle-même.
+- La définition de « fiche à valeur » n'est pas réinventée : c'est **exactement** celle que `Modules\News\Console\PruneDraftsCommand` refuse déjà de supprimer (non publiée, non retirée, résumé composé OU fiche relue), lue par le MÊME helper du modèle. Ce que la purge nocturne protège, l'écran le montre - le site ne peut plus protéger un travail que son auteur ne retrouve pas.
+
+### Inchangé, et c'est délibéré
+- Le filtre du jour reste INTACT pour les candidats BRUTS : c'est la demande explicite du 2026-08-23 (« les articles du jour seulement »), et un test la verrouille désormais contre toute régression future, y compris la mienne.
+
+### Note de méthode
+- Les trois tests neufs ont été vus ROUGES contre le code sans correctif, puis verts après. Le quatrième, lui, passait déjà : son rôle est précisément de garder la demande du fondateur intacte.
+- L'assertion sur le badge porte sur LA fiche concernée, jamais sur la réponse entière - une clé présente ailleurs ne peut pas faire passer le test à tort.
+
 ## [1.251.1] - 2026-09-03
 
 ### Corrigé

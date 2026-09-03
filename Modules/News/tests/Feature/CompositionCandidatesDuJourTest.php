@@ -183,3 +183,81 @@ it('préfère title_fr à title quand présent, et seo_title à tout le reste', 
     expect($items[$avecTitleFr->id]['title'])->toBe('Déjà traduit en base')
         ->and($items[$avecSeoTitle->id]['title'])->toBe('Titre éditorial');
 });
+
+/**
+ * AJOUT 2026-09-03 (ticket #2208) - la frontière entre « brouillon brut » et « travail éditorial ».
+ *
+ * Le filtre du jour est une demande explicite du fondateur (2026-08-23) et il reste intact pour
+ * les CANDIDATS BRUTS. Mais une fiche sur laquelle un humain a déjà travaillé n'est pas un
+ * candidat : c'est du travail en cours, et le faire disparaître de l'écran le fait perdre.
+ *
+ * La définition de « fiche à valeur » n'est pas inventée ici : c'est EXACTEMENT celle que
+ * Modules\News\Console\PruneDraftsCommand refuse déjà de supprimer (is_published faux, retired_at
+ * nul, reviewed_at nul et hasComposedSummary() faux). Ce que la purge protège, l'écran doit le
+ * montrer - sinon le site protège un travail que son auteur ne peut plus retrouver.
+ */
+it('garde visible un brouillon COMPOSÉ un autre jour, même quand la journée courante a des articles', function () {
+    // La journée courante n'est PAS vide : le repli automatique ne peut donc pas jouer.
+    $dujour = cdjArticle();
+
+    $composeHier = cdjArticle();
+    $composeHier->forceFill([
+        'created_at' => now()->subDays(3),
+        'structured_summary' => ['composed' => true, 'hook' => 'Travail commencé avant-hier.'],
+    ])->saveQuietly();
+
+    $admin = cdjAdmin();
+    $reponse = $this->actingAs($admin)->getJson(route('admin.news.composition.candidates'));
+
+    $reponse->assertOk();
+    $ids = collect($reponse->json('items'))->pluck('id')->all();
+
+    expect($ids)->toContain($dujour->id)
+        ->and($ids)->toContain($composeHier->id);
+});
+
+it('garde visible un brouillon RELU un autre jour', function () {
+    cdjArticle(); // la journée courante n'est pas vide
+
+    $reluHier = cdjArticle();
+    $reluHier->forceFill([
+        'created_at' => now()->subDays(2),
+        'reviewed_at' => now()->subDays(2),
+    ])->saveQuietly();
+
+    $admin = cdjAdmin();
+    $reponse = $this->actingAs($admin)->getJson(route('admin.news.composition.candidates'));
+
+    expect(collect($reponse->json('items'))->pluck('id')->all())->toContain($reluHier->id);
+});
+
+it('marque les fiches hors du jour affiché, pour que l\'écran puisse le dire', function () {
+    cdjArticle();
+
+    $composeHier = cdjArticle();
+    $composeHier->forceFill([
+        'created_at' => now()->subDays(3),
+        'structured_summary' => ['composed' => true, 'hook' => 'Travail commencé avant-hier.'],
+    ])->saveQuietly();
+
+    $admin = cdjAdmin();
+    $items = collect($this->actingAs($admin)->getJson(route('admin.news.composition.candidates'))->json('items'));
+
+    // L'assertion porte sur LA fiche concernée, jamais sur la page entière : une clé présente
+    // ailleurs dans la réponse ne doit pas pouvoir faire passer ce test.
+    $fiche = $items->firstWhere('id', $composeHier->id);
+    expect($fiche)->not->toBeNull()
+        ->and($fiche['hors_jour'] ?? null)->toBeTrue();
+});
+
+it('ne ressuscite PAS un brouillon BRUT d\'un autre jour (la demande « du jour seulement » tient)', function () {
+    cdjArticle();
+
+    $brutHier = cdjArticle();
+    $brutHier->forceFill(['created_at' => now()->subDays(3)])->saveQuietly();
+
+    $admin = cdjAdmin();
+    $ids = collect($this->actingAs($admin)->getJson(route('admin.news.composition.candidates'))->json('items'))->pluck('id')->all();
+
+    expect($ids)->not->toContain($brutHier->id);
+});

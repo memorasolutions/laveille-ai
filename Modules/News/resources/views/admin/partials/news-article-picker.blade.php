@@ -76,6 +76,15 @@
                                 <template x-if="item.already_used">
                                     <span class="cb-used-badge ms-1">🔁 déjà utilisée</span>
                                 </template>
+                                {{-- Ticket #2208 : cette fiche vient d'un AUTRE jour que celui affiché. Elle est là
+                                     parce qu'un travail éditorial y a déjà été commencé (résumé composé ou fiche
+                                     relue) - la même définition que la purge nocturne refuse de supprimer. Sans ce
+                                     badge, l'admin ne comprendrait pas sa présence dans la liste du jour.
+                                     Réutilise la classe de badge existante : aucun style neuf, donc aucun nouveau
+                                     risque de contraste. --}}
+                                <template x-if="item.hors_jour">
+                                    <span class="cb-used-badge ms-1" title="Un travail éditorial a été commencé sur cette fiche un autre jour : elle reste accessible pour être terminée.">📌 commencée un autre jour</span>
+                                </template>
                             </div>
                             <div class="cb-summary" x-text="item.summary" x-show="item.summary"></div>
                             <div class="cb-actions mt-2">
