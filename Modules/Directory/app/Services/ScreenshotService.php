@@ -181,6 +181,16 @@ class ScreenshotService
             // RAISON: défaut préexistant relevé par la revue adversariale - le fichier physique
             // change à chaque capture, la date de mise à jour doit suivre.
             $tool->updated_at = now();
+            // ACTION: trace le resultat de CETTE tentative reussie sur le meme saveQuietly() -
+            // jamais un second appel (voir recordAttemptOutcome(), reserve aux deux issues
+            // d'echec de captureWithRetry()). 'og:image' (repli, ne produit jamais de master) est
+            // normalise en 'og_image' ; toute autre valeur de $method (seule alternative connue :
+            // 'screenshot', capture Puppeteer pleine) est ecrite telle quelle.
+            // MCP: SELF (< 5 lignes)
+            // RAISON: ticket #2087 lot 1 (2026-09-03) - permet a directory:dispatch-margin-recapture
+            // de distinguer un master reellement obtenu d'un repli og:image qui boucle sans progres.
+            $tool->screenshot_last_attempt_at = now();
+            $tool->screenshot_last_attempt_result = $method === 'og:image' ? 'og_image' : $method;
             $tool->saveQuietly();
 
             // ACTION: Brique 1 - deplacement atomique du master vers public/screenshots/masters/.
@@ -222,10 +232,39 @@ class ScreenshotService
         if (! File::exists($existingPath) || File::size($existingPath) < 20000) {
             Log::channel('directory_screenshots')->info("Screenshot {$slug}: generation gradient fallback");
 
-            return self::generateFallbackGradient($tool);
+            $generated = self::generateFallbackGradient($tool);
+            // ACTION: trace l'issue "fallback" - point d'ecriture partage avec l'issue "failed"
+            // ci-dessous (recordAttemptOutcome(), DRY).
+            // MCP: SELF (< 5 lignes)
+            // RAISON: ticket #2087 lot 1 (2026-09-03) - un repli gradient est aussi une recapture
+            // qui n'a produit aucun master, donc futile au sens du dispatch de recaptures.
+            self::recordAttemptOutcome($tool, 'fallback');
+
+            return $generated;
         }
 
+        // ACTION: trace l'issue "failed" - les 3 tentatives ont echoue ET aucun fallback gradient
+        // n'a ete genere (screenshot existant deja assez grand, conserve tel quel).
+        // MCP: SELF (< 5 lignes)
+        // RAISON: ticket #2087 lot 1 (2026-09-03).
+        self::recordAttemptOutcome($tool, 'failed');
+
         return false;
+    }
+
+    /**
+     * Point d'ecriture UNIQUE (DRY) du resultat + date de la derniere tentative de capture -
+     * utilise par les deux issues d'echec de captureWithRetry() (fallback genere / echec sec).
+     * Jamais appelee par le chemin succes de capture(), qui pose deja ces deux memes champs sur
+     * son propre saveQuietly() existant (evite un second UPDATE - voir capture()). N'est jamais
+     * atteinte pour un outil screenshot_locked : captureWithRetry() (comme capture()) sort deja
+     * avant d'y arriver.
+     */
+    private static function recordAttemptOutcome(Tool $tool, string $result): void
+    {
+        $tool->screenshot_last_attempt_at = now();
+        $tool->screenshot_last_attempt_result = $result;
+        $tool->saveQuietly();
     }
 
     /**

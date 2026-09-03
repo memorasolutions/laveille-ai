@@ -88,7 +88,14 @@ class Tool extends Model implements Searchable
         'name', 'slug', 'description', 'short_description', 'url', 'affiliate_url', 'logo',
         'pricing', 'status', 'clicks_count', 'is_featured', 'featured_until', 'featured_order', 'sort_order',
         'how_to_use', 'core_features', 'use_cases', 'faq', 'pros', 'cons',
-        'screenshot', 'screenshot_locked', 'screenshot_focal_y', 'screenshot_master_stale', 'prices_converted_cad_at', 'website_type', 'launch_year', 'target_audience',
+        'screenshot', 'screenshot_locked', 'screenshot_focal_y', 'screenshot_master_stale',
+        // ACTION: trace du resultat/date de la derniere tentative de capture, exploitee par
+        // directory:dispatch-margin-recapture pour ecarter temporairement les "recaptures
+        // futiles" (repli og:image qui ne produit jamais de master, ou echec franc recent).
+        // MCP: SELF (<5 lignes)
+        // RAISON: ticket #2087 lot 1 (2026-09-03) - convention $fillable des champs screenshot_* voisins.
+        'screenshot_last_attempt_at', 'screenshot_last_attempt_result',
+        'prices_converted_cad_at', 'website_type', 'launch_year', 'target_audience',
         'submitted_by',
         'last_enriched_at', 'enrichment_version',
         'parent_tool_id', 'ecosystem_tag',
@@ -212,6 +219,9 @@ class Tool extends Model implements Searchable
         'screenshot_locked' => 'boolean',
         'screenshot_focal_y' => 'integer',
         'screenshot_master_stale' => 'boolean',
+        // ACTION: cast datetime - ticket #2087 lot 1 (voir $fillable ci-dessus pour le contexte).
+        // MCP: SELF (<5 lignes) / RAISON: comparaisons de grace (now()->subDays()) fiables cote appelant.
+        'screenshot_last_attempt_at' => 'datetime',
         'prices_converted_cad_at' => 'datetime',
         'has_education_pricing' => 'boolean',
         'education_target_audience' => 'array',

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.248.1] - 2026-09-03
+
+### Corrigé
+- **Annuaire : `directory:dispatch-margin-recapture` n'insiste plus sur les « recaptures futiles »** - mesure sur 100 jobs de la queue `screenshots` : 48 échecs francs et 48 « succès » par repli og:image qui ne produit jamais de master, pour seulement 3 masters obtenus. Ces outils redevenaient candidats au dispatch suivant sans jamais progresser (boucle sans fin).
+- **Nouvelle trace `screenshot_last_attempt_at`/`screenshot_last_attempt_result`** (colonnes nullables) sur chaque tentative de capture (`ScreenshotService`) : le dispatch écarte désormais, pendant une période de grâce de 30 jours (`--futile-grace-days`), un outil dont la dernière tentative est un repli `og_image`, un échec ou un fallback - jamais une vraie capture `screenshot`. Filtre entièrement réversible (`--include-futile`) et transparent (compteur `futile_skipped` dans le résumé de segment, jamais un cap silencieux).
+
 ## [1.248.0] - 2026-09-03
 
 ### Ajouté

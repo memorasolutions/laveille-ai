@@ -80,7 +80,9 @@ class DispatchMarginRecaptureCommand extends Command
         {--limit=0 : Nombre maximum de RECAPTURES RESEAU mises en file sur TOUTE la chaine de relances (0 = illimite ; les derivations locales gratuites ne sont jamais bornees par cette limite)}
         {--chunk=50 : Taille des sous-lots de lecture en base (memoire)}
         {--restart-every=250 : Nombre d\'outils EXAMINES avant de relancer un processus frais - protection usure memoire #2173 (0 = jamais relancer, comportement pre-#2173, deconseille sur le catalogue complet)}
-        {--after-id=0 : Curseur de reprise - ne considere que les outils dont l\'id est strictement superieur (aliment automatiquement par les relances ; peut aussi reprendre manuellement une execution interrompue)}';
+        {--after-id=0 : Curseur de reprise - ne considere que les outils dont l\'id est strictement superieur (aliment automatiquement par les relances ; peut aussi reprendre manuellement une execution interrompue)}
+        {--futile-grace-days=30 : Periode de grace (jours) pendant laquelle un outil deja tente sans succes (og_image/failed/fallback) est ECARTE du dispatch plutot que remis en file sans progres - ticket #2087 lot 1}
+        {--include-futile : Desactive completement le filtre anti-futiles ci-dessus (diagnostic/rattrapage manuel)}';
 
     protected $description = "Identifie les outils publies sans marge de recadrage (master absent ou <= 630px), derive un master local quand la vignette existante le permet deja, et met en file une recapture reseau (queue 'screenshots') pour le reste.";
 
@@ -91,6 +93,11 @@ class DispatchMarginRecaptureCommand extends Command
         $chunkSize = max(1, (int) $this->option('chunk'));
         $restartEvery = max(0, (int) $this->option('restart-every'));
         $afterId = max(0, (int) $this->option('after-id'));
+        // ACTION: lecture des options du filtre anti-futiles.
+        // MCP: SELF (< 5 lignes)
+        // RAISON: ticket #2087 lot 1 (2026-09-03).
+        $futileGraceDays = max(0, (int) $this->option('futile-grace-days'));
+        $includeFutile = (bool) $this->option('include-futile');
 
         $segmentLabel = $restartEvery > 0
             ? "segment de {$restartEvery} outil(s) (protection usure memoire #2173)"
@@ -111,6 +118,7 @@ class DispatchMarginRecaptureCommand extends Command
         $lockedSkipped = 0;
         $unreadable = 0;
         $noLocalVignette = 0;
+        $futileSkipped = 0;
         $limitReached = false;
         $restartCapReached = false;
         $lastId = $afterId;
@@ -122,9 +130,9 @@ class DispatchMarginRecaptureCommand extends Command
 
         $query->chunkById($chunkSize, function ($tools) use (
                 &$scanned, &$alreadyMargin, &$masterDerivedLocally, &$queuedForRecapture,
-                &$lockedSkipped, &$unreadable, &$noLocalVignette, &$limitReached,
+                &$lockedSkipped, &$unreadable, &$noLocalVignette, &$futileSkipped, &$limitReached,
                 &$restartCapReached, &$lastId,
-                $derivation, $dryRun, $limit, $restartEvery
+                $derivation, $dryRun, $limit, $restartEvery, $futileGraceDays, $includeFutile
             ): bool {
                 foreach ($tools as $tool) {
                     if ($restartEvery > 0 && $scanned >= $restartEvery) {
@@ -214,6 +222,26 @@ class DispatchMarginRecaptureCommand extends Command
                         continue;
                     }
 
+                    // ACTION: ecarte temporairement les "recaptures futiles" - un outil deja
+                    // tente recemment via un chemin qui ne produit jamais de master (repli
+                    // og:image) ou qui a echoue franchement redevient sinon candidat au dispatch
+                    // suivant sans jamais progresser (mesure : 3 masters produits sur 100 jobs,
+                    // ticket #2087 lot 1). Un resultat 'screenshot' (vraie capture Puppeteer
+                    // reussie mais dont le master reste malgre tout trop court) n'est JAMAIS
+                    // considere futile : la cause est ailleurs, une nouvelle tentative reste
+                    // legitime. --include-futile desactive completement ce filtre.
+                    // MCP: SELF (< 5 lignes de logique de garde)
+                    // RAISON: ticket #2087 lot 1 (2026-09-03), contrat ferme de la spec.
+                    if (! $includeFutile
+                        && in_array($tool->screenshot_last_attempt_result, ['og_image', 'failed', 'fallback'], true)
+                        && $tool->screenshot_last_attempt_at !== null
+                        && $tool->screenshot_last_attempt_at->greaterThan(now()->subDays($futileGraceDays))
+                    ) {
+                        $futileSkipped++;
+
+                        continue;
+                    }
+
                     if ($limit > 0 && $queuedForRecapture >= $limit) {
                         $limitReached = true;
 
@@ -227,14 +255,15 @@ class DispatchMarginRecaptureCommand extends Command
                 }
 
                 $this->info(sprintf(
-                    '[lot] %d outils examinés jusqu\'ici - déjà avec marge %d, master local dérivé %d, recaptures mises en file %d, verrouillés ignorés %d, illisibles %d, sans vignette locale %d.',
+                    '[lot] %d outils examinés jusqu\'ici - déjà avec marge %d, master local dérivé %d, recaptures mises en file %d, verrouillés ignorés %d, illisibles %d, sans vignette locale %d, écartés comme futiles %d.',
                     $scanned,
                     $alreadyMargin,
                     $masterDerivedLocally,
                     $queuedForRecapture,
                     $lockedSkipped,
                     $unreadable,
-                    $noLocalVignette
+                    $noLocalVignette,
+                    $futileSkipped
                 ));
 
                 return true;
@@ -242,7 +271,7 @@ class DispatchMarginRecaptureCommand extends Command
 
         $this->newLine();
         $this->info(sprintf(
-            '%s%d outil(s) examiné(s) dans ce segment : %d avaient déjà une marge exploitable, %d master(s) dérivé(s) localement (gratuit, sans réseau), %d recapture(s) réseau %s (queue "screenshots"), %d verrouillé(s) ignoré(s), %d illisible(s), %d sans vignette locale.',
+            '%s%d outil(s) examiné(s) dans ce segment : %d avaient déjà une marge exploitable, %d master(s) dérivé(s) localement (gratuit, sans réseau), %d recapture(s) réseau %s (queue "screenshots"), %d verrouillé(s) ignoré(s), %d illisible(s), %d sans vignette locale, %d écarté(s) comme recapture(s) futile(s).',
             $dryRun ? '[SIMULATION] ' : '',
             $scanned,
             $alreadyMargin,
@@ -251,7 +280,8 @@ class DispatchMarginRecaptureCommand extends Command
             $dryRun ? 'auraient été mises en file' : 'mise(s) en file',
             $lockedSkipped,
             $unreadable,
-            $noLocalVignette
+            $noLocalVignette,
+            $futileSkipped
         ));
 
         // Verite terrain apres coup (existence en base), jamais deduite des seuls drapeaux
@@ -281,6 +311,9 @@ class DispatchMarginRecaptureCommand extends Command
             'locked_skipped' => $lockedSkipped,
             'unreadable' => $unreadable,
             'no_local_vignette' => $noLocalVignette,
+            'futile_skipped' => $futileSkipped,
+            'futile_grace_days' => $futileGraceDays,
+            'include_futile' => $includeFutile,
             'limit_reached' => $limitReached,
             'last_id' => $lastId,
             'has_more_work' => $hasMoreWork,
@@ -288,7 +321,7 @@ class DispatchMarginRecaptureCommand extends Command
         ]);
 
         if ($shouldRelaunch) {
-            return $this->relaunch($lastId, $limit, $queuedForRecapture, $dryRun, $chunkSize, $restartEvery);
+            return $this->relaunch($lastId, $limit, $queuedForRecapture, $dryRun, $chunkSize, $restartEvery, $futileGraceDays, $includeFutile);
         }
 
         return self::SUCCESS;
@@ -314,8 +347,16 @@ class DispatchMarginRecaptureCommand extends Command
      * en file dans TOUTE LA CHAINE jusqu'ici, pour rester une limite globale a la chaine plutot
      * que de se reinitialiser a chaque segment (jamais atteint ici puisque $limitReached aurait
      * deja arrete la chaine avant d'appeler cette methode - voir le garde $shouldRelaunch).
+     *
+     * ACTION: $futileGraceDays/$includeFutile traversent aussi la relance a l'identique (meme
+     * regle que --chunk/--restart-every) - sans cela, le filtre anti-futiles retomberait
+     * silencieusement a ses valeurs par defaut a chaque segment sur un catalogue de production
+     * (--restart-every=250 par defaut, largement sous les ~2336 outils reels), ce qui viderait
+     * de son sens un --include-futile ou un --futile-grace-days explicite passe par l'operateur.
+     * MCP: SELF (< 5 lignes, meme plomberie que les options existantes)
+     * RAISON: ticket #2087 lot 1 (2026-09-03) - correction necessaire, hors segmentation elle-meme.
      */
-    private function relaunch(int $afterId, int $limit, int $alreadyQueuedThisChain, bool $dryRun, int $chunkSize, int $restartEvery): int
+    private function relaunch(int $afterId, int $limit, int $alreadyQueuedThisChain, bool $dryRun, int $chunkSize, int $restartEvery, int $futileGraceDays, bool $includeFutile): int
     {
         $command = [
             PHP_BINARY,
@@ -324,10 +365,15 @@ class DispatchMarginRecaptureCommand extends Command
             '--after-id='.$afterId,
             '--chunk='.$chunkSize,
             '--restart-every='.$restartEvery,
+            '--futile-grace-days='.$futileGraceDays,
         ];
 
         if ($dryRun) {
             $command[] = '--dry-run';
+        }
+
+        if ($includeFutile) {
+            $command[] = '--include-futile';
         }
 
         if ($limit > 0) {
