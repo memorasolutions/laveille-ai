@@ -112,6 +112,38 @@ it('lie "Composer" employe seul, dans un contexte qui parle reellement de loutil
         ->and($html)->toContain('>Composer</a>');
 });
 
+// ── 2026-09-02 : meme mecanisme, entree « Astra » (7e recidive homonyme, fiche 42269) ────
+// « modele Astra » designe le futur modele d'OpenAI ; l'outil « Astra » de l'annuaire est le
+// Project Astra de Google DeepMind (un assistant, jamais appele « modele »). Meme trade-off que
+// « Paragraph Composer » : le composé precis est rejete, la mention seule continue de lier.
+
+function pcfcAstraTool(): Tool
+{
+    return Tool::withoutEvents(fn () => Tool::create([
+        'name' => ['fr_CA' => 'Astra', 'en' => 'Astra'],
+        'slug' => ['fr_CA' => 'astra', 'en' => 'astra'],
+        'status' => 'published',
+        'pricing' => 'free',
+    ]));
+}
+
+it('ne lie PAS "Astra" a linterieur de "modele Astra" (contexte OpenAI)', function () {
+    pcfcAstraTool();
+
+    $html = GlossaryLinkifier::linkify('<p>OpenAI annoncait que son futur modèle Astra a atteint son seuil critique.</p>');
+
+    expect($html)->not->toContain('/annuaire/astra');
+});
+
+it('lie "Astra" employe seul, dans un contexte qui parle du Project Astra de Google', function () {
+    pcfcAstraTool();
+
+    $html = GlossaryLinkifier::linkify('<p>Google DeepMind poursuit le developpement de Astra pour ses lunettes connectees.</p>');
+
+    expect($html)->toContain('/annuaire/astra')
+        ->and($html)->toContain('>Astra</a>');
+});
+
 // ── Mécanisme 2 : attachement automatique a la fiche (NewsToolSyncAction, source=auto) ─
 
 it('nattache PAS loutil Composer quand seul "Paragraph Composer" est mentionne dans la fiche', function () {

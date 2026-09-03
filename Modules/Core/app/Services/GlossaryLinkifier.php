@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v19.'; // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
+    public const CACHE_KEY = 'glossary.terms.v20.'; // 2026-09-02 bump v20 (TOOL_COMPOUND_EXCLUSIONS « modèle Astra », 7e récidive homonyme) - sans ce bump, une entrée v19 chaude servirait le faux lien vers /annuaire/astra jusqu'au TTL. Historique v19 : // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -165,6 +165,12 @@ class GlossaryLinkifier
      */
     public const TOOL_COMPOUND_EXCLUSIONS = [
         'composer' => ['paragraph'],
+        // 2026-09-02 (7e récidive du motif homonyme, fiche 42269) : « modèle Astra » désigne le
+        // futur modèle d'OpenAI (annoncé le 1er septembre 2026), jamais le Project Astra de
+        // Google DeepMind - qui est un ASSISTANT, que Google n'appelle pas « modèle ». Sans cette
+        // garde, l'auto-lien envoyait le lecteur d'une fiche OpenAI vers la fiche d'annuaire de
+        // l'assistant Google. « Astra » employé seul continue de lier (mention Google légitime).
+        'astra' => ['modèle', 'modele', 'model'],
     ];
 
     /**
@@ -1098,6 +1104,9 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-09-02 : v19 ajoutée ici en même temps que le bump v20 (TOOL_COMPOUND_EXCLUSIONS
+            // « modèle Astra ») - même raison que les notes précédentes.
+            Cache::forget('glossary.terms.v19.'.$loc);
             // 2026-09-01 : v18 ajoutée ici en même temps que le bump v19 (ALIAS_NEVER_AUTO +
             // "autonomie"/"autonomies") - même raison que les notes précédentes : sans elle, une
             // clé v18 déjà chaude resterait servie jusqu'à l'expiration de son TTL après un flush

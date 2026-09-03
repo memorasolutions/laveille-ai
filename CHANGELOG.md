@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.247.7] - 2026-09-02
+
+### Corrigé
+- **Faux auto-lien « Astra » - 7e récidive du motif homonyme, mesurée sur la fiche 42269 le soir même de sa publication.** « modèle Astra » (le futur modèle d'OpenAI, annoncé le 1er septembre) était transformé en lien vers la fiche d'annuaire du Project Astra de Google DeepMind - un assistant, que Google n'appelle jamais « modèle ». Le lecteur d'une fiche OpenAI atterrissait chez Google.
+- **Mécanisme existant étendu, pas un second ajouté :** `TOOL_COMPOUND_EXCLUSIONS` reçoit `'astra' => ['modèle', 'modele', 'model']` - le composé précis est rejeté par le lookbehind déjà en place (v1.234.0, « Paragraph Composer »), « Astra » employé seul continue de lier (mention Google légitime).
+- **Clé de cache montée en v20** (+ purge v19 dans `flushCache()`) - sans ce bump, une entrée chaude aurait servi le faux lien jusqu'à l'expiration du TTL.
+- **Couverture :** 2 tests ajoutés à `ComposerParagraphFauxComposeTest` (le composé ne lie pas / la mention seule lie), 6/6 verts, et les 53 tests unitaires du linkifier restent verts.
+
 ## [1.247.6] - 2026-09-02
 
 ### Corrigé
