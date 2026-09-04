@@ -12,8 +12,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 252;
-$lvPatch = 1;
+$lvMinor = 253;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,
@@ -21,7 +21,7 @@ return [
     'patch' => $lvPatch,
 
     // Codename optionnel (nom de la release courante). Vide ou null si pas de codename.
-    'codename' => 'garde-fou-image-publication',
+    'codename' => 'champs-perdus-constructeur',
 
     // Format du SemVer assemblé — DÉRIVÉ automatiquement de major.minor.patch (source unique).
     // NE JAMAIS figer cette valeur en dur (incident déjà survenu — voir archive, #319).

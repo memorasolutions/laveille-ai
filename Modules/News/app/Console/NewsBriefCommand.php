@@ -38,6 +38,19 @@ use Modules\News\Services\NewsImageService;
  * RAISON: tâche #1942 - « décrire ce qui est déjà en base avant toute décision de rédaction »
  * vaut aussi pour ce champ, maintenant qu'il est écrivable par cette même porte.
  *
+ * ACTION : publish_readiness ajouté au JSON (2026-09-04, ticket #2237) - cette commande est le
+ * SEUL endroit du code que le skill /actu2 nomme « préflight » (étape 0), mais elle ne vérifiait
+ * QUE is_published : rien n'exposait si la fiche remplissait déjà seo_title/summary/
+ * editorial_proof_pairs/image_credit ni si ses paires de preuve étaient valides. Résultat mesuré
+ * la nuit du 2026-09-03 : 7 fiches sur 9 soumises à la publication ont été refusées par
+ * NewsArticle::publishReadinessCheck() alors que le prévol les avait laissées passer, faute d'un
+ * verdict à consulter avant --publish. DRY strict : publish_readiness DÉLÈGUE cette même méthode,
+ * déjà la SEULE source de vérité de la règle « prêt à publier » (voir son docblock) - jamais une
+ * réimplémentation, même partielle, des mêmes conditions.
+ * MCP: SELF (1 ligne utile)
+ * RAISON: ticket #2237 - le prévol de /actu2 doit vérifier ce que la publication exige réellement,
+ * pas seulement si la fiche est déjà publiée.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -79,6 +92,7 @@ class NewsBriefCommand extends Command
             'nature_original' => $article->nature_original,
             'niveau_preuve' => $article->niveau_preuve,
             'has_image' => $this->imageService->exists($article->id),
+            'publish_readiness' => $article->publishReadinessCheck(),
             'policy_version' => CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION,
             'site_url' => url('/actualites/'.$article->slug),
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));

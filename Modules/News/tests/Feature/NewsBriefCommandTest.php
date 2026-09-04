@@ -162,3 +162,67 @@ it('news:brief never writes anything, even when called repeatedly', function () 
     expect($after->updated_at?->toIso8601String())->toBe($before)
         ->and($after->seo_title)->toBeNull();
 });
+
+// ── Ticket #2237 : le « prévol » de /actu2 (étape 0, cette même commande) ne vérifiait que
+// is_published, jamais ce que publishReadinessCheck() exige réellement à la publication - d'où 7
+// fiches sur 9 refusées la nuit du 2026-09-03 malgré un prévol qui les avait laissées passer. DRY
+// strict : publish_readiness DÉLÈGUE à NewsArticle::publishReadinessCheck(), jamais une
+// réimplémentation partielle des mêmes règles. ────────────────────────────────────────────
+
+it('news:brief exposes publish_readiness with the full list of missing fields when the fiche is not ready', function () {
+    $article = nbcArticle([
+        'seo_title' => null,
+        'summary' => null,
+        'editorial_proof_pairs' => null,
+        'image_credit' => null,
+    ]);
+
+    \Illuminate\Support\Facades\Artisan::call('news:brief', ['article' => $article->id]);
+    $decoded = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true);
+
+    expect($decoded['publish_readiness']['ready'])->toBeFalse()
+        ->and($decoded['publish_readiness']['missing'])->toBe(['seo_title', 'summary', 'editorial_proof_pairs', 'image_credit'])
+        ->and($decoded['publish_readiness']['invalid_pair'])->toBeNull();
+});
+
+it('news:brief exposes publish_readiness as ready when every requirement of publishReadinessCheck is met', function () {
+    $article = nbcArticle([
+        'seo_title' => 'Un titre pour Google',
+        'summary' => 'Un chapo complet.',
+        'editorial_proof_pairs' => [[
+            'statement' => 'Une affirmation éditoriale.',
+            'excerpt' => 'un extrait confirmé à la source primaire',
+            'type' => 'primary_fact',
+            'source_url' => 'https://exemple.com/source-primaire',
+        ]],
+        'image_credit' => 'Image : générée (Gemini)',
+    ]);
+
+    \Illuminate\Support\Facades\Artisan::call('news:brief', ['article' => $article->id]);
+    $decoded = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true);
+
+    expect($decoded['publish_readiness']['ready'])->toBeTrue()
+        ->and($decoded['publish_readiness']['missing'])->toBe([])
+        ->and($decoded['publish_readiness']['invalid_pair'])->toBeNull();
+});
+
+it('news:brief exposes the invalid_pair verdict of publishReadinessCheck, pas seulement les champs manquants (preuve de délégation réelle)', function () {
+    $article = nbcArticle([
+        'seo_title' => 'Un titre pour Google',
+        'summary' => 'Un chapo complet.',
+        'internal_source_text' => 'Le texte source réellement collecté.',
+        'editorial_proof_pairs' => [[
+            'statement' => 'Une affirmation qui ne correspond à rien.',
+            'excerpt' => "un extrait qui n'existe pas dans le texte source",
+            'type' => 'fact',
+        ]],
+        'image_credit' => 'Image : générée (Gemini)',
+    ]);
+
+    \Illuminate\Support\Facades\Artisan::call('news:brief', ['article' => $article->id]);
+    $decoded = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true);
+
+    expect($decoded['publish_readiness']['ready'])->toBeFalse()
+        ->and($decoded['publish_readiness']['missing'])->toBe([])
+        ->and($decoded['publish_readiness']['invalid_pair']['reason'])->toBe('fact_substring');
+});

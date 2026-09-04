@@ -1801,7 +1801,20 @@ document.addEventListener('alpine:init', function() {
                 // ancrées ({text}) - jamais `pending` (état de création transitoire, sans objet une
                 // fois le prompt sauvegardé) ni spaceValues (valeurs de remplissage, jamais
                 // persistées avec le prompt, voir spec §Persistance).
-                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, contextInfo: this.contextInfo, spaces: this.spaces.map(function(s) { return { text: s.text }; }), audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile, zones: this.zones.slice() };
+                return { selectedTask: this.selectedTask, personaType: this.personaType, personaPreset: this.personaPreset, personaCustom: this.personaCustom, verbType: this.verbType, verb: this.verb, verbCustom: this.verbCustom, taskObject: this.taskObject, contextInfo: this.contextInfo, spaces: this.spaces.map(function(s) { return { text: s.text }; }), secondTaskEnabled: this.secondTaskEnabled, verbType2: this.verbType2, verb2: this.verb2, verbCustom2: this.verbCustom2, audienceType: this.audienceType, audiencePresets: this.audiencePresets, audienceCustom: this.audienceCustom, formats: this.formatsSelected, formatCustom: this.formatCustom, length: this.length, tone: this.tone, language: this.language, technique: this.technique, constraintAntiAI: this.constraintAntiAI, constraintTypo: this.constraintTypo, constraintCanvas: this.constraintCanvas, canvasAI: this.canvasAI, canvasFormat: this.canvasFormat, formatMode: this.formatMode, canvasCustomFormat: this.canvasCustomFormat, constraintChainOfThought: this.constraintChainOfThought, constraintAskIfUnclear: this.constraintAskIfUnclear, constraintForceQcm: this.constraintForceQcm, constraintRepeatList: this.constraintRepeatList, constraintCustom: this.constraintCustom, useDelimiters: this.useDelimiters, examples: this.examples, cadreStrict: this.cadreStrict, profile: this.profile, zones: this.zones.slice() };
+                // #2239 (2026-09-04) : `secondTaskEnabled`/`verbType2`/`verb2`/`verbCustom2` (2e
+                // tâche optionnelle) et `constraintForceQcm`/`constraintRepeatList` (Options
+                // avancées) influencent bel et bien get prompt() mais manquaient ici - même piège
+                // round 42 documenté plus haut (tout champ oublié ici se perd à la réouverture
+                // ?edit=ID / ?remix=ID, puis un "Enregistrer" écrase la version en base avec ces
+                // champs perdus). Filet symétrique dans _applyWizardParams(). Ce commentaire est
+                // placé APRÈS le `return` (et non juste avant, comme les commentaires historiques
+                // ci-dessus) : un test de proximité de source préexistant
+                // (Modules/Tools/tests/Feature/PromptBuilderContextVariablesGuestHistoryTest.php)
+                // vérifie que `contextInfo: this.contextInfo` reste à moins de 3000 OCTETS (pas
+                // caractères - la regex PCRE n'a pas le flag /u, donc chaque accent français compte
+                // pour 2 octets) après `get wizardParams()` ; ajouter du texte avant le retour
+                // pousse cette distance et casse ce garde-fou pourtant sans lien avec ce correctif.
             },
             // Extraction DRY (2026-08-11) : les TROIS points de restauration de l'état du wizard
             // (?edit=ID, ?remix=ID, loadGuestHistoryEntry() pour l'historique invité) appliquaient
@@ -1835,6 +1848,18 @@ document.addEventListener('alpine:init', function() {
                     if (legacy) self.verbType = 'custom';
                 }
                 if (p.taskObject) self.taskObject = p.taskObject;
+                // #2239 (2026-09-04) : deuxième tâche optionnelle - même piège round 42 que le
+                // bloc verbType/verb/verbCustom ci-dessus, calqué à l'identique (y compris le
+                // repli verbType2='custom' si verbCustom2 est rempli, filet legacy, voir opts.legacy
+                // ci-dessus). Un ancien prompt sauvegardé avant ce correctif n'a aucune de ces 4
+                // clés : les gardes `if (p.xxx)` laissent alors la valeur par défaut inchangée.
+                if (p.secondTaskEnabled !== undefined) self.secondTaskEnabled = p.secondTaskEnabled;
+                if (p.verbType2) self.verbType2 = p.verbType2;
+                if (p.verb2) self.verb2 = p.verb2;
+                if (p.verbCustom2) {
+                    self.verbCustom2 = p.verbCustom2;
+                    if (legacy) self.verbType2 = 'custom';
+                }
                 // #1593a (2026-08-07) : contexte additionnel, même piège round 42 que les autres
                 // champs texte restaurés ici (constraintCustom, examples...) - un oubli le perd
                 // silencieusement à la réouverture.
@@ -1876,6 +1901,13 @@ document.addEventListener('alpine:init', function() {
                 if (p.constraintTypo !== undefined) self.constraintTypo = p.constraintTypo;
                 if (p.constraintChainOfThought !== undefined) self.constraintChainOfThought = p.constraintChainOfThought;
                 if (p.constraintAskIfUnclear !== undefined) self.constraintAskIfUnclear = p.constraintAskIfUnclear;
+                // #2239 (2026-09-04) : « QCM forcé » / « Répéter pour ma liste » (Options avancées)
+                // manquaient à la restauration - même piège round 42 que les 3 gardes juste
+                // au-dessus, calqué à l'identique (garde `!== undefined`, ces 2 champs sont des
+                // booléens comme leurs voisins constraintTypo/constraintChainOfThought/
+                // constraintAskIfUnclear).
+                if (p.constraintForceQcm !== undefined) self.constraintForceQcm = p.constraintForceQcm;
+                if (p.constraintRepeatList !== undefined) self.constraintRepeatList = p.constraintRepeatList;
                 if (p.constraintCustom) self.constraintCustom = p.constraintCustom;
                 if (p.useDelimiters !== undefined) self.useDelimiters = p.useDelimiters;
                 if (p.examples) self.examples = p.examples;

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.253.0] - 2026-09-04
+
+### Corrigé
+- **Six réglages du constructeur de prompts se perdaient à chaque sauvegarde.** La deuxième tâche optionnelle (son activation et son verbe) et deux options avancées - « l'IA propose des choix avant de répondre » et « répéter pour chaque élément de ma liste » - étaient bien cochables, agissaient bel et bien sur le texte produit, mais n'atteignaient jamais le serveur. Rouvrir un prompt par « Modifier » ou « Remixer » les perdait, et l'enregistrement suivant écrasait la version en base avec ces champs vidés.
+- **Le défaut était verrouillé aux deux bouts, ce qui explique qu'il ait survécu.** Les six champs manquaient à l'objet envoyé au serveur, ET personne ne les relisait au retour : même envoyés, ils n'auraient pas été restaurés. Ni la validation ni la base n'étaient en cause - la colonne accepte n'importe quelle clé et écrit ce qu'elle reçoit. Le correctif rétablit la symétrie aller-retour.
+- **Un prompt sauvegardé avant ce correctif ne casse pas.** Il ne contient aucune de ces six clés ; les gardes laissent alors la valeur par défaut plutôt que d'écraser avec une valeur vide. Ce cas est couvert par un test dédié.
+
+### Ajouté
+- **Le cycle de composition des actualités sait enfin, AVANT de publier, si une fiche est complète.** `news:brief` sort désormais une clé `publish_readiness` qui dit ce qui manque (`ready`, `missing`, `invalid_pair`). Jusqu'ici, rien dans le code ne vérifiait les conditions de publication en amont : le seul contrôle documenté portait sur « la fiche est-elle déjà publiée », et le refus se découvrait au moment même de l'appel. Coût mesuré de cette lacune le 3 septembre : sept fiches sur neuf refusées, chacune valant un aller-retour complet.
+- **Aucune condition n'a été recopiée.** Le nouveau champ délègue à `NewsArticle::publishReadinessCheck()`, la seule source de vérité de cette règle, déjà appelée par les trois portes de publication. Une cinquième réécriture des mêmes quatre conditions aurait divergé au premier changement.
+
+### Note de méthode
+- Le test du tour complet a été vu ROUGE avant le correctif - 22 assertions en échec sur 29 - puis vert après. Les 7 assertions déjà vertes avant étaient précisément les gardes « un ancien prompt ne change rien », qui ne devaient pas bouger.
+- Le correctif a d'abord cassé un test préexistant sans rapport, qui mesure une distance en OCTETS entre deux chaînes du fichier source. Placer un commentaire en français avant le point mesuré suffit à le faire échouer, chaque accent comptant double. Contourné en déplaçant le commentaire, et signalé comme dette à part entière plutôt que corrigé au passage.
+
 ## [1.252.1] - 2026-09-04
 
 ### Corrigé
