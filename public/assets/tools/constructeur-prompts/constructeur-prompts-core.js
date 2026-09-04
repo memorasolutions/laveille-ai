@@ -1808,13 +1808,12 @@ document.addEventListener('alpine:init', function() {
                 // round 42 documenté plus haut (tout champ oublié ici se perd à la réouverture
                 // ?edit=ID / ?remix=ID, puis un "Enregistrer" écrase la version en base avec ces
                 // champs perdus). Filet symétrique dans _applyWizardParams(). Ce commentaire est
-                // placé APRÈS le `return` (et non juste avant, comme les commentaires historiques
-                // ci-dessus) : un test de proximité de source préexistant
-                // (Modules/Tools/tests/Feature/PromptBuilderContextVariablesGuestHistoryTest.php)
-                // vérifie que `contextInfo: this.contextInfo` reste à moins de 3000 OCTETS (pas
-                // caractères - la regex PCRE n'a pas le flag /u, donc chaque accent français compte
-                // pour 2 octets) après `get wizardParams()` ; ajouter du texte avant le retour
-                // pousse cette distance et casse ce garde-fou pourtant sans lien avec ce correctif.
+                // resté APRÈS le `return` pour raison historique : jusqu'au 2026-09-04, un test de
+                // proximité mesurait une distance de 3000 OCTETS depuis l'en-tête du getter (regex
+                // PCRE sans flag /u, donc chaque accent français comptait double), et le moindre
+                // texte ajouté avant le retour le faisait rougir. Cette contrainte est LEVÉE
+                // (ticket #2249) : le test ancre désormais son assertion sur la ligne du `return`
+                // elle-même. Un commentaire peut de nouveau être écrit avant le retour.
             },
             // Extraction DRY (2026-08-11) : les TROIS points de restauration de l'état du wizard
             // (?edit=ID, ?remix=ID, loadGuestHistoryEntry() pour l'historique invité) appliquaient

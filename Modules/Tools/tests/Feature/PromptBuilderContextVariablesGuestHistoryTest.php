@@ -153,7 +153,33 @@ it('includes contextInfo in the wizardParams serialization object used by save/e
     // wizardParams est l'objet de sérialisation réellement envoyé à l'API (voir addToHistory(),
     // body: { params: this.wizardParams }) - contextInfo doit y figurer comme tous les autres
     // champs texte (examples, constraintCustom...), sinon il se perd à la sauvegarde.
-    expect($src)->toMatch('/get wizardParams\(\)[\s\S]{0,3000}contextInfo: this\.contextInfo/');
+    //
+    // ACTION : délimiter le getter, au lieu de mesurer une distance depuis son en-tête.
+    // RAISON (2026-09-04, ticket #2249) : la forme précédente était
+    // /get wizardParams\(\)[\s\S]{0,3000}contextInfo: this\.contextInfo/ - un quantificateur
+    // PCRE SANS le flag /u, qui compte donc des OCTETS et non des caractères (chaque accent
+    // français en vaut deux). Ajouter un simple commentaire dans le getter poussait contextInfo
+    // au-delà des 3000 octets et faisait rougir ce test, alors que le champ testé était intact.
+    // Le correctif du 2026-09-04 avait dû déplacer un commentaire APRÈS le `return` pour le
+    // contourner : c'est le code qui se tordait pour satisfaire la mesure. On vérifie désormais
+    // l'intention réelle - contextInfo figure dans le corps du getter - sans aucune borne
+    // arbitraire.
+    // L'ancre porte l'accolade ouvrante : « get wizardParams() { ». Sans elle, on attrape aussi
+    // la mention entre accents graves qui figure dans le commentaire ci-dessous, dans le JS.
+    $debutGetter = strpos($src, 'get wizardParams() {');
+    expect($debutGetter)->not->toBeFalse();
+
+    // On isole LA LIGNE du `return` - et rien d'autre. Mesuré le 2026-09-04 : une première
+    // version de ce correctif lisait tout le CORPS du getter, commentaires compris ; comme un
+    // commentaire y cite littéralement `contextInfo: this.contextInfo`, le test restait VERT
+    // même après suppression du vrai champ. Un test qui lit un commentaire ne teste rien.
+    $posReturn = strpos($src, 'return {', $debutGetter);
+    expect($posReturn)->not->toBeFalse();
+
+    $finLigne = strpos($src, "\n", $posReturn);
+    $ligneReturn = substr($src, $posReturn, $finLigne - $posReturn);
+
+    expect($ligneReturn)->toContain('contextInfo: this.contextInfo');
 });
 
 it('lets a saved prompt carrying contextInfo survive the public remix-data round trip unchanged', function () {

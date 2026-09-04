@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.253.1] - 2026-09-04
+
+### Corrigé
+- **Un test verrouillait la mise en forme du code source au lieu de vérifier son comportement.** Il exigeait que le champ `contextInfo` reste à moins de 3000 OCTETS de l'en-tête d'une fonction - des octets, pas des caractères, l'expression régulière n'ayant pas le drapeau qui traite l'accentué correctement, si bien que chaque accent français comptait double. Conséquence concrète : ajouter un simple commentaire dans cette fonction faisait échouer un test sans aucun rapport avec la modification. Le correctif de la veille avait dû déplacer un commentaire pour le contourner - c'est le code qui se pliait à la mesure.
+- **Le test vérifie désormais ce qui compte vraiment** : que le champ figure bien sur la ligne de retour de la fonction. Aucune borne arbitraire, et un commentaire peut de nouveau être écrit là où il est utile.
+- **Le commentaire du code qui décrivait cette contrainte a été corrigé** : il annonçait encore une limite désormais levée, et aurait piégé la prochaine personne à passer par là.
+
 ## [1.253.0] - 2026-09-04
 
 ### Corrigé
