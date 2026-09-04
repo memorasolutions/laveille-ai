@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.252.1] - 2026-09-04
+
+### Corrigé
+- **Une fiche d'actualité ne peut plus être publiée sans une vraie photo.** Deux récidives en quelques jours (2026-08-31 et 2026-09-03) ont mis en ligne des fiches illustrées par la carte de repli générée à partir du titre, en anglais et parfois tronquée. La cause n'était pas un oubli ponctuel : rien, dans le code, n'empêchait la publication d'une fiche sans image curatée. `NewsArticle::publishReadinessCheck()` refuse désormais une fiche dont le crédit d'image est vide, au même titre qu'un titre pour Google ou une paire de preuve manquante.
+- **Le prédicat n'a pas été inventé pour l'occasion.** `hasCuratedImage()` existait déjà, et `RegenerateFallbackImagesCommand` utilisait déjà son exact inverse (`image_credit` vide) pour trouver les fiches à carte de repli. Le générateur de repli n'écrit jamais de crédit, mesuré : un crédit vide signifie donc bien « aucune vraie photo posée ». `image_url`, lui, ne distingue rien, le repli s'écrivant au même chemin que l'image réelle.
+- **Trois portes de publication fermées, pas deux.** Mon relevé initial cherchait `is_published => true` en littéral et a raté les écritures par variable : la bascule rapide de `AdminNewsController::toggleArticle()` publiait sans aucun contrôle. Trouvée par une revue adversariale de Codex, elle applique maintenant le même contrôle que `news:apply --publish` et que l'écran de composition. Les cinq chemins de `FetchNewsCommand` ont été vérifiés dormants (`config('news.autopublish.enabled', false)`, arrêt v1.174.0).
+- **Le bouton « Publier » de l'écran de composition se désactive aussi.** Sa garde cliente listait encore les trois champs d'avant ce correctif : le rédacteur découvrait le refus seulement après l'appel HTTP. Second défaut trouvé par la même revue, vérifié dans le code réel avant d'être accepté.
+- **Le message de refus n'indique plus comment contourner le garde-fou.** Sa première rédaction proposait « ou renseigne le crédit dans l'écran de composition » comme solution de rechange, ce qui revenait à expliquer comment publier sans photo. Il dit maintenant que le crédit atteste la photo, et que le renseigner sans image ne ferait que masquer le problème.
+- Le texte de refus vit désormais dans une seule méthode, `NewsArticle::publishMissingMessage()`, appelée par la commande et par le contrôleur : les deux formulations divergeaient.
+
+### Limite connue, écrite plutôt que tue
+- Le contrôle prouve qu'un humain a **attesté** une image, pas qu'un fichier photo existe. Un rédacteur qui saisirait délibérément un crédit sur une fiche sans photo passerait encore. Aucun automatisme ne peut produire ce cas : le générateur de repli n'écrit jamais de crédit. Les deux récidives corrigées ici relevaient toutes deux du cas passif, désormais fermé.
+- L'ordre des refus n'a pas été touché : un crédit manquant masque encore une paire de preuve invalide, ce qui impose un aller-retour au rédacteur. Défaut d'ergonomie, jamais d'intégrité, et le changer toucherait la logique partagée par les trois portes.
+- La QC navigateur n'a pas été faite : `/admin/news/composition` est protégé par une double authentification, qu'on ne contourne pas. La moitié cliente est prouvée en bac à sable Node, la moitié serveur par des tests Pest.
+
+### Note de méthode
+- Les tests neufs ont été vus ROUGES contre le code sans correctif, puis verts après, dans les deux sens et pour les deux moitiés (Pest et JS) : le garde-fou serveur, la garde cliente, et la liaison du bouton « Publier » à cette garde.
+- **Deux tests existants sont tombés en régression, et c'était le garde-fou qui mordait.** L'un publiait par `news:apply --publish`, l'autre par la bascule rapide, tous deux sur une fiche sans crédit d'image ; le second n'avait même pas de titre pour Google, puisque cette porte ne contrôlait rien jusqu'ici. Leurs fixtures ont été complétées, pas le garde-fou affaibli.
+- Deux revues adversariales de Codex ont porté sur ce correctif. La première a trouvé la troisième porte et la garde cliente absente. La seconde a démenti ma formule « les chemins de `news:fetch` sont dormants » : dormant n'est pas fermé, et la brèche est consignée en ticket plutôt que corrigée à la hâte en fin de lot (elle rendrait un drapeau de configuration définitivement inopérant, ce qui est une décision de produit).
+
 ## [1.252.0] - 2026-09-03
 
 ### Ajouté

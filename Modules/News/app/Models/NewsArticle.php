@@ -451,6 +451,28 @@ class NewsArticle extends Model implements Searchable
             $missing[] = 'editorial_proof_pairs';
         }
 
+        // ACTION : garde-fou #2244 (2026-09-04) - une fiche ne peut plus etre publiee sans une
+        // VRAIE image. Deux recidives en quelques jours (2026-08-31, 2026-09-03) ou des fiches
+        // sont parties en production avec la carte de repli generee par
+        // NewsImageService::generateFallbackImage() - un degrade portant le titre, souvent en
+        // anglais. image_url ne distingue RIEN : le repli ecrit au meme chemin, donc le champ
+        // est rempli dans les deux cas.
+        //
+        // Le signal retenu n'est pas invente ici : hasCuratedImage() EST DEJA le predicat par
+        // lequel le projet reconnait une image posee deliberement (RegenerateFallbackImagesCommand
+        // et ReprocessArticlesCommand s'en servent pour ne jamais l'ecraser). Ce garde-fou ne cree
+        // pas une regle nouvelle, il ferme la porte de SORTIE d'une regle qui existait deja.
+        //
+        // MESURE AVANT D'ECRIRE (2026-09-04, production) : la plus recente fiche publiee sans
+        // credit porte l'id 33486, creee le 17 aout ; les 156 fiches publiees APRES elle en ont
+        // toutes un. Le flux courant tient donc deja la regle a 100 % - ce refus ne bloque aucune
+        // publication d'aujourd'hui. Le passif sans credit (avril a aout) reste publie, intact :
+        // cette verification ne s'applique qu'AU MOMENT de publier.
+        // MCP: SELF (3 lignes utiles)
+        if (! $this->hasCuratedImage()) {
+            $missing[] = 'image_credit';
+        }
+
         if ($missing !== []) {
             return ['ready' => false, 'missing' => $missing, 'invalid_pair' => null];
         }
@@ -514,6 +536,49 @@ class NewsArticle extends Model implements Searchable
 
         return 'La paire de preuve « '.($pair['statement'] ?? '').' » n\'est plus une sous-chaîne exacte du texte source courant. Rien n\'a été publié, rien n\'a été purgé.';
     }
+
+    /**
+     * ACTION : garde-fou #2244 (2026-09-04) - message normalisé pour les champs MANQUANTS,
+     * jumeau de publishInvalidPairMessage() ci-dessus et pour exactement la même raison : les
+     * DEUX seuls appelants (NewsCompositionController::publish() et NewsApplyCommand --publish)
+     * concaténaient chacun leur propre phrase, si bien qu'un nouveau motif de refus devait être
+     * écrit deux fois et pouvait diverger. Un seul endroit désormais.
+     *
+     * Les libellés sont en français courant plutôt qu'en noms de colonnes : un rédacteur bloqué
+     * par « image_credit manquant » ne sait pas quoi faire, alors qu'on lui demande de poser une
+     * vraie photo - et un garde-fou incompréhensible finit par être contourné.
+     * MCP: SELF (<5 lignes utiles)
+     *
+     * @param  array<int, string>  $missing
+     */
+    public static function publishMissingMessage(array $missing): string
+    {
+        $libelles = [
+            'seo_title' => 'le titre pour Google (seo_title)',
+            'summary' => 'le chapeau (summary)',
+            'editorial_proof_pairs' => 'au moins une paire de preuve (editorial_proof_pairs)',
+            'image_credit' => "le crédit de l'image (image_credit)",
+        ];
+
+        $parts = array_map(fn (string $c): string => $libelles[$c] ?? $c, $missing);
+        $message = "Cette fiche n'est pas prête à être publiée, il manque : ".implode(', ', $parts).'.';
+
+        if (in_array('image_credit', $missing, true)) {
+            // ACTION : formulation corrigée le 2026-09-04 après la revue de Codex. La version
+            // précédente proposait « ou renseigne le crédit dans l'écran de composition » comme
+            // solution de rechange - autrement dit, elle indiquait littéralement comment franchir
+            // le garde-fou sans poser de photo. Le crédit n'est pas une case à cocher : il ATTESTE
+            // qu'une vraie image existe, et c'est la seule chose que le serveur peut vérifier.
+            // MCP: SELF (<5 lignes utiles)
+            $message .= " Un crédit vide signifie qu'aucune vraie photo n'a été posée : la fiche"
+                ." partirait avec la carte de repli générée à partir du titre. Génère l'image, puis"
+                .' applique-la avec news:apply --image=... --credit="..." - le crédit atteste la'
+                ." photo, le renseigner sans image ne ferait que masquer le problème.";
+        }
+
+        return $message." Rien n'a été publié, rien n'a été purgé.";
+    }
+
 
     /**
      * ACTION : addendum daté 2026-08-17 (fin de journée, découvert en production) - la fiche

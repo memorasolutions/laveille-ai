@@ -1498,7 +1498,7 @@ class NewsApplyCommand extends Command
 
         if (! $check['ready']) {
             if ($check['missing'] !== []) {
-                $this->error("Cette fiche n'est pas prête à être publiée : ".implode(', ', $check['missing']).' manquant(s).');
+                $this->error(NewsArticle::publishMissingMessage($check['missing']));
             } else {
                 $this->error(NewsArticle::publishInvalidPairMessage($check['invalid_pair']));
             }

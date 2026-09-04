@@ -1207,7 +1207,7 @@ class NewsCompositionController extends Controller
         if (! $check['ready']) {
             if ($check['missing'] !== []) {
                 return response()->json([
-                    'error' => "Cette fiche n'est pas prête à être publiée : ".implode(', ', $check['missing']).' manquant(s).',
+                    'error' => NewsArticle::publishMissingMessage($check['missing']),
                     'missing' => $check['missing'],
                 ], 422);
             }

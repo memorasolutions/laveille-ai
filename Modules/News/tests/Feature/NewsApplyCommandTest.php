@@ -560,6 +560,7 @@ it('applies --publish: article published, source text purged, public link in the
     $sourceText = 'Le ministère a confirmé un investissement de 12 millions de dollars pour ce projet.';
     $article = nacArticle([
         'seo_title' => 'Titre publié prêt',
+        'image_credit' => 'Photo : source de test',
         'summary' => 'Résumé publié prêt.',
         'internal_source_text' => $sourceText,
         'source_content_hash' => hash('sha256', $sourceText),
@@ -606,6 +607,7 @@ it('refuses --publish when prerequisites are missing (seo_title/summary/editoria
 it('refuses --publish when a "fact" pair is no longer an exact substring of the current source text - nothing published, nothing purged', function () {
     $article = nacArticle([
         'seo_title' => 'Titre publié prêt',
+        'image_credit' => 'Photo : source de test',
         'summary' => 'Résumé publié prêt.',
         'internal_source_text' => 'Le texte source a changé depuis la création de la paire de preuve.',
         'editorial_proof_pairs' => [[
@@ -791,6 +793,7 @@ it('applying --publish writes to the dedicated composition log file', function (
     $sourceText = 'Texte source pour vérifier la journalisation de la publication.';
     $article = nacArticle([
         'seo_title' => 'Titre journalisé publié',
+        'image_credit' => 'Photo : source de test',
         'summary' => 'Résumé journalisé publié.',
         'internal_source_text' => $sourceText,
         'source_content_hash' => hash('sha256', $sourceText),

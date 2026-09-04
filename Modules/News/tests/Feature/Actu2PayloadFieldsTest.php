@@ -361,6 +361,9 @@ it('nature_original, niveau_preuve and original_post survive the publish-and-pur
     $article = a2pArticle([
         'seo_title' => 'Titre publié prêt',
         'summary' => 'Résumé publié prêt.',
+        // Garde-fou #2244 (2026-09-04) : publishReadinessCheck() refuse une fiche sans credit
+        // d'image (une fiche sans credit partirait avec la carte de repli generee du titre).
+        'image_credit' => 'Photo : source de test',
         'internal_source_text' => $sourceText,
         'source_content_hash' => hash('sha256', $sourceText),
         'nature_original' => 'annonce_commerciale',

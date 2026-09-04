@@ -45,6 +45,7 @@ function prspArticle(string $sourceText, string $excerpt): NewsArticle
         // summary : sans lui, la méthode sort AVANT d'atteindre le contrôle des paires, et le test
         // ne mesurerait plus rien de ce qu'il prétend mesurer.
         'seo_title' => 'Titre pour Google, fiche prsp',
+        'image_credit' => 'Photo : source de test',
         'guid' => 'guid-prsp-'.$suffixe,
         'url' => 'https://exemple.com/prsp-article-'.$suffixe,
         'description' => '',

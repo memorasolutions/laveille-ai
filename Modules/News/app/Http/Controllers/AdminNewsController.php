@@ -145,6 +145,25 @@ class AdminNewsController extends Controller
     public function toggleArticle(NewsArticle $article): RedirectResponse
     {
         if (! $article->is_published) {
+            // ACTION : garde-fou #2244 (2026-09-04) - TROISIÈME porte de publication, trouvée par
+            // une revue adversariale de Codex alors que j'avais écrit qu'il n'en existait que deux.
+            // Mon relevé cherchait « is_published => true » en littéral et a raté les écritures par
+            // variable ; cette porte-ci publie via publishAndPurgeSource() sans aucun contrôle.
+            // C'est un BOUTON D'ADMINISTRATION bien réel (PATCH admin/news/articles/{id}/toggle),
+            // donc probablement le chemin par lequel des fiches sont parties sans vraie photo.
+            //
+            // Même délégation DRY que les deux autres portes : la règle « prête à publier » vit
+            // dans NewsArticle::publishReadinessCheck(), jamais recopiée ici.
+            // MCP: SELF (<5 lignes utiles)
+            // RAISON: un garde-fou qui laisse une porte ouverte ne tient pas sa promesse.
+            $check = $article->publishReadinessCheck();
+
+            if (! $check['ready']) {
+                return back()->with('error', $check['missing'] !== []
+                    ? NewsArticle::publishMissingMessage($check['missing'])
+                    : NewsArticle::publishInvalidPairMessage($check['invalid_pair']));
+            }
+
             // ACTION : bascule rapide → même règle « publier = purger » que le bouton
             // Publier-et-purger de l'écran de composition (addendum "purge garantie sur tous
             // les chemins de publication", 2026-08-17) - DRY sur

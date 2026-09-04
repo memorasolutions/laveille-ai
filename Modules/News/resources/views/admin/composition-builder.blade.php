@@ -964,6 +964,12 @@ function compositionBuilder(opts) {
             if (!this.formSeoTitle || !this.formSeoTitle.trim()) missing.push('titre SEO');
             if (!this.formSummary || !this.formSummary.trim()) missing.push('résumé');
             if (!this.proofPairs.length) missing.push('au moins une paire de preuve');
+            // ACTION : garde-fou #2244 (2026-09-04) - le serveur refuse depuis aujourd'hui une
+            // fiche sans crédit d'image ; sans cette ligne le bouton restait ACTIF et le rédacteur
+            // ne découvrait le refus qu'après l'appel HTTP. Trouvé par la revue de Codex, vérifié
+            // dans le code : publishMissingList() listait encore les 3 champs d'avant le correctif.
+            // MCP: SELF (1 ligne utile)
+            if (!this.formImageCredit || !this.formImageCredit.trim()) missing.push("le crédit de l'image (une vraie photo, pas la carte de repli)");
             return missing;
         },
 

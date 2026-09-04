@@ -334,6 +334,7 @@ it('publish rejects when a "fact" pair is no longer an exact substring of the cu
     $source = smfSource();
     $article = smfArticle($source->id, [
         'seo_title' => 'Titre publié prêt',
+        'image_credit' => 'Photo : source de test',
         'summary' => 'Résumé publié prêt.',
         'internal_source_text' => 'Le texte source a changé depuis la création de la paire de preuve.',
         'editorial_proof_pairs' => [[
@@ -364,6 +365,7 @@ it('publish succeeds: article published, internal_source_text purged, provenance
     $sourceText = 'Le ministère a confirmé un investissement de 12 millions de dollars pour ce projet.';
     $article = smfArticle($source->id, [
         'seo_title' => 'Titre publié prêt',
+        'image_credit' => 'Photo : source de test',
         'summary' => 'Résumé publié prêt.',
         'internal_source_text' => $sourceText,
         'source_content_hash' => hash('sha256', $sourceText),
@@ -443,6 +445,7 @@ it('publish also clears structured_summary (machine summary) so the composed sum
     $sourceText = 'Le ministère a confirmé un investissement de 12 millions de dollars pour ce projet.';
     $article = smfArticle($source->id, [
         'seo_title' => 'Titre publié prêt',
+        'image_credit' => 'Photo : source de test',
         'summary' => 'Résumé publié prêt.',
         'internal_source_text' => $sourceText,
         'source_content_hash' => hash('sha256', $sourceText),
@@ -502,6 +505,13 @@ it('toggleArticle purges the internal source text when it publishes a draft, pro
     $sourceText = 'Texte source intégral qui doit disparaître dès la bascule rapide.';
     $article = smfArticle($source->id, [
         'is_published' => false,
+        // Garde-fou #2244 (2026-09-04) : depuis ce correctif, toggleArticle() applique
+        // publishReadinessCheck() comme les deux autres portes - la bascule rapide exige donc
+        // desormais les MEMES quatre champs, dont le titre pour Google (absent du helper
+        // smfArticle) et le credit d'image. C'est exactement l'effet voulu : cette porte
+        // publiait jusqu'ici sans aucun controle.
+        'seo_title' => 'Titre pour Google de la bascule rapide',
+        'image_credit' => 'Photo : source de test',
         'internal_source_text' => $sourceText,
         'source_content_hash' => hash('sha256', $sourceText),
         'source_captured_at' => now(),
