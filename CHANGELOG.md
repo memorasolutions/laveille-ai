@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.254.5] - 2026-09-05
+
+### Corrigé
+- **Auto-liens : l'exclusion de suffixe ne vivait que sur le NOM d'un terme, jamais sur ses ALIAS** (ticket #2241).
+  « Haiku OS », le systeme d'exploitation libre heritier de BeOS, renvoyait vers la fiche du modele
+  d'Anthropic. Le correctif du meme jour (v1.254.x, table `TOOL_SUFFIX_COMPOUND_EXCLUSIONS`) posait bien
+  `'haiku' => ['os']`, mais le champ `exclude_suffix` n'etait attache qu'a l'entree du NOM du terme.
+  Or « Haiku » est le PREMIER alias de sa fiche : c'est cette entree-la, sans exclusion, qui posait le lien.
+  Le champ est desormais propage aux TROIS blocs d'alias de glossaire (curés, dérivés par qualifier,
+  morphologiques). Meme famille d'angle mort que #2137 : ce qui est invisible, c'est l'alias, pas le nom.
+- Cache des termes bumpe v25 -> v26 : sans ce bump, une entree chaude continuerait de servir des alias
+  SANS le champ jusqu'a expiration du TTL, et le faux lien survivrait au deploiement.
+- Fiche 42899 : le corps redactionnel ecrit desormais « Haiku OS » (titre et seo_title le faisaient deja),
+  ce qui est aussi plus exact - le projet s'appelle ainsi.
+
+### Tests
+- Deux cas neufs dans `GlossaryLinkifierTest` : un terme de glossaire respecte son `exclude_suffix`, et
+  la contre-epreuve qu'il continue de lier hors du compose. 55 tests verts, 94 assertions.
+
+
 All notable changes to this project will be documented in this file.
 
 ## [1.254.4] - 2026-09-05

@@ -675,3 +675,44 @@ it('n applique la garde suffixe a aucun outil absent de TOOL_SUFFIX_RISK_NAMES, 
 
     expect($liens)->toBe(1, 'Un outil hors TOOL_SUFFIX_RISK_NAMES ne doit plus jamais etre bloque par la garde suffixe.');
 });
+
+/**
+ * 2026-09-05 (ticket #2241) - « Haiku OS » liait vers la fiche du modele d'Anthropic.
+ *
+ * CE QUE CE TEST PROUVE : qu'un terme de GLOSSAIRE portant `exclude_suffix` respecte
+ * bien cette garde (mecanisme aval). La table TOOL_SUFFIX_COMPOUND_EXCLUSIONS est
+ * partagee entre glossaire et annuaire depuis #2241 - le prefixe TOOL_ est historique.
+ *
+ * CE QU'IL NE PROUVE PAS, et c'est important de l'ecrire : que le champ soit bien POSE
+ * sur les entrees d'alias au moment ou le cache se construit. C'etait justement le
+ * defaut : le champ vivait sur le NOM du terme, jamais sur ses ALIAS - et « Haiku » est
+ * le PREMIER alias de sa fiche, donc c'est l'entree alias qui posait le lien. Cette
+ * moitie-la se prouve en production, pas ici : la construction du cache lit la base, et
+ * la base locale ne porte pas ce terme. Meme famille d'angle mort que #2137.
+ */
+it('un terme de glossaire ne lie pas quand le mot suivant figure dans son exclude_suffix', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Haiku OS, le systeme libre heritier de BeOS, publie sa beta 6.</p>');
+
+    $terme = [['name' => 'Haiku', 'slug' => 'haiku', 'definition' => 'Test',
+               'type' => 'glossary', 'url' => '/glossaire/haiku', 'match_strategy' => 'loose',
+               'exclude_suffix' => ['os']]];
+
+    $liens = glxWalk($dom, $root, $terme, false, 10);
+
+    expect($liens)->toBe(0, '« Haiku OS » est un systeme d exploitation, jamais le modele d Anthropic.');
+    expect(str_contains($dom->saveHTML(), '/glossaire/haiku'))->toBeFalse();
+});
+
+it('le meme terme lie normalement quand le suffixe exclu est absent', function () {
+    // Contre-epreuve indispensable : sans elle, un exclude_suffix trop large passerait
+    // pour un succes alors qu il aurait simplement tout tue.
+    [$dom, $root] = glxDomFromHtml('<p>Les modeles Opus, Sonnet et Haiku couvrent trois paliers.</p>');
+
+    $terme = [['name' => 'Haiku', 'slug' => 'haiku', 'definition' => 'Test',
+               'type' => 'glossary', 'url' => '/glossaire/haiku', 'match_strategy' => 'loose',
+               'exclude_suffix' => ['os']]];
+
+    $liens = glxWalk($dom, $root, $terme, false, 10);
+
+    expect($liens)->toBe(1, 'Hors du compose « Haiku OS », le terme doit continuer de lier.');
+});
