@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.254.0] - 2026-09-05
+
+### Ajouté
+- **Le raccourcisseur nettoie tout seul les blancs collés autour d'une adresse.** Coller une cellule de Google Sheets ramène des espaces, une tabulation ou un saut de ligne autour du lien ; il fallait les retirer à la main chaque fois. Le champ les enlève désormais au collage, et le serveur les enlève de son côté avant de valider. L'intérieur de l'adresse n'est jamais réécrit.
+- **Le nettoyage couvre les cinq écrans qui portent un champ d'adresse** (page publique, création et modification côté membre, création et modification côté administration), et les quatre champs concernés : le lien à raccourcir, l'image de partage et la vignette.
+
+### Corrigé
+- **Le cas qui bloquait vraiment était l'espace insécable, pas l'espace ordinaire.** Mesuré en navigateur : un champ de type adresse retire déjà lui-même les espaces, tabulations et sauts de ligne ordinaires, mais il laisse passer l'insécable en le déclarant valide. Celui-ci partait donc au serveur, où la validation le refusait - un refus incompréhensible pour qui ne voit pas le caractère. C'est ce cas précis que le correctif ferme.
+- **Un `trim()` classique n'aurait pas suffi** : en PHP il ne retire que sept caractères ASCII, jamais l'insécable ni les autres blancs Unicode. La normalisation s'appuie sur les catégories Unicode, ancrée au début et à la fin de la chaîne uniquement.
+
+### Note de méthode
+- **Le formulaire public n'a pas d'attribut `name`** : il passe par Alpine et envoie son propre état, pas la valeur du champ. Nettoyer l'affichage sans prévenir Alpine aurait donné un champ propre à l'écran et une valeur sale envoyée au serveur. Le correctif réémet donc l'événement que le cadre écoute. Le sélecteur cible le TYPE du champ, commun aux cinq écrans, et non son nom, absent de l'un d'eux.
+- **Les deux bancs d'essai ont été vus rouges avant d'être verts.** Avec un nettoyage naïf limité à l'ASCII, 7 cas sur 11 échouent ; correctif retiré de la page, la vérification en navigateur tombe à 1 sur 3, l'état Alpine inclus. Sans cette étape, un test qui passe ne prouve rien - le champ de type adresse aurait pu faire le travail à la place du correctif.
+
 ## [1.253.1] - 2026-09-04
 
 ### Corrigé

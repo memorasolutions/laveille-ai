@@ -263,4 +263,9 @@
         <a href="{{ route('admin.short-urls.index') }}" class="btn btn-outline-danger">Annuler</a>
     </div>
 </form>
+
+{{-- Nettoyage des blancs invisibles colles autour des URL (demande 2026-09-05).
+     Le serveur normalise deja (trait NormalizesPastedUrls) : ceci rend le
+     nettoyage VISIBLE dans le champ. --}}
+@include('shorturl::partials._url-paste-clean')
 @endsection

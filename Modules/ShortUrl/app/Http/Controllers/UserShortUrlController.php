@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Modules\ShortUrl\Http\Controllers;
 
+use Modules\ShortUrl\Http\Controllers\Concerns\NormalizesPastedUrls;
+
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -22,6 +24,8 @@ use Modules\ShortUrl\Services\ShortUrlService;
 
 class UserShortUrlController
 {
+    use NormalizesPastedUrls;
+
     public function __construct(
         private readonly ShortUrlService $service
     ) {}
@@ -86,6 +90,8 @@ class UserShortUrlController
 
     public function store(Request $request): RedirectResponse
     {
+        // ACTION: nettoyer les blancs colles autour des URL AVANT de valider.
+        $this->normalizePastedUrls($request);
         $validated = $request->validate([
             'original_url' => ['required', 'url', 'max:2048'],
             'slug' => ['nullable', 'alpha_dash', 'max:50', 'unique:short_urls,slug', 'not_in:'.implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
@@ -137,6 +143,8 @@ class UserShortUrlController
     {
         abort_if($shortUrl->user_id !== auth()->id(), 403);
 
+        // ACTION: nettoyer les blancs colles autour des URL AVANT de valider.
+        $this->normalizePastedUrls($request);
         $validated = $request->validate([
             'original_url' => ['required', 'url', 'max:2048'],
             'slug' => ['nullable', 'alpha_dash', 'max:50', Rule::unique('short_urls', 'slug')->ignore($shortUrl->id), 'not_in:'.implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
@@ -175,6 +183,8 @@ class UserShortUrlController
 
     public function scrapeMeta(Request $request): JsonResponse
     {
+        // ACTION: nettoyer les blancs colles autour des URL AVANT de valider.
+        $this->normalizePastedUrls($request);
         $request->validate(['url' => ['required', 'url', 'max:2048']]);
 
         $meta = $this->service->scrapeMetadata($request->input('url'));

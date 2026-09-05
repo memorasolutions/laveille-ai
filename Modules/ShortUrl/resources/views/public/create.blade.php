@@ -482,4 +482,9 @@
 @push('scripts')
 <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
 @endpush
+
+{{-- Nettoyage des blancs invisibles colles autour des URL (demande 2026-09-05).
+     Le serveur normalise deja (trait NormalizesPastedUrls) : ceci rend le
+     nettoyage VISIBLE dans le champ. --}}
+@include('shorturl::partials._url-paste-clean')
 @endsection

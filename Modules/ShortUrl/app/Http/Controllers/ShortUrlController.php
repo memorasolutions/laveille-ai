@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Modules\ShortUrl\Http\Controllers;
 
+use Modules\ShortUrl\Http\Controllers\Concerns\NormalizesPastedUrls;
+
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -21,6 +23,8 @@ use Modules\ShortUrl\Services\ShortUrlService;
 
 class ShortUrlController
 {
+    use NormalizesPastedUrls;
+
     public function __construct(
         private readonly ShortUrlService $service
     ) {}
@@ -51,6 +55,8 @@ class ShortUrlController
 
     public function store(Request $request): RedirectResponse
     {
+        // ACTION: nettoyer les blancs colles autour des URL AVANT de valider.
+        $this->normalizePastedUrls($request);
         $validated = $request->validate([
             'original_url' => ['required', 'url:http,https', 'max:2048'],
             'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:short_urls,slug', 'not_in:'.implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],
@@ -108,6 +114,8 @@ class ShortUrlController
 
     public function update(Request $request, ShortUrl $shortUrl): RedirectResponse
     {
+        // ACTION: nettoyer les blancs colles autour des URL AVANT de valider.
+        $this->normalizePastedUrls($request);
         $validated = $request->validate([
             'original_url' => ['required', 'url:http,https', 'max:2048'],
             'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9_-]+$/', 'unique:short_urls,slug,'.$shortUrl->id, 'not_in:'.implode(',', \Modules\ShortUrl\Models\ShortUrl::RESERVED_SLUGS)],

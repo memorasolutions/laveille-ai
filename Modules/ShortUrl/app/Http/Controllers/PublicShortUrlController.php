@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Modules\ShortUrl\Http\Controllers;
 
+use Modules\ShortUrl\Http\Controllers\Concerns\NormalizesPastedUrls;
+
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +21,8 @@ use Modules\ShortUrl\Services\ShortUrlService;
 
 class PublicShortUrlController
 {
+    use NormalizesPastedUrls;
+
     public function __construct(
         private readonly ShortUrlService $service
     ) {}
@@ -56,6 +60,8 @@ class PublicShortUrlController
             ];
         }
 
+        // ACTION: nettoyer les blancs colles autour des URL AVANT de valider.
+        $this->normalizePastedUrls($request);
         $request->validate($rules);
 
         $url = $request->input('url');
