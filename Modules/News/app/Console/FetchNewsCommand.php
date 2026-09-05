@@ -61,6 +61,14 @@ class FetchNewsCommand extends Command
     // aucune pertinence n'a même été évaluée par IA.
     // MCP: SELF (<5 lignes)
     // RAISON: alimente la ligne de bilan « résumés machine : désactivés ».
+    // ACTION : compteur des refus de publication faute d'image curatee (2026-09-05, ticket #2248).
+    // Distinct de $totalEligibleNonPublies (retenu par le DRAPEAU) et de totalFiltered (non
+    // pertinent) : trois causes differentes ne se melangent jamais, sinon le bilan ment sur la
+    // raison reelle.
+    // MCP: SELF (<5 lignes)
+    // RAISON: rend visible qu'une fiche pertinente et autorisee a quand meme ete retenue.
+    private int $totalRefusesSansImage = 0;
+
     private int $totalMachineSummarySkipped = 0;
 
     public function handle(RssFetcherService $fetcher, AiSummaryService $summarizer): int
@@ -319,7 +327,7 @@ class FetchNewsCommand extends Command
                 // RAISON: demande explicite du superviseur - le bilan ne doit jamais annoncer une
                 // publication qui n'a pas eu lieu.
                 $wouldPublish = $score >= $minScore;
-                $published = $this->resolvePublicationState($wouldPublish);
+                $published = $this->resolvePublicationState($wouldPublish, $article);
 
                 $article->update([
                     'relevance_score' => $score,
@@ -389,7 +397,15 @@ class FetchNewsCommand extends Command
         if (! $this->machineSummaryEnabled) {
             $bilan .= ", résumés machine : désactivés ({$this->totalMachineSummarySkipped} article(s)/groupe(s) collecté(s) sans résumé)";
         }
-        $bilan .= ' ---';
+                    // ACTION : segment de bilan des refus pour absence d'image (ticket #2248). Affiche
+            // SEULEMENT si le compteur est non nul - contrairement au drapeau, ce n'est pas un etat
+            // de configuration : a zero, la ligne n'apprend rien.
+            // MCP: SELF (<5 lignes)
+            // RAISON: distinguer dans le bilan « retenu par le drapeau » de « retenu faute d'image ».
+            if ($this->totalRefusesSansImage > 0) {
+                $bilan .= ", {$this->totalRefusesSansImage} refuse(s) faute d'image curatee";
+            }
+            $bilan .= ' ---';
         $this->info($bilan);
 
         return 0;
@@ -487,7 +503,7 @@ class FetchNewsCommand extends Command
             // MCP: SELF (<5 lignes)
             // RAISON: demande explicite du superviseur.
             $wouldPublish = $score >= $minScore;
-            $published = $this->resolvePublicationState($wouldPublish);
+            $published = $this->resolvePublicationState($wouldPublish, $article);
 
             $article->update([
                 'relevance_score' => $score,
@@ -605,7 +621,7 @@ class FetchNewsCommand extends Command
 
             $score = (int) ($result['score'] ?? 0);
             $wouldPublish = $score >= $minScore;
-            $isPublished = $this->resolvePublicationState($wouldPublish);
+            $isPublished = $this->resolvePublicationState($wouldPublish, $digestArticle);
             $indexed = $isPublished && $todayIndexedDigests < $maxIndexedDigests;
 
             $digestUpdate = [
@@ -812,12 +828,39 @@ class FetchNewsCommand extends Command
      * "filtré". Centralisé ici : les 3 sites appelants (chemin non-fusion, fusion-singleton,
      * fiche comparative) héritent du comptage correct sans le dupliquer.
      */
-    private function resolvePublicationState(bool $wouldPublish): bool
+    private function resolvePublicationState(bool $wouldPublish, ?NewsArticle $article = null): bool
     {
         $published = $wouldPublish && $this->autopublishEnabled;
 
+        // CAUSE 1 - le drapeau retient. Sortie immediate : sans ce retour, le refus pour image
+        // incrementerait AUSSI ce compteur et les deux causes deviendraient indiscernables.
         if ($wouldPublish && ! $published) {
             $this->totalEligibleNonPublies++;
+
+            return false;
+        }
+
+        // CAUSE 2 - garde-fou image (2026-09-05, ticket #2248). Le garde-fou de #2244 ferme trois
+        // portes de publication, mais PAS celle-ci : news:fetch ecrit is_published sans jamais
+        // passer par publishReadinessCheck(). Appeler cette methode en ENTIER serait faux ici -
+        // elle exige aussi des paires de preuve editoriales que le pipeline automatique ne produit
+        // pas, et refuserait donc tout pour une mauvaise raison. On reutilise le MEME predicat
+        // hasCuratedImage() : jamais une regle nouvelle, la meme regle appliquee a une porte de plus.
+        //
+        // POURQUOI MAINTENANT alors que NEWS_AUTOPUBLISH_ENABLED est eteint : un etat de
+        // configuration n'est pas une garantie structurelle (lecon #2244). Le jour ou le drapeau
+        // se rallume, ce garde-fou doit deja etre en place - sinon la recidive que #2244 devait
+        // rendre impossible redevient possible le jour meme.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: aucune fiche ne part en production avec une carte de repli generee.
+        if ($published && $article !== null && ! $article->hasCuratedImage()) {
+            $this->totalRefusesSansImage++;
+            Log::channel('fusion')->info(
+                "AUTOPUBLISH-REFUS-IMAGE: article {$article->id} pertinent et autorise, mais publication "
+                .'refusee faute d\'image curatee (image_credit vide).'
+            );
+
+            return false;
         }
 
         return $published;

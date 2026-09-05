@@ -39,9 +39,14 @@ function napgSource(string $name): NewsSource
     ]);
 }
 
-function napgArticle(NewsSource $source, string $slug, string $title): NewsArticle
+// 2026-09-05 (ticket #2248) : le parametre $imageCredit est arrive avec le garde-fou image de
+// news:fetch. Depuis, une fiche SANS credit ne peut plus etre publiee automatiquement - le cas
+// NORMAL d'un test « le drapeau publie » doit donc fournir un credit, sinon il decrit un monde
+// qui n'existe plus. Defaut non vide pour que les tests existants gardent leur intention.
+function napgArticle(NewsSource $source, string $slug, string $title, ?string $imageCredit = 'Photo de test - MEMORA solutions'): NewsArticle
 {
     return NewsArticle::create([
+        'image_credit' => $imageCredit,
         'news_source_id' => $source->id,
         'title' => $title,
         'guid' => 'guid-'.$slug,
@@ -251,4 +256,54 @@ it('drapeau ON : le meme scenario de quota bas publie normalement et le bilan ne
     // Drapeau ON : le quota REEL de 1/jour s'applique bel et bien - un seul appel IA, le second
     // article est retenu par le quota (comportement inchangé, non lié à ce chantier).
     Http::assertSentCount(1);
+});
+
+// ── 2026-09-05, ticket #2248 : le garde-fou image ferme la porte de news:fetch ────────────────
+//
+// LE TROU, mesure ce jour : news:fetch ecrit is_published sans jamais passer par
+// publishReadinessCheck(), ou vit le garde-fou image de #2244. Les trois autres portes de
+// publication sont couvertes, celle-ci ne l'etait pas. Le drapeau NEWS_AUTOPUBLISH_ENABLED est
+// eteint en production aujourd'hui - mais « dormant » n'est pas « ferme » (lecon #2244) : le jour
+// ou il se rallume, la recidive que #2244 devait rendre impossible redevenait possible.
+//
+// LE TEMOIN EST REEL, pas une paraphrase : les DEUX tests « drapeau ON » de ce fichier sont
+// tombes des l'application du correctif, parce que leurs articles n'avaient aucun credit d'image.
+// C'etait le bon signal - un garde-fou qui ne casse AUCUN test existant merite qu'on se demande
+// s'il mord vraiment.
+it('drapeau ON mais AUCUNE image curatee : la fiche reste en brouillon et le bilan nomme la vraie cause', function () {
+    config(['news.autopublish.enabled' => true]);
+    napgBindFakeRssFetcher();
+    napgFakeOpenRouterSuccess();
+
+    $source = napgSource('SourceSansImage');
+    // Credit VIDE : c'est exactement l'etat d'une fiche dont l'image est la carte de repli generee.
+    $article = napgArticle($source, 'autopub-sans-image', 'OpenAI lance un nouveau modele IA generative pour les entreprises', null);
+
+    Artisan::call('news:fetch');
+    $output = Artisan::output();
+
+    $article->refresh();
+    expect($article->is_published)->toBeFalse();
+
+    // Le bilan doit nommer la cause REELLE. Sans cette assertion, un refus pour la mauvaise raison
+    // (le drapeau, le quota) passerait pour un succes du garde-fou.
+    expect($output)->toContain("refuse(s) faute d'image curatee")
+        ->and($output)->not->toContain('admissibles non publiés');
+});
+
+it('drapeau ON AVEC image curatee : la publication automatique fonctionne toujours', function () {
+    config(['news.autopublish.enabled' => true]);
+    napgBindFakeRssFetcher();
+    napgFakeOpenRouterSuccess();
+
+    $source = napgSource('SourceAvecImage');
+    $article = napgArticle($source, 'autopub-avec-image', 'OpenAI lance un nouveau modele IA generative pour les entreprises', 'Photo : MEMORA solutions');
+
+    Artisan::call('news:fetch');
+    $output = Artisan::output();
+
+    // Le SECOND sens du temoin : le garde-fou ne mord QUE sur l'absence d'image, il n'a pas
+    // ferme la porte pour tout le monde.
+    expect($article->refresh()->is_published)->toBeTrue()
+        ->and($output)->not->toContain("refuse(s) faute d'image curatee");
 });

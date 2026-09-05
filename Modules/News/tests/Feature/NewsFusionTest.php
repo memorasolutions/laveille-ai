@@ -30,7 +30,11 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 
 // ── Correctif 2026-08-09 : borne mémoire de la file (news.fetch_backlog_hours) ────
 
-it('borne de 48 h : un article plus vieux que la fenetre n est plus retraite par news:fetch', function () {
+it('borne de 48 h : un article plus vieux que la fenetre n est plus retraite par news:fetch', // 2026-09-05 (ticket #2248) : credit d'image par defaut. Depuis le garde-fou image de news:fetch,
+// une fiche SANS credit ne peut plus etre publiee automatiquement - un test qui verifie le chemin
+// NORMAL doit donc en fournir un, sinon il decrit un monde qui n'existe plus. Passer null pour
+// tester explicitement le refus.
+function () {
     config(['news.fusion.enabled' => false, 'news.fetch_backlog_hours' => 48]);
     nfusBindFakeRssFetcher();
     nfusFakeOpenRouterSuccess();
@@ -64,6 +68,7 @@ function nfusSource(string $name): NewsSource
 function nfusArticle(NewsSource $source, string $slug, string $title, $pubDate = null): NewsArticle
 {
     return NewsArticle::create([
+        'image_credit' => 'Photo de test - MEMORA solutions',
         'news_source_id' => $source->id,
         'title' => $title,
         'guid' => 'guid-'.$slug,

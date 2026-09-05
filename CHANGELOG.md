@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.254.4] - 2026-09-05
+
+### Corrigé
+- **Le garde-fou image ferme enfin la porte de `news:fetch` (ticket #2248).** Le garde-fou de
+  v1.252.1 couvrait trois portes de publication ; celle du pipeline automatique écrivait
+  `is_published` sans jamais passer par `publishReadinessCheck()`. Le drapeau
+  `NEWS_AUTOPUBLISH_ENABLED` est éteint en production, mais un état de configuration n'est pas une
+  garantie structurelle : le jour où il se rallume, la récidive que le garde-fou devait rendre
+  impossible redevenait possible. Le même prédicat `hasCuratedImage()` est réutilisé - jamais une
+  règle nouvelle, la même règle appliquée à une porte de plus.
+- Les trois causes de non-publication restent comptées SÉPARÉMENT (non pertinent, retenu par le
+  drapeau, refusé faute d'image) : un bilan qui les mélange ment sur la raison réelle. Le segment
+  de bilan n'apparaît que si le compteur est non nul.
+- **L'alias « haïku » ne déclenche plus l'auto-lien vers la fiche du modèle d'Anthropic
+  (ticket #2241, volet a).** MESURE avant de trancher, sur 188 pages de production : 3 liens
+  « Haiku » sur 4 sont légitimes (« Claude Haiku 4.5 », « Opus 3 et Haiku 4.5 »). Retirer le NOM
+  aurait coûté trois liens justes pour en supprimer un faux - c'est donc le seul alias accentué,
+  qui ne peut désigner que le poème japonais, qui est retiré. Gain net, aucune perte mesurée.
+- Clé de cache des termes portée de v24 à v25, v24 ajoutée à la purge.
+
 ## [1.254.3] - 2026-09-05
 
 ### Corrigé

@@ -33,6 +33,10 @@ uses(Tests\TestCase::class, RefreshDatabase::class);
 
 // ── Helpers locaux (préfixés Nmsg pour éviter tout conflit inter-fichiers) ────
 
+// 2026-09-05 (ticket #2248) : credit d'image par defaut. Depuis le garde-fou image de news:fetch,
+// une fiche SANS credit ne peut plus etre publiee automatiquement - un test qui verifie le chemin
+// NORMAL doit donc en fournir un, sinon il decrit un monde qui n'existe plus. Passer null pour
+// tester explicitement le refus.
 function nmsgSource(string $name): NewsSource
 {
     return NewsSource::create([
@@ -45,6 +49,7 @@ function nmsgSource(string $name): NewsSource
 function nmsgArticle(NewsSource $source, string $slug, string $title): NewsArticle
 {
     return NewsArticle::create([
+        'image_credit' => 'Photo de test - MEMORA solutions',
         'news_source_id' => $source->id,
         'title' => $title,
         'guid' => 'guid-'.$slug,

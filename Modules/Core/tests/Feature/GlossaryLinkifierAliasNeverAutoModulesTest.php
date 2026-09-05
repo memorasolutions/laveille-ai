@@ -273,3 +273,22 @@ it('ne lie pas « Haiku OS » (le systeme), mais lie « Haiku » employe seul (l
     $seul = GlossaryLinkifier::linkify('<p>Le modele Haiku repond plus vite que les autres.</p>');
     expect($seul)->toContain('/glossaire/'.$slug);
 });
+
+// 2026-09-05 (ticket #2241, volet a) : « haïku » accentue est le GENRE POETIQUE japonais, jamais
+// le modele d'Anthropic. C'etait un alias CURE de la fiche /glossaire/haiku - une collision qui
+// n'attendait qu'un article sur la poesie. MESURE avant de trancher : sur 188 pages de production,
+// 3 liens « Haiku » sur 4 sont LEGITIMES (« Claude Haiku 4.5 », « Opus 3 et Haiku 4.5 ») - retirer
+// le NOM couterait trois liens justes pour un faux. Seul l'ALIAS accentue part.
+it('« haïku » (le poeme) ne lie plus, « Haiku » (le modele) lie toujours', function () {
+    $terme = anrTerm('Haiku', 'haiku-poeme', ['haïku'], 'case_sensitive');
+    $slug = $terme->getTranslation('slug', 'fr_CA');
+    GlossaryLinkifier::flushCache();
+
+    GlossaryLinkifier::resetState();
+    $poeme = GlossaryLinkifier::linkify('<p>Il a compose un haïku sur les cerisiers en fleurs.</p>');
+    expect($poeme)->not->toContain('/glossaire/'.$slug);
+
+    GlossaryLinkifier::resetState();
+    $modele = GlossaryLinkifier::linkify('<p>Le modele Haiku repond plus vite que les autres.</p>');
+    expect($modele)->toContain('/glossaire/'.$slug);
+});
