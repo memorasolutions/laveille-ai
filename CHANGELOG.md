@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.254.3] - 2026-09-05
+
+### Corrigé
+- **Auto-liens : « Haiku OS » ne renvoie plus vers la fiche du modèle d'Anthropic.** Haiku OS est
+  un système d'exploitation libre inspiré de BeOS ; `/glossaire/haiku` documente le modèle
+  d'Anthropic. Le lecteur de la fiche 42899 qui cliquait atterrissait sur une page sans rapport.
+  La stratégie `case_sensitive` écartait déjà le nom commun en minuscules (« un haïku de Bashô »)
+  mais pas un second nom propre capitalisé : la frontière du linkifier borne un mot, jamais une
+  locution. Même mécanique que « Atlas danois » (v1.247.9).
+- **Les termes de glossaire consultent désormais la même table d'exclusions composées que les
+  outils d'annuaire.** La règle métier encodée est identique des deux côtés, elle vit donc en un
+  seul endroit plutôt qu'en double. Le préfixe `TOOL_` de la constante est historique.
+- Clé de cache des termes portée de v23 à v24, et v23 ajoutée à la purge : sans ce bump, une
+  entrée déjà chaude aurait servi des termes dépourvus du nouveau champ jusqu'à l'expiration,
+  et le faux lien aurait survécu au déploiement.
+
 ## [1.254.2] - 2026-09-05
 
 ### Corrigé

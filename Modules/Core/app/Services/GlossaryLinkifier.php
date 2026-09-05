@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v23.'; // 2026-09-05 bump v23 (ACRONYM_NEVER_AUTO « ai », ticket #2238 - 8 faux liens sur 8 mesures) - sans ce bump, une entree v22 chaude continuerait de servir le faux lien jusqu'au TTL. Historique v22 : // 2026-09-03 bump v22 (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202 - garde suffixe minuscule) - sans ce bump, une entrée v21 chaude servirait des entrées sans le champ exclude_suffix jusqu'au TTL. Historique v21 : // 2026-09-03 bump v21 (préfixe « that » ajouté à l'exclusion astra, fiche 42244 : faux lien déplacé dans une citation anglaise verbatim) - sans ce bump, une entrée v20 chaude servirait encore le faux lien jusqu'au TTL. Historique v20 : // 2026-09-02 bump v20 (TOOL_COMPOUND_EXCLUSIONS « modèle Astra », 7e récidive homonyme) - sans ce bump, une entrée v19 chaude servirait le faux lien vers /annuaire/astra jusqu'au TTL. Historique v19 : // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
+    public const CACHE_KEY = 'glossary.terms.v24.'; // 2026-09-05 bump v24 (« Haiku OS », ticket #2241 - sans ce bump une entree v23 chaude servirait des entrees glossaire SANS le champ exclude_suffix jusqu'au TTL, et le faux lien survivrait au deploiement). Historique v23 : 2026-09-05 bump v23 (ACRONYM_NEVER_AUTO « ai », ticket #2238 - 8 faux liens sur 8 mesures) - sans ce bump, une entree v22 chaude continuerait de servir le faux lien jusqu'au TTL. Historique v22 : // 2026-09-03 bump v22 (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202 - garde suffixe minuscule) - sans ce bump, une entrée v21 chaude servirait des entrées sans le champ exclude_suffix jusqu'au TTL. Historique v21 : // 2026-09-03 bump v21 (préfixe « that » ajouté à l'exclusion astra, fiche 42244 : faux lien déplacé dans une citation anglaise verbatim) - sans ce bump, une entrée v20 chaude servirait encore le faux lien jusqu'au TTL. Historique v20 : // 2026-09-02 bump v20 (TOOL_COMPOUND_EXCLUSIONS « modèle Astra », 7e récidive homonyme) - sans ce bump, une entrée v19 chaude servirait le faux lien vers /annuaire/astra jusqu'au TTL. Historique v19 : // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -201,6 +201,12 @@ class GlossaryLinkifier
      */
     public const TOOL_SUFFIX_COMPOUND_EXCLUSIONS = [
         'atlas' => ['danois', 'danoise'],
+        // 2026-09-05 (ticket #2241, fiche 42899) : « Haiku OS » est un systeme d'exploitation
+        // libre inspire de BeOS ; /glossaire/haiku documente le MODELE d'Anthropic. Deux choses
+        // sans rapport. `case_sensitive` ecartait deja le nom commun minuscule (« un haiku de
+        // Basho ») mais PAS un second nom propre capitalise - la frontiere du linkifier borne un
+        // MOT, jamais une locution. Meme mecanique que « Atlas danois » juste au-dessus.
+        'haiku' => ['os'],
     ];
 
     /**
@@ -486,6 +492,12 @@ class GlossaryLinkifier
                                 'name' => $name, 'slug' => $slug, 'definition' => $shortDef,
                                 'type' => 'glossary', 'url' => $url, 'match_strategy' => $strategy,
                                 'origin_rank' => self::ORIGIN_PRIMARY,
+                                // 2026-09-05 (ticket #2241) : le glossaire consulte desormais LA MEME
+                                // table que les outils. La regle metier encodee est identique - « ce nom,
+                                // suivi de ce mot, ne doit pas lier » - donc une seule table, deux
+                                // consommateurs (DRY). Le prefixe TOOL_ est HISTORIQUE : la table a ete
+                                // creee pour l'annuaire (#2202) et sert aux deux familles depuis ce jour.
+                                'exclude_suffix' => self::TOOL_SUFFIX_COMPOUND_EXCLUSIONS[mb_strtolower(trim($name))] ?? [],
                             ];
                             // 2026-05-11 #138 : aliases manuels DB
                             $aliases = is_array($t->aliases) ? $t->aliases : (is_string($t->aliases) ? json_decode($t->aliases, true) : []);
@@ -1179,6 +1191,7 @@ class GlossaryLinkifier
             // « ai », ticket #2238) - meme raison que les notes suivantes : sans cette ligne, une
             // cle v22 deja chaude resterait servie jusqu'a l'expiration de son TTL apres un flush
             // explicite (celui declenche par la sauvegarde d'une fiche, hors deploiement).
+            Cache::forget('glossary.terms.v23.'.$loc);
             Cache::forget('glossary.terms.v22.'.$loc);
             // 2026-09-03 : v20 et v21 ajoutées ici en même temps que le bump v22
             // (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202) - v20 avait été

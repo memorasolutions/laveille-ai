@@ -246,3 +246,30 @@ it('les quatre formes mesurees en production ne posent aucun lien « AI »', fun
             ->not->toContain('/acronymes-education/ai-formes', "Faux lien pose dans : {$phrase}");
     }
 });
+
+// ── 2026-09-05, ticket #2241 : « Haiku OS » ne doit pas ouvrir la fiche du modele ───────────────
+//
+// LE DEFAUT, confirme EN PRODUCTION le 2026-09-05 sur la fiche 42899 : « Haiku OS » est un
+// systeme d'exploitation libre inspire de BeOS, sans aucun rapport avec le modele d'Anthropic
+// documente par /glossaire/haiku. Le lecteur qui cliquait atterrissait sur une page hors sujet.
+//
+// POURQUOI LA GARDE EXISTANTE NE SUFFISAIT PAS : `case_sensitive` ecarte le nom commun en
+// minuscules (« un haiku de Basho »), mais PAS un second nom propre capitalise. La frontiere du
+// linkifier borne un MOT, jamais une locution - meme mecanique que « Atlas danois » (#2202).
+//
+// LE TEST PORTE LES DEUX SENS, sans quoi il ne prouverait rien :
+//   (a) « Haiku OS » ne lie plus            -> le defaut est ferme
+//   (b) « Haiku » employe seul lie toujours -> la garde n'a pas mordu au-dela de sa cible
+it('ne lie pas « Haiku OS » (le systeme), mais lie « Haiku » employe seul (le modele)', function () {
+    $terme = anrTerm('Haiku', 'haiku', [], 'case_sensitive');
+    $slug = $terme->getTranslation('slug', 'fr_CA');
+    GlossaryLinkifier::flushCache();
+
+    GlossaryLinkifier::resetState();
+    $compose = GlossaryLinkifier::linkify('<p>Haiku OS atteint sa sixieme beta cette semaine.</p>');
+    expect($compose)->not->toContain('/glossaire/'.$slug);
+
+    GlossaryLinkifier::resetState();
+    $seul = GlossaryLinkifier::linkify('<p>Le modele Haiku repond plus vite que les autres.</p>');
+    expect($seul)->toContain('/glossaire/'.$slug);
+});
