@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.254.1] - 2026-09-05
+
+### Corrigé
+- **Raccourcisseur, le navigateur et le serveur nettoyaient des ensembles DIFFÉRENTS de blancs.**
+  Trouvé par une revue adversariale de Codex, puis mesuré : six caractères (isolats bidirectionnels
+  U+2066 à U+2069, trait mou U+00AD, séparateur mongol U+180E) étaient retirés côté serveur mais
+  pas côté navigateur. Le champ aurait affiché une adresse que le serveur modifiait ensuite, et
+  l'historique local du raccourcisseur public aurait gardé la version sale. Les deux motifs sont
+  désormais littéralement identiques (`[\p{Z}\p{C}\s]`, ancré début et fin), et un commentaire
+  dans chaque fichier impose de reporter toute évolution de l'un dans l'autre.
+- **Le nettoyage du navigateur ne vise plus tout le document.** Il ciblait `input[type="url"]`
+  partout ; un champ d'adresse ajouté par un gabarit ou une modale aurait été modifié à son insu.
+  Le sélecteur nomme maintenant les six champs des cinq vues du raccourcisseur.
+
+### Ajouté
+- Quatre tests HTTP (`UrlNormalizationHttpTest`) qui prouvent le câblage réel des six points
+  d'appel, là où les tests précédents ne couvraient que le trait isolé. Leur en-tête documente
+  une mesure faite par témoin rouge : un seul des quatre rougit sans le correctif, parce que le
+  middleware `TrimStrings` de Laravel couvre déjà cinq des six cas. Les trois autres verrouillent
+  le comportement de bout en bout sans prouver le trait, et le disent.
+
 ## [1.254.0] - 2026-09-05
 
 ### Ajouté
