@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.254.2] - 2026-09-05
+
+### Corrigé
+- **Le sigle anglais « AI » ne pose plus de lien vers la fiche d'acronyme.** Mesuré sur quarante
+  fiches d'actualité tirées au hasard parmi 1198, les quarante lues : huit occurrences de « AI »
+  étaient transformées en lien, et les huit étaient fausses. Cinq visaient un nom de média dans la
+  ligne de métadonnées (« TechCrunch AI », « The Verge AI », « Wired AI »), une le nom d'une
+  entreprise dans un titre (« Caisse des Dépôts-Mistral AI »), une le nom de la loi européenne
+  (« AI Act »), une un nom de produit (« Google AI Ultra »). Aucune ne désignait le concept : en
+  français, celui-ci s'écrit « IA », et « AI » n'apparaît qu'à l'intérieur de noms propres anglais.
+  Le sigle français « IA » reste lié, lui, puisqu'il désigne bien le concept.
+- La liste qui protégeait déjà certains mots ne pouvait pas atteindre ce cas : elle ne s'applique
+  qu'aux variantes d'une fiche, jamais à son nom principal. Une liste jumelle, curée elle aussi,
+  couvre désormais le nom principal d'un acronyme court.
+- **Le chemin jumeau est fermé lui aussi.** Une revue adversariale a montré qu'une autre fiche
+  déclarant « AI » parmi ses variantes rouvrirait exactement le même faux lien, par une porte que
+  la première liste n'atteint pas. Les deux portes sont désormais closes. Le sigle « IA », les
+  noms d'outils qui contiennent ces deux lettres (« Z.ai », « Jan.ai ») et les fiches d'acronymes
+  plus longues continuent de se lier normalement : la protection porte sur le mot entier, jamais
+  sur une suite de lettres à l'intérieur d'un autre mot.
+
 ## [1.254.1] - 2026-09-05
 
 ### Corrigé

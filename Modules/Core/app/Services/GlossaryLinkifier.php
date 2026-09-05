@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v22.'; // 2026-09-03 bump v22 (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202 - garde suffixe minuscule) - sans ce bump, une entrée v21 chaude servirait des entrées sans le champ exclude_suffix jusqu'au TTL. Historique v21 : // 2026-09-03 bump v21 (préfixe « that » ajouté à l'exclusion astra, fiche 42244 : faux lien déplacé dans une citation anglaise verbatim) - sans ce bump, une entrée v20 chaude servirait encore le faux lien jusqu'au TTL. Historique v20 : // 2026-09-02 bump v20 (TOOL_COMPOUND_EXCLUSIONS « modèle Astra », 7e récidive homonyme) - sans ce bump, une entrée v19 chaude servirait le faux lien vers /annuaire/astra jusqu'au TTL. Historique v19 : // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
+    public const CACHE_KEY = 'glossary.terms.v23.'; // 2026-09-05 bump v23 (ACRONYM_NEVER_AUTO « ai », ticket #2238 - 8 faux liens sur 8 mesures) - sans ce bump, une entree v22 chaude continuerait de servir le faux lien jusqu'au TTL. Historique v22 : // 2026-09-03 bump v22 (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202 - garde suffixe minuscule) - sans ce bump, une entrée v21 chaude servirait des entrées sans le champ exclude_suffix jusqu'au TTL. Historique v21 : // 2026-09-03 bump v21 (préfixe « that » ajouté à l'exclusion astra, fiche 42244 : faux lien déplacé dans une citation anglaise verbatim) - sans ce bump, une entrée v20 chaude servirait encore le faux lien jusqu'au TTL. Historique v20 : // 2026-09-02 bump v20 (TOOL_COMPOUND_EXCLUSIONS « modèle Astra », 7e récidive homonyme) - sans ce bump, une entrée v19 chaude servirait le faux lien vers /annuaire/astra jusqu'au TTL. Historique v19 : // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -593,7 +593,8 @@ class GlossaryLinkifier
                             }
                             // Sigle court : regrouper par clé normalisée (minuscules)
                             // La résolution ambiguïté se fait APRÈS la boucle complète
-                            if ($acro && mb_strlen($acro) >= 2) {
+                            if ($acro && mb_strlen($acro) >= 2
+                                && ! in_array(mb_strtolower(trim($acro)), self::ACRONYM_NEVER_AUTO, true)) {
                                 $acrKey = strtolower($acro);
                                 $acrGrouped[$acrKey][] = [
                                     'name' => $acro, 'slug' => $slug,
@@ -924,7 +925,44 @@ class GlossaryLinkifier
     // d'une autre fiche l'emporte toujours sur un alias, #199) et aurait semé une confusion
     // éditoriale sur QUEL terme les revendique. Le nom PRINCIPAL « Autonomie (IA) » et son pluriel
     // dérivé restent, eux, pleinement trouvables (jamais concernés par ALIAS_NEVER_AUTO).
-    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral', 'ia', 'pathway', 'pathways', 'autonomie', 'autonomies'];
+    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral', 'ia', 'ai', 'pathway', 'pathways', 'autonomie', 'autonomies'];
+    // 2026-09-05 (#2238) : « ai » ferme le chemin JUMEAU de celui d'ACRONYM_NEVER_AUTO. Le cas
+    // MESURE en production passe par le NOM PRINCIPAL de la fiche /acronymes-education/ai (verifie
+    // le 2026-09-05 : son h1 est « AI », sa forme longue « Artificial Intelligence »), donc par
+    // ACRONYM_NEVER_AUTO. Mais une revue adversariale Codex a montre qu'une AUTRE fiche portant
+    // « AI » en ALIAS, en qualifier derive ou en variante rouvrirait exactement le meme faux lien,
+    // par un chemin que la premiere constante n'atteint pas. Cette entree-ci n'est donc PAS un ajout
+    // par ressemblance (ce que le docblock d'ACRONYM_NEVER_AUTO interdit) : c'est la MEME chaine,
+    // fermee sur ses deux portes, pour la MEME mesure - 8 occurrences, 8 fausses. Aucun cas d'alias
+    // « ai » n'a ete OBSERVE en base : cette entree previent, elle ne corrige pas.
+    // « ia » reste distinct juste au-dessus : lui vise le sigle FRANCAIS, dont le lien EST legitime
+    // dans le corps du texte et n'est neutralise que comme alias.
+
+    /**
+     * 2026-09-05 (ticket #2238) : symétrique d'ALIAS_NEVER_AUTO, mais pour le NOM PRINCIPAL d'un
+     * acronyme - qu'ALIAS_NEVER_AUTO ne peut pas atteindre (son docblock le dit : « jamais appelée
+     * sur le nom PRINCIPAL d'une fiche »). C'est exactement ce trou qui laissait « AI » se lier.
+     *
+     * MESURE qui justifie l'entrée « ai », sur 40 fiches d'actualité tirées au hasard (sur 1198),
+     * 40 lues sur 40 : HUIT occurrences de « AI » linkifiées, HUIT fausses sur huit. Aucune ne
+     * désignait le concept. Cinq étaient dans la ligne de métadonnées, sur le NOM DU MÉDIA
+     * (« TechCrunch AI · 25 juin 2026 », « The Verge AI », « Wired AI ») ; une dans le TITRE
+     * (« l'accord Caisse des Dépôts-Mistral AI ») ; une sur « AI Act », le nom de la loi
+     * européenne ; une sur « Google AI Ultra », un nom de produit. Zéro mention légitime mesurée :
+     * en français, le concept s'écrit « IA », et « AI » n'apparaît qu'à l'intérieur de noms propres
+     * anglais. Le perdre ne coûte aucun lien vrai - doctrine du fichier : un lien perdu n'est
+     * jamais une régression, un lien faux oui.
+     *
+     * « ia » n'est PAS ici et ne doit pas y être : le français « IA » désigne bien le concept dans
+     * le corps rédactionnel, et son lien y est légitime. (Le cas « Journal du Net - IA », mesuré
+     * lui aussi, vient de la ligne de métadonnées, pas du mot : il est traité en #2252, qui ferme
+     * le mécanisme au lieu du symptôme.)
+     *
+     * Liste CURÉE, jamais une règle générale : la garde générale sur les composés a été mesurée à
+     * 0 % de précision (#2128, 46 liens légitimes perdus pour 0 vrai blocage). Un futur cas
+     * s'ajoute ici avec SA PROPRE mesure, jamais par ressemblance.
+     */
+    public const ACRONYM_NEVER_AUTO = ['ai'];
 
     /**
      * 2026-08-29 : vrai si cette chaîne (alias curé, qualifier dérivé, ou variante morphologique)
@@ -1137,6 +1175,11 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-09-05 : v22 ajoutee ici en meme temps que le bump v23 (ACRONYM_NEVER_AUTO
+            // « ai », ticket #2238) - meme raison que les notes suivantes : sans cette ligne, une
+            // cle v22 deja chaude resterait servie jusqu'a l'expiration de son TTL apres un flush
+            // explicite (celui declenche par la sauvegarde d'une fiche, hors deploiement).
+            Cache::forget('glossary.terms.v22.'.$loc);
             // 2026-09-03 : v20 et v21 ajoutées ici en même temps que le bump v22
             // (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202) - v20 avait été
             // OUBLIÉE lors du bump v21 du même jour (préfixe « that »), rattrapée ici : sans ces

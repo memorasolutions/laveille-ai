@@ -191,3 +191,58 @@ it('bloque CNN (module Acronymes) et garde Node.js/Z.ai/Jan.ai (module Dictionar
         ->and($html)->not->toContain('/acronymes-education/reseau-convolutif-capstone-test')
         ->and(substr_count($html, 'glossary-link'))->toBe(3);
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VOLET 4 (2026-09-05, ticket #2238) - ACRONYM_NEVER_AUTO : le NOM PRINCIPAL
+// d'un acronyme, qu'ALIAS_NEVER_AUTO ne peut pas atteindre.
+//
+// Mesure qui a motivé l'entrée « ai » : sur 40 fiches d'actualité tirées au
+// hasard (1198 au total), 8 occurrences de « AI » linkifiées, 8 FAUSSES sur 8 -
+// nom de média (« TechCrunch AI »), titre (« Mistral AI »), nom de loi
+// (« AI Act »), nom de produit (« Google AI Ultra »). Zéro mention légitime.
+// ═══════════════════════════════════════════════════════════════════════════
+
+it('ne lie JAMAIS « AI » (nom principal d\'acronyme) mais continue de lier « GPU »', function () {
+    // Les DEUX fiches sont creees ensemble, et l'assertion porte sur les DEUX :
+    // c'est ce qui distingue une garde d'une panne. Un test qui ne verifie que
+    // l'absence passerait aussi si le linkifier etait completement cassé.
+    anrAcronym('AI', 'Artificial Intelligence', 'ai-garde', [], 'case_sensitive');
+    $gpu = anrAcronym('GPU', 'Graphics Processing Unit', 'gpu-garde', [], 'case_sensitive');
+    $slugGpu = $gpu->getTranslation('slug', 'fr_CA', false) ?: $gpu->slug;
+
+    $sortie = GlossaryLinkifier::linkify('Un texte avec AI et GPU dedans pour comparer.');
+
+    expect($sortie)
+        ->not->toContain('/acronymes-education/ai-garde')   // la garde mord
+        ->and($sortie)->toContain('/acronymes-education/'.$slugGpu); // et elle ne mord QUE ça
+
+    // TEMOIN ROUGE execute le 2026-09-05 : filtre neutralise dans
+    // GlossaryLinkifier.php:596, ce meme test relance -> « AI present dans les
+    // termes : OUI » et le lien <a href="/acronymes-education/ai-...">AI</a> est
+    // bien pose. Filtre actif -> AI absent des termes, aucun lien. La garde est
+    // donc PROUVEE dans les deux sens, pas seulement supposee.
+});
+
+it('« AI » en ALIAS d\'une autre fiche ne lie pas non plus (chemin jumeau, trouve par Codex)', function () {
+    // Le cas mesure en production passe par le NOM principal (test precedent). Celui-ci ferme la
+    // porte que ACRONYM_NEVER_AUTO n'atteint pas : une fiche dont le nom est autre chose, mais
+    // qui declare « AI » parmi ses variantes.
+    anrAcronym('AGI', 'Artificial General Intelligence', 'agi-alias', ['AI'], 'case_sensitive');
+
+    expect(GlossaryLinkifier::linkify('Un texte avec AI dedans.'))
+        ->not->toContain('/acronymes-education/agi-alias');
+});
+
+it('les quatre formes mesurees en production ne posent aucun lien « AI »', function () {
+    anrAcronym('AI', 'Artificial Intelligence', 'ai-formes', [], 'case_sensitive');
+
+    foreach ([
+        'Publie par TechCrunch AI le 25 juin 2026.',            // nom de media (5 cas sur 8)
+        'L\'accord Caisse des Depots-Mistral AI est signe.',    // nom d\'entreprise, dans un titre
+        'Les exigences de l\'AI Act europeen s\'appliquent.',    // nom de loi
+        'Les abonnes Google AI Ultra paient 100 $ par mois.',   // nom de produit
+    ] as $phrase) {
+        expect(GlossaryLinkifier::linkify($phrase))
+            ->not->toContain('/acronymes-education/ai-formes', "Faux lien pose dans : {$phrase}");
+    }
+});
