@@ -1,5 +1,17 @@
 # Changelog
 
+
+## [1.254.12] - 2026-09-06
+
+### Corrigé
+- **Annuaire, formulaire de demande de retrait : `noindex` posé (#2288).** La fiche d'outil pose un
+  lien vers `/annuaire/retrait/{slug}` sur chacune des 2202 fiches ; la route sert le MÊME formulaire
+  quel que soit le slug. Cela fabriquait 2202 adresses au contenu identique, dont Google en avait
+  déjà exploré 91. `@section('page_noindex', true)` sur la vue du formulaire seulement.
+  La page de POLITIQUE de retrait reste indexable : elle est unique et vaut comme signal de
+  conformité. Pas de `Disallow` dans robots.txt, qui empêcherait Google de lire ce `noindex`.
+  Test `TakedownNoindexTest` avec sa contre-épreuve de conservation ; contre-preuve exécutée :
+  correctif retiré → le test du formulaire rougit, celui de la politique reste vert.
 ## [1.254.11] - 2026-09-06
 
 ### Corrigé

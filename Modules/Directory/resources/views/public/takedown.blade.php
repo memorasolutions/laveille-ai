@@ -1,4 +1,15 @@
 @extends(fronttheme_layout())
+
+{{-- MESURÉ le 2026-09-06 (ticket #2288) : la fiche d'outil pose un lien
+     route('directory.takedown.create', $tool->...) sur CHACUNE des 2202 fiches de l'annuaire.
+     Cela fabrique 2202 adresses distinctes qui servent toutes le MÊME formulaire ; Google en
+     avait déjà exploré 91. Ce n'est pas une page de destination éditoriale : c'est un
+     formulaire de service, dupliqué par construction. Même politique que Décido, Mes prompts
+     et le permalien de prompt. La page de POLITIQUE de retrait, elle, reste indexable : elle
+     est unique et vaut comme signal de conformité.
+     Pas de Disallow dans robots.txt : il empêcherait Google de LIRE ce noindex, et les
+     adresses déjà indexées y resteraient. --}}
+@section('page_noindex', true)
 @section('title', __('Demande de retrait de contenu') . ' - ' . config('app.name'))
 @section('meta_description', __('Formulaire de demande de retrait de contenu (droit d\'auteur, marque, données personnelles).'))
 @section('breadcrumb')
