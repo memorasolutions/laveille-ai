@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.254.6] - 2026-09-05
+
+### Corrigé
+- **L'écran de composition des actualités ne se charge plus parfois à vide (ticket #2210).** Le
+  script `news-article-picker.js` était chargé en `defer` et pouvait s'exécuter après le code qui
+  l'utilise, ce qui provoquait jusqu'à 34 `ReferenceError` et un panneau vide au premier accès.
+  Il est désormais injecté une seule fois par la directive `@assets` de Livewire, depuis le
+  partial partagé par les trois écrans (composition, concentré, objectif vidéo), donc avant le
+  boot d'Alpine. Une garde `typeof NewsArticlePicker === 'undefined'` reste en filet sur chacun
+  des trois écrans.
+
 ## [1.254.5] - 2026-09-05
 
 ### Corrigé

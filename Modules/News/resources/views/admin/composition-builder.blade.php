@@ -635,9 +635,10 @@
     </div>
 </div>
 
-{{-- Mixin partagé "sélecteur d'actualités" - voir public/assets/admin/. Chargé AVANT le script
-     inline ci-dessous : window.NewsArticlePicker doit exister avant init(). --}}
-<script src="{{ asset('assets/admin/news-article-picker.js') }}?v={{ config('version.semver') }}" defer></script>
+{{-- Ticket #2210 (2026-09-05) : le <script defer> de public/assets/admin/news-article-picker.js
+     a déménagé dans news::admin.partials.news-article-picker (inclus plus haut, ligne 157), sous
+     la directive @assets - injecté par Livewire AVANT le boot d'Alpine, contrairement à un
+     <script> posé ici qui se charge APRÈS (même classe de défaut que l'historique 1.65.302). --}}
 
 <script>
 function compositionBuilder(opts) {
@@ -1649,10 +1650,23 @@ function compositionBuilder(opts) {
     // plutôt que spread, fusion hors de init()).
     // defaultSortMode: 'date' - le regroupement par acteur (mixin par défaut) n'apporte rien ici
     // : contrairement au Concentré, une seule actualité est composée à la fois.
-    Object.defineProperties(state, Object.getOwnPropertyDescriptors(NewsArticlePicker({
-        defaultSortMode: 'date',
-        fetchStrategy: (ctx) => ({ method: 'GET', url: ctx.endpoints.candidates }),
-    })));
+    //
+    // Garde de disponibilité (ticket #2210, 2026-09-05) - même forme que initRelatedToolPicker()
+    // (typeof TomSelect === 'undefined' ci-dessus) : si window.NewsArticlePicker manque malgré le
+    // chargement via la directive Livewire "assets" (voir news-article-picker.blade.php), on NE
+    // LAISSE PAS le ReferenceError remonter - il ferait échouer compositionBuilder() au complet et Alpine
+    // cascaderait en dizaines d'erreurs sur CHAQUE directive du composant (x-data jamais retourné).
+    // Sans plafond de réessai : un script absent le reste, retenter ne change rien. Mode dégradé
+    // assumé : le sélecteur d'actualités reste inopérant, le reste du panneau (titre, résumé,
+    // outils liés, image) demeure utilisable.
+    if (typeof NewsArticlePicker === 'undefined') {
+        console.error('[composition-builder] window.NewsArticlePicker introuvable (script assets/admin/news-article-picker.js non chargé) - sélecteur d\'actualités inopérant, reste du panneau conservé.');
+    } else {
+        Object.defineProperties(state, Object.getOwnPropertyDescriptors(NewsArticlePicker({
+            defaultSortMode: 'date',
+            fetchStrategy: (ctx) => ({ method: 'GET', url: ctx.endpoints.candidates }),
+        })));
+    }
 
     // RÉÉCRITURE volontaire, APRÈS la fusion du mixin (pour primer sur ses versions) : cet écran
     // impose "une actualité = une fiche" (design doc "Actus - composition manuelle assistée"

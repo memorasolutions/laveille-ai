@@ -16,7 +16,21 @@
             colorForItem(), setColor(), selectItem(), selectAllVisible(), manualColors.
             Filtre compagnie ajouté 2026-08-29 (demande du fondateur) : voir
             OfficialCompanySourcesSeeder pour la donnée qui l'alimente.
+
+    Ticket #2210 (2026-09-05) : le mixin window.NewsArticlePicker (voir le fichier ci-dessus) doit
+    exister AVANT que Livewire ne démarre Alpine et n'évalue le x-data des 3 pages hôtes
+    (composition-builder, concentre-builder, video-goal-builder) - sinon la fabrique x-data entière
+    lève un ReferenceError et Alpine échoue en cascade sur chaque directive du composant (~34
+    erreurs constatées). Même classe de défaut et même correctif que l'historique 1.65.302
+    (2026-06-21, éditeur Markdown Académie) : un <script defer> posé en @push('scripts')/inline se
+    charge APRÈS que Livewire ait déjà démarré Alpine. Solution : @assets, injecté tôt par
+    Livewire (dédupliqué) - voir aussi ShortUrl/index.blade.php et Tools/crosswords/index.blade.php
+    pour le même pattern hors composant Livewire. Ce partial étant inclus par les 3 pages, PORTER
+    la directive ICI (au lieu de la dupliquer 3 fois) est le point DRY naturel.
 --}}
+@assets
+<script src="{{ asset('assets/admin/news-article-picker.js') }}?v={{ config('version.semver') }}" defer></script>
+@endassets
 <div class="cb-card">
     <div class="cb-section-title">
         📰 Actualités disponibles

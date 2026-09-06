@@ -142,10 +142,10 @@
     </div>
 </div>
 
-{{-- Mixin partagé "sélecteur d'actualités" (recherche/filtres/tri/cluster/couleur/sélection),
-     le même que celui utilisé par admin/concentre-builder.blade.php. Chargé AVANT le script
-     inline ci-dessous : window.NewsArticlePicker doit exister avant init(). --}}
-<script src="{{ asset('assets/admin/news-article-picker.js') }}?v={{ config('version.semver') }}" defer></script>
+{{-- Ticket #2210 (2026-09-05) : le <script defer> de public/assets/admin/news-article-picker.js
+     a déménagé dans news::admin.partials.news-article-picker (inclus plus haut, ligne 90), sous
+     la directive @assets - injecté par Livewire AVANT le boot d'Alpine, contrairement à un
+     <script> posé ici qui se charge APRÈS (même classe de défaut que l'historique 1.65.302). --}}
 
 <script>
 function videoGoalBuilder(opts) {
@@ -259,23 +259,36 @@ function videoGoalBuilder(opts) {
     // en local (Playwright) : les propriétés ajoutées via defineProperties sur `this` à l'intérieur
     // d'init() n'étaient PAS visibles par le reste du template (erreurs "x is not defined"). D'où
     // la fusion ICI, avant le `return`, sur l'objet encore brut.
-    Object.defineProperties(state, Object.getOwnPropertyDescriptors(NewsArticlePicker({
-        // Objectif Vidéo n'a pas de plage par défaut garantie côté UI (l'utilisateur peut vider
-        // les champs) : on ne fetch que si les deux dates sont renseignées, comme le faisait
-        // l'ancien fetchNews() de cette page (`if (!dateStart || !dateEnd) return;`).
-        shouldFetch: (ctx) => !!(ctx.dateStart && ctx.dateEnd),
-        fetchStrategy: (ctx) => ({
-            method: 'POST',
-            url: ctx.endpoints.news,
-            body: { date_start: ctx.dateStart, date_end: ctx.dateEnd },
-        }),
-        // Purge la sélection des actualités qui ne sont plus dans la nouvelle plage chargée
-        // (même comportement que l'ancien fetchNews() de cette page).
-        onFetchSuccess: (ctx) => {
-            ctx.selectedIds = ctx.selectedIds.filter(id => ctx.newsItems.some(n => n.id === id));
-        },
-        onFetchSettled: (ctx) => { ctx.hasFetched = true; },
-    })));
+    //
+    // Garde de disponibilité (ticket #2210, 2026-09-05) - même forme que initRelatedToolPicker()
+    // (typeof TomSelect === 'undefined' dans composition-builder.blade.php) : si
+    // window.NewsArticlePicker manque malgré le chargement via la directive Livewire "assets"
+    // (voir news-article-picker.blade.php), on NE LAISSE PAS le ReferenceError remonter - il ferait
+    // échouer videoGoalBuilder() au complet et Alpine cascaderait en dizaines d'erreurs sur
+    // CHAQUE directive du composant (x-data jamais retourné). Sans plafond de réessai : un script
+    // absent le reste, retenter ne change rien. Mode dégradé assumé : le sélecteur d'actualités
+    // reste inopérant, le reste du panneau demeure utilisable.
+    if (typeof NewsArticlePicker === 'undefined') {
+        console.error('[video-goal-builder] window.NewsArticlePicker introuvable (script assets/admin/news-article-picker.js non chargé) - sélecteur d\'actualités inopérant, reste du panneau conservé.');
+    } else {
+        Object.defineProperties(state, Object.getOwnPropertyDescriptors(NewsArticlePicker({
+            // Objectif Vidéo n'a pas de plage par défaut garantie côté UI (l'utilisateur peut vider
+            // les champs) : on ne fetch que si les deux dates sont renseignées, comme le faisait
+            // l'ancien fetchNews() de cette page (`if (!dateStart || !dateEnd) return;`).
+            shouldFetch: (ctx) => !!(ctx.dateStart && ctx.dateEnd),
+            fetchStrategy: (ctx) => ({
+                method: 'POST',
+                url: ctx.endpoints.news,
+                body: { date_start: ctx.dateStart, date_end: ctx.dateEnd },
+            }),
+            // Purge la sélection des actualités qui ne sont plus dans la nouvelle plage chargée
+            // (même comportement que l'ancien fetchNews() de cette page).
+            onFetchSuccess: (ctx) => {
+                ctx.selectedIds = ctx.selectedIds.filter(id => ctx.newsItems.some(n => n.id === id));
+            },
+            onFetchSettled: (ctx) => { ctx.hasFetched = true; },
+        })));
+    }
 
     return state;
 }

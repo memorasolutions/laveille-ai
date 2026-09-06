@@ -110,6 +110,48 @@ it('allows superadmin to view index', function () {
     $response->assertSee('Charger les actualités', false);
 });
 
+// ── Ordre de chargement du mixin partagé (ticket #2210, 2026-09-05) ────────────
+// La PRÉSENCE de news-article-picker.js et de l'appel videoGoalBuilder(...) dans le HTML ne prouve
+// rien : les deux étaient déjà présents AVANT le correctif, et l'écran cascadait quand même en
+// ReferenceError (le script chargeait APRÈS que Livewire ait déjà démarré Alpine et évalué
+// x-data). La preuve porte sur la POSITION RELATIVE dans le HTML rendu : le script doit arriver
+// avant le code qui s'en sert ET avant le script Livewire qui démarre Alpine
+// (@livewireScripts, Modules/Backoffice/.../layouts/admin.blade.php:180).
+it('news-article-picker.js charge avant l\'appel videoGoalBuilder(...) et avant le script Livewire qui démarre Alpine', function () {
+    $admin = vgbSuperAdmin();
+
+    $html = $this->actingAs($admin)->get(route('admin.news.video-goal.index'))->getContent();
+
+    $scriptPos = strpos($html, 'news-article-picker.js');
+    $factoryCallPos = strpos($html, 'videoGoalBuilder(');
+    $livewireBootPos = strpos($html, 'livewire.js');
+
+    expect($scriptPos)->not->toBeFalse('news-article-picker.js absent du HTML rendu');
+    expect($factoryCallPos)->not->toBeFalse('appel videoGoalBuilder(...) absent du HTML rendu');
+    expect($livewireBootPos)->not->toBeFalse('script livewire.js absent du HTML rendu');
+
+    expect($scriptPos)->toBeLessThan($factoryCallPos);
+    expect($scriptPos)->toBeLessThan($livewireBootPos);
+});
+
+// ── Non-régression du piège trouvé pendant l'implémentation (ticket #2210) ─────
+// La première version du correctif écrivait le mot "@assets" dans un commentaire JAVASCRIPT
+// (// ...) à l'intérieur d'un <script> : Blade ne distingue pas un commentaire JS d'un commentaire
+// Blade ({{-- --}}) et compile @assets où qu'il apparaisse hors {{-- --}}, ce qui a posé un
+// ob_start() jamais fermé (PHPUnit : "did not close its own output buffers"). Sans ce test, la
+// prochaine personne qui écrit "@assets" dans un commentaire JS refait exactement la même erreur
+// sans que rien ne l'arrête.
+it('ne laisse aucun buffer de sortie ouvert après le rendu du générateur d\'objectif vidéo', function () {
+    $admin = vgbSuperAdmin();
+
+    $obLevelBefore = ob_get_level();
+    $response = $this->actingAs($admin)->get(route('admin.news.video-goal.index'));
+    $obLevelAfter = ob_get_level();
+
+    $response->assertOk();
+    expect($obLevelAfter)->toBe($obLevelBefore);
+});
+
 // ── newsForRange (JSON) ───────────────────────────────────────────────────────
 
 it('returns published articles within date range as json', function () {

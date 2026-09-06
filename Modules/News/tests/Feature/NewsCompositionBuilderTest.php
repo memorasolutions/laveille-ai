@@ -111,6 +111,50 @@ it('allows an admin to view the composition screen', function () {
     $response->assertSee('news-article-picker.js', false);
 });
 
+// ── Ordre de chargement du mixin partagé (ticket #2210, 2026-09-05) ────────────
+// La PRÉSENCE de news-article-picker.js et de l'appel compositionBuilder(...) dans le HTML ne
+// prouve rien : les deux étaient déjà présents AVANT le correctif, et l'écran cascadait quand
+// même en ~34 ReferenceError (le script chargeait APRÈS que Livewire ait déjà démarré Alpine et
+// évalué x-data). La preuve porte sur la POSITION RELATIVE dans le HTML rendu, traduction directe
+// de « le script arrive avant le code qui s'en sert » et de ce que @assets (voir
+// news::admin.partials.news-article-picker) est censé garantir : injection dans <head>, avant
+// x-data (dans <body>) ET avant le script Livewire qui démarre Alpine (@livewireScripts, en fin
+// de <body> - Modules/Backoffice/.../layouts/admin.blade.php:180).
+it('news-article-picker.js charge avant l\'appel compositionBuilder(...) et avant le script Livewire qui démarre Alpine', function () {
+    $admin = ncbAdmin();
+
+    $html = $this->actingAs($admin)->get(route('admin.news.composition.index'))->getContent();
+
+    $scriptPos = strpos($html, 'news-article-picker.js');
+    $factoryCallPos = strpos($html, 'compositionBuilder(');
+    $livewireBootPos = strpos($html, 'livewire.js');
+
+    expect($scriptPos)->not->toBeFalse('news-article-picker.js absent du HTML rendu');
+    expect($factoryCallPos)->not->toBeFalse('appel compositionBuilder(...) absent du HTML rendu');
+    expect($livewireBootPos)->not->toBeFalse('script livewire.js absent du HTML rendu');
+
+    expect($scriptPos)->toBeLessThan($factoryCallPos);
+    expect($scriptPos)->toBeLessThan($livewireBootPos);
+});
+
+// ── Non-régression du piège trouvé pendant l'implémentation (ticket #2210) ─────
+// La première version du correctif écrivait le mot "@assets" dans un commentaire JAVASCRIPT
+// (// ...) à l'intérieur d'un <script> : Blade ne distingue pas un commentaire JS d'un commentaire
+// Blade ({{-- --}}) et compile @assets où qu'il apparaisse hors {{-- --}}, ce qui a posé un
+// ob_start() jamais fermé (PHPUnit : "did not close its own output buffers"). Sans ce test, la
+// prochaine personne qui écrit "@assets" dans un commentaire JS refait exactement la même erreur
+// sans que rien ne l'arrête.
+it('ne laisse aucun buffer de sortie ouvert après le rendu de l\'écran de composition', function () {
+    $admin = ncbAdmin();
+
+    $obLevelBefore = ob_get_level();
+    $response = $this->actingAs($admin)->get(route('admin.news.composition.index'));
+    $obLevelAfter = ob_get_level();
+
+    $response->assertOk();
+    expect($obLevelAfter)->toBe($obLevelBefore);
+});
+
 // ── Écran minimal : édition manuelle repliée, bouton principal (panel "club des sages",
 //    2026-08-15) ──────────────────────────────────────────────────────────────────────
 
