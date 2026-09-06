@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.254.9] - 2026-09-06
+
+### Corrigé
+- **Le courriel « Crédit OpenRouter bientôt épuisé » repartait malgré la demande du 26 août
+  (ticket #2292).** Le compte du fondateur se recharge tout seul par carte : l'alerte réclame une
+  action qui se fait déjà seule. Le correctif du 26 août (commit `e1267d42`) n'avait neutralisé que
+  les seuils d'AVERTISSEMENT (`warn_remaining_usd`/`warn_remaining_days` mis à 0) et avait
+  délibérément laissé actifs les seuils d'ÉCHEC (15 $ / 3 jours), en supposant qu'ils ne
+  sonneraient que si la recharge automatique échouait réellement. Cette supposition était fausse à
+  l'usage : OpenRouter déclenche sa propre recharge quand le solde est DÉJÀ bas, donc le
+  fonctionnement normal franchit exactement ces seuils d'échec. Le message reçu (« 15,14 $
+  restants, soit environ 0,6 jours d'autonomie ») correspond mot pour mot à la branche
+  `fail_remaining_days`.
+- Nouveau drapeau `HEALTH_OPENROUTER_NOTIFY_BY_MAIL` (défaut : `false`), lu dans
+  `config/health.php`. La nouvelle méthode `OpenRouterCreditCheck::silencerCourrielSiDesactive()`
+  est appelée par les quatre branches du signal solde/autonomie (échec ET avertissement) : elle
+  journalise toujours le fait dans le canal `directory_enrichment` (niveau `info`, donc non avalé
+  par `LOG_LEVEL=error` en production), puis vide le message de notification quand le drapeau est
+  à `false`.
+- **La mesure n'est pas coupée, seul l'envoi l'est.** Le statut (échec/avertissement) et les
+  chiffres restent visibles au tableau de bord de santé et dans le journal serveur. Les signaux
+  « clé refusée », « mesure impossible », « aucune clé configurée » et « échecs de connexion
+  répétés » continuent de partir par courriel, intacts.
+
+### Limite assumée
+- Si la carte du fondateur finissait par être réellement refusée, l'API `/credits` répondrait
+  toujours 200 avec un solde bas (ce n'est ni un 401 ni un 403) : ce cas ne déclenche donc PAS
+  d'alerte distincte. Le seul filet restant est le journal serveur et le tableau de bord. Séparer
+  « recharge automatique en cours » de « carte refusée » demanderait un signal supplémentaire (par
+  exemple un solde resté sous le seuil plusieurs jours d'affilée), non demandé et non implémenté.
+
+### Tests
+- `Modules/Health/tests/Feature/OpenRouterCreditCheckTest.php` : trois cas neufs qui ROUGISSENT
+  sans le correctif (le rouge reproduit littéralement le libellé signalé par le fondateur) et
+  passent avec. Suite complète du module : 63 tests, 151 assertions, toutes vertes.
+
 ## [1.254.8] - 2026-09-06
 
 ### Corrigé

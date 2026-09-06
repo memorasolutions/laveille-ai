@@ -13,6 +13,7 @@ namespace Modules\Health\Checks;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Spatie\Health\Checks\Check;
 use Spatie\Health\Checks\Result;
 use Throwable;
@@ -134,25 +135,64 @@ final class OpenRouterCreditCheck extends Check
         $rechargez = " Rechargez avant que l'enrichissement de l'annuaire ne s'arrête.";
 
         if ($restant <= (float) config('health.openrouter.fail_remaining_usd', 15)) {
-            return $result->failed('Crédit OpenRouter presque épuisé : '.$this->resume($restant, $jours).$rechargez);
+            return $this->silencerCourrielSiDesactive(
+                $result->failed('Crédit OpenRouter presque épuisé : '.$this->resume($restant, $jours).$rechargez)
+            );
         }
 
         if ($jours !== null && $jours <= (float) config('health.openrouter.fail_remaining_days', 3)) {
-            return $result->failed('Crédit OpenRouter bientôt épuisé : '.$this->resume($restant, $jours).$rechargez);
+            return $this->silencerCourrielSiDesactive(
+                $result->failed('Crédit OpenRouter bientôt épuisé : '.$this->resume($restant, $jours).$rechargez)
+            );
         }
 
         if ($restant <= (float) config('health.openrouter.warn_remaining_usd', 50)) {
-            return $result->warning('Crédit OpenRouter bas : '.$this->resume($restant, $jours));
+            return $this->silencerCourrielSiDesactive(
+                $result->warning('Crédit OpenRouter bas : '.$this->resume($restant, $jours))
+            );
         }
 
         if ($jours !== null && $jours <= (float) config('health.openrouter.warn_remaining_days', 10)) {
-            return $result->warning('Crédit OpenRouter à surveiller : '.$this->resume($restant, $jours));
+            return $this->silencerCourrielSiDesactive(
+                $result->warning('Crédit OpenRouter à surveiller : '.$this->resume($restant, $jours))
+            );
         }
 
         // ok() SANS message, imperativement : un message non vide, meme au vert, part en
         // courriel a chaque passage (RunHealthChecksCommand filtre sur le message, pas sur le
         // statut, tant que only_on_failure reste a false). Le detail vit dans meta().
         return $result->ok();
+    }
+
+    /**
+     * Coupe le COURRIEL pour ce signal précis (solde/autonomie), sans toucher au statut ni aux
+     * AUTRES signaux du même contrôle (clé refusée, mesure impossible, aucune clé configurée) -
+     * ceux-là continuent d'alerter normalement, ils restent utiles.
+     *
+     * RAISON (2026-09-06, deuxième demande du fondateur sur le même défaut - cf.
+     * config/health.php) : le compte OpenRouter se recharge TOUT SEUL par carte, donc cette
+     * alerte précise réclame une action qui se fait déjà toute seule. Le point exact où ce
+     * correctif agit est celui que Spatie utilise pour DÉCIDER d'envoyer le courriel
+     * (RunHealthChecksCommand::sendNotification() ne retient que les résultats dont
+     * getNotificationMessage() n'est pas vide) : vider ce message ici empêche l'envoi sans
+     * changer le statut échec/avertissement, qui reste visible au tableau de bord de santé.
+     *
+     * Le fait est TOUJOURS journalisé côté serveur, courriel coupé ou non : si la carte finit
+     * un jour par être vraiment refusée, l'enrichissement de l'annuaire s'arrête SANS erreur
+     * visible ailleurs, et ce journal est la seule trace qui reste.
+     */
+    private function silencerCourrielSiDesactive(Result $result): Result
+    {
+        Log::channel('directory_enrichment')->warning(
+            'OpenRouterCreditCheck : '.$result->notificationMessage,
+            $result->meta
+        );
+
+        if ((bool) config('health.openrouter.notify_by_mail', false)) {
+            return $result;
+        }
+
+        return $result->notificationMessage('');
     }
 
     /**

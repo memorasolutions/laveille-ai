@@ -216,18 +216,36 @@ return [
         // d'echantillonnage pour l'estimation d'autonomie : trop court, le bruit domine.
         'poll_seconds' => env('HEALTH_OPENROUTER_POLL_SECONDS', 1800),
         'warn_after_consecutive_failures' => env('HEALTH_OPENROUTER_WARN_AFTER_CONSECUTIVE_FAILURES', 3),
-        // AVERTISSEMENTS DESACTIVES le 2026-08-26, sur demande du fondateur : le compte
-        // OpenRouter se recharge AUTOMATIQUEMENT par carte, donc un « credit bas » n'appelle
-        // aucune action et le rappel ne fait que deranger.
-        //
-        // A zero, la comparaison `$restant <= 0` n'est jamais vraie : plus aucun avertissement.
-        // Les seuils d'ECHEC restent actifs, et c'est delibere : si la carte expire ou est
-        // refusee, l'auto-recharge echoue en silence et le credit tombe pour de bon. C'est le
-        // seul cas ou une alerte apprend encore quelque chose, et il reste couvert.
+        // Seuils en dollars/jours : ils continuent à déterminer le STATUT (échec/avertissement)
+        // affiché au tableau de bord de santé et journalisé, même si le courriel est coupé par
+        // 'notify_by_mail' ci-dessous. On mesure toujours ; on n'envoie plus toujours.
         'warn_remaining_usd' => env('HEALTH_OPENROUTER_WARN_REMAINING_USD', 0),
         'fail_remaining_usd' => env('HEALTH_OPENROUTER_FAIL_REMAINING_USD', 15),
         'warn_remaining_days' => env('HEALTH_OPENROUTER_WARN_REMAINING_DAYS', 0),
         'fail_remaining_days' => env('HEALTH_OPENROUTER_FAIL_REMAINING_DAYS', 3),
+
+        /*
+         * COURRIEL COUPÉ PAR DÉFAUT (2026-09-06) - récidive du 2026-08-26.
+         *
+         * Le compte OpenRouter du fondateur se recharge TOUT SEUL par carte : une alerte
+         * « crédit bas » réclame une action qui se fait déjà toute seule, ce n'est pas une
+         * alerte mais du bruit, et le bruit fait ignorer les vraies alertes.
+         *
+         * Le 2026-08-26, seuls les seuils d'AVERTISSEMENT (warn_remaining_usd/days ci-dessus)
+         * avaient été neutralisés (mis à 0). Les seuils d'ÉCHEC avaient été laissés actifs en
+         * croyant qu'ils ne sonneraient QUE si la recharge automatique échouait vraiment (carte
+         * expirée/refusée). Faux à l'usage : OpenRouter déclenche SA PROPRE recharge quand le
+         * solde est déjà bas - un fonctionnement NORMAL qui franchit exactement ces mêmes seuils
+         * d'échec (15 $ / 3 jours), d'où le même courriel « bientôt épuisé » revenu identique.
+         *
+         * Ce drapeau coupe l'ENVOI, jamais la MESURE : le statut échec/avertissement et les
+         * chiffres restent visibles au tableau de bord de santé et journalisés dans le canal
+         * 'directory_enrichment' (cf. OpenRouterCreditCheck::silencerCourrielSiDesactive) - si
+         * la carte finit vraiment par être refusée un jour, le fait laisse une trace serveur,
+         * il ne part simplement plus par courriel.
+         */
+        'notify_by_mail' => env('HEALTH_OPENROUTER_NOTIFY_BY_MAIL', false),
+
         'connection_failures_cache_key' => env('HEALTH_OPENROUTER_CONNECTION_FAILURES_CACHE_KEY', 'health:openrouter:echecs_consecutifs'),
         'measurement_cache_key' => env('HEALTH_OPENROUTER_MEASUREMENT_CACHE_KEY', 'health:openrouter:derniere_mesure'),
     ],

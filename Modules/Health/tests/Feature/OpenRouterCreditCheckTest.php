@@ -11,6 +11,7 @@ declare(strict_types=1);
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Modules\Health\Checks\OpenRouterCreditCheck;
 use Spatie\Health\Enums\Status;
 
@@ -27,6 +28,9 @@ beforeEach(function () {
         'fail_remaining_usd' => 15,
         'warn_remaining_days' => 10,
         'fail_remaining_days' => 3,
+        // Défaut de production (config/health.php) depuis le 2026-09-06 : le compte se
+        // recharge tout seul par carte, le courriel de ce signal précis est coupé par défaut.
+        'notify_by_mail' => false,
         'connection_failures_cache_key' => 'tests:or:echecs',
         'measurement_cache_key' => 'tests:or:mesure',
     ]);
@@ -57,22 +61,68 @@ it('reste totalement silencieux quand le solde est confortable', function () {
         ->and($resultat->shortSummary)->toContain('400,00 $');
 });
 
-it('avertit quand le solde passe sous le seuil bas', function () {
+// Le STATUT continue de basculer en avertissement (visible au tableau de bord de santé et
+// journalisé), mais plus AUCUN courriel ne part pour ce signal par défaut (2026-09-06) : le
+// compte OpenRouter se recharge tout seul par carte, l'ancienne alerte ne réclamait donc
+// aucune action réelle.
+it('avertit toujours au tableau de bord quand le solde passe sous le seuil bas, mais ne courrielle plus par defaut', function () {
+    Log::spy();
+    Log::shouldReceive('channel')->with('directory_enrichment')->andReturnSelf();
+
     openrouterCreditsFake(500, 460);
 
     $resultat = OpenRouterCreditCheck::new()->run();
 
     expect($resultat->status->equals(Status::warning()))->toBeTrue()
-        ->and($resultat->getNotificationMessage())->toContain('40,00 $');
+        ->and($resultat->getNotificationMessage())->toBe('')
+        ->and($resultat->meta['restant'] ?? null)->toBe(40.0);
+
+    Log::shouldHaveReceived('warning')
+        ->once()
+        ->withArgs(fn ($message, $context = null): bool => is_string($message)
+            && str_contains($message, 'OpenRouterCreditCheck')
+            && str_contains($message, '40,00 $')
+            && is_array($context)
+            && ($context['restant'] ?? null) === 40.0);
 });
 
-it('echoue quand le solde est presque epuise', function () {
+// Le point exact qui déclenche l'envoi côté Spatie (RunHealthChecksCommand::sendNotification)
+// est getNotificationMessage() non vide. C'est CE point que le correctif du 2026-09-06 vise,
+// pas le calcul du seuil (fail_remaining_usd) : le statut reste « échec », seul le courriel
+// est coupé, et le fait est journalisé côté serveur à la place.
+it('echoue toujours au tableau de bord quand le solde est presque epuise, mais ne courrielle plus par defaut', function () {
+    Log::spy();
+    Log::shouldReceive('channel')->with('directory_enrichment')->andReturnSelf();
+
     openrouterCreditsFake(500, 490);
 
     $resultat = OpenRouterCreditCheck::new()->run();
 
     expect($resultat->status->equals(Status::failed()))->toBeTrue()
-        ->and($resultat->getNotificationMessage())->toContain('10,00 $');
+        ->and($resultat->getNotificationMessage())->toBe('')
+        ->and($resultat->meta['restant'] ?? null)->toBe(10.0);
+
+    Log::shouldHaveReceived('warning')
+        ->once()
+        ->withArgs(fn ($message, $context = null): bool => is_string($message)
+            && str_contains($message, 'presque épuisé')
+            && str_contains($message, '10,00 $')
+            && is_array($context));
+});
+
+// Échappatoire délibérée (config/health.php: HEALTH_OPENROUTER_NOTIFY_BY_MAIL) : si le besoin
+// se représente un jour, le courriel se rallume sans toucher au code, et le contenu du
+// message (montant, marche à suivre) reste intact.
+it('recourrielle si notify_by_mail est explicitement reactive', function () {
+    config()->set('health.openrouter.notify_by_mail', true);
+
+    openrouterCreditsFake(500, 490);
+
+    $resultat = OpenRouterCreditCheck::new()->run();
+
+    expect($resultat->status->equals(Status::failed()))->toBeTrue()
+        ->and($resultat->getNotificationMessage())->toContain('10,00 $')
+        ->and($resultat->getNotificationMessage())->toContain('Rechargez avant que l\'enrichissement');
 });
 
 it('avertit quand aucune cle n\'est configuree', function () {
@@ -133,7 +183,10 @@ it('n\'interroge pas l\'API quand la derniere mesure est encore fraiche', functi
         ->and($second->shortSummary)->toContain('400,00 $');
 });
 
-it('estime l\'autonomie et echoue quand elle tombe sous trois jours', function () {
+it('estime l\'autonomie et echoue quand elle tombe sous trois jours, sans courrieller par defaut', function () {
+    Log::spy();
+    Log::shouldReceive('channel')->with('directory_enrichment')->andReturnSelf();
+
     // 120 $ il y a deux heures, 80 $ maintenant : 40 $ brules en 2 h, soit 480 $ par jour.
     // Le solde de 80 $ reste au-dessus des DEUX seuils en dollars ; seule l'autonomie alerte.
     Cache::forever('tests:or:mesure', [
@@ -147,8 +200,17 @@ it('estime l\'autonomie et echoue quand elle tombe sous trois jours', function (
 
     $resultat = OpenRouterCreditCheck::new()->run();
 
+    // Statut « échec » préservé (trace au tableau de bord) ; plus aucun courriel pour ce
+    // signal par défaut - c'est exactement le message reçu par le fondateur (« 0,6 jours
+    // d'autonomie ») que ce correctif coupe.
     expect($resultat->status->equals(Status::failed()))->toBeTrue()
-        ->and($resultat->getNotificationMessage())->toContain("jours d'autonomie");
+        ->and($resultat->getNotificationMessage())->toBe('');
+
+    Log::shouldHaveReceived('warning')
+        ->once()
+        ->withArgs(fn ($message, $context = null): bool => is_string($message)
+            && str_contains($message, "jours d'autonomie")
+            && is_array($context));
 });
 
 it('ignore l\'autonomie quand le solde remonte apres une recharge', function () {
