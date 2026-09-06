@@ -618,8 +618,15 @@
                              l'article) rendu dans la branche @else ci-dessous. --}}
                         @if(!empty($ss['quote']['text'] ?? null))
                         <h2 class="nw-section-heading">{{ __('Citation') }}</h2>
+                        {{-- JAMAIS de @glossarize ici : une citation verbatim est intouchable
+                             éditorialement, on n'ajoute pas un lien dans les mots de quelqu'un
+                             d'autre. Le linkifier a bien « blockquote » dans ses $skipTags, mais
+                             cette garde ne peut PAS mordre à cet endroit : Blade ajoute la balise
+                             <blockquote> APRÈS le retour de la directive, donc le DOM que voit
+                             linkify() n'a aucun noeud blockquote à sauter. Mesuré le 2026-09-06 :
+                             4 fiches publiées sur 20 portaient un lien dans leur citation. --}}
                         <blockquote class="nw-quote" @if(!empty($article->resolved_url ?? $article->url)) cite="{{ $article->resolved_url ?? $article->url }}" @endif>
-                            « @glossarize(e($ss['quote']['text']), $glossOpts) »
+                            « {{ $ss['quote']['text'] }} »
                             @if(!empty($ss['quote']['author']))
                                 <cite>{{ $ss['quote']['author'] }}</cite>
                             @endif
@@ -667,8 +674,12 @@
                              29.2 Loi sur le droit d'auteur (design doc "Attribution citation 29.2
                              LDA", 2026-08-13). --}}
                         @if($ss && !empty($ss['quote']))
+                            {{-- JAMAIS de @glossarize ici non plus : même règle qu'au bloc de
+                                 citation composée ci-dessus, et elle pèse plus lourd encore ici,
+                                 puisque cet extrait est verbatim d'une source EXTERNE couverte par
+                                 l'article 29.2 de la Loi sur le droit d'auteur. --}}
                             <blockquote class="nw-quote" @if(!empty($article->resolved_url ?? $article->url)) cite="{{ $article->resolved_url ?? $article->url }}" @endif>
-                                « @glossarize(e($ss['quote']), $glossOpts) »
+                                « {{ $ss['quote'] }} »
                                 <x-news::quote-attribution :article="$article" />
                             </blockquote>
                         @endif

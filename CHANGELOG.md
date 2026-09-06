@@ -1,5 +1,43 @@
 # Changelog
 
+## [1.254.11] - 2026-09-06
+
+### Corrigé
+- **Le moteur d'auto-liens posait des liens de glossaire À L'INTÉRIEUR des citations verbatim.**
+  Mesuré en production : 4 fiches publiées sur 20, dont la fiche CCQ où « renseignements
+  personnels » renvoyait vers `/glossaire/renseignement-personnel` au beau milieu des mots d'un
+  porte-parole. Une citation est intouchable éditorialement, et l'extrait d'une source EXTERNE
+  l'est doublement, puisqu'il est couvert par l'article 29.2 de la Loi sur le droit d'auteur.
+- **La cause est structurelle, pas une configuration oubliée.** `GlossaryLinkifier` porte bien
+  `blockquote` dans ses `$skipTags` (ligne 1384), mais cette garde ne peut pas mordre à cet
+  endroit : la directive `@glossarize()` reçoit le TEXTE SEUL de la citation, Blade n'ajoutant la
+  balise `<blockquote>` qu'APRÈS le retour de la directive. Le DOM que voit `linkify()` n'a donc
+  aucun noeud `blockquote` à sauter. Une garde qui existe mais que le flux contourne n'est pas une
+  garde - même motif que le ticket #2241, où une exclusion vivait sur le nom d'un terme alors que
+  c'était son alias qui posait le faux lien.
+- Correctif : les DEUX blocs de citation de `Modules/News/resources/views/public/show.blade.php`
+  (citation composée `quote.text`, et citation verbatim externe de la branche machine/R10)
+  n'appellent plus `@glossarize()`. Ils rendent le texte par `{{ }}`, qui échappe exactement comme
+  le `e()` explicite qu'il remplace. Aucun caractère de la citation n'est perdu.
+
+### Effet à connaître (relevé par la revue Codex, il n'est pas neutre)
+- Le compteur d'occurrences du linkifier est STATIQUE et partagé par tous les appels d'une même
+  requête, avec un plafond d'un lien par terme (tâche #1350). Une citation qui consommait ce
+  quota unique ne le consomme plus : **si un terme n'apparaissait que dans la citation et dans une
+  section RENDUE APRÈS elle** (« Ce que ça change au Québec », « Action concrète »), le lien ne
+  disparaît pas - il se déplace vers cette section. C'est l'effet voulu (le lien va au corps
+  rédactionnel plutôt qu'aux mots d'un tiers), et il est désormais prouvé par un test dédié.
+
+### Tests
+- Nouveau `Modules/News/tests/Feature/QuoteNeverLinkifiedTest.php`, 5 cas, 29 assertions :
+  les deux branches de citation, la contre-épreuve qu'un terme cité hors citation reste bien
+  auto-lié (sans elle, un correctif trop large qui éteindrait TOUS les auto-liens passerait pour
+  un succès), la conservation de la citation entière échappée exactement une fois, et le
+  déplacement du lien décrit ci-dessus.
+- **Contre-preuve exécutée** : correctif retiré, les deux tests de citation rougissent
+  (« Failed asserting that 1 is identical to 0 » - le lien réapparaît bien dans le blockquote) ;
+  correctif remis, 5/5 verts.
+
 ## [1.254.10] - 2026-09-06
 
 ### Corrigé
