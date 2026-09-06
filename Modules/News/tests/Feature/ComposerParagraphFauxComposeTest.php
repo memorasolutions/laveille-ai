@@ -209,3 +209,30 @@ it('lie "Atlas" employe seul, y compris suivi d\'un verbe minuscule', function (
         ->and($html)->toContain('/annuaire/atlas')
         ->and($html)->toContain('>Atlas</a>');
 });
+
+// ── 2026-09-06 : le « ,? » global du lookbehind est retire, remplace par des variantes ────
+// virgulees declarees UNE A UNE dans TOOL_COMPOUND_EXCLUSIONS (ticket #2325, revue Codex).
+// Le « ,? » global bloquait a tort « Apres Paragraph, Composer reste utile » - une enumeration
+// de DEUX outils distincts, pas le compose « Paragraph Composer ». Reparation ci-dessous, puis
+// contre-epreuve obligatoire : le cas Astra qui a motive la virgule en premier lieu (fiche 31500,
+// citation verbatim anglaise) doit rester bloque, sinon la garde aurait ete affaiblie plutot que
+// corrigee.
+
+it('lie "Composer" apres "Paragraph," suivi d\'une virgule (enumeration de deux outils distincts, pas un compose)', function () {
+    pcfcComposerTool();
+
+    $html = GlossaryLinkifier::linkify('<p>Apres Paragraph, Composer reste notre outil prefere.</p>');
+
+    expect($html)->toContain('glossary-link')
+        ->and($html)->toContain('/annuaire/composer')
+        ->and($html)->toContain('>Composer</a>');
+});
+
+it('ne lie TOUJOURS PAS "Astra" apres "models," dans la citation verbatim anglaise (contre-epreuve, fiche 31500)', function () {
+    pcfcAstraTool();
+
+    $html = GlossaryLinkifier::linkify('<p>OpenAI teased one of our upcoming models, Astra, during the keynote.</p>');
+
+    expect($html)->not->toContain('glossary-link')
+        ->and($html)->not->toContain('/annuaire/astra');
+});

@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.254.13] - 2026-09-06
+
+### Corrigé
+- **Auto-liens : la virgule d'exclusion ne bloque plus des liens légitimes (#2325).** Le correctif
+  « Astra » de v1.254.10 avait ajouté un `,?` GLOBAL au lookbehind d'exclusion, pour couvrir une
+  citation anglaise (« one of our upcoming models, Astra »). Effet de bord trouvé par la revue Codex
+  et vérifié en PHP réel : ce `,?` bloquait aussi « Après Paragraph, Composer reste utile » - une
+  énumération de DEUX outils distincts, pas le composé « Paragraph Composer ». Il rendait en outre
+  le lookbehind à largeur VARIABLE, qui ne compile pas sous PCRE2 antérieur à 10.43 (c'est la cause
+  de l'échec de CI rattrapé le jour même par 67952893).
+  Correction : le `,?` est retiré du patron, qui redevient à largeur FIXE, et les variantes
+  virgulées sont déclarées dans la DONNÉE (`TOOL_COMPOUND_EXCLUSIONS['astra']` porte désormais
+  `modèle,` `modele,` `model,` `models,`). Zéro changement de logique, seule la table bouge.
+  `CACHE_KEY` bumpé v27 → v28 : sans lui, une entrée chaude servirait l'ancienne liste jusqu'au TTL.
+  Contre-épreuve de CONSERVATION incluse : le cas Astra visé reste bloqué, et « Paragraph Composer »
+  sans virgule aussi - une garde qui ne bloque plus rien passerait sinon pour un succès.
+
 
 ## [1.254.12] - 2026-09-06
 
