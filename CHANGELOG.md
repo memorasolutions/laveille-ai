@@ -37,6 +37,12 @@
   lien faux à l'intérieur d'une citation anglaise qui commence PAR « Astra » (aucun mot ne la
   précède, même dans le texte source) - aucune garde de préfixe ne peut fermer ce cas sans altérer
   la citation, ce que la politique éditoriale du site interdit (article 29.2 LDA).
+- **Détachement du widget « Outils mentionnés » :** 14 fiches (le groupe OpenAI complet + les
+  cas Synaptics et Topaz Labs) portaient encore l'outil Astra dans leurs relations
+  `related_tool_slugs`, posées une fois pour toutes à la composition - le correctif du lien
+  inline ne les touche pas (donnée figée, pas recalculée à l'affichage). Détachées via
+  `NewsToolSyncAction::detachBySlug()`, la porte officielle déjà en place (mandat #2091). Les 2
+  fiches Google Project Astra (11656, 16828) gardent l'attachement, légitime.
 
 ### Tests
 - 5 tests neufs dans `GlossaryLinkifierTest` (2 blocages GPT-6/GPT-42.5, 2 blocages
