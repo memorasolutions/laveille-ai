@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.254.14] - 2026-09-06
+
+### Modifié
+- **Hygiène du dépôt : 79 fichiers de sauvegarde (31 Mo) rangés, et la cause corrigée.** Ils
+  s'accumulaient à la racine du projet, dont 17 pour la seule journée du 2026-09-06. Aucun n'a
+  été supprimé : 72 déplacés vers `.backups/journal/`, 7 vers `.backups/divers/`. Le script de
+  journal partagé dépose désormais son filet dans le sous-dossier, avec repli sur l'ancien
+  comportement si le dossier ne peut pas être créé.
+- **`.gitignore` complété** : `*.backup-*` et `*.avant-*` n'étaient pas couverts (seuls `*.bak`
+  et `*.bak-*` l'étaient), d'où des sauvegardes visibles dans `git status`. Ajout aussi de
+  `/public/news-screenshots/`, écrit par le code lui-même. Contre-épreuve : aucun fichier déjà
+  suivi ne devient ignoré.
+
+### Ajouté
+- **`config/social_destinations.php` versionné.** Ce garde-fou refuse toute publication sociale
+  quand la liste des anciens clients est illisible ou incomplète. Il n'avait jamais été
+  committé, donc il aurait été absent d'un déploiement. Vérifié sans variable `HOME` (le cas de
+  la production) : retourne `refuser_toute_publication = true`, sans avertissement.
+
 ## [1.254.13] - 2026-09-06
 
 ### Corrigé
