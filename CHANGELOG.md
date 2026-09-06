@@ -1,5 +1,43 @@
 # Changelog
 
+## [1.254.10] - 2026-09-06
+
+### Corrigé
+- **Le faux auto-lien « Astra » récidivait sous une forme que les correctifs précédents
+  (v1.247.7/v1.247.8, `TOOL_COMPOUND_EXCLUSIONS['astra']`) ne voyaient pas.** Ces correctifs
+  excluaient des MOTS EXACTS (« modèle », « model », « that ») précédant « Astra » d'un espace.
+  Le tri complet des 19 fiches vivantes mentionnant « Astra » a montré deux familles de
+  qualifiants qu'une liste de mots exacts ne peut pas fermer : un numéro de version qui grandit
+  sans fin (« GPT-6 Astra », demain « GPT-7 Astra ») et une élision française COLLÉE sans espace
+  (« d'Astra », « qu'Astra »). Il a aussi révélé un TROISIÈME « Astra » sans rapport avec OpenAI ou
+  Google - « Synaptics Astra », une gamme de processeurs IA embarqués (fiche 14290).
+- Nouvelle table `GlossaryLinkifier::TOOL_PREFIX_PATTERN_EXCLUSIONS`, symétrique en PATRONS regex
+  de la table existante `TOOL_COMPOUND_EXCLUSIONS` (mots exacts) : un patron numérique
+  (`gpt-\d{1,3}(?:\.\d{1,2})?`) et un patron d'élision collée (`(?:d|qu)['']`, sans séparateur),
+  posée sur le nom ET les alias d'un outil (l'alias n'en portait aucune jusqu'ici - même angle
+  mort que le ticket #2241 sur le glossaire). `'synaptics'` ajouté à la table existante des mots
+  exacts. Virgule optionnelle tolérée après tout préfixe exclu (`,?`) pour couvrir une citation
+  verbatim anglaise (« one of our upcoming models, Astra ») sans jamais réécrire la citation.
+- **Nettoyage éditorial des fiches déjà publiées (groupe OpenAI + le cas Topaz Labs) :** 7 fiches
+  (24760, 31239, 31456, 31487, 31490, 31500, 43770) portaient encore une mention BARE de « Astra »
+  (aucun qualifiant du tout) ailleurs sur la même page - la garde de préfixe, aussi générale
+  soit-elle, ne peut structurellement pas voir une mention sans aucun mot devant elle. Corrigé en
+  insérant « (son/le) modèle » ou « GPT-6 » devant chaque mention bare de la prose éditoriale
+  (jamais dans une citation verbatim). Résiduel documenté et assumé : la fiche 44891 conserve UN
+  lien faux à l'intérieur d'une citation anglaise qui commence PAR « Astra » (aucun mot ne la
+  précède, même dans le texte source) - aucune garde de préfixe ne peut fermer ce cas sans altérer
+  la citation, ce que la politique éditoriale du site interdit (article 29.2 LDA).
+
+### Tests
+- 5 tests neufs dans `GlossaryLinkifierTest` (2 blocages GPT-6/GPT-42.5, 2 blocages
+  d'élision, 1 JUMEAU qui prouve que « Astra » employé seul continue de lier vers Project Astra de
+  Google) - ROUGISSENT sans le correctif (vérifié en désactivant temporairement la boucle de
+  lecture d'`exclude_after_pattern`), VERTS avec. Suite `GlossaryLinkifierTest` complète : 60
+  tests, 101 assertions. Régression : module Core (Unit+Feature) 339 tests, module News
+  (`ToolNameProperNounSuffixTest`, `ComposerParagraphFauxComposeTest`, `GlossaryLinkDensityTest`,
+  `NewsToolSyncActionTest`) 33 tests, modules News (Unit)/Dictionary/Directory 463 tests - 835
+  tests au total, zéro régression.
+
 ## [1.254.9] - 2026-09-06
 
 ### Corrigé

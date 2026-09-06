@@ -716,3 +716,68 @@ it('le meme terme lie normalement quand le suffixe exclu est absent', function (
 
     expect($liens)->toBe(1, 'Hors du compose « Haiku OS », le terme doit continuer de lier.');
 });
+
+/**
+ * 2026-09-06 (ticket Astra) - GlossaryLinkifier::TOOL_PREFIX_PATTERN_EXCLUSIONS.
+ *
+ * Le lien /annuaire/astra (Project Astra, l'assistant de Google DeepMind) était posé sur
+ * des fiches qui parlent du modèle OpenAI GPT-6 Astra - deux entreprises concurrentes
+ * confondues sous les yeux du lecteur. Deux correctifs antérieurs (TOOL_COMPOUND_EXCLUSIONS
+ * 'astra' => ['modèle', 'modele', 'model', 'that']) avaient déjà fermé les composés exacts
+ * mesurés à l'époque, mais la récidive a pris deux formes que des MOTS EXACTS ne peuvent
+ * pas voir : un numéro de version qui change à chaque sortie (« GPT-6 Astra », demain
+ * « GPT-7 Astra ») et une élision française COLLÉE sans espace (« d'Astra », « qu'Astra »).
+ *
+ * Chaque garde « bloquée » ci-dessous a son JUMEAU qui prouve que la mention seule (le vrai
+ * Project Astra de Google) continue de lier : sans ce jumeau, une exclusion trop large
+ * passerait pour un succès en tuant aussi les liens légitimes - c'est exactement l'erreur
+ * qu'une mesure précédente (ticket #2128) a chiffrée à 0 % de précision sur un autre motif.
+ */
+function glxTermeAstra(): array
+{
+    return [['name' => 'Astra', 'slug' => 'astra', 'definition' => 'Test',
+             'type' => 'tool', 'url' => '/annuaire/astra', 'match_strategy' => 'case_sensitive',
+             'exclude_after_pattern' => GlossaryLinkifier::TOOL_PREFIX_PATTERN_EXCLUSIONS['astra']]];
+}
+
+it('ne lie pas Astra quand il est qualifié par un numéro de version GPT', function () {
+    [$dom, $root] = glxDomFromHtml('<p>GPT-6 Astra pose plus de questions que son prédécesseur.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeAstra(), false, 10);
+
+    expect($liens)->toBe(0, 'GPT-6 Astra désigne le modèle OpenAI, jamais Project Astra de Google.');
+    expect(str_contains($dom->saveHTML(), 'glossary-link'))->toBeFalse();
+});
+
+it('ne lie pas non plus un numéro de version GPT jamais vu - le patron généralise, pas un mot figé', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le futur GPT-42.5 Astra reste hypothétique pour le moment.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeAstra(), false, 10);
+
+    expect($liens)->toBe(0, 'Un patron regex doit couvrir GPT-42.5 sans jamais avoir été écrit mot pour mot dans une liste.');
+});
+
+it('ne lie pas Astra après une élision française collée (apostrophe de « d »)', function () {
+    [$dom, $root] = glxDomFromHtml("<p>OpenAI suspend le développement d'Astra après des tests inquiétants.</p>");
+
+    $liens = glxWalk($dom, $root, glxTermeAstra(), false, 10);
+
+    expect($liens)->toBe(0, "« d'Astra » désigne le modèle OpenAI dans ce contexte, jamais Google.");
+});
+
+it('ne lie pas Astra après l élision de « qu apostrophe »', function () {
+    [$dom, $root] = glxDomFromHtml("<p>OpenAI ne peut exclure qu'Astra possède des capacités critiques.</p>");
+
+    $liens = glxWalk($dom, $root, glxTermeAstra(), false, 10);
+
+    expect($liens)->toBe(0, "« qu'Astra » est la même collision qu'un espace : la garde doit voir les deux formes.");
+});
+
+it('JUMEAU INDISPENSABLE : Astra employé seul continue de lier vers Project Astra de Google', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Le projet Astra permet à l IA de traiter simultanément la vidéo et le texte.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermeAstra(), false, 10);
+
+    expect($liens)->toBe(1, 'Sans qualifiant OpenAI, Astra doit continuer de lier - sinon la garde est trop large et tue aussi les liens vrais.');
+    expect(str_contains($dom->saveHTML(), '/annuaire/astra'))->toBeTrue();
+});

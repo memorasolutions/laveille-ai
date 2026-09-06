@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
  */
 class GlossaryLinkifier
 {
-    public const CACHE_KEY = 'glossary.terms.v26.'; // 2026-09-05 bump v26 (exclude_suffix propage aux ALIAS, ticket #2241 - sans ce bump une entree v25 chaude servirait des alias SANS le champ jusqu'au TTL, et « Haiku OS » resterait lie). Historique v25 : 2026-09-05 bump v25 (alias « haïku » retire, ticket #2241 - MESURE : 3 liens legitimes contre 1 faux, donc le NOM « Haiku » reste auto-lie ; seul l'alias accentue, qui ne peut designer que le poeme japonais, est retire. Gain net sans perte). Historique v24 : 2026-09-05 bump v24 (« Haiku OS », ticket #2241 - sans ce bump une entree v23 chaude servirait des entrees glossaire SANS le champ exclude_suffix jusqu'au TTL, et le faux lien survivrait au deploiement). Historique v23 : 2026-09-05 bump v23 (ACRONYM_NEVER_AUTO « ai », ticket #2238 - 8 faux liens sur 8 mesures) - sans ce bump, une entree v22 chaude continuerait de servir le faux lien jusqu'au TTL. Historique v22 : // 2026-09-03 bump v22 (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202 - garde suffixe minuscule) - sans ce bump, une entrée v21 chaude servirait des entrées sans le champ exclude_suffix jusqu'au TTL. Historique v21 : // 2026-09-03 bump v21 (préfixe « that » ajouté à l'exclusion astra, fiche 42244 : faux lien déplacé dans une citation anglaise verbatim) - sans ce bump, une entrée v20 chaude servirait encore le faux lien jusqu'au TTL. Historique v20 : // 2026-09-02 bump v20 (TOOL_COMPOUND_EXCLUSIONS « modèle Astra », 7e récidive homonyme) - sans ce bump, une entrée v19 chaude servirait le faux lien vers /annuaire/astra jusqu'au TTL. Historique v19 : // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
+    public const CACHE_KEY = 'glossary.terms.v27.'; // 2026-09-06 bump v27 (TOOL_PREFIX_PATTERN_EXCLUSIONS, garde de préfixe en patron pour « GPT-6 Astra »/« d'Astra »/« qu'Astra » + exclude_after/exclude_after_pattern propagés aux alias d'outils + 'synaptics' ajouté à TOOL_COMPOUND_EXCLUSIONS['astra'] - ticket Astra) - sans ce bump, une entrée v26 chaude servirait des entrées SANS ces champs jusqu'au TTL, et les faux liens GPT-6 Astra/Synaptics Astra -> /annuaire/astra survivraient au déploiement. Historique v26 : 2026-09-05 bump v26 (exclude_suffix propage aux ALIAS, ticket #2241 - sans ce bump une entree v25 chaude servirait des alias SANS le champ jusqu'au TTL, et « Haiku OS » resterait lie). Historique v25 : 2026-09-05 bump v25 (alias « haïku » retire, ticket #2241 - MESURE : 3 liens legitimes contre 1 faux, donc le NOM « Haiku » reste auto-lie ; seul l'alias accentue, qui ne peut designer que le poeme japonais, est retire. Gain net sans perte). Historique v24 : 2026-09-05 bump v24 (« Haiku OS », ticket #2241 - sans ce bump une entree v23 chaude servirait des entrees glossaire SANS le champ exclude_suffix jusqu'au TTL, et le faux lien survivrait au deploiement). Historique v23 : 2026-09-05 bump v23 (ACRONYM_NEVER_AUTO « ai », ticket #2238 - 8 faux liens sur 8 mesures) - sans ce bump, une entree v22 chaude continuerait de servir le faux lien jusqu'au TTL. Historique v22 : // 2026-09-03 bump v22 (TOOL_SUFFIX_COMPOUND_EXCLUSIONS « Atlas danois », ticket #2202 - garde suffixe minuscule) - sans ce bump, une entrée v21 chaude servirait des entrées sans le champ exclude_suffix jusqu'au TTL. Historique v21 : // 2026-09-03 bump v21 (préfixe « that » ajouté à l'exclusion astra, fiche 42244 : faux lien déplacé dans une citation anglaise verbatim) - sans ce bump, une entrée v20 chaude servirait encore le faux lien jusqu'au TTL. Historique v20 : // 2026-09-02 bump v20 (TOOL_COMPOUND_EXCLUSIONS « modèle Astra », 7e récidive homonyme) - sans ce bump, une entrée v19 chaude servirait le faux lien vers /annuaire/astra jusqu'au TTL. Historique v19 : // 2026-09-01 bump v19 (mot "autonomie"/"autonomies") : ALIAS_NEVER_AUTO gagne les deux (voir plus bas) - sans ce bump, une entrée v18 déjà chaude continuerait de dériver et de matcher la base "autonomie" jusqu'à expiration du TTL, faux lien MESURÉ en production (81 des 137 pages liées vers /glossaire/autonomie-ia au mauvais sens - batterie/véhicule ou humain/géopolitique) avant d'être neutralisé.
     public const CACHE_TTL = 3600; // 1h
     // 2026-08-02 #1526 : compteur d'epoch pour invalider le cache du RÉSULTAT linkify() (voir linkify()
     // et flushCache()) sans avoir à énumérer des clés — un seul Cache::forever() invalide tout d'un coup.
@@ -176,7 +176,18 @@ class GlossaryLinkifier
         // intouchable éditorialement. « that » ne précède jamais une mention française légitime
         // du Project Astra (mot anglais) : le perdre ne coûte aucun lien vrai, doctrine du
         // fichier (un lien perdu n'est jamais une régression, un lien faux oui).
-        'astra' => ['modèle', 'modele', 'model', 'that'],
+        // 2026-09-06 (tri complet des 16 fiches vivantes portant le lien, ticket Astra) : le tri
+        // a révélé un TROISIÈME « Astra » sans rapport - « Synaptics Astra » est une gamme de
+        // processeurs IA embarqués du fabricant Synaptics (fiche 14290, « Google launches a tiny
+        // board that runs Gemma 3 locally » : le Coral Board embarque un « processeur Synaptics
+        // Astra SL2619 »). Ni OpenAI ni Google DeepMind - un TROISIÈME acteur, même mot, même
+        // collision. Measuré : aucune mention légitime du Project Astra de Google n'emploie
+        // « Synaptics » comme préfixe sur le corpus vérifié (19 fiches vivantes).
+        // 2026-09-06 : 'models' (pluriel) ajouté pour la même citation verbatim (fiche 31500,
+        // « one of our upcoming models, Astra ») - combiné à la virgule optionnelle ajoutée dans
+        // matchInText() (voir commentaire sur $debutDeMot), ferme le dernier cas mesuré où le
+        // préfixe existait déjà mais au SINGULIER seulement.
+        'astra' => ['modèle', 'modele', 'model', 'models', 'that', 'synaptics'],
     ];
 
     /**
@@ -207,6 +218,42 @@ class GlossaryLinkifier
         // Basho ») mais PAS un second nom propre capitalise - la frontiere du linkifier borne un
         // MOT, jamais une locution. Meme mecanique que « Atlas danois » juste au-dessus.
         'haiku' => ['os'],
+    ];
+
+    /**
+     * 2026-09-06 (ticket Astra, récidive malgré TOOL_COMPOUND_EXCLUSIONS['astra'] déjà posée en
+     * v1.247.7/v1.247.8) : le tri des 16 fiches vivantes portant le lien /annuaire/astra a montré
+     * que la liste de MOTS EXACTS ('modèle', 'modele', 'model', 'that') ne ferme jamais la CLASSE
+     * du défaut, seulement les cas déjà vus. Deux nouvelles familles, prouvées sur le corpus réel
+     * de septembre, lui échappent par construction :
+     *
+     *  1. Un numéro de version qui grandit sans fin - « GPT-6 Astra » (fiches 44683, 44892,
+     *     43770, 44891, 44893) aujourd'hui, « GPT-7 Astra » demain. Une liste de mots exacts
+     *     devrait être réécrite à CHAQUE nouvelle version ; un patron numérique la ferme une
+     *     fois pour toutes.
+     *  2. Une élision française SANS ESPACE - « d'Astra », « qu'Astra » (fiches 31239, 31456,
+     *     31500, 31490, 42244) : TOOL_COMPOUND_EXCLUSIONS n'exclut que sur un mot suivi d'un
+     *     espace (voir `$debutDeMot` dans matchInText()), donc ne voit jamais un qualifiant
+     *     collé par une apostrophe. MESURÉ sur ce même corpus : les 4 fiches Google Project
+     *     Astra n'emploient JAMAIS cette forme élidée - aucune perte de lien légitime constatée.
+     *
+     * Symétrique de TOOL_COMPOUND_EXCLUSIONS mais en PATRONS REGEX plutôt qu'en mots littéraux
+     * figés (clé = nom en minuscules ; valeur = liste de ['pattern' => fragment regex BRUT,
+     * jamais preg_quote - c'est déjà un patron, 'attached' => true si le qualifiant est collé
+     * SANS espace comme une élision, false s'il est séparé par un espace comme un nom composé
+     * classique). Une future collision du même GENRE (« Claude Haiku », « OpenAI Codex »...)
+     * s'ajoute ici en une ligne de donnée, jamais en dupliquant matchInText().
+     *
+     * Portée volontairement limitée aux entrées où le champ est POSÉ dans loadTerms() (nom
+     * d'outil ET alias d'outil - voir la leçon de l'alias « Haiku » ticket #2241, jamais
+     * seulement le nom) : glossaire/acronyme n'ont pas ce risque, même raisonnement que
+     * TOOL_COMPOUND_EXCLUSIONS ci-dessus.
+     */
+    public const TOOL_PREFIX_PATTERN_EXCLUSIONS = [
+        'astra' => [
+            ['pattern' => 'gpt-\d{1,3}(?:\.\d{1,2})?', 'attached' => false],
+            ['pattern' => "(?:d|qu)['\u{2019}]", 'attached' => true],
+        ],
     ];
 
     /**
@@ -698,6 +745,9 @@ class GlossaryLinkifier
                                     // 2026-09-03 : faux composés côté SUFFIXE minuscule (« Atlas danois ») -
                                     // voir TOOL_SUFFIX_COMPOUND_EXCLUSIONS (ticket #2202).
                                     'exclude_suffix' => self::TOOL_SUFFIX_COMPOUND_EXCLUSIONS[$lower] ?? [],
+                                    // 2026-09-06 : faux composés côté PRÉFIXE en PATRON (numéro de version qui
+                                    // grandit sans fin, élision française collée) - voir TOOL_PREFIX_PATTERN_EXCLUSIONS.
+                                    'exclude_after_pattern' => self::TOOL_PREFIX_PATTERN_EXCLUSIONS[$lower] ?? [],
                                 ];
                                 $takenLower[$lower] = true;
 
@@ -724,6 +774,15 @@ class GlossaryLinkifier
                                             'url'            => $url,
                                             'match_strategy' => 'case_sensitive',
                                             'origin_rank'    => self::ORIGIN_CURATED_ALIAS,
+                                            // 2026-09-06 : un ALIAS d'outil ne portait NI exclude_after NI
+                                            // exclude_after_pattern (angle mort déjà mesuré côté glossaire pour
+                                            // exclude_suffix, ticket #2241, « Haiku » premier alias de sa fiche).
+                                            // Aucun outil publié n'a aujourd'hui d'alias dans ces deux tables -
+                                            // donc zéro changement de comportement actuel - mais un futur cas
+                                            // (« Claude Haiku » comme alias) sera couvert dès son ajout aux tables,
+                                            // sans qu'il faille se souvenir de revenir modifier ce bloc-ci.
+                                            'exclude_after' => self::TOOL_COMPOUND_EXCLUSIONS[$aliasLower] ?? [],
+                                            'exclude_after_pattern' => self::TOOL_PREFIX_PATTERN_EXCLUSIONS[$aliasLower] ?? [],
                                         ];
                                         $takenLower[$aliasLower] = true;
                                     }
@@ -1199,6 +1258,11 @@ class GlossaryLinkifier
         // #158 flush toutes les versions cache (v2-v8) pour migration propre
         foreach (['fr_CA', 'fr', 'en', 'en_CA'] as $loc) {
             Cache::forget(self::CACHE_KEY.$loc);
+            // 2026-09-06 : v26 ajoutée ici en même temps que le bump v27 (TOOL_PREFIX_PATTERN_EXCLUSIONS,
+            // ticket Astra) - sans cette ligne, une clé v26 déjà chaude resterait servie jusqu'à
+            // l'expiration de son TTL après un flush explicite (celui déclenché par la sauvegarde
+            // d'une fiche, hors déploiement).
+            Cache::forget('glossary.terms.v26.'.$loc);
             // 2026-09-05 : v22 ajoutee ici en meme temps que le bump v23 (ACRONYM_NEVER_AUTO
             // « ai », ticket #2238) - meme raison que les notes suivantes : sans cette ligne, une
             // cle v22 deja chaude resterait servie jusqu'a l'expiration de son TTL apres un flush
@@ -1419,9 +1483,27 @@ class GlossaryLinkifier
             // (préfixe + 1 espace, casse insensible sur le seul préfixe) : rejette UNIQUEMENT le
             // composé précis, jamais le terme employé seul ailleurs dans le même texte ou la même
             // page - donc aucune récursion/boucle à changer dans matchInText()/walkAndReplace().
+            // 2026-09-06 (ticket Astra, fiche 31500) : virgule optionnelle `,?` ajoutée entre le
+            // préfixe et l'espace - une citation VERBATIM anglaise « one of our upcoming models,
+            // Astra » ne peut pas être réécrite éditorialement (même doctrine que le préfixe
+            // « that », v1.247.8), et la virgule après « models » empêchait le préfixe pluriel de
+            // matcher. Amélioration GÉNÉRALE (profite à toute entrée de la table, pas seulement
+            // Astra) : une virgule après un préfixe exclu ne change jamais le sens de l'exclusion.
             $debutDeMot = '';
             foreach (($term['exclude_after'] ?? []) as $prefixExclu) {
-                $debutDeMot .= '(?<!(?i:'.preg_quote($prefixExclu, '/').')[\s\x{00A0}])';
+                $debutDeMot .= '(?<!(?i:'.preg_quote($prefixExclu, '/').'),?[\s\x{00A0}])';
+            }
+            // 2026-09-06 : garde de FAUX COMPOSÉ côté PRÉFIXE EN PATRON (TOOL_PREFIX_PATTERN_EXCLUSIONS,
+            // ex. « GPT-6 Astra », « d'Astra »/« qu'Astra »). Généralise le lookbehind ci-dessus (mots
+            // EXACTS) à des FAMILLES de qualifiants : un patron regex (numéro de version qui grandit
+            // sans fin) ou une élision française COLLÉE sans espace ('attached' => true, aucun séparateur
+            // injecté) - ce que la boucle ci-dessus ne peut pas exprimer (elle exige toujours un espace
+            // entre le préfixe exclu et le terme). PCRE2 accepte des alternatives de longueurs différentes
+            // dans un lookbehind (vérifié : `(?<!(?:d|qu)['’])` compile et s'exécute sans erreur) - donc
+            // aucun risque de lookbehind à largeur variable non bornée ici, chaque patron reste borné.
+            foreach (($term['exclude_after_pattern'] ?? []) as $prefixPattern) {
+                $separateur = ($prefixPattern['attached'] ?? false) ? '' : '[\s\x{00A0}]';
+                $debutDeMot .= '(?<!(?i:'.$prefixPattern['pattern'].')'.$separateur.')';
             }
             // 2026-09-03 (ticket #2202) : garde de FAUX COMPOSÉ côté SUFFIXE MINUSCULE
             // (TOOL_SUFFIX_COMPOUND_EXCLUSIONS, ex. « Atlas danois » = l'atlas mycologique du
