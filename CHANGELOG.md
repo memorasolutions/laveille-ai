@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.255.0] - 2026-09-06
+
+### Ajouté
+- **Huitième valeur de « nature de l'original » : `article_journalistique`.** MESURE (ticket #2311,
+  en production) : sur les 270 fiches passées par /actu2, 150 (56 %) avaient ce champ VIDE. Le tri
+  par hôte de ces 150 est sans ambiguïté - 85 à 87 % viennent d'un média établi (TechCrunch 20,
+  LeBigData 21, The Decoder 15, The Verge 13, Wired 13, Journal du Net 11...), et l'original
+  retrouvé y EST lui-même un article de reportage : ni communiqué, ni étude, ni message, ni
+  conférence en amont. Aucune des sept valeurs ne s'y appliquait.
+- Pourquoi le ticket #1915 (2026-08-30) ne l'avait pas vue alors qu'elle était déjà majoritaire :
+  ses trois ajouts étaient tirés de cas particuliers repérés un par un. La catégorie la plus
+  fréquente est si banale qu'elle ne se remarque pas en parcourant des exemples. **Il a fallu
+  compter, pas échantillonner.**
+- La constante `NewsArticle::NATURE_ORIGINAL_VALUES` est la source unique : l'écran de composition,
+  la validation et la porte d'écriture la lisent tous, donc l'ajout tient en une ligne. Le test qui
+  VERROUILLE le vocabulaire a rougi à l'ajout - c'est exactement son rôle - et a été mis à jour
+  avec la mesure qui motive la huitième clé. Le skill /actu2 est aligné, concordance vérifiée
+  programmatiquement (0 valeur du code absente du skill).
+
 ## [1.254.14] - 2026-09-06
 
 ### Modifié

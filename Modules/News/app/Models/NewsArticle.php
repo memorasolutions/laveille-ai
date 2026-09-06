@@ -1199,6 +1199,29 @@ class NewsArticle extends Model implements Searchable
      *   distincte d'un message spontané (ex. fiche 37573 - entrevue de Sam Altman - laissée vide ;
      *   fiche 35337 - entrevue de Boris Cherny chez Y Combinator - forcée à tort en
      *   'annonce_commerciale').
+     *
+     * Mesure du 2026-09-06 (ticket #2311), sur la MÊME population, six jours plus tard : 270
+     * fiches passées par /actu2, dont 150 (56 %) toujours vides. Le tri par hôte des 150 est sans
+     * ambiguïté : 85 à 87 % viennent d'un média établi (TechCrunch 20, LeBigData 21, The Decoder
+     * 15, The Verge 13, Wired 13, Journal du Net 11...), et l'original retrouvé y EST lui-même un
+     * article de reportage ou d'analyse - aucun communiqué, aucune étude, aucun message, aucune
+     * conférence en amont. Aucune des sept valeurs ne s'y applique.
+     *
+     * Pourquoi #1915 ne l'avait pas vue, alors qu'elle était déjà majoritaire : l'ajout de trois
+     * valeurs y avait été tiré de CAS PARTICULIERS observés un par un (une conférence, un dépôt,
+     * une entrevue). La catégorie la plus fréquente, elle, est si banale qu'elle ne se remarque
+     * pas en parcourant des exemples - un article de journaliste ne « saute pas aux yeux » comme
+     * une anomalie. Il a fallu compter, pas échantillonner.
+     *
+     * - 'article_journalistique' : l'original est un article de reportage, d'analyse ou d'enquête
+     *   signé par un ou une journaliste (média établi) ou par un auteur indépendant, sans source
+     *   plus fondamentale en amont. C'est le cas le plus fréquent d'une veille d'actualité, et il
+     *   n'avait aucune valeur jusqu'ici.
+     *
+     * RESTE À FAIRE, distinct et à ne pas confondre (ticket #2311) : ~15 fiches sur 150 (10 %) ne
+     * manquent d'AUCUNE valeur - elles auraient dû recevoir 'annonce_commerciale' ou
+     * 'projet_communautaire' et ne l'ont jamais reçu. C'est un défaut de rétro-application, pas de
+     * taxonomie : il se corrige par un rattrapage, jamais par une valeur de plus.
      */
     public const NATURE_ORIGINAL_VALUES = [
         'annonce_commerciale' => 'Annonce commerciale',
@@ -1208,6 +1231,7 @@ class NewsArticle extends Model implements Searchable
         'contenu_educatif' => 'Contenu éducatif',
         'projet_communautaire' => 'Projet communautaire',
         'entrevue_publiee' => 'Entrevue publiée',
+        'article_journalistique' => 'Article journalistique',
     ];
 
     /**

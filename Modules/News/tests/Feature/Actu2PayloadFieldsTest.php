@@ -141,7 +141,11 @@ it('still refuses a value absent from NewsArticle::NATURE_ORIGINAL_VALUES after 
     expect($article->fresh()->nature_original)->toBeNull();
 });
 
-it('NewsArticle::NATURE_ORIGINAL_VALUES carries the seven expected keys, each with a non-empty French label', function () {
+it('NewsArticle::NATURE_ORIGINAL_VALUES carries the eight expected keys, each with a non-empty French label', function () {
+    // 'article_journalistique' ajoutee le 2026-09-06 (ticket #2311) : mesure sur les 150 fiches
+    // /actu2 au champ vide - 85 a 87 % venaient d'un media etabli dont l'original EST lui-meme un
+    // article de reportage, cas qu'aucune des sept valeurs ne couvrait. Ce test VERROUILLE le
+    // vocabulaire : il a rougi a l'ajout, ce qui est exactement son role.
     expect(array_keys(NewsArticle::NATURE_ORIGINAL_VALUES))->toBe([
         'annonce_commerciale',
         'etude_evaluee',
@@ -150,6 +154,7 @@ it('NewsArticle::NATURE_ORIGINAL_VALUES carries the seven expected keys, each wi
         'contenu_educatif',
         'projet_communautaire',
         'entrevue_publiee',
+        'article_journalistique',
     ]);
 
     foreach (NewsArticle::NATURE_ORIGINAL_VALUES as $valeur => $libelle) {
