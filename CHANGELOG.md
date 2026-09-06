@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.254.8] - 2026-09-06
+
+### Corrigé
+- **La commande `typo:apply-fr` ignorait en silence une partie des champs qu'elle prétendait
+  traiter (ticket #2290).** Le plan déclarait des colonnes et une table absentes du schéma réel
+  (`dictionary_terms.term/context`, `news_articles.excerpt/content`,
+  `articles.meta_title/meta_description`, la table `pages` au lieu de `static_pages`,
+  `testimonials.name`) : l'ancien code les filtrait par `array_filter` sur `Schema::hasColumn()`
+  ou sautait la table avec un simple `warn()`, sans jamais faire échouer la commande. Ces champs
+  n'étaient donc JAMAIS typographiés, sans le moindre signal.
+- Le plan est corrigé contre le schéma réel (`Schema::getColumnListing()`), pas contre une
+  supposition sur le nom du modèle. Une nouvelle garde `guardPlanIntegrity()` fait désormais
+  échouer la commande AVANT toute lecture ou écriture de ligne dès qu'une table ou une colonne du
+  plan ne correspond pas au schéma, en nommant la table et la colonne fautives. Le seul silence
+  qui reste légitime est celui d'une table portée par un module nwidart désactivé
+  (`modules_statuses.json`), whitelisté explicitement plutôt que déduit.
+
+### Tests
+- Trois cas neufs dans `TypoApplyFrCommandTest` : refus d'une colonne disparue d'une table
+  existante, acceptation du plan curaté complet contre le schéma réel, refus d'une table absente
+  qu'aucun module désactivé n'explique.
+
 ## [1.254.7] - 2026-09-05
 
 ### Corrigé
