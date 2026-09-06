@@ -100,3 +100,10 @@ logo-white-canvas.txt
 # 504 Ko de copies du journal suivies par erreur).
 *.bak
 *.bak-*
+*.backup-*
+*.avant-*
+
+# Captures produites par le code lui-meme (Storage::disk('public')->put('news-screenshots/...')).
+# Ce sont des DONNEES generees, pas des sources : elles se recreent, et les versionner les
+# ferait partir en production a chaque deploiement.
+/public/news-screenshots/
