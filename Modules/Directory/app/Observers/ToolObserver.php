@@ -11,6 +11,41 @@ use Modules\Directory\Services\EcosystemCountService;
 
 class ToolObserver
 {
+    /**
+     * Ticket #2289 (2026-09-05) - POINT UNIQUE de la garde contre la jonction schéma/séparateur
+     * cassée par une espace insécable (ex. "https ://domaine", href résolu comme un chemin
+     * RELATIF, URL mortes explorées par les robots). Déplacée ICI, sur l'écriture du modèle,
+     * après un premier tour qui l'avait posée sur trois commandes seulement : un recensement a
+     * montré une douzaine d'autres appelants (DirectoryAdminController, IngestController,
+     * PublicDirectoryController, ToolDiscoveryService, ConvertPricesCadCommand, des seeders...)
+     * qui écrivent les deux mêmes champs SANS passer par ces trois commandes.
+     *
+     * LEÇON DU 2026-09-05 sur ce même projet (exclusion d'auto-lien posée sur le NOM d'un terme,
+     * jamais sur ses ALIAS - deux correctifs livrés sans effet réel, le mauvais point de
+     * fabrication) : une garde qui vit sur l'appelant ne protège QUE l'appelant où elle est
+     * posée. En la mettant sur `saving()`, TOUT chemin d'écriture, existant ou futur, est fermé
+     * par le même geste - c'est la même connaissance métier appliquée au même endroit.
+     *
+     * CHAQUE locale est traitée, jamais seulement fr_CA : mesuré le 2026-09-05, certaines fiches
+     * portent aussi des traductions 'fr' et 'en' sur ces deux champs. getTranslations() renvoie
+     * la structure décodée {locale => texte} quelle que soit la locale active du modèle.
+     */
+    public function saving(Tool $tool): void
+    {
+        foreach (['description', 'short_description'] as $champ) {
+            foreach ($tool->getTranslations($champ) as $locale => $valeur) {
+                if (! is_string($valeur) || $valeur === '') {
+                    continue;
+                }
+
+                $repare = lv_repare_jonction_schema_url($valeur);
+                if ($repare !== $valeur) {
+                    $tool->setTranslation($champ, $locale, $repare);
+                }
+            }
+        }
+    }
+
     public function saved(Tool $tool): void
     {
         // La capture est DISPATCHÉE, jamais exécutée ici (2026-08-23). Elle l'était en

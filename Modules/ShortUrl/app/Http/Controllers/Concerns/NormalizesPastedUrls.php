@@ -24,9 +24,11 @@ trait NormalizesPastedUrls
     // RAISON: trim() ne retire QUE " \t\n\r\0\x0B". Il laisse passer l'espace
     // insecable U+00A0, les espaces fins U+2000-200A, le U+200B et le BOM U+FEFF,
     // qui sont precisement ce que produisent les collages depuis un tableur ou une
-    // page web. \p{Z} couvre les separateurs Unicode, \p{C} les caracteres de
-    // controle et de format. Les blancs INTERNES ne sont jamais touches : on ne
-    // reecrit pas l'adresse de l'usager, on enleve seulement ce qui l'entoure.
+    // page web. LV_URL_BLANCS_INVISIBLES (app/Helpers/typo.php) est la SOURCE UNIQUE
+    // de cette classe de caracteres (ticket #2289, 2026-09-05 - avant ce correctif elle
+    // etait dupliquee ici en dur) : \p{Z} couvre les separateurs Unicode, \p{C} les
+    // caracteres de controle et de format. Les blancs INTERNES ne sont jamais touches :
+    // on ne reecrit pas l'adresse de l'usager, on enleve seulement ce qui l'entoure.
     protected function normalizePastedUrls(Request $request): void
     {
         $propres = [];
@@ -38,7 +40,7 @@ trait NormalizesPastedUrls
                 continue;
             }
 
-            $nettoyee = preg_replace('/^[\p{Z}\p{C}\s]+|[\p{Z}\p{C}\s]+$/u', '', $valeur);
+            $nettoyee = preg_replace('/^['.LV_URL_BLANCS_INVISIBLES.'\s]+|['.LV_URL_BLANCS_INVISIBLES.'\s]+$/u', '', $valeur);
 
             // preg_replace rend null sur erreur (ex. sequence UTF-8 invalide) :
             // on garde alors la valeur d'origine plutot que de vider le champ.

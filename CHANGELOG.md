@@ -1,6 +1,30 @@
 # Changelog
 
-## [1.254.6] - 2026-09-05
+## [1.254.7] - 2026-09-05
+
+### Corrigé
+- **Des liens de fiches d'annuaire menaient à des adresses inexistantes (ticket #2289).** Un
+  espace insécable (U+00A0) se glissait entre `https` et `://` dans les descriptions rédigées par
+  le pipeline d'enrichissement IA. Le rendu Markdown produisait alors `href="https ://domaine"` :
+  le schéma n'était plus reconnu, l'adresse était résolue comme un chemin relatif du site
+  (`/annuaire/https%C2%A0://domaine`), une page inexistante explorée depuis le 18 mai 2026 par
+  Googlebot, Bingbot, GPTBot, ClaudeBot, Applebot et Baiduspider. 96 fiches étaient touchées en
+  production, dont 68 avec un lien réellement cassé.
+- La réparation est chirurgicale : seule la jonction schéma/séparateur est visée
+  (`lv_repare_jonction_schema_url()`, `app/Helpers/typo.php`), jamais un nettoyage général des
+  espaces insécables - la typographie française en a légitimement besoin ailleurs (avant un
+  deux-points, entre un nombre et son unité ou son symbole monétaire).
+- La garde est posée sur l'écriture du modèle (`ToolObserver::saving()`), donc sur TOUT chemin
+  d'écriture des descriptions, existant ou futur - pas seulement les commandes d'enrichissement
+  d'où venait le défaut. Toutes les locales d'une fiche sont couvertes, pas seulement le français.
+- Nouvelle commande `tools:repair-scheme-separator` pour corriger les fiches déjà écrites en
+  production : `--dry-run` pour mesurer l'ampleur avant d'agir, sauvegarde horodatée écrite avant
+  toute mutation, `--restore` pour revenir exactement à l'état d'avant si nécessaire.
+
+### Tests
+- Couverture rouge sans la garde puis verte avec, sur les trois points d'écriture (fonction
+  partagée, observateur du modèle, commande de rattrapage) ; 288 tests du module Directory
+  toujours verts.
 
 ### Corrigé
 - **L'écran de composition des actualités ne se charge plus parfois à vide (ticket #2210).** Le

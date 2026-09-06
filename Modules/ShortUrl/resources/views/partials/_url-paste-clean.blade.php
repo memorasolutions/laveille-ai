@@ -13,6 +13,12 @@
   valeur que le serveur modifiait ensuite. Toute evolution de l'un des deux motifs
   doit etre reportee dans l'autre, sinon la divergence revient.
 
+  SOURCE UNIQUE cote PHP (ticket #2289, 2026-09-05) : la classe \p{Z}\p{C} n'est
+  plus dupliquee en PHP, elle vit dans la constante LV_URL_BLANCS_INVISIBLES
+  (app/Helpers/typo.php). Le JS ci-dessous ne peut pas lire un fichier PHP : il
+  reste une COPIE manuelle de cette constante, jamais mise a jour automatiquement.
+  Toute evolution de LV_URL_BLANCS_INVISIBLES doit encore etre reportee ICI a la main.
+
   MESURE du meme jour : le formulaire PUBLIC n'a pas d'attribut name, il passe par
   Alpine (x-model="url") et envoie son propre etat, pas champ.value. D'ou
   l'evenement input reemis apres nettoyage : il resynchronise Alpine comme Livewire.

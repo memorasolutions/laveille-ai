@@ -87,6 +87,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\HealthCheckReportCommand::class,
             \Modules\Directory\Console\AuditTutorialsCommand::class,
             \Modules\Directory\Console\ModerateTutorialsCommand::class,
+            \Modules\Directory\Console\RepairSchemeSeparatorCommand::class,
         ]);
     }
 

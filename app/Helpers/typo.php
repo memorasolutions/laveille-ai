@@ -38,6 +38,77 @@ declare(strict_types=1);
  *   - Console : php artisan typo:apply-fr --dry
  */
 
+/**
+ * Classe de caractères Unicode considérés comme des blancs INVISIBLES dans le contexte
+ * d'une URL (espace insécable, espaces fins, largeur nulle, isolats bidirectionnels,
+ * BOM, autres formats de contrôle - voir \p{Z} et \p{C} de la table Unicode).
+ *
+ * SOURCE UNIQUE de cette connaissance (ticket #2289, 2026-09-05). Avant ce correctif,
+ * la même classe `\p{Z}\p{C}` vivait dupliquée à deux endroits, avec un commentaire
+ * demandant de reporter à la main toute évolution de l'un dans l'autre :
+ *   - Modules/ShortUrl/app/Http/Controllers/Concerns/NormalizesPastedUrls.php (PHP,
+ *     trim des BORDS d'un champ URL collé avant validation) ;
+ *   - Modules/ShortUrl/resources/views/partials/_url-paste-clean.blade.php (JS côté
+ *     navigateur, même nettoyage, exécuté avant l'envoi au serveur).
+ *
+ * Le trait PHP référence désormais cette constante (la duplication PHP a disparu).
+ * Le JS ne peut pas lire un fichier PHP : son commentaire pointe ici, et toute évolution
+ * de cette classe doit encore être reportée à la main dans le fichier JS - ce report
+ * manuel reste le seul point de duplication restant, documenté des deux côtés.
+ *
+ * Utilisée aussi par lv_repare_jonction_schema_url() ci-dessous, qui répare UNIQUEMENT
+ * la jonction schéma/séparateur d'une URL (jamais un nettoyage général des blancs
+ * invisibles - la typographie française insécable ailleurs dans un texte est légitime
+ * et ne doit jamais être touchée par cette classe de caractères).
+ */
+if (! defined('LV_URL_BLANCS_INVISIBLES')) {
+    define('LV_URL_BLANCS_INVISIBLES', '\p{Z}\p{C}');
+}
+
+if (! function_exists('lv_repare_jonction_schema_url')) {
+    /**
+     * Retire les caractères Unicode invisibles glissés entre le schéma (http/https) et
+     * son séparateur (:// ou, variante déjà vue dans les journaux, :/ à un seul slash).
+     *
+     * Ticket #2289 (2026-09-05) : un espace insécable (U+00A0) s'invite entre `https`
+     * et `://` dans les descriptions rédigées par le pipeline d'enrichissement IA.
+     * `Str::markdown()` produit alors `href="https ://domaine"` - le schéma n'est plus
+     * reconnu, l'adresse est résolue comme un chemin RELATIF, d'où des URL mortes
+     * explorées par les robots (bingbot, GPTBot, ClaudeBot, Applebot, Baiduspider,
+     * Googlebot).
+     *
+     * CHIRURGICALE PAR CONCEPTION : ne vise QUE la jonction schéma-séparateur. Un
+     * `trim()` ou un nettoyage général des insécables sur ces mêmes textes est
+     * FORMELLEMENT INTERDIT ailleurs - la typographie québécoise en impose légitimement
+     * avant un deux-points, autour des guillemets, entre un nombre et son unité ou son
+     * symbole monétaire (ex. « 8,5 % », « 24,99 $ », « 25 cm », « Voici : le résultat »).
+     * Cette fonction ne touche à AUCUN de ces cas : elle n'agit qu'après la sous-chaîne
+     * littérale `http` ou `https`, immédiatement suivie d'invisibles puis de `:/` ou `://`.
+     *
+     * Idempotent (une deuxième application ne change plus rien).
+     *
+     * Usage : lv_repare_jonction_schema_url($texte) avant écriture en base, sur toute
+     * description rédigée par un pipeline automatisé (voir Modules/Directory/app/Console/
+     * EnrichPendingCommand.php, ReenrichStaleCommand.php, DirectoryEnrichToolsCommand.php).
+     */
+    function lv_repare_jonction_schema_url(?string $texte): string
+    {
+        if ($texte === null || $texte === '') {
+            return $texte ?? '';
+        }
+
+        $repare = preg_replace(
+            '/(https?)['.LV_URL_BLANCS_INVISIBLES.']+(:\/{1,2})/u',
+            '$1$2',
+            $texte
+        );
+
+        // preg_replace rend null sur erreur (ex. séquence UTF-8 invalide) : on garde
+        // alors le texte d'origine plutôt que de le vider.
+        return $repare ?? $texte;
+    }
+}
+
 if (! function_exists('lv_typo_fr_apply_rules')) {
     /**
      * Applique les règles sur un fragment de texte brut (sans HTML).
