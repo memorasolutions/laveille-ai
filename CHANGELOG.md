@@ -12,12 +12,22 @@
   (« d'Astra », « qu'Astra »). Il a aussi révélé un TROISIÈME « Astra » sans rapport avec OpenAI ou
   Google - « Synaptics Astra », une gamme de processeurs IA embarqués (fiche 14290).
 - Nouvelle table `GlossaryLinkifier::TOOL_PREFIX_PATTERN_EXCLUSIONS`, symétrique en PATRONS regex
-  de la table existante `TOOL_COMPOUND_EXCLUSIONS` (mots exacts) : un patron numérique
-  (`gpt-\d{1,3}(?:\.\d{1,2})?`) et un patron d'élision collée (`(?:d|qu)['']`, sans séparateur),
-  posée sur le nom ET les alias d'un outil (l'alias n'en portait aucune jusqu'ici - même angle
-  mort que le ticket #2241 sur le glossaire). `'synaptics'` ajouté à la table existante des mots
-  exacts. Virgule optionnelle tolérée après tout préfixe exclu (`,?`) pour couvrir une citation
-  verbatim anglaise (« one of our upcoming models, Astra ») sans jamais réécrire la citation.
+  de la table existante `TOOL_COMPOUND_EXCLUSIONS` (mots exacts), posée sur le nom ET les alias
+  d'un outil (l'alias n'en portait aucune jusqu'ici - même angle mort que le ticket #2241 sur le
+  glossaire). `'synaptics'` ajouté à la table existante des mots exacts. Virgule optionnelle
+  tolérée après tout préfixe exclu (`,?`) pour couvrir une citation verbatim anglaise (« one of
+  our upcoming models, Astra ») sans jamais réécrire la citation.
+- **Piège PCRE détecté par la CI, corrigé avant tout déploiement** : la première version des
+  patrons (`gpt-\d{1,3}(?:\.\d{1,2})?`, `(?:d|qu)['']`) compilait et passait tous les tests en
+  LOCAL (PHP 8.4/PCRE2 récent, Homebrew), mais échouait sur la CI (PHP 8.4/PCRE2 différent) avec
+  `Compilation failed: lookbehind assertion is not fixed length` - un lookbehind PCRE DOIT être à
+  largeur FIXE, et un quantificateur `{1,3}` ou une alternation de branches de longueurs
+  différentes ne compile que sur les versions de PCRE2 récentes (>= 10.43, support ajouté pour le
+  lookbehind à largeur variable BORNÉE). L'échec de compilation désactivait TOUTE la garde pour
+  « Astra », y compris les mentions légitimes (0 lien au lieu de 1 sur le test jumeau). Corrigé en
+  énumérant une entrée par LARGEUR EXACTE (`gpt-\d`, `gpt-\d\d`, `gpt-\d\.\d`... ; `d['']` et
+  `qu['']` séparés) plutôt qu'un quantificateur ou une alternation multi-longueur dans un seul
+  lookbehind - comportement identique, portable sur toute version de PCRE.
 - **Nettoyage éditorial des fiches déjà publiées (groupe OpenAI + le cas Topaz Labs) :** 7 fiches
   (24760, 31239, 31456, 31487, 31490, 31500, 43770) portaient encore une mention BARE de « Astra »
   (aucun qualifiant du tout) ailleurs sur la même page - la garde de préfixe, aussi générale

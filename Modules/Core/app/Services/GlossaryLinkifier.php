@@ -248,11 +248,31 @@ class GlossaryLinkifier
      * d'outil ET alias d'outil - voir la leçon de l'alias « Haiku » ticket #2241, jamais
      * seulement le nom) : glossaire/acronyme n'ont pas ce risque, même raisonnement que
      * TOOL_COMPOUND_EXCLUSIONS ci-dessus.
+     *
+     * ⚠️ CHAQUE patron DOIT être à LARGEUR FIXE (aucun quantificateur variable `{1,3}`, aucune
+     * alternation `(?:d|qu)` dont les branches n'ont pas la même longueur) : PCRE exige un
+     * lookbehind à largeur fixe. `gpt-\d{1,3}(?:\.\d{1,2})?` et `(?:d|qu)['’]` COMPILENT sur
+     * PCRE2 récent (>= 10.43, support ajouté pour le lookbehind à largeur variable BORNÉE) mais
+     * ÉCHOUENT sur la CI - mesuré le 2026-09-06, échec `preg_match(): Compilation failed:
+     * lookbehind assertion is not fixed length`, qui désactivait TOUTE la garde pour ce terme, y
+     * compris les mentions LÉGITIMES (le pattern entier refuse de compiler, donc plus aucun match
+     * du tout). Une variante différente par longueur EXACTE, jamais un quantificateur ni une
+     * alternation multi-longueur dans un seul lookbehind.
      */
     public const TOOL_PREFIX_PATTERN_EXCLUSIONS = [
         'astra' => [
-            ['pattern' => 'gpt-\d{1,3}(?:\.\d{1,2})?', 'attached' => false],
-            ['pattern' => "(?:d|qu)['\u{2019}]", 'attached' => true],
+            // Numéro de version OpenAI - une entrée par largeur exacte (1 ou 2 chiffres,
+            // 0/1/2 décimales) plutôt qu'un quantificateur variable dans le lookbehind.
+            ['pattern' => 'gpt-\d', 'attached' => false],
+            ['pattern' => 'gpt-\d\d', 'attached' => false],
+            ['pattern' => 'gpt-\d\.\d', 'attached' => false],
+            ['pattern' => 'gpt-\d\d\.\d', 'attached' => false],
+            ['pattern' => 'gpt-\d\.\d\d', 'attached' => false],
+            ['pattern' => 'gpt-\d\d\.\d\d', 'attached' => false],
+            // Élision française COLLÉE - une entrée par mot (jamais combinées en (?:d|qu), qui
+            // mélangerait deux longueurs dans le même lookbehind).
+            ['pattern' => "d['\u{2019}]", 'attached' => true],
+            ['pattern' => "qu['\u{2019}]", 'attached' => true],
         ],
     ];
 
