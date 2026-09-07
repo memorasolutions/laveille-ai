@@ -442,6 +442,12 @@ it('échec du premier modèle rejeté par la porte, succès du second : la fiche
     $article = azcArticle($source->id, [
         'is_published' => false,
         'description' => 'IA générative : texte de fixture suffisant pour passer le pré-filtre de mots-clés.',
+        // Le garde-fou image du 2026-09-05 (tickets #2244 et #2248) refuse toute publication
+        // sans image créditée : resolvePublicationState() teste hasCuratedImage(), qui n'est
+        // rien d'autre que filled(image_credit). Ce test vérifie le chemin de publication
+        // COMPLET, il doit donc décrire une fiche réellement publiable. Sans ce champ, il
+        // mesurait le garde-fou au lieu du pipeline, et rougissait pour la mauvaise raison.
+        'image_credit' => 'Image de fixture, crédit de test',
     ]);
 
     $this->artisan('news:fetch', ['--source' => $source->id])->assertSuccessful();
