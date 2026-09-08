@@ -486,7 +486,16 @@
                 }
                 else { this.scrapeError = d.message || '{{ __('Erreur lors de la soumission.') }}'; }
             } catch(e) { this.scrapeError = '{{ __('Erreur réseau.') }}'; }
-            finally { this.submitting = false; }
+            finally {
+                this.submitting = false;
+                // Le jeton Turnstile ne sert QU'UNE fois : siteverify le consomme, et
+                // Cloudflare n'a aucun moyen de le savoir. Sans cette remise à zéro, toute
+                // soumission qui suit un premier envoi (refus de validation, deuxième
+                // proposition) repartirait avec un jeton brûlé, et un visiteur légitime
+                // serait refusé comme robot. L'EXPIRATION, elle, n'est pas en cause : le
+                // défaut data-refresh-expired="auto" régénère seul un jeton après 300 s.
+                window.turnstile?.reset(document.querySelector('.cf-turnstile'));
+            }
         },
         async sendMagicLink() {
             if (!this.authEmail || this.authSending) return;
@@ -769,7 +778,7 @@
              le bloc PHP en tête de fichier), donc rien n'est ajouté au DOM tant que ce n'est
              pas configuré côté Cloudflare. --}}
         @if($turnstileSiteKey)
-        <div class="cf-turnstile" data-sitekey="{{ $turnstileSiteKey }}" data-size="invisible" data-action="directory-submit"></div>
+        <div class="cf-turnstile" data-sitekey="{{ $turnstileSiteKey }}" data-action="directory-submit"></div>
         @endif
 
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">

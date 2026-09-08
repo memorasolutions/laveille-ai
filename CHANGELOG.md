@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.256.2] - 2026-09-08
+
+### Corrigé
+- **Le widget anti-robots portait un attribut qui l'aurait empêché de fonctionner, et son jeton
+  ne servait qu'une fois.** Deux défauts mesurés avant la mise en service, sur du code livré
+  inactif en v1.243.0. Premier défaut : les deux vues qui rendent le widget déclaraient
+  `data-size="invisible"`. Cette valeur n'existe pas dans Turnstile, dont les seules tailles
+  valides sont `normal`, `flexible` et `compact` ; Cloudflare renvoie une erreur de paramètre et
+  le widget peut ne jamais s'initialiser. Le mode invisible ne vient pas de cet attribut, il vient
+  du mode du widget configuré chez Cloudflare. Conséquence évitée : aucun jeton produit, donc
+  tous les visiteurs des deux formulaires refusés comme robots. Second défaut : le jeton est à
+  usage unique, et aucune des deux soumissions ne réinitialisait le widget. Une fois le jeton
+  consommé par le service de vérification, Cloudflare n'a aucun moyen de le savoir : toute
+  soumission suivante depuis la même page repartait avec un jeton brûlé, et un visiteur légitime
+  était refusé comme robot. Le cas se produit dès qu'un envoi est refusé et corrigé, ou qu'une
+  deuxième proposition est faite sans recharger la page. Les deux formulaires redemandent
+  désormais un jeton frais après chaque envoi. Précision mesurée le jour même : l'expiration au
+  bout de cinq minutes n'était PAS en cause, le réglage par défaut du widget la couvre seul.
+
 ## [1.256.1] - 2026-09-08
 
 ### Corrigé

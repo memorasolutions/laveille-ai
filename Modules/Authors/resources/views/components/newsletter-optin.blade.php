@@ -51,6 +51,13 @@
             } catch (e) {
                 this.state = 'error';
                 this.message = 'Erreur réseau. Réessaie.';
+            } finally {
+                // Le jeton Turnstile ne sert QU'UNE fois : le serveur vient de le consommer
+                // auprès de siteverify, et Cloudflare n'a aucun moyen de le savoir. Sans cette
+                // remise à zéro, une deuxième inscription depuis la même page renverrait ce
+                // jeton déjà brûlé, et le visiteur serait refusé comme robot. Le widget se
+                // réexécute et en produit un frais (data-execution vaut « render » par défaut).
+                window.turnstile?.reset(this.$root.querySelector('.cf-turnstile'));
             }
         }
     }"
@@ -78,7 +85,7 @@
         <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
 
         @if($turnstileSiteKey)
-            <div class="cf-turnstile lv-nlopt__turnstile" data-sitekey="{{ $turnstileSiteKey }}" data-size="invisible" data-action="newsletter-subscribe"></div>
+            <div class="cf-turnstile lv-nlopt__turnstile" data-sitekey="{{ $turnstileSiteKey }}" data-action="newsletter-subscribe"></div>
         @endif
 
         <button
