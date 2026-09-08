@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.257.1] - 2026-09-08
+
+### Corrigé
+- **La page personnelle d'un auteur ne déborde plus horizontalement sur téléphone.** Le contenu
+  mesurait 432 px de large dans une fenêtre de 390 px : la carte « En ce moment » dépassait le
+  bord droit de 42 px, et le visiteur devait balayer latéralement pour lire la fin des lignes.
+  La cause n'était ni un mot trop long ni une image trop large : une colonne de grille CSS
+  déclarée en `1fr` porte un plancher implicite (`min-width: auto`) qui autorise son contenu à
+  l'élargir AU-DELÀ de son conteneur. Les quatre grilles de la page passent en `minmax(0, 1fr)`,
+  qui retire ce plancher sans rien changer quand le contenu tient déjà. Mesuré après correctif :
+  390 px de contenu pour 390 px de fenêtre sur les deux profils de démonstration, et la
+  disposition à 1440 px reste identique (trois colonnes de 394 px).
+
 ## [1.257.0] - 2026-09-08
 
 ### Ajouté
