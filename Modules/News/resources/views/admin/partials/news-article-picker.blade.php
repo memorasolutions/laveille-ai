@@ -93,18 +93,27 @@
                                      hôtes de ce mixin (concentre-builder, objectif-video), d'où le
                                      x-show. Le score ORDONNE déjà la liste ; la pastille explique
                                      pourquoi via l'infobulle native, jamais une boîte noire. --}}
-                                {{-- tabindex + aria-label : l'infobulle native title="" ne s'ouvre
-                                     qu'à la souris. Sans ces deux attributs, les raisons du score
-                                     étaient INACCESSIBLES au clavier et aux lecteurs d'écran
-                                     (revue adversariale Codex du 2026-09-08). aria-label porte le
-                                     texte complet - valeur ET raisons - parce qu'un lecteur
-                                     d'écran ne lit pas title="" de façon fiable selon le
-                                     navigateur. --}}
+                                {{-- ACCESSIBILITÉ - DEUXIÈME REVUE CODEX (2026-09-08). Ma première
+                                     version rendait la pastille focalisable (tabindex="0") parce
+                                     que l'infobulle native title="" ne s'ouvre qu'à la souris.
+                                     Codex a nommé le coût : sur une liste de 200 articles, c'est
+                                     200 arrêts de tabulation ajoutés sur un élément qui n'est PAS
+                                     un contrôle - alors que chaque ligne en porte DÉJÀ quatre
+                                     (deux liens, la pastille de couleur, « + Ajouter »), soit un
+                                     cinquième de plus à traverser pour atteindre le bouton qu'on
+                                     vise. tabindex est donc retiré : role="note" + aria-label
+                                     suffisent au lecteur d'écran, qui parcourt une liste en mode
+                                     lecture et n'a jamais eu besoin du focus pour lire ça.
+                                     Restait le second point de Codex : un clavier SANS lecteur
+                                     d'écran ne voyait rien. Il est traité en CSS et coûte ZÉRO
+                                     arrêt de tabulation - .cb-news-item:focus-within révèle les
+                                     raisons dès qu'un contrôle DÉJÀ focalisable de la ligne reçoit
+                                     le focus (voir news-article-picker.css). --}}
                                 <span class="cb-score-badge" x-show="typeof item.score_tri === 'number'" x-cloak
                                       x-text="scoreTriLabel(item)"
                                       :title="scoreTriTooltip(item)"
                                       :aria-label="'Score de tri ' + scoreTriLabel(item) + '. ' + scoreTriTooltip(item)"
-                                      tabindex="0" role="note"></span>
+                                      role="note"></span>
                                 <span x-text="item.title" :title="item.title_original && item.title_original !== item.title ? 'Titre original : ' + item.title_original : ''"></span>
                             </div>
                             <div class="cb-meta">

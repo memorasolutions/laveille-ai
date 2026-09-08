@@ -42,9 +42,13 @@
   annonçant « enquête » pouvait donc s'afficher sous une pastille « Aucun signal détecté ». Le
   score lit maintenant exactement le texte que l'admin a sous les yeux.
 - **Les raisons du score étaient inaccessibles au clavier.** L'infobulle native ne s'ouvre qu'à la
-  souris : la pastille porte désormais un attribut de tabulation, un rôle et une étiquette
-  accessible qui répète la valeur ET les raisons, parce qu'un lecteur d'écran ne lit pas
-  l'infobulle de façon fiable selon le navigateur.
+  souris. La pastille porte donc un rôle et une étiquette accessible qui répète la valeur ET les
+  raisons, parce qu'un lecteur d'écran ne lit pas l'infobulle de façon fiable selon le navigateur ;
+  et les raisons s'affichent à l'écran dès qu'un bouton ou un lien de la même ligne reçoit le focus,
+  pour un clavier SANS lecteur d'écran. Note de méthode : mon premier correctif rendait la pastille
+  elle-même focalisable, ce qui ajoutait 200 arrêts de tabulation sur une liste de 200 articles,
+  sur un élément qui n'est pas un contrôle. La deuxième revue adversariale l'a mesuré ; la solution
+  retenue ne coûte aucun arrêt de tabulation supplémentaire.
 - **Le repérage des promotions mordait sur les intervalles de pourcentage.** « Les gains atteignent
   20-30 % » était lu comme un rabais de -30 %, parce que le tiret d'un intervalle ressemble à un
   signe moins. Le motif ignore maintenant un tiret précédé d'un chiffre. Note de méthode : j'avais
