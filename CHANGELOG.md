@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.255.1] - 2026-09-08
+
+### Corrigé
+- **Quatrième porte du garde-fou image : un membre de fusion héritait de `is_published` sans que
+  SON crédit d'image soit contrôlé.** Le ticket #2244 avait fermé trois portes de publication en
+  exigeant `hasCuratedImage()` ; `attachFusionMember()` et `absorbFusionMember()` recopiaient
+  l'état publié du digest sur chaque membre absorbé, sans jamais tester le crédit du membre.
+  Un article sans crédit pouvait donc devenir public par la seule voie de la fusion.
+  Les deux écritures exigent désormais `$digestPublished && $member->hasCuratedImage()`, avec le
+  MÊME prédicat que `resolvePublicationState()` (`filled($this->image_credit)`).
+- Le docblock de `resolvePublicationState()` affirmait que `absorbFusionMember()` « héritait déjà »
+  sans contrôle propre. C'était vrai, et c'est la description du défaut : le commentaire est corrigé.
+- **Preuve rouge → vert :** la garde retirée de `attachFusionMember()`, le test
+  « un membre de fusion SANS image_credit reste is_published=false » ÉCHOUE
+  (« Failed asserting that true is false », NewsFusionTest:264) ; restaurée, il passe.
+  Régression : 48 tests, 169 assertions, sur NewsFusionTest + ActusZeroCopiePipelineTest +
+  NewsAutopublishGateTest.
+
+### Modifié
+- **Le bilan de `news:fetch` NOMME désormais la cause d'un brouillon.** Les trois emplacements
+  affichaient le même « publication suspendue » sans distinguer le drapeau éteint d'une image sans
+  crédit. Nouvelle méthode DRY `draftReason()` : elle réévalue les deux causes INDÉPENDAMMENT
+  (`resolvePublicationState()` court-circuite au premier obstacle et ne teste jamais l'image quand
+  le drapeau suffit), uniquement pour l'affichage ; aucune décision de publication n'en dépend.
+  Sortie : « publication suspendue : drapeau éteint + image sans crédit ».
+
 ## [1.255.0] - 2026-09-06
 
 ### Ajouté

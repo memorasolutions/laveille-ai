@@ -65,10 +65,16 @@ function nfusSource(string $name): NewsSource
     ]);
 }
 
-function nfusArticle(NewsSource $source, string $slug, string $title, $pubDate = null): NewsArticle
+// ACTION : parametre $imageCredit ajoute (2026-09-08, correctif quatrieme porte #2244/#2248) -
+// defaut inchange ('Photo de test - MEMORA solutions') pour que TOUS les appels existants
+// gardent leur intention (fiche creditee) sans etre touches ; passer null teste explicitement
+// un membre/digest SANS credit, comme napgArticle() le fait deja dans NewsAutopublishGateTest.php.
+// MCP: SELF (<5 lignes utiles)
+// RAISON: seul moyen de fabriquer, dans ce fichier, un membre de fusion sans image curatee.
+function nfusArticle(NewsSource $source, string $slug, string $title, $pubDate = null, ?string $imageCredit = 'Photo de test - MEMORA solutions'): NewsArticle
 {
     return NewsArticle::create([
-        'image_credit' => 'Photo de test - MEMORA solutions',
+        'image_credit' => $imageCredit,
         'news_source_id' => $source->id,
         'title' => $title,
         'guid' => 'guid-'.$slug,
@@ -218,6 +224,70 @@ it('deux articles au sujet partage produisent une fiche comparative avec un memb
         ->and($member->dedup_reason)->not->toBeNull();
 
     expect(NewsDedupLog::where('new_article_id', $digest->id)->where('action', 'fusion_grouped')->count())->toBe(1);
+});
+
+// ── Quatrieme porte du garde-fou image (2026-09-08, tickets #2244/#2248) ─────
+//
+// LE TROU, mesure ce jour : un membre qui rejoint un groupe fusionne recevait le statut de
+// publication de SON DIGEST (attachFusionMember(), 'is_published' => $digestPublished) sans
+// jamais consulter sa PROPRE image_credit - ce point d'ecriture ne passe pas par
+// resolvePublicationState(), ou vit le garde-fou de #2244/#2248 pour un NewsArticle unique.
+// Correctif : le MEME predicat hasCuratedImage() est desormais applique au membre lui-meme,
+// $digestPublished restant la condition NECESSAIRE (jamais publie si le digest ne l'est pas).
+
+it('un membre de fusion SANS image_credit reste is_published=false meme quand son digest est publie', function () {
+    config(['news.fusion.enabled' => true, 'news.autopublish.enabled' => true]);
+    nfusBindFakeRssFetcher();
+    nfusFakeOpenRouterSuccess(['sources' => [
+        ['source_name' => 'SourceImgA', 'author' => null, 'url' => 'https://exemple.com/img-a', 'angle' => null],
+        ['source_name' => 'SourceImgB', 'author' => null, 'url' => 'https://exemple.com/img-b', 'angle' => null],
+    ]]);
+
+    $sourceA = nfusSource('SourceImgA');
+    $sourceB = nfusSource('SourceImgB');
+    // digestArticle = group[0] = le plus ancien pub_date (usort ascendant dans
+    // processFusionCandidates()) -> credite, pour isoler le test sur le SEUL statut du membre :
+    // sans credit sur le digest, celui-ci ne serait meme pas publie et le test ne prouverait rien.
+    nfusArticle($sourceA, 'img-a', 'Amazon lance un nouveau service IA generative pour les entreprises', now()->subHours(2));
+    // membre = le plus recent -> SANS credit (null) : c'est exactement l'etat d'une fiche dont
+    // l'image est la carte de repli generee.
+    nfusArticle($sourceB, 'img-b', 'Amazon devoile un nouveau service IA generative destine aux entreprises', now()->subHour(), null);
+
+    $this->artisan('news:fetch')->assertSuccessful();
+
+    $digest = NewsArticle::where('is_comparative_digest', true)->first();
+    expect($digest)->not->toBeNull()
+        ->and($digest->is_published)->toBeTrue();
+
+    $member = NewsArticle::where('is_potential_duplicate_of', $digest->id)->first();
+    expect($member)->not->toBeNull()
+        ->and($member->is_published)->toBeFalse();
+});
+
+it('un membre de fusion AVEC image_credit herite bien de is_published=true quand son digest est publie', function () {
+    config(['news.fusion.enabled' => true, 'news.autopublish.enabled' => true]);
+    nfusBindFakeRssFetcher();
+    nfusFakeOpenRouterSuccess(['sources' => [
+        ['source_name' => 'SourceImgC', 'author' => null, 'url' => 'https://exemple.com/img-c', 'angle' => null],
+        ['source_name' => 'SourceImgD', 'author' => null, 'url' => 'https://exemple.com/img-d', 'angle' => null],
+    ]]);
+
+    $sourceA = nfusSource('SourceImgC');
+    $sourceB = nfusSource('SourceImgD');
+    // Digest ET membre credites (comportement par defaut de nfusArticle()) : le second sens du
+    // temoin, symetrique au test precedent - le garde-fou ne mord QUE sur l'absence de credit.
+    nfusArticle($sourceA, 'img-c', 'Amazon presente un nouvel outil IA generative pour les equipes marketing', now()->subHours(2));
+    nfusArticle($sourceB, 'img-d', 'Amazon devoile un nouvel outil IA generative destine aux equipes marketing', now()->subHour());
+
+    $this->artisan('news:fetch')->assertSuccessful();
+
+    $digest = NewsArticle::where('is_comparative_digest', true)->first();
+    expect($digest)->not->toBeNull()
+        ->and($digest->is_published)->toBeTrue();
+
+    $member = NewsArticle::where('is_potential_duplicate_of', $digest->id)->first();
+    expect($member)->not->toBeNull()
+        ->and($member->is_published)->toBeTrue();
 });
 
 it('un groupe de 3 articles ne declenche exactement qu un seul appel HTTP', function () {

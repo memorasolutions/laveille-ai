@@ -351,7 +351,12 @@ class FetchNewsCommand extends Command
                     // Pertinent (score >= seuil) mais retenu par le drapeau, jamais compté dans
                     // totalFiltered (réservé aux articles réellement sous le seuil) ni dans les
                     // quotas quotidiens is_published-only.
-                    $this->line("  ⏳ [{$score}/10] Collecté en brouillon (publication suspendue) : {$article->title}");
+                    // ACTION : correctif 2026-09-08 - le motif reel (drapeau et/ou image sans
+                    // credit) est desormais NOMME, via draftReason() (methode DRY unique).
+                    // MCP: SELF (<5 lignes)
+                    // RAISON: la ligne generique cachait l'absence de credit quand elle etait
+                    // AUSSI en cause en plus du drapeau.
+                    $this->line("  ⏳ [{$score}/10] Collecté en brouillon (publication suspendue : {$this->draftReason($article)}) : {$article->title}");
                 } else {
                     $totalFiltered++;
                     $this->line("  ⊘ [{$score}/10] Non pertinent : {$article->title}");
@@ -523,7 +528,11 @@ class FetchNewsCommand extends Command
                 $feedType === 'ia' ? $todayIa++ : $todayTech++;
                 $this->line("  ✓ [{$score}/10] {$article->title}");
             } elseif ($wouldPublish) {
-                $this->line("  ⏳ [{$score}/10] Collecté en brouillon (publication suspendue) : {$article->title}");
+                // ACTION : correctif 2026-09-08 - voir le commentaire jumeau du chemin non-fusion
+                // ci-dessus (draftReason(), methode DRY unique).
+                // MCP: SELF (<5 lignes)
+                // RAISON: DRY - meme motif, meme methode, jamais une deuxieme chaine recopiee.
+                $this->line("  ⏳ [{$score}/10] Collecté en brouillon (publication suspendue : {$this->draftReason($article)}) : {$article->title}");
             } else {
                 $totalFiltered++;
                 $this->line("  ⊘ [{$score}/10] Non pertinent : {$article->title}");
@@ -671,7 +680,12 @@ class FetchNewsCommand extends Command
                 }
                 $this->line("  ✓ [{$score}/10] Fiche comparative ({$this->pluralizeGroupSize(count($group))}) : {$digestArticle->title}");
             } elseif ($wouldPublish) {
-                $this->line("  ⏳ [{$score}/10] Groupe collecté en brouillon (publication suspendue) : {$digestArticle->title}");
+                // ACTION : correctif 2026-09-08 - voir le commentaire jumeau du chemin non-fusion
+                // dans handle() (draftReason(), methode DRY unique) ; le digest, pas un membre,
+                // porte ici sa propre image_credit.
+                // MCP: SELF (<5 lignes)
+                // RAISON: DRY - meme motif, meme methode, jamais une troisieme chaine recopiee.
+                $this->line("  ⏳ [{$score}/10] Groupe collecté en brouillon (publication suspendue : {$this->draftReason($digestArticle)}) : {$digestArticle->title}");
             } else {
                 $totalFiltered++;
                 $this->line("  ⊘ [{$score}/10] Groupe non pertinent : {$digestArticle->title}");
@@ -748,7 +762,17 @@ class FetchNewsCommand extends Command
             'dedup_score' => $score,
             'dedup_reason' => $reason,
             'seo_status' => 'noindex',
-            'is_published' => $digestPublished,
+            // ACTION : quatrieme porte du garde-fou image (2026-09-08, tickets #2244/#2248) - ce
+            // point d'ecriture ne passe pas par resolvePublicationState() (qui prend UN seul
+            // NewsArticle), donc un membre heritait de is_published=true sans jamais consulter
+            // sa PROPRE image_credit. $digestPublished reste la condition NECESSAIRE (jamais
+            // publie si le digest ne l'est pas) ; hasCuratedImage() du membre est une condition
+            // SUPPLEMENTAIRE, jamais un remplacement - meme predicat reutilise que #2248, aucune
+            // regle nouvelle inventee.
+            // MCP: SELF (<5 lignes utiles)
+            // RAISON: un membre sans credit propre ne doit jamais partir en production avec une
+            // carte de repli generee, meme quand sa fiche comparative est correctement publiee.
+            'is_published' => $digestPublished && $member->hasCuratedImage(),
         ]);
 
         NewsDedupLog::create([
@@ -791,7 +815,15 @@ class FetchNewsCommand extends Command
             'dedup_score' => $result['score'],
             'dedup_reason' => $reason,
             'seo_status' => 'noindex',
-            'is_published' => (bool) $digest->is_published,
+            // ACTION : meme quatrieme porte que attachFusionMember() ci-dessus (2026-09-08,
+            // tickets #2244/#2248), appliquee ici au chemin absorption (fiche comparative
+            // EXISTANTE) - un membre absorbe n'herite de is_published=true que s'il possede
+            // LUI-MEME un image_credit ; $digest->is_published reste la condition NECESSAIRE,
+            // hasCuratedImage() du membre est SUPPLEMENTAIRE.
+            // MCP: SELF (<5 lignes utiles)
+            // RAISON: la meme faille que #2248 existait sur ce second point d'ecriture - un
+            // digest publie avec sa propre image ne garantit rien sur l'image du membre absorbe.
+            'is_published' => (bool) $digest->is_published && $member->hasCuratedImage(),
         ]);
 
         NewsDedupLog::create([
@@ -810,13 +842,15 @@ class FetchNewsCommand extends Command
     }
 
     /**
-     * ACTION : point d'écriture UNIQUE de la décision de publication (2026-08-14) - appelé aux
-     * 4 endroits qui calculent fraîchement un statut de publication (chemin non-fusion, chemin
-     * fusion singleton, fiche comparative/digest, membre rattaché à un digest nouvellement créé).
-     * Le 5e endroit historique (absorbFusionMember, republication absorbée dans une fiche
-     * comparative EXISTANTE) hérite déjà de $digest->is_published, une valeur elle-même
-     * résolue par cette méthode au moment de la création du digest - aucun appel supplémentaire
-     * n'y est nécessaire.
+     * ACTION : point d'écriture UNIQUE de la décision de publication d'un ARTICLE/DIGEST propre
+     * (2026-08-14) - appelé aux 3 endroits qui calculent fraîchement ce statut (chemin
+     * non-fusion, chemin fusion singleton, fiche comparative/digest). Les 2 endroits qui
+     * RATTACHENT un membre (attachFusionMember, absorbFusionMember) n'appellent pas cette
+     * méthode - ils héritent de digestPublished/$digest->is_published (eux-mêmes résolus ici
+     * pour le digest) ET appliquent en plus, depuis 2026-09-08 (quatrième porte, tickets
+     * #2244/#2248), le MÊME prédicat hasCuratedImage() directement sur le membre - jamais une
+     * règle nouvelle, la même règle qu'ici appliquée à une porte de plus qu'un seul
+     * NewsArticle en paramètre ne peut pas couvrir.
      * MCP: SELF (<5 lignes)
      * RAISON: DRY strict (consigne explicite) - une seule méthode plutôt que 5 conditions
      * copiées-collées ; le scoring, la porte de qualité et la fusion restent des décisions
@@ -864,6 +898,37 @@ class FetchNewsCommand extends Command
         }
 
         return $published;
+    }
+
+    /**
+     * ACTION : motif(s) EXACT(S) d'un refus de publication pour la ligne console "Collecté en
+     * brouillon" (2026-09-08, correctif audit) - resolvePublicationState() retourne au PREMIER
+     * obstacle rencontré (CAUSE 1, le drapeau, court-circuite AVANT même de tester CAUSE 2,
+     * l'image) : son booléen seul ne permet donc jamais de savoir si l'image était AUSSI en
+     * cause quand le drapeau l'était déjà. Cette méthode réévalue les deux causes
+     * INDÉPENDAMMENT, uniquement pour l'AFFICHAGE console - aucune décision de publication n'en
+     * dépend, resolvePublicationState() reste l'unique point d'écriture.
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: DRY strict - une seule méthode rend le motif, appelée aux 3 emplacements du bilan
+     * console (chemin non-fusion, fusion singleton, fiche comparative) plutôt que 3 chaînes
+     * recopiées ; sans elle, l'absence de crédit restait invisible dès qu'un drapeau éteint
+     * suffisait déjà à expliquer le brouillon.
+     */
+    private function draftReason(?NewsArticle $article): string
+    {
+        $reasons = [];
+
+        if (! $this->autopublishEnabled) {
+            $reasons[] = 'drapeau éteint';
+        }
+
+        if ($article !== null && ! $article->hasCuratedImage()) {
+            $reasons[] = 'image sans crédit';
+        }
+
+        // Défensif seulement : $wouldPublish=true sans publication réelle implique toujours au
+        // moins une des deux causes ci-dessus - ce cas ne devrait jamais s'afficher en pratique.
+        return $reasons === [] ? 'motif inconnu' : implode(' + ', $reasons);
     }
 
     /**
