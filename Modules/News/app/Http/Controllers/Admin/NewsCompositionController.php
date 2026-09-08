@@ -15,6 +15,7 @@ use Modules\News\Actions\NewsToolSyncAction;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Services\CompositionPayloadNormalizer;
 use Modules\News\Services\CompositionPromptBuilder;
+use Modules\News\Services\EditorialTriageScorer;
 use Modules\News\Services\NewsImageService;
 use Modules\News\Services\SourceMarkdownFetcher;
 
@@ -105,6 +106,12 @@ use Modules\News\Services\SourceMarkdownFetcher;
  * detachBySlug() (section 2.4, méthodes promues au Lot 1) - additif/soustractif par slug UNIQUE,
  * jamais un remplacement de la liste complète (contrairement à tool_ids[] de l'écran classique).
  *
+ * TICKET #2358 (2026-09-08) - tri éditorial déterministe : candidates() délègue désormais à
+ * Modules\News\Services\EditorialTriageScorer::score() pour calculer, à la volée sur le titre
+ * seul (aucun texte source disponible - politique zéro-copie #1810), un score qui ORDONNE la
+ * liste (score décroissant, pub_date décroissant en départage) sans jamais rien exclure ni
+ * rien écrire en base. Zéro impact sur relevance_score/news:prune-seo/machine_summary.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -124,6 +131,7 @@ class NewsCompositionController extends Controller
         private readonly NewsImageService $imageService,
         private readonly SourceMarkdownFetcher $sourceFetcher,
         private readonly NewsToolSyncAction $toolSync,
+        private readonly EditorialTriageScorer $triageScorer,
     ) {
     }
 
@@ -258,6 +266,33 @@ class NewsCompositionController extends Controller
 
         $traduction = $this->titresTraduits($articles);
 
+        // ACTION : tri éditorial déterministe (ticket #2358) - un score calculé à la volée sur
+        // le seul titre (original ET traduit), qui ORDONNE la liste sans jamais rien exclure ni
+        // rien écrire en base (contrainte non négociable de la spec - relevance_score, seul
+        // ressort de Modules\News\Console\PruneSeoCommand, n'est pas touché). Le tri par
+        // pub_date décroissant déjà en place plus haut devient le DÉPARTAGE : à score égal,
+        // l'ordre affiché ne change pas. La requête SQL elle-même reste inchangée.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: design doc "tri éditorial déterministe de l'écran de composition" (#2358).
+        // Le score lit le titre RÉELLEMENT AFFICHÉ, pas l'attribut brut (revue adversariale
+        // Codex du 2026-09-08) : titresTraduits() vient de traduire à la volée jusqu'à 40 titres,
+        // et c'est SA sortie que la charge JSON expose plus bas sous la clé 'title'. Scorer
+        // $a->title_fr aurait laissé un écart visible à l'écran - un titre français annonçant
+        // « enquête » sous une pastille « Aucun signal détecté ». Le titre original reste passé
+        // en premier argument : une entité écrite seulement dans la version anglaise compte
+        // toujours.
+        $scoresTri = $articles->mapWithKeys(fn (NewsArticle $a) => [
+            $a->id => $this->triageScorer->score(
+                $a->title,
+                $traduction['titres'][$a->id] ?? $a->title_fr,
+                $a->source?->name
+            ),
+        ]);
+        $articles = $articles
+            ->sortByDesc(fn (NewsArticle $a) => (($scoresTri[$a->id]['score'] ?? 0) * 10_000_000_000)
+                + ($a->pub_date?->timestamp ?? 0))
+            ->values();
+
         return response()->json([
             'jour_affiche' => $jour,
             'est_repli' => $estRepli,
@@ -266,6 +301,8 @@ class NewsCompositionController extends Controller
             'items' => $articles->map(fn (NewsArticle $a) => [
                 'id' => $a->id,
                 'title' => $traduction['titres'][$a->id] ?? ($a->seo_title ?: $a->title),
+                'score_tri' => $scoresTri[$a->id]['score'] ?? 0,
+                'raisons_tri' => $scoresTri[$a->id]['raisons'] ?? [],
                 'title_original' => $a->title,
                 'slug' => $a->slug,
                 'site_url' => url('/actualites/'.$a->slug),

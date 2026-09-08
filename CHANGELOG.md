@@ -1,5 +1,79 @@
 # Changelog
 
+## [1.256.0] - 2026-09-08
+
+### Ajouté
+- **Tri éditorial déterministe de l'écran de composition des actualités (ticket #2358).** MESURE
+  qui a ouvert le chantier, en production : 662 articles en attente, dont **581 sans aucun score**
+  (`relevance_score` NULL) - le score IA est éteint volontairement depuis le 2026-08-17, et il le
+  reste. L'écran listait les 236 articles du jour dans le seul ordre de `pub_date`, sans aucune
+  notion de pertinence. Nouveau service `Modules\News\Services\EditorialTriageScorer` : un score
+  calculé À LA VOLÉE (jamais persisté, jamais dans `relevance_score`, que consomme une commande de
+  suppression), sur le seul TITRE et sans aucun appel réseau ni modèle. Il ORDONNE, il n'exclut
+  rien : un titre sans signal vaut 0 et reste affiché.
+- Chaque ligne porte une pastille avec son score et, en infobulle, les raisons qui l'ont produit
+  (« +4 entité : OpenAI ; +3 terme IA : modèle »). Le score n'est jamais une boîte noire.
+- Signal « portée » (enquête, emploi, justice, école, gouvernement) prévu dès la conception contre
+  le biais nommé par la revue adversariale : un score qui ne primerait que les marques et les
+  chiffres remonterait les COMMUNIQUÉS D'ENTREPRISE et enterrerait les enquêtes.
+
+### Corrigé
+- **Le sigle « GPT » manquait à la liste des entités**, alors que le mot central du domaine y avait
+  toute sa place : « GPT-6 Astra a battu Portal de bout en bout » valait 0. Mesuré sur un
+  échantillon de contrôle de 40 titres de production tenu à l'écart du rédacteur du service.
+- **Un sigle de deux lettres ne se reconnaît qu'en MAJUSCULES.** Le titre réel « J'ai factorisé les
+  clés RSA d'une autorité de certification des années 90 » gagnait « +4 entité : AI » : l'apostrophe
+  est une frontière de mot, et la comparaison ignorait la casse - le verbe français le plus courant
+  devenait une entité d'intelligence artificielle. La règle est générale, pas un cas particulier :
+  un terme de config écrit tout en majuscules est un sigle et se compare en respectant la casse ;
+  tout terme portant une minuscule (« OpenAI », « intelligence artificielle ») reste insensible.
+- **Le libellé « Tri par date » était devenu faux** sur cet écran, où ce mode rend l'ordre du serveur
+  sans le retrier - donc l'ordre par pertinence. Il affiche « Tri par pertinence, puis date ».
+  Défaut trouvé par la QC VISUELLE, pas par un test. Les deux autres écrans qui partagent le même
+  sélecteur (concentré, objectif vidéo) gardent leur libellé d'origine, vérifié dans le navigateur.
+
+- **Deux modes de tri sur trois ANNULAIENT le nouveau classement.** Les modes « par acteur » et
+  « par couleur » regroupaient les articles puis les réordonnaient par date seule à l'intérieur de
+  chaque groupe : le score disparaissait dès qu'on quittait le mode par défaut. Les trois modes
+  départagent désormais par score, puis par date. Défaut trouvé par la revue adversariale Codex,
+  pas par mes tests.
+- **Le titre affiché et le titre scoré pouvaient différer.** Le score lisait le titre français brut
+  de la base, alors que l'écran affiche une traduction rattrapée au chargement. Un titre français
+  annonçant « enquête » pouvait donc s'afficher sous une pastille « Aucun signal détecté ». Le
+  score lit maintenant exactement le texte que l'admin a sous les yeux.
+- **Les raisons du score étaient inaccessibles au clavier.** L'infobulle native ne s'ouvre qu'à la
+  souris : la pastille porte désormais un attribut de tabulation, un rôle et une étiquette
+  accessible qui répète la valeur ET les raisons, parce qu'un lecteur d'écran ne lit pas
+  l'infobulle de façon fiable selon le navigateur.
+- **Le repérage des promotions mordait sur les intervalles de pourcentage.** « Les gains atteignent
+  20-30 % » était lu comme un rabais de -30 %, parce que le tiret d'un intervalle ressemble à un
+  signe moins. Le motif ignore maintenant un tiret précédé d'un chiffre. Note de méthode : j'avais
+  d'abord retiré ce signal en entier, et la remesure a démenti cette décision - la promotion ne
+  tombait pas à 0, elle REMONTAIT à +2, parce que le bonus « nombre porteur » n'est accordé qu'en
+  l'absence de marqueur commercial. Retirer le marqueur libérait le bonus.
+
+### Limites écrites, mesurées le 2026-09-08
+- **Le score ne peut pas connaître les mots qu'on n'a pas écrits.** Deux titres pertinents de
+  l'échantillon de contrôle valent 0 et le resteront : « L'Urssaf choisit Linux pour son cloud » et
+  « Uber lance au Royaume-Uni les premiers robotaxis ». Ajouter « Urssaf » ou « robotaxi » aurait
+  été du surajustement à l'échantillon, pas une correction de cause : refusé.
+- **Le pluriel n'est pas reconnu** (« Agents », « règlements » ne marquent pas leur terme au
+  singulier). Mesuré : 2 cas sur 80 titres réels, soit 2,5 %. Trop faible pour justifier un
+  troisième correctif et son risque de faux positifs non mesurés.
+- **Un titre bilingue sur l'IA touche le plafond d'entités avec un seul concept** (« IA » et « AI »
+  comptent tous les deux). Ce n'est pas un faux positif - les deux termes sont bien là - mais ça
+  hausse les articles traduits par rapport à ceux qui nomment deux entreprises distinctes.
+- **Le MÉDIA n'est pas un signal**, alors que le paramètre existe dans la signature. Un blogue
+  spécialisé (« Hugging Face Blog ») n'aide donc pas son article à remonter. Le brancher
+  remonterait mécaniquement les communiqués d'entreprise, exactement le biais que le signal
+  « portée » sert à contrer : laissé de côté à dessein, pas par oubli.
+- **Les titres reçus en anglais sans traduction ne sont pas désavantagés en pratique**, contrairement
+  à ce que la revue adversariale supposait. Mesure en production : 419 articles en attente n'ont
+  aucune traduction, mais 382 d'entre eux (91,2 %) portent déjà un titre FRANÇAIS - seuls **3 titres
+  sur 419, soit 0,7 %,** sont réellement anglais. La prémisse « pénalisation systématique » est
+  fausse ; aucune correction n'a donc été faite, et le chiffre est écrit ici pour qu'on le
+  re-mesure plutôt que de le supposer.
+
 ## [1.255.1] - 2026-09-08
 
 ### Corrigé

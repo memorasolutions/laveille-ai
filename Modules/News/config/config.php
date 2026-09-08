@@ -238,4 +238,105 @@ return [
             'not', 'their', 'its', 'we', 'you', 'will', 'would', 'about', 'into', 'than', 'these',
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tri éditorial déterministe de l'écran de composition (ticket #2358)
+    |--------------------------------------------------------------------------
+    | Mesuré le 2026-09-08 : 662 articles en attente dans l'écran de composition, 581 sans
+    | aucun relevance_score (le résumé machine est éteint depuis le 2026-08-17, voir
+    | 'machine_summary' plus haut - on ne le rallume pas) et aucun texte source disponible
+    | (politique zéro-copie #1810, description vide et internal_source_text nul tant que
+    | rien n'est collé) : seuls le titre et le média restent observables à l'écran, c'est
+    | exactement ce que l'humain regarde. Modules\News\Services\EditorialTriageScorer
+    | calcule, à la volée dans NewsCompositionController::candidates(), un score qui
+    | ORDONNE la liste - aucune écriture en base, aucun appel réseau, zéro impact hors de
+    | cet écran d'administration. AUCUNE fiche n'est supprimée par ce score, mais avec ~236
+    | articles par jour et une attention humaine limitée, le bas du classement reste une
+    | exclusion DE FAIT : la revue adversariale du 2026-09-08 l'a nommé explicitement, ce
+    | n'est pas un détail. C'est précisément pour cette raison que la famille 'portee'
+    | ci-dessous existe (revue adversariale du même jour, biais n°1) : un score qui ne
+    | primerait que le vocabulaire IA et les chiffres ferait remonter les COMMUNIQUÉS
+    | D'ENTREPRISE (riches en marques et en statistiques par construction) et enterrerait
+    | systématiquement les enquêtes et les conséquences institutionnelles, dont le titre ne
+    | nomme pas toujours l'IA. Ces listes de termes vivent ICI et nulle part en dur dans le
+    | service (règle projet - zéro code en dur) : les enrichir ne demande aucun déploiement
+    | de code, seulement une modification de config.
+    */
+    'editorial_triage' => [
+        // Entité d'IA nommée dans le titre : +4 chacune, plafond +8 dans le service (au
+        // maximum deux entités distinctes comptent).
+        // AJOUT (revue adversariale 2026-09-08, cause 1, mesuré sur 40 titres réels de
+        // production - 35/40 valaient 0) : le mot central du site en était absent. « IA »,
+        // « AI » et « intelligence artificielle » y entrent comme entités au même titre que les
+        // noms de produits - décision du superviseur, pas une reclassification de ma part. « IA »
+        // et « AI » sont des sous-chaînes de mots courants (médIA, mAIson) : la frontière de mot
+        // Unicode de contientTerme() (lettre/chiffre interdit des deux côtés) est ce qui les rend
+        // sûrs, voir EditorialTriageScorerTest ("les médias sociaux" ne doit rien marquer,
+        // "l'IA générative" doit marquer une entité).
+        'entites_ia' => [
+            'OpenAI', 'Anthropic', 'Claude', 'ChatGPT', 'GPT', 'Gemini', 'DeepMind', 'Mistral',
+            'Meta AI', 'Llama', 'Nvidia', 'Hugging Face', 'Qwen', 'DeepSeek', 'Copilot',
+            'IA', 'AI', 'intelligence artificielle',
+            'Meta', 'Google', 'Microsoft', 'Apple', 'Amazon', 'xAI', 'Grok', 'Perplexity',
+            'Sora', 'Midjourney', 'Stability',
+        ],
+
+        // Terme d'IA substantiel : +3 chacun, plafond +6 dans le service (au maximum deux
+        // termes distincts comptent).
+        'termes_ia' => [
+            'modèle', 'agent', 'LLM', 'entraînement', 'inférence', 'jeu de données',
+            'apprentissage', 'prompt', 'hallucination', 'alignement',
+        ],
+
+        // Portée : enquête et conséquence, +3 chacun, plafond +6 (revue adversariale
+        // 2026-09-08, biais n°1 - voir le bloc de commentaire ci-dessus). Ces mots
+        // signalent un article dont l'enjeu porte sur des PERSONNES et des DÉCISIONS
+        // (justice, emploi, éducation, santé, institutions, vie privée), pas sur une
+        // sortie de produit - sans cette famille, le classement remonte les annonces
+        // marketing et enterre les enquêtes qui ne nomment pas toujours une entité d'IA.
+        // AJOUT (revue adversariale 2026-09-08, cause 2, mesuré sur 40 titres réels) : une
+        // liste écrite à la main est incomplète par construction - « Interdiction du smartphone
+        // au lycée » valait 0 parce que « école » y était mais pas « lycée ».
+        'portee' => [
+            'enquête', 'poursuite', 'jugement', 'plainte', 'rapport', 'étude',
+            'document interne', 'licenciement', 'emploi', 'salarié', 'travailleur',
+            'école', 'élève', 'hôpital', 'Québec', 'Canada', 'loi', 'règlement',
+            'commission', 'vie privée', 'surveillance',
+            'lycée', 'collège', 'cégep', 'université', 'enseignant', 'professeur', 'étudiant',
+            'ministre', 'gouvernement', 'tribunal', 'Union européenne', 'Europe',
+            'consommateur', 'patient', 'citoyen',
+        ],
+
+        // Unités qui qualifient un « nombre porteur » (+2, une seule fois par titre - voir
+        // EditorialTriageScorer::premierNombrePorteur()) : un nombre suivi d'un
+        // pourcentage, d'un montant ou d'un multiplicateur.
+        'unites_nombre_porteur' => [
+            '%', '$', 'K$', 'M$', 'G$', 'milliard', 'milliards', 'million', 'millions',
+            'millier', 'milliers', 'fois',
+        ],
+
+        // Marqueur commercial : -5 chacun, cumulable (aucun plafond - un titre qui en
+        // porte trois en perd trois fois autant). AJOUT (revue adversariale 2026-09-08, cause 3,
+        // mesuré sur 40 titres réels) : ces marqueurs ne mordaient sur AUCUN cas réel de
+        // promotion. Les deux gabarits à nombre variable de la même revue (« perd NNN € »,
+        // « à -NN % ») ne sont volontairement PAS ici : un nombre n'est pas un terme fixe, ils
+        // sont détectés par EditorialTriageScorer::scoreRabaisNumeriques() - même doctrine que
+        // premierNombrePorteur() (structure numérique en code, vocabulaire en config ci-dessous).
+        'marqueurs_commerciaux' => [
+            'bon plan', 'promo', 'soldes', 'précommande', 'meilleur prix',
+            "c'est terminé", 'test complet', 'unboxing', 'code promo',
+            'chute à', 'prix cassé', 'réduction', "l'accessoire ultime", "fin de l'offre",
+            'bon prix',
+        ],
+
+        // Mots qui introduisent une perte chiffrée en devise (« perd 200 € », « perdent 50 $ »)
+        // - EditorialTriageScorer::scoreRabaisNumeriques(), cause 3 ci-dessus.
+        'marqueurs_commerciaux_rabais_mots' => ['perd', 'perdent'],
+
+        // Devises reconnues par le même gabarit. Liste séparée de unites_nombre_porteur :
+        // même symbole ($), mais deux règles métier distinctes qui peuvent diverger un jour
+        // (DRY porte sur la connaissance, pas sur la ressemblance de forme).
+        'marqueurs_commerciaux_devises' => ['€', '$'],
+    ],
 ];

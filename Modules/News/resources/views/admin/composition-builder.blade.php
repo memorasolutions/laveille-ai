@@ -1664,6 +1664,11 @@ function compositionBuilder(opts) {
     } else {
         Object.defineProperties(state, Object.getOwnPropertyDescriptors(NewsArticlePicker({
             defaultSortMode: 'date',
+            // Ticket #2358 : le mode 'date' rend l'ordre du serveur SANS le retrier, et cet ordre
+            // est ici « score éditorial décroissant, puis pub_date décroissante ». Le libellé le
+            // dit, sinon l'écran affiche un classement par pertinence sous une étiquette de date -
+            // défaut trouvé par la QC visuelle du 2026-09-08, pas par un test.
+            libelleTriDate: '🎯 Tri par pertinence, puis date',
             fetchStrategy: (ctx) => ({ method: 'GET', url: ctx.endpoints.candidates }),
         })));
     }

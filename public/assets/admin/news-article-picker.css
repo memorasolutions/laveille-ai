@@ -108,6 +108,13 @@
 .cb-news-item .cb-actions a:hover { background: #0B7285; color: #fff; }
 
 .cb-used-badge { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+
+/* Pastille de tri éditorial (ticket #2358, Modules\News\Services\EditorialTriageScorer) : le
+   score n'est jamais une boîte noire, la valeur (le signe +/- porte le sens, pas la couleur -
+   accessible sans distinguer les teintes) ET ses raisons (infobulle native title="") restent
+   visibles à côté du titre. Contraste réutilisé tel quel plutôt qu'inventé : #064E5A sur
+   #F0F4F8 = 8,46:1, déjà mesuré AAA dans ce même fichier (.cb-list-notice). */
+.cb-score-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 18px; padding: 0 6px; margin-right: 6px; border: 1px solid #B9C7CE; border-radius: 9px; background: #F0F4F8; color: #064E5A; font-size: 11px; font-weight: 700; line-height: 1; vertical-align: middle; }
 .cb-position-badge { background: #0B7285; color: #fff; font-weight: 700; min-width: 28px; height: 28px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
 
 /* Avis de liste (2026-08-23) : journée sans collecte, ou traduction des titres indisponible.

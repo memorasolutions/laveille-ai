@@ -76,6 +76,16 @@ window.NewsArticlePicker = function (opts) {
         // inoffensif pour les pages qui n'ont jamais ce champ (concentre-builder, objectif vidéo).
         companyFilter: '',
         sortMode: opts.defaultSortMode || 'cluster', // 'cluster' (défaut, groupage acteur) | 'date' | 'color'
+
+        // Libellé du mode 'date' dans le sélecteur de tri (ticket #2358, trouvé par la QC visuelle
+        // du 2026-09-08). Ce mode ne RETRIE rien : il rend la liste dans l'ordre où le serveur l'a
+        // envoyée. Sur l'écran de composition, cet ordre est désormais « score éditorial
+        // décroissant, puis pub_date décroissante » (NewsCompositionController::candidates), si
+        // bien que le libellé « Tri par date » y était devenu FAUX - l'écran affichait un ordre par
+        // pertinence sous une étiquette de date. Les autres pages hôtes (concentre-builder,
+        // objectif vidéo) n'ont pas de score et gardent le libellé d'origine : le mot juste dépend
+        // de la page, il vit donc en option plutôt qu'en dur dans le gabarit partagé.
+        libelleTriDate: opts.libelleTriDate || '📅 Tri par date',
         manualColors: {}, // { [itemId]: '#hexcolor' }
         colorPalette: [
             { label: 'Effacer', value: '' },
@@ -187,13 +197,29 @@ window.NewsArticlePicker = function (opts) {
                     || (n.summary || '').toLowerCase().includes(q);
             });
 
+            // Départage commun aux modes « couleur » et « acteur » : à couleur (ou acteur) égal,
+            // le score éditorial passe AVANT la date (revue adversariale Codex du 2026-09-08).
+            // Sans lui, changer de mode de tri neutralisait complètement le tri éditorial - or
+            // sur l'écran de composition actor_cluster vaut null pour TOUS les articles
+            // (NewsCompositionController::candidates), si bien que « Tri par acteur » revenait à
+            // un simple tri par date. Le mode choisi garde son critère principal ; seul le
+            // départage change. Sur les pages sans score (concentre-builder, objectif vidéo),
+            // score_tri est undefined partout : le départage vaut 0 des deux côtés et l'ordre
+            // d'origine (date) est conservé à l'identique.
+            const parScorePuisDate = (a, b) => {
+                const sa = typeof a.score_tri === 'number' ? a.score_tri : 0;
+                const sb = typeof b.score_tri === 'number' ? b.score_tri : 0;
+                if (sa !== sb) return sb - sa;
+                return (b.pub_date || '').localeCompare(a.pub_date || '');
+            };
+
             if (this.sortMode === 'color') {
-                // Trie : par couleur (manuel d'abord puis cluster), date desc dans chaque
+                // Trie : par couleur (manuel d'abord puis cluster), score puis date dans chaque
                 return [...filtered].sort((a, b) => {
                     const ca = this.colorForItem(a);
                     const cb = this.colorForItem(b);
                     if (ca !== cb) return ca.localeCompare(cb);
-                    return (b.pub_date || '').localeCompare(a.pub_date || '');
+                    return parScorePuisDate(a, b);
                 });
             }
             if (this.sortMode === 'cluster') {
@@ -201,7 +227,7 @@ window.NewsArticlePicker = function (opts) {
                     const ca = a.actor_cluster || '￿';
                     const cb = b.actor_cluster || '￿';
                     if (ca !== cb) return ca.localeCompare(cb);
-                    return (b.pub_date || '').localeCompare(a.pub_date || '');
+                    return parScorePuisDate(a, b);
                 });
             }
             return filtered;
@@ -225,6 +251,25 @@ window.NewsArticlePicker = function (opts) {
         },
 
         // ── Méthodes ─────────────────────────────────────────────────────────
+        // Tri éditorial déterministe (ticket #2358) - item.score_tri / item.raisons_tri sont
+        // fournis SEULEMENT par NewsCompositionController::candidates() (Modules\News\Services\
+        // EditorialTriageScorer) ; ils restent undefined sur les autres pages hôtes de ce mixin
+        // (concentre-builder, objectif-video), ce qui rend cet ajout inoffensif pour elles - la
+        // vue les affiche derrière un x-show qui teste leur présence.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: design doc "tri éditorial déterministe de l'écran de composition" (#2358).
+        scoreTriLabel(item) {
+            const score = item && typeof item.score_tri === 'number' ? item.score_tri : 0;
+            return (score > 0 ? '+' : '') + score;
+        },
+
+        // Infobulle native (attribut title) : le score n'est jamais une boîte noire, les raisons
+        // qui l'ont produit sont toujours accessibles au clic/survol du même geste.
+        scoreTriTooltip(item) {
+            const raisons = item && Array.isArray(item.raisons_tri) ? item.raisons_tri : [];
+            return raisons.length ? raisons.join('\n') : 'Aucun signal détecté dans le titre.';
+        },
+
         colorForItem(item) {
             if (!item) return '#94a3b8';
             const manual = this.manualColors[item.id];

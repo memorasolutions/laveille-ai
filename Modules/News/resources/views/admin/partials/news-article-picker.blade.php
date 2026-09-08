@@ -63,7 +63,10 @@
         <select class="form-select form-select-sm" x-model="sortMode" style="width:auto;" title="Mode de tri">
             <option value="cluster">🏷 Tri par acteur</option>
             <option value="color">🎨 Tri par couleur</option>
-            <option value="date">📅 Tri par date</option>
+            {{-- Libellé porté par le mixin (ticket #2358) : sur l'écran de composition, ce mode
+                 rend l'ordre du serveur, qui est désormais « pertinence puis date » - ailleurs il
+                 reste un vrai tri par date. Voir libelleTriDate dans news-article-picker.js. --}}
+            <option value="date" x-text="libelleTriDate">📅 Tri par date</option>
         </select>
         <select class="form-select form-select-sm" x-model="colorFilter" style="width:auto;" title="Filtre par couleur">
             <option value="">🎨 Toutes couleurs</option>
@@ -83,7 +86,27 @@
                     <div class="cb-news-item" :style="'border-left-color:' + colorForItem(item)">
                         <img :src="item.favicon" loading="lazy" class="cb-fav" alt="" onerror="this.style.display='none'">
                         <div style="flex:1; min-width:0;">
-                            <div class="cb-title" x-text="item.title" :title="item.title_original && item.title_original !== item.title ? 'Titre original : ' + item.title_original : ''"></div>
+                            <div class="cb-title">
+                                {{-- Ticket #2358 : pastille de tri éditorial (Modules\News\Services\
+                                     EditorialTriageScorer), présente seulement sur cet écran de
+                                     composition - item.score_tri est absent sur les autres pages
+                                     hôtes de ce mixin (concentre-builder, objectif-video), d'où le
+                                     x-show. Le score ORDONNE déjà la liste ; la pastille explique
+                                     pourquoi via l'infobulle native, jamais une boîte noire. --}}
+                                {{-- tabindex + aria-label : l'infobulle native title="" ne s'ouvre
+                                     qu'à la souris. Sans ces deux attributs, les raisons du score
+                                     étaient INACCESSIBLES au clavier et aux lecteurs d'écran
+                                     (revue adversariale Codex du 2026-09-08). aria-label porte le
+                                     texte complet - valeur ET raisons - parce qu'un lecteur
+                                     d'écran ne lit pas title="" de façon fiable selon le
+                                     navigateur. --}}
+                                <span class="cb-score-badge" x-show="typeof item.score_tri === 'number'" x-cloak
+                                      x-text="scoreTriLabel(item)"
+                                      :title="scoreTriTooltip(item)"
+                                      :aria-label="'Score de tri ' + scoreTriLabel(item) + '. ' + scoreTriTooltip(item)"
+                                      tabindex="0" role="note"></span>
+                                <span x-text="item.title" :title="item.title_original && item.title_original !== item.title ? 'Titre original : ' + item.title_original : ''"></span>
+                            </div>
                             <div class="cb-meta">
                                 <span x-text="item.source_language === 'fr' ? '🇫🇷' : (item.source_language === 'en' ? '🇬🇧' : '🌐')" :title="item.source_language === 'fr' ? 'Français' : (item.source_language === 'en' ? 'Anglais (titre FR si traduit)' : 'Langue inconnue')" style="margin-right:4px;"></span>
                                 <span x-text="item.source_name || 'Source inconnue'"></span> · <span x-text="item.pub_date_short"></span>
