@@ -204,7 +204,7 @@
                                     <tbody>
                                         <tr><td>Brevo</td><td>{{ __('Infolettre') }}</td><td>{{ __('Union européenne') }}</td><td>{{ __('Décision d\'adéquation') }}</td></tr>
                                         <tr><td>OpenRouter / Google</td><td>{{ __('Résumés IA') }}</td><td>{{ __('États-Unis') }}</td><td>{{ __('Clauses contractuelles types (SCC)') }}</td></tr>
-                                        <tr><td>Cloudflare</td><td>{{ __('CDN, sécurité') }}</td><td>{{ __('Global') }}</td><td>{{ __('DPF UE-US') }}</td></tr>
+                                        <tr><td>Cloudflare</td><td>{{ __('CDN, sécurité, protection anti-robots des formulaires (Turnstile)') }}</td><td>{{ __('Global') }}</td><td>{{ __('DPF UE-US') }}</td></tr>
                                         <tr><td>HostPapa</td><td>{{ __('Hébergement') }}</td><td>{{ __('États-Unis') }}</td><td>{{ __('Évaluation en cours conformément à l\'article 17 de la Loi 25, encadrement contractuel') }}</td></tr>
                                         <tr><td>Google Analytics 4</td><td>{{ __('Analyse d\'audience') }}</td><td>{{ __('États-Unis') }}</td><td>{{ __('SCC + mode consentement v2') }}</td></tr>
                                     </tbody>
@@ -276,6 +276,14 @@
                                 <li>{{ __('Audits de sécurité réguliers') }}</li>
                                 <li>{{ __('Formation du personnel à la protection des données') }}</li>
                             </ul>
+                            {{-- Mention EXIGÉE par Cloudflare pour le mode « invisible » de Turnstile : l'écran de
+                                 création du widget indique qu'activer ce mode oblige à référer à son addendum de
+                                 confidentialité dans notre propre politique. Le mode invisible a été retenu parce
+                                 qu'il ne présente AUCUN test à résoudre, ce qu'exige le critère WCAG 2.2 AAA 3.3.9
+                                 (authentification accessible) que suit ce site : un test visuel ou cognitif y serait
+                                 un recul. Les deux formulaires nommés ici sont les seuls que protège le widget
+                                 (voir CLOUDFLARE_TURNSTILE_SITE_KEY dans .env.example : un seul widget les sert). --}}
+                            <p>{{ __('Protection contre les robots. Les formulaires publics du site, soit l\'inscription à l\'infolettre d\'un auteur et la proposition d\'un outil pour l\'annuaire, sont protégés par Cloudflare Turnstile en mode invisible : aucun test visuel ne vous est présenté, aucune image ni aucun texte déformé ne vous est demandé. Le service analyse des signaux techniques du navigateur pour distinguer une personne d\'un robot. Cloudflare déclare que Turnstile ne sert pas à la publicité et ne suit pas les visiteurs d\'un site à l\'autre ; le détail des renseignements que ce service traite figure dans son addendum de confidentialité :') }} <a href="https://www.cloudflare.com/turnstile-privacy-policy/" target="_blank" rel="noopener">cloudflare.com/turnstile-privacy-policy</a>.</p>
 
                             <h3 id="efvp">{{ __('20. Évaluation des facteurs relatifs à la vie privée (EFVP)') }}</h3>
                             <p>{{ __('Conformément à l\'article 3.3 de la Loi modernisant des dispositions législatives en matière de protection des renseignements personnels (Loi 25, Québec), notre organisation s\'engage à effectuer une Évaluation des facteurs relatifs à la vie privée (EFVP) pour tout projet impliquant la collecte, l\'utilisation, la communication, la conservation ou la destruction de renseignements personnels.') }}</p>

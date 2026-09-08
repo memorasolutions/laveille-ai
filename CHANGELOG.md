@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.256.1] - 2026-09-08
+
+### Corrigé
+- **La protection anti-robots des formulaires publics devient réellement active, et sa mention
+  légale la précède.** Le code Turnstile dort dans le projet depuis v1.243.0 (soumission d'un
+  outil) et depuis v1.27.0 (infolettre d'auteur) : il se désactive de lui-même tant que la clé
+  secrète est vide, si bien que les deux formulaires n'ont jamais été protégés. Le widget manquait
+  côté Cloudflare ; il a été créé pour le domaine laveille.ai en mode **Invisible**, celui qui ne
+  présente AUCUN test à résoudre, seul compatible avec le critère WCAG 2.2 AAA 3.3.9 que suit ce
+  site. Or l'écran de création de Cloudflare pose une condition à ce mode : référer à son addendum
+  de confidentialité dans notre propre politique. La politique de confidentialité porte donc
+  maintenant, à la section « Mesures de sécurité », un paragraphe qui nomme le service, dit ce
+  qu'il fait, distingue ce que Cloudflare DÉCLARE de ce que nous constatons, et renvoie à
+  l'addendum ; le tableau des transferts internationaux nomme lui aussi Turnstile à la ligne
+  Cloudflare, qui ne disait que « CDN, sécurité ».
+  Ordre de livraison volontaire : la mention part AVANT les clés, pour qu'aucune minute de
+  production ne tourne avec un mode invisible actif et sans la référence exigée.
+
 ## [1.256.0] - 2026-09-08
 
 ### Ajouté
