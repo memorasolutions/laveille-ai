@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.256.3] - 2026-09-08
+
+### Corrigé
+- **La politique de sécurité du contenu du site interdisait l'iframe de Cloudflare, et le widget
+  anti-robots ne pouvait produire aucun jeton.** Troisième défaut du même chantier, et le plus
+  décisif, mesuré en production dans un vrai navigateur avec la seule clé publique posée, donc sans
+  qu'aucun visiteur ne puisse être refusé pendant la mesure. Le champ du jeton restait vide et la
+  console donnait la cause : « Framing https://challenges.cloudflare.com/ violates the following
+  Content Security Policy directive: frame-src ... ». Turnstile exécute son contrôle dans une
+  iframe ; la directive ne l'autorisait pas, l'iframe n'était jamais créée, et le serveur aurait
+  alors refusé TOUS les visiteurs des deux formulaires protégés comme des robots. L'hôte est
+  désormais autorisé dans les deux politiques du site : celle qui est active pour toutes les
+  réponses, et celle qui dort dans le code sans être branchée sur aucune route, corrigée elle aussi
+  pour qu'un branchement futur ne rouvre pas le défaut en silence. Directives complétées selon
+  l'exigence documentée par Cloudflare : `frame-src` et `script-src`.
+
 ## [1.256.2] - 2026-09-08
 
 ### Corrigé

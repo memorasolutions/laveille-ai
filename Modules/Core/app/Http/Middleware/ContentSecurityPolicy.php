@@ -25,7 +25,7 @@ class ContentSecurityPolicy
 
         $policy = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'nonce-{$nonce}' https://js.stripe.com",
+            "script-src 'self' 'nonce-{$nonce}' https://js.stripe.com https://challenges.cloudflare.com",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: https:",
             "font-src 'self'",
@@ -33,7 +33,9 @@ class ContentSecurityPolicy
             // screenpal.com + media.memora.solutions (CNAME ScreenPal marque blanche, domaine Memora premier niveau) :
             // vidéos du module Academy (AcademyCsp le couvre aussi, mais la CSP globale peut écraser celle du
             // middleware de route si elle est appliquée après — on l'ajoute ici par sécurité).
-            "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://screenpal.com https://*.screenpal.com https://media.memora.solutions",
+            // challenges.cloudflare.com : Turnstile exige script-src ET frame-src (voir le
+            // commentaire de SecurityHeaders, qui porte la mesure faite en production).
+            "frame-src 'self' https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://screenpal.com https://*.screenpal.com https://media.memora.solutions",
             "frame-ancestors 'self'",
             "base-uri 'self'",
             "form-action 'self' https://api.stripe.com",
