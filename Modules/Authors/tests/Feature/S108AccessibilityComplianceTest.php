@@ -33,6 +33,28 @@ it('mini-site contains skip link as first focusable element', function () {
     $response->assertSee('id="lv-main-content"', false);
 });
 
+it('le lien d evitement mene AVANT le contenu, pas apres lui', function () {
+    // Ce test existe parce que le test voisin ne verifiait que la PRESENCE des deux chaines,
+    // jamais leur ORDRE : quand les publications ont ete remontees dans l en-tete, l ancre
+    // s est retrouvee APRES elles et le lien d evitement faisait sauter tout le contenu que
+    // l utilisateur venait chercher. Aucun test ne l a vu. Revue adversariale du 2026-09-08.
+    $author = makeAuthorS108();
+    $html = $this->get('/@'.$author->slug)->assertStatus(200)->getContent();
+
+    // Un identifiant HTML doit etre unique : l ancre ne doit exister qu une seule fois.
+    expect(substr_count($html, 'id="lv-main-content"'))->toBe(1);
+
+    $positionAncre = strpos($html, 'id="lv-main-content"');
+    $positionMain = strpos($html, '<main');
+
+    expect($positionAncre)->not->toBeFalse();
+    expect($positionMain)->not->toBeFalse();
+
+    // L ancre precede le <main> : elle est posee au debut du contenu reel, et non sur un
+    // conteneur situe tout en bas de la page.
+    expect($positionAncre)->toBeLessThan($positionMain);
+});
+
 it('TurnstileVerificationService returns true when not configured (graceful bypass)', function () {
     config(['services.turnstile.secret_key' => null]);
     $service = new TurnstileVerificationService();

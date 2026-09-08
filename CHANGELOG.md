@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.257.0] - 2026-09-08
+
+### Ajouté
+- **Le nom d'un auteur invité devient un lien vers sa page personnelle, au bas des articles qu'il
+  signe.** Le lien n'apparaît que si cette personne a bien une page publique non archivée ; sinon
+  le nom reste du texte, exactement comme avant. Un composant partagé unique porte cette règle,
+  pour qu'elle ne se retrouve jamais réécrite différemment à deux endroits. Le module Authors
+  reste optionnel dans l'appel. Portée assumée et non étendue : les fiches d'actualité ne sont pas
+  concernées, parce qu'aucun nom d'auteur interne n'y est affiché, par décision de conception déjà
+  prise et notée en août 2026 ; le champ « auteur » d'une actualité désigne le journaliste de la
+  source externe, pas quelqu'un du site.
+
+### Modifié
+- **La page personnelle d'un auteur montre ses publications AVANT le reste.** Un visiteur qui vient
+  voir ce que quelqu'un a écrit le voit maintenant sans avoir à défiler. Conséquence assumée sur
+  grand écran : la carte de profil et la carte « en ce moment » ne peuvent plus être côte à côte,
+  puisque les publications s'intercalent entre les deux. Les deux objectifs sont géométriquement
+  incompatibles, et celui du contenu a été jugé prioritaire.
+
+### Corrigé
+- **La page n'annonce plus publiquement l'inactivité de son auteur.** Un bandeau s'affichait au bout
+  de soixante jours sans publication, sur une page que la personne partage à ses collègues et à ses
+  élèves. Il ne s'affiche plus. La donnée reste calculée côté serveur, sans aucune requête
+  supplémentaire, pour que le bandeau puisse être rétabli en décommentant une seule ligne.
+- **Les compteurs à zéro ont disparu, et la carte de statistiques peut enfin disparaître avec eux.**
+  Chaque ligne ne s'affiche que si sa valeur est réellement positive. Le premier correctif laissait
+  toutefois la carte s'afficher quand même, réduite à la seule mention « membre depuis », parce que
+  cette date est toujours renseignée : un compte neuf recevait donc une carte « Statistiques »
+  vide de statistiques. Mesuré en contrôle visuel sur un profil sans aucune publication, puis
+  corrigé. La date reste affichée quand la carte est justifiée par autre chose.
+- **La grille des trois cartes secondaires ne réserve plus de colonne à une carte absente.** Le
+  nombre de colonnes était calculé avant de savoir si la carte de statistiques s'afficherait :
+  depuis qu'elle peut disparaître, la grille déclarait une colonne de trop, et pouvait même
+  s'ouvrir entièrement vide. Les compteurs sont désormais calculés en premier, et la grille les
+  consulte. Défaut relevé en revue adversariale.
+- **La page débordait de 221 pixels sur téléphone, et la carte « À propos » était coupée.** Un
+  style écrit directement dans la balise forçait trois colonnes à toute largeur d'écran et écrasait
+  la règle responsive prévue pour les petits écrans, qui n'a donc jamais pu s'appliquer. Ce style
+  ne transmet plus qu'une variable, que seule la règle des grands écrans consomme. Mesuré avant et
+  après sur deux profils : 611 pixels de contenu pour 390 de fenêtre, contre 390 pour 390
+  maintenant. Défaut préexistant, corrigé ici parce qu'il touche la page même que ce lot refond.
+- **Le lien « Aller au contenu principal » faisait sauter le contenu principal.** Il pointait vers
+  une zone située après les publications, qui viennent d'être remontées : un utilisateur au clavier
+  ou au lecteur d'écran contournait donc exactement ce qu'il cherchait à atteindre. Une ancre est
+  posée au début du contenu réel. Le test qui existait ne vérifiait que la présence des deux
+  éléments, jamais leur ordre, et ne pouvait donc pas voir la régression ; un test d'ordre a été
+  ajouté, et il échoue bien lorsqu'on retire le correctif. Défaut relevé en revue adversariale,
+  puis vérifié au clavier dans un vrai navigateur.
+
 ## [1.256.3] - 2026-09-08
 
 ### Corrigé

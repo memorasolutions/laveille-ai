@@ -82,7 +82,7 @@
         .bento-hero { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media (min-width: 1024px) { .bento-hero { grid-template-columns: 3fr 2fr; } .bento-hero.single-col { grid-template-columns: 1fr; } }
         .bento-sub { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1.5rem; }
-        @media (min-width: 768px) { .bento-sub { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 768px) { .bento-sub { grid-template-columns: repeat(var(--lv-sub-cols, 3), 1fr); } }
         .bento-articles { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media (min-width: 768px) { .bento-articles { grid-template-columns: repeat(4, 1fr); grid-auto-rows: minmax(200px, auto); } .bento-articles > .featured { grid-column: span 2; grid-row: span 2; } }
         /* WCAG AAA fix S110 : opacité augmentée 0.7→0.95 pour contraste texte garanti sur translucent backgrounds */
@@ -150,9 +150,9 @@
         </div>
     </nav>
 
-    @if($showAbandonBanner)
-        <div class="container"><div class="abandon-banner fade-up">🌱 Pas publié depuis {{ $author->daysSinceLastPublish() }} jours. Le contenu reste accessible.</div></div>
-    @endif
+    {{-- Travail A (2026-09-08) : rendu de la bannière d'abandon retiré - elle annonçait
+         publiquement l'inactivité d'un enseignant devant ses collègues et ses élèves ; la
+         donnée $showAbandonBanner reste calculée côté contrôleur, seul l'affichage est coupé. --}}
 
     @if(isset($searchResults) && $searchResults !== null)
         <section class="container lv-search-results-section" aria-labelledby="lv-search-results-h2" style="padding-top:24px; padding-bottom:24px;">
@@ -191,7 +191,7 @@
     @endif
 
     <header class="container" style="padding-top: 32px;">
-        <div class="bento-hero {{ $author->isModuleVisible('now') ? '' : 'single-col' }}">
+        <div class="bento-hero single-col">
             <div class="glass-card fade-up" style="text-align: center; padding: 48px 32px;">
                 @php
                     $authorName = $author->user?->name ?? $author->slug;
@@ -222,8 +222,68 @@
                     </div>
                 @endif
             </div>
+        </div>
 
-            @if($author->isModuleVisible('now'))
+        {{-- Cible du lien d'évitement : depuis que les publications ont été remontées, le
+             <main> se trouve APRÈS elles. Un utilisateur au clavier qui suivait « Aller au
+             contenu principal » sautait donc tout le contenu qu'il venait chercher. L'ancre
+             est posée ici, au début du contenu réel. Relevé en revue adversariale 2026-09-08. --}}
+        <div id="lv-main-content" tabindex="-1"></div>
+
+        {{-- Travail C (2026-09-08) : bloc « Publications récentes » remonté ici, IMMÉDIATEMENT
+             après le hero de profil et AVANT la carte « en ce moment » et les trois cartes
+             secondaires - un visiteur qui vient voir ce que la personne a écrit doit le voir
+             sans défiler. Balisage et style du bloc intacts, déplacés tels quels depuis <main>
+             (voir plus bas dans ce fichier). --}}
+        @php
+            $articles = $timeline->filter(function ($i) { return ! isset($i->content_type); })->values();
+        @endphp
+        @if($articles->isNotEmpty() && $author->isModuleVisible('recent_articles'))
+            <section id="articles">
+                <h2 style="font-family: 'Fraunces', serif; font-variation-settings: 'opsz' 48, 'wght' 600; font-size: clamp(28px, 4vw, 40px); color: var(--c-primary); margin-bottom: 24px;" class="fade-up">⭐ Publications récentes</h2>
+                <div class="bento-articles">
+                    @php $featured = $articles->first(); @endphp
+                    @if($featured && $author->isModuleVisible('featured'))
+                        <article class="glass-card featured fade-up" style="display: flex; flex-direction: column; justify-content: space-between; padding: 32px;">
+                            <div>
+                                <span class="pill pill-featured" style="margin-bottom: 16px;">⭐ À lire d'abord</span>
+                                <h3 class="article-title" style="font-size: 26px; margin-bottom: 16px;">{{ $featured->title ?? \Illuminate\Support\Str::limit(strip_tags($featured->content ?? ''), 80) }}</h3>
+                                @if(!empty($featured->excerpt))
+                                    <p style="color: var(--c-text-secondary); font-size: 16px; line-height: 1.6; margin-bottom: 16px;">{{ \Illuminate\Support\Str::limit($featured->excerpt, 200) }}</p>
+                                @endif
+                            </div>
+                            <div>
+                                <div class="article-meta" style="margin-bottom: 8px;">{{ optional($featured->published_at)->format('j F Y') }}</div>
+                                @if(!empty($featured->slug))
+                                    <a href="{{ url('/blog/'.$featured->slug) }}" class="read-link">Lire l'article complet →</a>
+                                @endif
+                            </div>
+                        </article>
+                    @endif
+
+                    @foreach($articles->skip(1)->take(4) as $article)
+                        <article class="glass-card fade-up" style="display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div class="article-meta" style="margin-bottom: 8px;">{{ optional($article->published_at)->format('j M Y') }}</div>
+                                <h3 class="article-title" style="font-size: 16px; margin-bottom: 12px;">{{ \Illuminate\Support\Str::limit($article->title ?? '', 70) }}</h3>
+                            </div>
+                            @if(!empty($article->slug))
+                                <a href="{{ url('/blog/'.$article->slug) }}" class="read-link" style="margin-top: 12px;">Lire →</a>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+
+                @if($articles->count() > 5)
+                    <div style="text-align: center; margin-top: 32px;" class="fade-up">
+                        <a href="#" class="btn-secondary">Voir les {{ $articles->count() }} publications →</a>
+                    </div>
+                @endif
+            </section>
+        @endif
+
+        @if($author->isModuleVisible('now'))
+        <div class="bento-hero single-col">
             <div class="glass-card now-card fade-up" style="display: flex; flex-direction: column; justify-content: space-between; gap: 20px;">
                 @php
                     $latestStatus = $timeline->first(function ($item) { return isset($item->content_type); });
@@ -273,21 +333,39 @@
                     50% { opacity: 0.5; transform: scale(1.3); }
                 }
             </style>
-            @endif
         </div>
+        @endif
 
         @php
-            $visibleSubModules = collect(['stats', 'newsletter', 'about'])->filter(fn ($m) => $author->isModuleVisible($m));
+            // Les compteurs sont calculés AVANT la grille : depuis que la carte « Statistiques »
+            // peut ne pas s'afficher du tout, compter « stats » comme visible sans vérifier
+            // $lvHasAnyStat réservait une colonne à une carte absente, et pouvait même ouvrir
+            // une grille entièrement vide. Défaut relevé en revue adversariale le 2026-09-08.
+            $lvPubCount = $timeline->count();
+            $lvQualCount = is_array($author->qualifications ?? null) ? count($author->qualifications) : 0;
+            $lvHasMemberSince = $author->created_at !== null;
+            // « membre depuis » ne compte PAS comme une statistique justifiant la carte : il est
+            // toujours vrai (Eloquent horodate created_at), donc l'inclure rendait la carte
+            // impossible à masquer - un compte neuf affichait une carte réduite à une ligne creuse.
+            $lvHasAnyStat = $lvPubCount > 0 || $lvQualCount > 0;
+
+            $visibleSubModules = collect(['stats', 'newsletter', 'about'])
+                ->filter(fn ($m) => $author->isModuleVisible($m) && ($m !== 'stats' || $lvHasAnyStat));
         @endphp
         @if($visibleSubModules->isNotEmpty())
-        <div class="bento-sub" style="grid-template-columns: repeat({{ min($visibleSubModules->count(), 3) }}, 1fr);">
-            @if($author->isModuleVisible('stats'))
+        <div class="bento-sub" style="--lv-sub-cols: {{ min($visibleSubModules->count(), 3) }};">
+            @if($author->isModuleVisible('stats') && $lvHasAnyStat)
             <div class="glass-card fade-up">
                 <h2 style="font-size: 13px; font-weight: 700; color: var(--c-text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">📊 Statistiques</h2>
-                <p style="font-size: 32px; font-weight: 800; color: var(--c-primary); font-family: 'Fraunces', serif; line-height: 1; margin: 0;">{{ $timeline->count() }}</p>
-                <p style="color: var(--c-text-muted); font-size: 14px; margin-top: 4px;">publications</p>
-                @if(!empty($author->qualifications))
-                    <p style="margin-top: 12px; font-size: 14px; color: var(--c-text-secondary);">{{ count($author->qualifications) }} qualifications · membre depuis {{ $author->created_at?->format('Y') }}</p>
+                @if($lvPubCount > 0)
+                    <p style="font-size: 32px; font-weight: 800; color: var(--c-primary); font-family: 'Fraunces', serif; line-height: 1; margin: 0;">{{ $lvPubCount }}</p>
+                    <p style="color: var(--c-text-muted); font-size: 14px; margin-top: 4px;">publications</p>
+                @endif
+                @if($lvQualCount > 0 || $lvHasMemberSince)
+                    <p style="margin-top: 12px; font-size: 14px; color: var(--c-text-secondary);">{{ collect([
+                        $lvQualCount > 0 ? $lvQualCount.' qualifications' : null,
+                        $lvHasMemberSince ? 'membre depuis '.$author->created_at->format('Y') : null,
+                    ])->filter()->implode(' · ') }}</p>
                 @endif
             </div>
             @endif
@@ -374,58 +452,13 @@
         </ol>
     </nav>
 
-    <main class="container" id="lv-main-content" role="main" style="max-width: 1200px;">
-        @php
-            $articles = $timeline->filter(function ($i) { return ! isset($i->content_type); })->values();
-        @endphp
-
+    <main class="container" role="main" style="max-width: 1200px;">
+        {{-- Travail C (2026-09-08) : la grille « Publications récentes » (id="articles") a
+             déménagé dans <header>, juste après le hero de profil - voir plus haut dans ce
+             fichier. La variable $articles n'est donc plus calculée ni utilisée ici. --}}
         <div class="container" style="padding-top:24px;">
             <x-authors::popular-posts :author="$author" :limit="5" />
         </div>
-
-        @if($articles->isNotEmpty() && $author->isModuleVisible('recent_articles'))
-            <section id="articles">
-                <h2 style="font-family: 'Fraunces', serif; font-variation-settings: 'opsz' 48, 'wght' 600; font-size: clamp(28px, 4vw, 40px); color: var(--c-primary); margin-bottom: 24px;" class="fade-up">⭐ Publications récentes</h2>
-                <div class="bento-articles">
-                    @php $featured = $articles->first(); @endphp
-                    @if($featured && $author->isModuleVisible('featured'))
-                        <article class="glass-card featured fade-up" style="display: flex; flex-direction: column; justify-content: space-between; padding: 32px;">
-                            <div>
-                                <span class="pill pill-featured" style="margin-bottom: 16px;">⭐ À lire d'abord</span>
-                                <h3 class="article-title" style="font-size: 26px; margin-bottom: 16px;">{{ $featured->title ?? \Illuminate\Support\Str::limit(strip_tags($featured->content ?? ''), 80) }}</h3>
-                                @if(!empty($featured->excerpt))
-                                    <p style="color: var(--c-text-secondary); font-size: 16px; line-height: 1.6; margin-bottom: 16px;">{{ \Illuminate\Support\Str::limit($featured->excerpt, 200) }}</p>
-                                @endif
-                            </div>
-                            <div>
-                                <div class="article-meta" style="margin-bottom: 8px;">{{ optional($featured->published_at)->format('j F Y') }}</div>
-                                @if(!empty($featured->slug))
-                                    <a href="{{ url('/blog/'.$featured->slug) }}" class="read-link">Lire l'article complet →</a>
-                                @endif
-                            </div>
-                        </article>
-                    @endif
-
-                    @foreach($articles->skip(1)->take(4) as $article)
-                        <article class="glass-card fade-up" style="display: flex; flex-direction: column; justify-content: space-between;">
-                            <div>
-                                <div class="article-meta" style="margin-bottom: 8px;">{{ optional($article->published_at)->format('j M Y') }}</div>
-                                <h3 class="article-title" style="font-size: 16px; margin-bottom: 12px;">{{ \Illuminate\Support\Str::limit($article->title ?? '', 70) }}</h3>
-                            </div>
-                            @if(!empty($article->slug))
-                                <a href="{{ url('/blog/'.$article->slug) }}" class="read-link" style="margin-top: 12px;">Lire →</a>
-                            @endif
-                        </article>
-                    @endforeach
-                </div>
-
-                @if($articles->count() > 5)
-                    <div style="text-align: center; margin-top: 32px;" class="fade-up">
-                        <a href="#" class="btn-secondary">Voir les {{ $articles->count() }} publications →</a>
-                    </div>
-                @endif
-            </section>
-        @endif
     </main>
 
     <footer class="footer">

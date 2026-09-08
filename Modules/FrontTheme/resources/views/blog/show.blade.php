@@ -377,10 +377,18 @@
                                 @endif
                             </div>
                             <div class="author-content">
-                                @if($authorLink)
+                                @if($isMainAuthor)
+                                    {{-- Page auteur dédiée historique de Stéphane Lapointe (/auteur/stephane-lapointe),
+                                         distincte du mini-site @slug générique - cas déjà géré, non touché ici. --}}
                                     <a href="{{ $authorLink }}" rel="author" style="text-decoration:none;color:inherit;">
                                         <span class="author-name" itemprop="name">{{ $author->name ?? __('Auteur') }}</span>
                                     </a>
+                                @elseif(class_exists(\Modules\Authors\Models\AuthorProfile::class))
+                                    {{-- Travail D (2026-09-08) : nom cliquable vers le mini-site auteur (composant
+                                         partagé, DRY) seulement si un profil auteur non archivé existe pour cet
+                                         utilisateur (auteur invité) - sinon texte brut, sans lien. Module Authors
+                                         gardé optionnel (class_exists) : un module désactivé ne casse jamais le site. --}}
+                                    <x-authors::author-name-link :user="$author" class="author-name" />
                                 @else
                                     <span class="author-name" itemprop="name">{{ $author->name ?? __('Auteur') }}</span>
                                 @endif
