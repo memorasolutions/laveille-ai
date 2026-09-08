@@ -310,10 +310,24 @@ it('RESSERREMENT 2026-09-08 : le RETRAIT complet du gabarit était une régressi
     // Mémoire de la mesure qui a démenti une décision déjà prise. J\'avais retiré le gabarit au
     // nom de faux positifs FABRIQUÉS ; la remesure a montré que score() n\'accorde le bonus
     // « nombre porteur » qu\'en l\'absence de marqueur commercial - retirer le marqueur libérait
-    // le bonus, et la promotion passait AU-DESSUS des titres neutres. Ce test garde la promo
-    // sous zéro, quelle que soit la forme du pourcentage (collé ou espacé).
-    expect(editorialScorer()->score('Erreur de prix : le Xiaomi Mi Mix Flip est à -70%, fin de l\'offre à minuit', null, null)['score'])
-        ->toBeLessThan(0);
+    // le bonus, et la promotion passait AU-DESSUS des titres neutres.
+    // TITRE VOLONTAIREMENT DÉPOUILLÉ (2e revue Codex) : ma première version testait le titre
+    // complet, qui porte AUSSI « fin de l\'offre ». Il restait donc sous zéro même sans le
+    // gabarit, et ne prouvait rien. Ce titre-ci ne porte QUE le pourcentage négatif : retirer le
+    // gabarit le fait remonter à +2, et le test rougit.
+    $resultat = editorialScorer()->score('Le Xiaomi Mi Mix Flip est à -70%', null, null);
+
+    expect($resultat['score'])->toBe(-5)
+        ->and($resultat['raisons'])->toBe(['-5 marqueur commercial : « -70% »']);
+});
+
+it('RESSERREMENT 2026-09-08 : une promo dont le PRODUIT finit par un chiffre est bien pénalisée - « Galaxy S24 -30 % »', function () {
+    // Faux négatif trouvé par la DEUXIÈME revue Codex : mon premier resserrement ajoutait un
+    // lookbehind (?<!\d\s) qui laissait passer la forme la plus courante des promos tech, un nom
+    // de produit terminé par un chiffre juste avant le rabais. Mesuré : « Samsung Galaxy S24
+    // -30 % » et « iPhone 15 -25% » n\'étaient PAS pénalisés.
+    expect(editorialScorer()->score('Samsung Galaxy S24 -30 %', null, null)['score'])->toBe(-5)
+        ->and(editorialScorer()->score('iPhone 15 -25% ce week-end', null, null)['score'])->toBe(-5);
 });
 
 it('CAUSE 3 : une perte chiffrée en devise ("perd 200 €") est un marqueur commercial', function () {

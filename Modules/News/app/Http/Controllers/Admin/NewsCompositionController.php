@@ -281,10 +281,31 @@ class NewsCompositionController extends Controller
         // « enquête » sous une pastille « Aucun signal détecté ». Le titre original reste passé
         // en premier argument : une entité écrite seulement dans la version anglaise compte
         // toujours.
+        // SOURCE UNIQUE du titre français affiché (2e revue Codex, 2026-09-08). Ma première
+        // version faisait lire au score « $traduction['titres'][...] ?? $a->title_fr » pendant que
+        // l'affichage, lui, lisait « ... ?? ($a->seo_title ?: $a->title) ». L'écart n'était pas
+        // théorique : titresTraduits() REFUSE de traduire un article qui porte déjà un seo_title
+        // (voir la condition plus bas, « le seo_title est déjà une réécriture éditoriale
+        // française »). Donc pour ces articles-là, la clé de traduction est absente, l'écran
+        // affichait le seo_title et le score notait le title_fr - deux textes différents.
+        // Une seule expression, calculée ici, sert maintenant au score ET au rendu, et c'est
+        // celle de l'AFFICHAGE : le rendu ne change pas d'un caractère, c'est le score qui vient
+        // s'aligner dessus.
+        // Pourquoi title_fr n'y figure PAS, alors que mon premier correctif le mettait en repli :
+        // titresTraduits() lit DÉJÀ 'title_fr' depuis la base et le place dans ce même tableau
+        // (voir la boucle « ce qui a déjà title_fr est lu directement »). Un repli sur title_fr
+        // était donc redondant là où la clé existe, et sans objet là où elle manque - car la clé
+        // ne manque que dans trois cas, et aucun ne laisse un title_fr utile : source déjà
+        // francophone, seo_title présent (qui exclut l'article de la traduction), ou rattrapage
+        // hors borne qui rend l'original.
+        $titresAffiches = $articles->mapWithKeys(fn (NewsArticle $a) => [
+            $a->id => $traduction['titres'][$a->id] ?? ($a->seo_title ?: $a->title),
+        ]);
+
         $scoresTri = $articles->mapWithKeys(fn (NewsArticle $a) => [
             $a->id => $this->triageScorer->score(
                 $a->title,
-                $traduction['titres'][$a->id] ?? $a->title_fr,
+                $titresAffiches[$a->id] ?? null,
                 $a->source?->name
             ),
         ]);
@@ -300,7 +321,7 @@ class NewsCompositionController extends Controller
             'traduction_motif' => $traduction['motif'],
             'items' => $articles->map(fn (NewsArticle $a) => [
                 'id' => $a->id,
-                'title' => $traduction['titres'][$a->id] ?? ($a->seo_title ?: $a->title),
+                'title' => $titresAffiches[$a->id],
                 'score_tri' => $scoresTri[$a->id]['score'] ?? 0,
                 'raisons_tri' => $scoresTri[$a->id]['raisons'] ?? [],
                 'title_original' => $a->title,

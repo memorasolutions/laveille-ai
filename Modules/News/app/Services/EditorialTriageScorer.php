@@ -263,12 +263,22 @@ final class EditorialTriageScorer
         // faux positif réel. Les deux familles de faux positifs de Codex étaient des titres que
         // j'avais FABRIQUÉS pour la sonde, jamais observés dans le flux.
         // Correctif retenu : garder le gabarit, et fermer la seule famille dont le faux positif
-        // est STRUCTUREL - l'intervalle, par les deux lookbehind ci-dessous (un chiffre, ou un
-        // chiffre puis une espace, avant le tiret). Largeur fixe, exigée par PCRE.
-        // LIMITE ÉCRITE, mesurée : la baisse chiffrée notée avec un signe moins (« amputé de
-        // -12 % ») reste pénalisée à tort. Aucune occurrence sur 80 titres réels - à rouvrir sur
-        // une mesure, jamais sur un titre inventé.
-        $motifPourcentageNegatif = '/(?<!\d)(?<!\d\s)-\s?\d+(?:[.,]\d+)?\s?%/u';
+        // est STRUCTUREL - l'intervalle « 20-30 % », par le lookbehind (?<!\d) : dans un
+        // intervalle, le tiret est COLLÉ au chiffre qui le précède.
+        // DEUXIÈME REVUE CODEX (2026-09-08) : j'avais d'abord ajouté un second lookbehind
+        // (?<!\d\s), et il créait un FAUX NÉGATIF sur la forme la plus courante des promos tech -
+        // un nom de produit qui finit par un chiffre. Mesuré : « Samsung Galaxy S24 -30 % » et
+        // « iPhone 15 -25% » n'étaient PAS pénalisés. Le second lookbehind est retiré.
+        // CE QUE LA MESURE NE TRANCHE PAS, et il faut le dire : sur les 80 titres réels des deux
+        // échantillons, les deux formes du motif mordent EXACTEMENT le même titre unique, et la
+        // forme « chiffre espace tiret pourcentage » n'y apparaît pas une seule fois. Le choix
+        // repose donc sur la fréquence ATTENDUE dans le domaine : une promo de produit numéroté
+        // est le pain quotidien de 01net et Frandroid, alors qu'un intervalle écrit « 10 -15 % »
+        // avec une espace avant le tiret est une faute de typographie française.
+        // LIMITES ÉCRITES, à rouvrir sur une mesure et jamais sur un titre inventé : la baisse
+        // chiffrée notée avec un signe moins (« amputé de -12 % ») reste pénalisée à tort, et
+        // l'intervalle mal typographié « 10 -15 % » l'est désormais aussi.
+        $motifPourcentageNegatif = '/(?<!\d)-\s?\d+(?:[.,]\d+)?\s?%/u';
         foreach ($textes as $texte) {
             if (preg_match($motifPourcentageNegatif, $texte, $correspondance) === 1) {
                 $score -= self::POIDS_MARQUEUR_COMMERCIAL;

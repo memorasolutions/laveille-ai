@@ -52,6 +52,19 @@
   tombait pas à 0, elle REMONTAIT à +2, parce que le bonus « nombre porteur » n'est accordé qu'en
   l'absence de marqueur commercial. Retirer le marqueur libérait le bonus.
 
+- **Deuxième revue Codex, sur les correctifs eux-mêmes : trois défauts de plus, tous réels.**
+  D'abord un FAUX NÉGATIF que j'avais introduit en corrigeant le premier : mon resserrement du
+  motif laissait passer la forme la plus courante des promotions techniques, un nom de produit qui
+  finit par un chiffre. Mesuré : « Samsung Galaxy S24 -30 % » et « iPhone 15 -25% » n'étaient plus
+  pénalisés du tout. Ensuite, un de mes deux tests neufs ne protégeait pas ce qu'il annonçait : son
+  titre portait AUSSI « fin de l'offre », donc il restait vert même sans le signal qu'il prétendait
+  verrouiller. Enfin, l'alignement du score sur le titre affiché restait incomplet : l'écran lit
+  `seo_title` en priorité, et la traduction est justement refusée aux articles qui en ont un.
+  Le titre affiché est maintenant calculé UNE fois et sert au score comme au rendu.
+- **Ce que la mesure ne tranche pas, et qui est écrit comme tel.** Sur les 80 titres réels, les deux
+  formes du motif mordent exactement le même titre unique : la mesure ne départage pas. Le choix
+  repose sur la fréquence attendue dans le domaine, pas sur ces chiffres.
+
 ### Limites écrites, mesurées le 2026-09-08
 - **Le score ne peut pas connaître les mots qu'on n'a pas écrits.** Deux titres pertinents de
   l'échantillon de contrôle valent 0 et le resteront : « L'Urssaf choisit Linux pour son cloud » et
