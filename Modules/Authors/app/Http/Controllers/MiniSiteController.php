@@ -24,31 +24,68 @@ final class MiniSiteController extends Controller
     }
 
     /**
-     * Le thème publie-t-il DÉJÀ une page auteur pour ce slug (route /auteur/{slug}) ?
+     * Le thème publie-t-il DÉJÀ une page auteur pour la MÊME PERSONNE ?
      *
-     * Quand c'est le cas, deux pages décrivent la même personne et se déclarent chacune
+     * Quand c'est le cas, deux pages décrivent le même auteur et se déclarent chacune
      * canonique. Mesuré le 2026-09-09 : /auteur/stephane-lapointe est indexée par Google
      * (« Submitted and indexed », 1 clic et 5 impressions sur 90 jours), tandis que
      * /@stephane lui est INCONNUE (« URL is unknown to Google »), parce que son plan de
      * site dédié n'est déclaré ni dans robots.txt ni dans sitemap.xml. Le doublon est donc
-     * dormant, pas actif - mais il s'ouvrirait au premier lien interne ou à la première
-     * soumission de sitemap-authors.xml. On le referme ici, sans changer aucune URL.
+     * dormant, pas actif - mais il s'ouvrirait au premier lien interne.
      *
-     * La source de vérité est le fichier de traduction du thème, celui-là même que lit
+     * LA COMPARAISON PORTE SUR LE NOM, PAS SUR LE SLUG, et c'est le coeur du correctif du
+     * 2026-09-09 (v1.257.4). La première version comparait les identifiants d'URL et ne
+     * mordait JAMAIS en production : les deux systèmes en emploient de DIFFÉRENTS pour la
+     * même personne - « stephane » pour le mini-site, « stephane-lapointe » pour la page du
+     * thème. Le test de la v1.257.3 était vert parce qu'il fabriquait un profil au slug
+     * « stephane-lapointe », qui n'existe pas dans la base réelle : il validait un cas
+     * fictif. Ce que les deux pages partagent réellement, c'est la PERSONNE qu'elles
+     * décrivent, donc son nom.
+     *
+     * La source de vérité reste le fichier de traduction du thème, celui-là même que lit
      * FrontTheme\Http\Controllers\AuthorController::show() pour décider s'il rend la page
      * ou renvoie un 404. Deux LECTEURS d'une même source, pas deux copies d'une règle.
      *
      * Le module Authors ne dépend pas de FrontTheme pour autant : quand la traduction est
-     * absente (module éteint), trans() retourne la CLÉ sous forme de chaîne, et le transtypage
-     * en tableau la range sous l'indice 0 - jamais sous un slug. Mesuré le 2026-09-09 :
-     * témoin positif « stephane-lapointe » vrai, témoin négatif « alpha-demo-preuve » faux,
-     * module inexistant faux.
+     * absente (module éteint), trans() retourne la CLÉ sous forme de chaîne, et la boucle
+     * ne trouve alors aucune entrée tableau portant un nom. Mesuré le 2026-09-09.
      */
-    private function pageAuteurThemeExiste(string $slug): bool
+    private function pageAuteurThemeExiste(AuthorProfile $auteur): bool
     {
-        $pagesDuTheme = (array) trans('fronttheme::authors');
+        $nom = $auteur->user?->name;
 
-        return isset($pagesDuTheme[$slug]) && is_array($pagesDuTheme[$slug]);
+        if (! is_string($nom) || trim($nom) === '') {
+            return false;
+        }
+
+        $nomCherche = $this->normaliserNomDAuteur($nom);
+
+        foreach ((array) trans('fronttheme::authors') as $pageDuTheme) {
+            if (! is_array($pageDuTheme) || ! isset($pageDuTheme['name'])) {
+                continue;
+            }
+
+            if ($this->normaliserNomDAuteur((string) $pageDuTheme['name']) === $nomCherche) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Normalise un nom pour la comparaison : minuscules, accents retirés, espaces réduits.
+     *
+     * Les accents comptent ici : jusqu'au 2026-09-09, la base portait « Stephane Lapointe »
+     * sans accent alors que le fichier du thème écrivait « Stéphane Lapointe ». La donnée a
+     * été corrigée depuis, mais une comparaison qui en dépendrait resterait fragile - un nom
+     * se ressaisit, et il se ressaisit parfois sans accent.
+     */
+    private function normaliserNomDAuteur(string $valeur): string
+    {
+        $sansAccent = \Illuminate\Support\Str::ascii($valeur);
+
+        return (string) preg_replace('/\s+/', ' ', trim(mb_strtolower($sansAccent)));
     }
 
     public function show(\Illuminate\Http\Request $request, string $slug)
@@ -110,7 +147,7 @@ final class MiniSiteController extends Controller
             'jsonLd' => $jsonLd,
             'searchQuery' => $searchQuery,
             'searchResults' => $searchResults,
-            'pageAuteurThemeConcurrente' => $this->pageAuteurThemeExiste($slug),
+            'pageAuteurThemeConcurrente' => $this->pageAuteurThemeExiste($author),
         ]);
     }
 

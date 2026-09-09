@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.257.4] - 2026-09-09
+
+### Corrigé
+- **Le `noindex` conditionnel livré en v1.257.3 ne mordait JAMAIS en production, et c'est la
+  vérification par requête réelle qui l'a démontré.** La version précédente comparait le SLUG du
+  mini-site aux clés du fichier de traduction du thème. Or les deux systèmes emploient des
+  identifiants d'URL DIFFÉRENTS pour la même personne : le mini-site est servi sous `stephane`,
+  la page du thème vit sous la clé `stephane-lapointe`. La comparaison était donc toujours
+  fausse, et `https://laveille.ai/@stephane` renvoyait 0 balise `robots` sur 20 essais alors que
+  la v1.257.3 était bien servie. La comparaison porte désormais sur le NOM de la personne, après
+  normalisation (minuscules, accents retirés, espaces réduits) : c'est la seule chose que les
+  deux pages partagent réellement. Mesuré en production le jour même, les deux noms normalisés
+  sont identiques.
+- **Le test de la v1.257.3 était vert sur un cas qui n'existe pas.** Il fabriquait un profil au
+  slug `stephane-lapointe`, absent de la base réelle. Il validait donc une situation fictive
+  pendant que le seul cas qu'il devait couvrir passait au travers. Le test reproduit désormais
+  le couple RÉEL de production (slug `stephane`, nom « Stéphane Lapointe »), et un troisième cas
+  vérifie que la comparaison tient même si le nom est ressaisi sans ses accents. La contre-épreuve
+  a été refaite dans les deux sens : correctif neutralisé, les deux cas positifs rougissent ;
+  balise posée sur tous les auteurs, le témoin négatif rougit.
+
+### Note technique
+- Le module `Authors` ne dépend pas de `FrontTheme` pour autant. Quand la traduction est absente
+  (module éteint), `trans()` retourne la clé sous forme de chaîne : la boucle ne trouve alors
+  aucune entrée tableau portant un nom, et la garde retourne `false`. Mesuré.
+
 ## [1.257.3] - 2026-09-09
 
 ### Corrigé
