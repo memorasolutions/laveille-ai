@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.257.3] - 2026-09-09
+
+### Corrigé
+- **Le mini-site d'un auteur ne concurrence plus la page auteur du thème dans l'index de
+  Google.** Deux pages décrivaient la même personne, `/auteur/stephane-lapointe` et
+  `/@stephane`, chacune se déclarant canonique vers elle-même. La mesure du 9 septembre a
+  renversé la prémisse du ticket : la première est bien indexée (« Submitted and indexed »,
+  1 clic et 5 impressions sur 90 jours, position moyenne 2,8), tandis que la seconde est
+  INCONNUE de Google (« URL is unknown to Google », jamais explorée). La cause de ce silence
+  est mesurée elle aussi : `/@stephane` n'est déclarée que dans `sitemap-authors.xml`, un plan
+  de site qui n'est référencé ni par `robots.txt` (il n'y déclare que `sitemap.xml` et
+  `news-sitemap.xml`) ni par le plan de site principal, qui est un `urlset` et non un index.
+  Le doublon était donc DORMANT, et il se serait ouvert au premier lien interne. Le mini-site
+  porte désormais `noindex, follow` **uniquement** quand le thème publie déjà une page auteur
+  pour le même identifiant : les mini-sites d'auteurs tiers, qui n'ont aucun doublon, restent
+  parfaitement indexables. Aucune URL n'a changé, aucune page n'a été retirée, et le « follow »
+  est délibéré pour que les liens sortants gardent leur valeur.
+- **Le nom du fondateur s'affichait sans accent sur le mini-site et dans les articles.** La
+  colonne `users.name` contenait « Stephane Lapointe ». Le titre de la page, son `og:title`,
+  son `h1` et le bloc de signature des articles en héritaient tous. Corrigé en production avec
+  sauvegarde préalable de la valeur : la page d'un article de référence passe de 6 occurrences
+  fautives à 0, le total d'occurrences du patronyme restant identique (11 avant, 11 après), ce
+  qui prouve qu'aucune n'a disparu au passage.
+
+### Note technique
+- La balise `noindex` est écrite en dur dans le `<head>` de la vue du mini-site, et non par la
+  directive `@section('page_noindex')` utilisée ailleurs sur le site : cette vue est un document
+  autonome qui n'étend aucun gabarit, la convention n'y aurait produit AUCUN effet.
+
 ## [1.257.2] - 2026-09-08
 
 ### Corrigé

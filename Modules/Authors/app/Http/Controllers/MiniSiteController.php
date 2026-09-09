@@ -23,6 +23,34 @@ final class MiniSiteController extends Controller
     ) {
     }
 
+    /**
+     * Le thème publie-t-il DÉJÀ une page auteur pour ce slug (route /auteur/{slug}) ?
+     *
+     * Quand c'est le cas, deux pages décrivent la même personne et se déclarent chacune
+     * canonique. Mesuré le 2026-09-09 : /auteur/stephane-lapointe est indexée par Google
+     * (« Submitted and indexed », 1 clic et 5 impressions sur 90 jours), tandis que
+     * /@stephane lui est INCONNUE (« URL is unknown to Google »), parce que son plan de
+     * site dédié n'est déclaré ni dans robots.txt ni dans sitemap.xml. Le doublon est donc
+     * dormant, pas actif - mais il s'ouvrirait au premier lien interne ou à la première
+     * soumission de sitemap-authors.xml. On le referme ici, sans changer aucune URL.
+     *
+     * La source de vérité est le fichier de traduction du thème, celui-là même que lit
+     * FrontTheme\Http\Controllers\AuthorController::show() pour décider s'il rend la page
+     * ou renvoie un 404. Deux LECTEURS d'une même source, pas deux copies d'une règle.
+     *
+     * Le module Authors ne dépend pas de FrontTheme pour autant : quand la traduction est
+     * absente (module éteint), trans() retourne la CLÉ sous forme de chaîne, et le transtypage
+     * en tableau la range sous l'indice 0 - jamais sous un slug. Mesuré le 2026-09-09 :
+     * témoin positif « stephane-lapointe » vrai, témoin négatif « alpha-demo-preuve » faux,
+     * module inexistant faux.
+     */
+    private function pageAuteurThemeExiste(string $slug): bool
+    {
+        $pagesDuTheme = (array) trans('fronttheme::authors');
+
+        return isset($pagesDuTheme[$slug]) && is_array($pagesDuTheme[$slug]);
+    }
+
     public function show(\Illuminate\Http\Request $request, string $slug)
     {
         $author = AuthorProfile::where('slug', $slug)
@@ -82,6 +110,7 @@ final class MiniSiteController extends Controller
             'jsonLd' => $jsonLd,
             'searchQuery' => $searchQuery,
             'searchResults' => $searchResults,
+            'pageAuteurThemeConcurrente' => $this->pageAuteurThemeExiste($slug),
         ]);
     }
 

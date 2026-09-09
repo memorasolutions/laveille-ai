@@ -11,6 +11,20 @@
     <meta property="og:type" content="profile">
     <meta property="og:url" content="{{ url()->current() }}">
     <link rel="canonical" href="{{ url()->current() }}">
+    @if ($pageAuteurThemeConcurrente ?? false)
+        {{--
+            Le thème publie déjà /auteur/{slug} pour cette personne, et c'est ELLE qui est
+            indexée. Deux pages sur le même auteur se cannibaliseraient. On retire donc
+            celle-ci de l'index, sans toucher à son URL ni à son contenu : elle reste une
+            pièce d'identité éditoriale atteignable, elle cesse d'être un résultat concurrent.
+            « follow » est délibéré : les liens sortants gardent toute leur valeur.
+
+            La balise est écrite ICI, en dur, et non par @section('page_noindex') : cette vue
+            est un document autonome (elle ouvre son propre <!DOCTYPE html>), elle n'étend
+            aucun gabarit, donc la convention du reste du site n'y produirait AUCUN effet.
+        --}}
+        <meta name="robots" content="noindex, follow">
+    @endif
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#064E5A">
     <link rel="webmention" href="{{ url('/webmention') }}">
