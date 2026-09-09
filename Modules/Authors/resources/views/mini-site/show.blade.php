@@ -42,7 +42,7 @@
             --c-dark: #1A1D23; --c-text-secondary: #3A4050; --c-text-muted: #3F4554;
             --c-surface: #F8FAFB;
         }
-        /* WCAG 2.2 AAA skip link — premier focusable, hidden tant que pas focus */
+        /* WCAG 2.2 AAA skip link - premier focusable, hidden tant que pas focus */
         .lv-skip-link {
             position: absolute; top: -100px; left: 0; z-index: 9999;
             background: #064E5A; color: #FFFFFF; padding: 12px 24px;
@@ -81,6 +81,22 @@
         .tagline { font-family: 'Plus Jakarta Sans'; font-variant: small-caps; font-weight: 600; letter-spacing: 0.08em; font-size: 14px; color: var(--c-text-muted); text-transform: lowercase; }
         .bento-hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
         @media (min-width: 1024px) { .bento-hero { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } .bento-hero.single-col { grid-template-columns: minmax(0, 1fr); } }
+        /* #2377 (2026-09-08) - depuis que les publications remontent avant le reste de la page
+           (v1.257.0), les deux cartes du haut ne sont plus côte à côte : chacune occupait donc
+           les 1232 px du conteneur pour un contenu centré d'environ 520 px, soit une grande boîte
+           presque vide. La largeur retenue n'est pas inventée : c'est celle que le hero avait
+           dans la grille 3fr/2fr d'origine, (1232 - 24) x 3/5 = 725 px.
+           `width: 100%` est indispensable AVEC `margin-inline: auto` : une marge automatique
+           seule rétracte un élément de grille à la largeur de son CONTENU (mesuré : 589 px pour
+           un nom, 479 px pour l'autre carte), ce qui ferait dépendre la mise en page du nom de
+           l'auteur.
+           La règle n'est VOLONTAIREMENT dans aucune media query, et une revue a signalé qu'elle
+           s'appliquerait donc aussi en dessous de 1024 px. Mesuré le 2026-09-08, à neuf largeurs :
+           le plafond ne mord qu'à partir de 1100 px (piste 976 px). Sous 1024 px le conteneur
+           tombe à 720 px, soit CINQ pixels de moins que le plafond - la marge est donc réelle mais
+           mince : déplacer ce bloc dans un conteneur plus large rendrait le plafond actif sur
+           mobile. Le vérifier plutôt que le supposer si le gabarit de page change. */
+        .bento-hero.single-col > .glass-card { width: 100%; max-width: 725px; margin-inline: auto; }
         .bento-sub { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; margin-top: 1.5rem; }
         @media (min-width: 768px) { .bento-sub { grid-template-columns: repeat(var(--lv-sub-cols, 3), minmax(0, 1fr)); } }
         .bento-articles { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
@@ -288,16 +304,16 @@
                 @php
                     $latestStatus = $timeline->first(function ($item) { return isset($item->content_type); });
                     $latestArticle = $timeline->first(function ($item) { return ! isset($item->content_type); });
-                    $daysSince = $author->daysSinceLastPublish();
                 @endphp
 
                 <div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                        <span class="pill pill-now">🔥 En ce moment</span>
+                        <span class="pill pill-now">✨ À découvrir</span>
                         @if($latestStatus && $latestStatus->published_at)
-                            <span style="font-size: 11px; color: var(--c-text-muted); font-weight: 500;">· {{ $latestStatus->published_at->diffForHumans() }}</span>
-                        @elseif($daysSince > 0)
-                            <span style="font-size: 11px; color: var(--c-text-muted); font-weight: 500;">· il y a {{ $daysSince }} jours</span>
+                            {{-- Date ABSOLUE (#2376, 2026-09-08) : une date relative se dégrade toute seule en
+                                 « il y a 8 mois », qui se lit comme un jugement sur l'auteur plutôt que comme un
+                                 repère. Le helper central porte le format configurable du site. --}}
+                            <span style="font-size: 11px; color: var(--c-text-muted); font-weight: 500;">· {{ format_date($latestStatus->published_at, 'short') }}</span>
                         @endif
                     </div>
 
@@ -318,11 +334,12 @@
                     @endif
 
                     <div style="display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--c-text-muted); font-weight: 500;">
-                        <span style="display: inline-flex; align-items: center; gap: 4px;">
-                            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: {{ $daysSince < 30 ? '#22C55E' : ($daysSince < 90 ? '#F59E0B' : '#94A3B8') }}; animation: pulse 2s ease-in-out infinite;"></span>
-                            {{ $daysSince < 7 ? 'Actif cette semaine' : ($daysSince < 30 ? 'Actif ce mois-ci' : ($daysSince < 90 ? 'Activité ralentie' : 'En veille')) }}
-                        </span>
-                        <span>· {{ $timeline->count() }} publications</span>
+                        {{-- Pastille d'activité retirée (#2376, 2026-09-08). Deux motifs distincts :
+                             (1) « Activité ralentie » / « En veille » est un jugement public sur l'auteur ;
+                             (2) elle était FAUSSE au cas limite - daysSinceLastPublish() retourne 0 quand
+                             last_published_at est null, donc un auteur qui n'a JAMAIS publié était affiché
+                             « Actif cette semaine », en vert. Le décompte ci-dessous reste un fait neutre. --}}
+                        <span>{{ $timeline->count() }} publications</span>
                     </div>
                 </div>
             </div>

@@ -17,7 +17,7 @@
         || collect($article->tags ?? [])->contains(fn($tag) => in_array(strtolower((string) $tag), ['concentré', 'concentre', 'hebdo', 'concentre-hebdo'], true));
 
     if ($isConcentre) {
-        // Template A — Concentre hebdo : 100% derive du contenu reel (parsing dynamique)
+        // Template A - Concentre hebdo : 100% derive du contenu reel (parsing dynamique)
         $hook = "🧠 " . $clean($article->title);
 
         // Tagline : excerpt ou premier paragraphe stripped
@@ -56,7 +56,7 @@
             "Via @laveilleAI",
         ], fn($line) => $line !== null && $line !== false);
     } else {
-        // Template B — Article normal (curiosity + teaser + meta inline)
+        // Template B - Article normal (curiosity + teaser + meta inline)
         $title = $clean($article->title);
         $excerpt = $article->excerpt ?? strip_tags((string) $article->content);
         $teaser = $clean(Str::limit($excerpt, 180));
@@ -120,7 +120,7 @@
     <meta name="llm:summary" content="{{ e($article->title) }} – {{ e(Str::limit(strip_tags($article->excerpt ?? $article->content ?? ''), 200)) }}">
     <meta name="llm:keywords" content="{{ e($article->title) }}, article, blog, IA, intelligence artificielle, francophone, Québec">
     <meta name="llm:url" content="{{ url('/blog/' . $article->slug) }}">
-    {{-- CWV #238 — preload LCP image article + fetchpriority high --}}
+    {{-- CWV #238 - preload LCP image article + fetchpriority high --}}
     @if($article->featured_image)
     <link rel="preload" as="image" href="{{ $article->featured_image_url }}?v={{ $article->updated_at?->timestamp ?? '0' }}" fetchpriority="high">
     @endif
@@ -383,12 +383,24 @@
                                     <a href="{{ $authorLink }}" rel="author" style="text-decoration:none;color:inherit;">
                                         <span class="author-name" itemprop="name">{{ $author->name ?? __('Auteur') }}</span>
                                     </a>
-                                @elseif(class_exists(\Modules\Authors\Models\AuthorProfile::class))
+                                @elseif(\Modules\Core\Services\ModuleChecker::isAvailable('Authors'))
                                     {{-- Travail D (2026-09-08) : nom cliquable vers le mini-site auteur (composant
                                          partagé, DRY) seulement si un profil auteur non archivé existe pour cet
-                                         utilisateur (auteur invité) - sinon texte brut, sans lien. Module Authors
-                                         gardé optionnel (class_exists) : un module désactivé ne casse jamais le site. --}}
-                                    <x-authors::author-name-link :user="$author" class="author-name" />
+                                         utilisateur (auteur invité) - sinon texte brut, sans lien.
+
+                                         DEUX gardes distinctes sont nécessaires, et il a fallu les MESURER (#2374) :
+                                         1. `ModuleChecker::isAvailable()` remplace un `class_exists()` qui ne
+                                            protégeait RIEN - composer autocharge la classe même module désactivé
+                                            (vérifié sur un module réellement désactivé : la classe répond « oui »).
+                                         2. `x-dynamic-component` remplace la balise `<x-authors::author-name-link>`.
+                                            La condition ci-dessus ne suffisait PAS : Blade résout un composant à la
+                                            COMPILATION du fichier, avant toute condition PHP. Module désactivé, le
+                                            namespace de vues `authors` n'est plus enregistré et la compilation lève
+                                            « Unable to locate a class or view for component » - la page d'article
+                                            entière tombait, branche non prise comprise. Mesuré, pas supposé.
+                                            `x-dynamic-component` diffère la résolution au RENDU, donc la condition
+                                            reprend son pouvoir. Rendu identique, vérifié caractère pour caractère. --}}
+                                    <x-dynamic-component :component="'authors::author-name-link'" :user="$author" class="author-name" />
                                 @else
                                     <span class="author-name" itemprop="name">{{ $author->name ?? __('Auteur') }}</span>
                                 @endif

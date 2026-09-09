@@ -1,5 +1,52 @@
 # Changelog
 
+## [1.257.2] - 2026-09-08
+
+### Corrigé
+- **La page personnelle d'un auteur ne porte plus de jugement public sur son rythme de
+  publication.** Deux signaux restaient affichés après le retrait de la bannière d'abandon : le
+  compteur « il y a N jours » et une pastille de couleur libellée « Activité ralentie » puis
+  « En veille » au-delà de 90 jours. Le vrai déclencheur n'était toutefois pas le compteur mais
+  le titre du bloc, « En ce moment », qui promettait de la fraîcheur et rendait donc tout
+  décalage visible : il devient « À découvrir ». La date relative (« il y a 8 mois ») laisse la
+  place à une date absolue passée par le formateur central du site. La pastille était par
+  ailleurs FAUSSE au cas limite : le calcul retourne zéro jour quand aucune publication n'existe,
+  si bien qu'un auteur n'ayant jamais rien publié était affiché « Actif cette semaine », en vert.
+- **Le module Authors désactivé aurait cassé le rendu des articles de blogue.** La garde posée
+  la veille était `class_exists()`, qui ne protège de rien ici : composer autocharge la classe
+  même quand le module est éteint, et le composant Blade, lui, disparaît avec le fournisseur du
+  module. Mesuré sur le module `Testimonials`, réellement désactivé dans ce dépôt :
+  `class_exists()` répond quand même `true`. Le test passe au service canonique du projet,
+  `ModuleChecker::isAvailable()`, qui interroge l'état réel du module.
+  Une revue adversariale a montré que ce remplacement ne suffisait PAS, et la mesure lui a donné
+  raison : Blade résout un composant à la COMPILATION du fichier, avant d'évaluer la moindre
+  condition PHP. Compiler `<x-testimonials::…>` sur un module éteint lève « Unable to locate a
+  class or view for component », et la page d'article entière tombait, y compris par une branche
+  jamais prise. La balise passe donc à `<x-dynamic-component>`, dont la résolution est différée
+  au rendu, ce qui redonne son pouvoir à la condition. Rendu vérifié identique, attributs
+  compris. Une seule balise de ce type existait hors du module, elle est corrigée.
+- **Les fiches d'auteur ne sont plus servies indéfiniment depuis un cache périmé.** Le service
+  worker appliquait `cache d'abord` aux documents HTML des adresses `/@slug`, sans revalidation
+  ni durée de vie : une page mise en cache une seule fois était resservie pour toujours, donc un
+  visiteur déjà venu ne voyait jamais aucune correction. Les documents passent en `réseau
+  d'abord`, le cache ne servant plus que de filet hors ligne, et le nom du cache change pour que
+  l'étape d'activation purge ce que les visiteurs portent déjà. Une revue adversariale a relevé
+  cinq défauts supplémentaires, tous corrigés : l'activation supprimait TOUT cache de l'origine
+  sauf le sien, donc ceux d'autres fonctionnalités, et se borne désormais à son propre préfixe ;
+  la stratégie s'appliquait aux adresses d'autres domaines dont le chemin commence par `/@`, et
+  vérifie maintenant l'origine ; elle attrapait aussi les images et scripts de ces pages, alors
+  qu'elle ne vise que les documents ; une réponse ayant suivi une redirection n'est plus mise en
+  cache, parce que la rejouer depuis un cache lève une erreur au moment précis où l'on comptait
+  sur le filet hors ligne ; enfin l'écriture en cache est prolongée et son échec capturé, un
+  quota disque dépassé produisant sinon un rejet que personne ne consomme.
+- **La carte de présentation n'occupe plus toute la largeur de l'écran.** Depuis que les
+  publications remontent en tête de page (v1.257.0), les deux cartes du haut ne sont plus côte à
+  côte : chacune s'étirait sur 1232 px pour un contenu centré d'environ 520 px. Elles sont
+  bornées à 725 px, la largeur qu'avait le hero dans la grille d'origine. Mesuré à neuf
+  largeurs : le plafond n'entre en jeu qu'à partir de 1100 px ; sous 1024 px le conteneur tombe
+  à 720 px, soit cinq pixels sous le plafond, qui reste donc sans effet. Le débordement
+  horizontal reste à 0 px sur 390, 768, 1280 et 1440 px.
+
 ## [1.257.1] - 2026-09-08
 
 ### Corrigé
