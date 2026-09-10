@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.258.0] - 2026-09-10
+
+### Ajouté
+- **Ticket #2246 - fenêtre glissante de 30 minutes / 3 échecs, propre aux travaux réseau,
+  avant l'alerte automatique.** Les travaux de fond qui dépendent du réseau (capture d'une
+  vignette de site, récupération d'une image distante, API tierce) échouent parfois de façon
+  isolée sans que rien ne soit cassé - le serveur distant était lent ou momentanément
+  indisponible (mesuré : environ 1 échec sur 150 travaux en une nuit, isolé, sans cause
+  commune). Un échec isolé sur un de ces travaux ne déclenche plus l'alerte par courriel ;
+  trois échecs en trente minutes sur le MÊME type de travail la déclenchent. Nouvelle classe
+  `Modules\Notifications\Services\NetworkJobFailureWindow`, branchée dans
+  `AppServiceProvider::configureQueueFailureHandling()` juste avant l'appel existant à
+  `AutomationAlertService::fire()` - jamais à l'intérieur de ce service générique, qui reste
+  inchangé et sert aussi d'autres sources d'alerte (cron, monitor...). Douze classes de jobs en
+  file, dont le `handle()` sort réellement vers Internet (lu dans leur code, jamais deviné par
+  leur nom), sont couvertes : `CaptureScreenshotJob`, `ResolveFaviconJob`,
+  `PurgeCloudflareCacheJob`, `DispatchWebhookJob`, `SendWebmentionsJob`, `ScanArticleJob`,
+  `AuthorActivityCheckJob`, `EnrichToolJob`, `ProcessWorkflowStep`, `SendCampaignEmailJob`,
+  `SendDigestJob`, `SendWebPushNotification`. Les jobs purement locaux (`AutoDetectNewsToolsJob`,
+  `ProcessUserExport`) et tout autre type de travail (cron, monitor...) gardent l'alerte
+  immédiate existante, inchangée : ce seuil ne remplace ni ne devient un seuil global. La
+  fenêtre est glissante (relecture des horodatages à chaque appel, jamais un compteur qui ne
+  fait qu'augmenter) et s'oublie d'elle-même : trois échecs étalés au-delà de 30 minutes
+  n'alertent pas. Chaque étouffement sous le seuil laisse une trace sur le canal dédié
+  `automation_alerts` (même prudence que le correctif du 2026-08-26 : un étouffement sans trace
+  avait déjà coûté 17 heures d'aveuglement).
+
+### Note technique
+- 18 tests nouveaux (`Modules/Notifications/tests/Feature/NetworkJobFailureWindowTest.php` et
+  `QueueFailureNetworkGateIntegrationTest.php`), prouvés rouges sans le correctif : deux échecs
+  réseau en 30 minutes ne déclenchent rien, le troisième déclenche, et trois échecs étalés
+  au-delà de la fenêtre ne déclenchent pas. La suite complète de `Modules/Notifications`
+  (48 tests) et les tests d'architecture (`ArchTest`, préréglage sécurité) restent verts sans
+  modification.
+
 ## [1.257.4] - 2026-09-09
 
 ### Corrigé

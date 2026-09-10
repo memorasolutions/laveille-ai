@@ -181,9 +181,26 @@ class AppServiceProvider extends ServiceProvider
             // MCP: SELF (<5 lignes utiles, le reste est du commentaire)
             try {
                 if (class_exists(\Modules\Notifications\Services\AutomationAlertService::class)) {
+                    $jobClass = $event->job->resolveName();
+
+                    // ACTION: fenêtre glissante de 30 min / 3 échecs, PROPRE aux jobs réseau
+                    // (ticket #2246) - AVANT l'appel à AutomationAlertService::fire(), jamais
+                    // dedans (ce seuil ne remplace ni ne devient un seuil global).
+                    // MCP: SELF (garde d'appel <5 lignes, logique dans NetworkJobFailureWindow)
+                    // RAISON: un échec réseau isolé est du bruit (mesuré : ~1/150 jobs/nuit,
+                    // isolé, sans cause commune) ; trois échecs en 30 min décrivent une panne.
+                    // Les jobs absents de NetworkJobFailureWindow::NETWORK_JOB_CLASSES gardent
+                    // l'alerte immédiate EXISTANTE, inchangée - class_exists() en repli si le
+                    // module a été déployé sans ce fichier (même prudence que pour
+                    // AutomationAlertService juste au-dessus).
+                    if (class_exists(\Modules\Notifications\Services\NetworkJobFailureWindow::class)
+                        && ! \Modules\Notifications\Services\NetworkJobFailureWindow::shouldAlert($jobClass)) {
+                        return;
+                    }
+
                     \Modules\Notifications\Services\AutomationAlertService::fire(
                         'queue',
-                        $event->job->resolveName(),
+                        $jobClass,
                         $event->exception->getMessage(),
                         [
                             'connection' => $event->connectionName,
