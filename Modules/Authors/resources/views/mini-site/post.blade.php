@@ -72,8 +72,15 @@
         .lv-post-wall { background: #F3F8F9; border-left: 4px solid #064E5A; border-radius: 8px; padding: 24px; margin: 24px 0; }
         .lv-post-wall__title { font-size: 19px; font-weight: 700; color: #064E5A; margin: 0 0 8px; }
         .lv-post-wall__text { color: #1F2937; margin: 0 0 16px; line-height: 1.6; }
-        .lv-post-wall__cta { display: inline-block; background: #064E5A; color: #FFFFFF; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: 600; min-height: 44px; line-height: 24px; }
-        .lv-post-wall__cta:hover, .lv-post-wall__cta:focus { background: #043A43; color: #FFFFFF; }
+        /* ACTION : le bouton est qualifie par .lv-post-body, son parent reel.
+           MCP: SELF (<5 lignes)
+           RAISON: le mur vit DANS .lv-post-body, dont la regle « .lv-post-body a »
+           (couleur orange + soulignement, pour les liens du CORPS redactionnel) battait
+           « .lv-post-wall__cta » par specificite - defaut VU a la verification visuelle,
+           invisible pour les tests. Deux classes (0-2-0) l'emportent sur classe + element
+           (0-1-1), sans recourir a !important. */
+        .lv-post-body .lv-post-wall__cta { display: inline-block; background: #064E5A; color: #FFFFFF; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: 600; min-height: 44px; line-height: 24px; }
+        .lv-post-body .lv-post-wall__cta:hover, .lv-post-body .lv-post-wall__cta:focus { background: #043A43; color: #FFFFFF; text-decoration: none; }
         .lv-post-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; }
         .lv-post-tag { background: #E0F2F1; color: #0B7285; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 600; }
         .lv-post-body { max-width: 720px; margin: 0 auto; padding: 0 24px 48px; }

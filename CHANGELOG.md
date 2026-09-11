@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.261.1] - 2026-09-11
+
+### Corrigé
+- **Le bouton du mur de lecture s'affichait en orange souligné sur fond teal.** Défaut vu au
+  contrôle visuel, invisible pour les 224 tests du module : ils vérifient que le mur est là et
+  que le corps ne fuit pas, pas la couleur d'un bouton. La cause venait de mon propre code : le
+  mur vit à l'intérieur de `.lv-post-body`, dont la règle destinée aux liens du corps
+  rédactionnel battait celle du bouton par spécificité. Le sélecteur est désormais qualifié par
+  son parent réel, sans recourir à un `!important`.
+
 ## [1.261.0] - 2026-09-11
 
 ### Ajouté
