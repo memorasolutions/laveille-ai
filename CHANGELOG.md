@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.258.2] - 2026-09-11
+
+### Ajouté
+- **Test de regression sur la rotation des sauvegardes de `news:prune-drafts`.** Le mecanisme
+  existait depuis le 2026-08-20 (`PruneDraftsCommand::rotateBackups()`, `BACKUPS_TO_KEEP = 14`)
+  mais n'avait JAMAIS ete couvert par un test : rien n'aurait signale sa disparition. Le test
+  ecrit 16 fichiers puis verifie qu'il n'en reste que 14 apres execution. Contre-epreuve faite
+  dans les deux sens : sans l'appel a `rotateBackups()`, il reste 16 fichiers et le test echoue
+  (`actual size 16 matches expected size 14`) ; avec, il passe. Suite complete du module News
+  verte : 821 tests, 2666 assertions.
+- Aucun fichier de code source touche. La mesure de production confirme le comportement reel :
+  14 sauvegardes presentes, du 2026-08-29 au 2026-09-11, sans aucun trou.
+
 ## [1.258.1] - 2026-09-11
 
 ### Corrigé

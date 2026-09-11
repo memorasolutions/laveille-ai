@@ -224,3 +224,58 @@ it('le mode --dry-run avec une fenêtre en jours ne supprime rien', function () 
 
     expect(NewsArticle::find($hier->id))->not->toBeNull();
 });
+
+// ── Rotation des backups : motif EXACT, jamais le dossier entier (ticket #2426) ─────────
+//
+// Mesuré en production le 2026-09-11 : exactement 14 fichiers `news-prune-drafts-backup-*`
+// (~20 Mo), du 2026-08-29 au jour même - la fenêtre glissante ne dérive pas depuis le premier
+// déploiement (2026-08-20). Le mécanisme (rotateBackups(), BACKUPS_TO_KEEP = 14) existe donc
+// déjà et fonctionne réellement ; il n'avait simplement jamais été verrouillé par un test. Ce
+// test comble ce trou : il prouve que la rotation cible UNIQUEMENT son propre motif de nom
+// (jamais un balayage de dossier qui emporterait un fichier qu'elle n'a pas écrit) et qu'elle
+// ne garde jamais plus que les N derniers.
+
+it('la rotation des backups ne garde que les 14 derniers et ne cible que son propre motif de nom', function () {
+    // Isolation : storage/app est partagé entre tests (dossier gitignored, jamais lu en
+    // production) - on repart d'un état connu sur le motif EXACT de cette commande seulement,
+    // sans toucher à aucun autre fichier du dossier.
+    $motif = storage_path('app/news-prune-drafts-backup-*.json');
+    foreach (glob($motif) ?: [] as $fichier) {
+        @unlink($fichier);
+    }
+
+    // Un fichier HOMONYME PARTIEL, hors motif exact (préfixe différent) : la rotation ne doit
+    // jamais le voir ni le supprimer - preuve que le garde-fou porte sur le motif, pas le dossier.
+    $intrus = storage_path('app/news-prune-drafts-backup-corrompu.txt');
+    file_put_contents($intrus, 'jamais touché');
+
+    // 15 fausses sauvegardes ANCIENNES, même convention de nom horodaté que le code réel,
+    // triées de la plus vieille (01) à la plus récente (15).
+    $ancien = [];
+    for ($i = 1; $i <= 15; $i++) {
+        $nom = sprintf('news-prune-drafts-backup-20200101-%06d.json', $i);
+        $chemin = storage_path('app/'.$nom);
+        file_put_contents($chemin, '[]');
+        $ancien[$i] = $chemin;
+    }
+
+    // Un brouillon brut éligible force l'écriture d'une 16e sauvegarde RÉELLE (déclenche la
+    // séquence backup puis suppression puis rotateBackups(), cf. handle()).
+    npdArticle(['pub_date' => now()->subMinutes(1)]);
+
+    $this->artisan('news:prune-drafts', ['--keep' => 0])->assertExitCode(0);
+
+    $restants = glob($motif) ?: [];
+    expect($restants)->toHaveCount(14);
+
+    // Les deux plus anciennes (01 et 02) ont disparu - jamais les treize suivantes.
+    expect(is_file($ancien[1]))->toBeFalse();
+    expect(is_file($ancien[2]))->toBeFalse();
+    for ($i = 3; $i <= 15; $i++) {
+        expect(is_file($ancien[$i]))->toBeTrue();
+    }
+
+    // L'intrus hors motif n'a jamais été touché par la rotation.
+    expect(is_file($intrus))->toBeTrue();
+    @unlink($intrus);
+});
