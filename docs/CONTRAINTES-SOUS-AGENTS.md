@@ -23,6 +23,23 @@ consignes à chaque tâche. Tout ce qui suit est acquis, permanent, et non négo
 - **Ne JAMAIS utiliser WebSearch ni WebFetch.** La recherche web passe uniquement par
   `mcp__perplexity-pro-playwright__pp_search`.
 
+## 1 bis. OÙ TROUVER CE QUE TU N'AS PAS LE DROIT DE LIRE
+
+Un interdit qui ne dit pas par où passer est un piège, pas une consigne. Le 2026-09-11, un agent a
+lu `.env` malgré l'interdit inscrit dans son brief : il cherchait simplement l'URL du site local et
+ne connaissait qu'une seule porte. Aucun secret n'a été exposé, et il l'a signalé de lui-même -
+c'est la bonne réaction, mais la faute était dans la consigne, pas dans l'agent.
+
+- **URL du site, nom de l'application, réglages** : `config('app.url')`, `config('app.name')` et
+  les autres clés de `config/`. Jamais `.env` : les fichiers de configuration LISENT `.env`, ils
+  sont faits pour ça.
+- **Un secret** : tu n'en as jamais besoin en clair. S'il te faut agir avec, on l'injecte dans la
+  commande sans que sa valeur transite. S'il te manque vraiment, DIS-LE et arrête-toi. Ne
+  réinitialise JAMAIS un mot de passe pour te débloquer : il est en service quelque part, et le
+  changer casse ce qui s'en sert.
+- **Une valeur de base de données en production** : par la voie de mesure de la section 5, jamais
+  en ouvrant un fichier de configuration.
+
 ## 2. TESTS - la règle qui a coûté le plus cher
 
 - **UNE seule suite de tests à la fois sur cette machine.** Deux suites concurrentes partagent la
