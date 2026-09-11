@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.259.0] - 2026-09-11
+
+### Ajoute
+- **L'espace d'edition des blogues perso existe enfin.** La route `/auteur/dashboard` rendait
+  `view('authors::dashboard')`, une vue qui n'existait dans AUCUN fichier, ni en local ni sur le
+  serveur : tout utilisateur CONNECTE y recevait une erreur 500 (`View [dashboard] not found`),
+  alors que l'invite ne voyait qu'une redirection vers la connexion, ce qui masquait le defaut.
+  Sept vues de courriel y renvoyaient pourtant (relances de reactivation, pourboire recu, digest
+  hebdomadaire), plus le bouton « Retour au tableau de bord » de la page d'abonnement.
+  Le composant Livewire `AuthorDashboard` existait et fonctionnait depuis toujours : il n'etait
+  monte que par `test-dashboard.blade.php`, une route gardee par `app()->environment('local')`,
+  donc injoignable en production. La vue manquante est ecrite, et la route resout desormais le
+  profil d'auteur de l'utilisateur connecte pour le lui passer. Un compte sans profil d'auteur
+  recoit une page d'explication plutot qu'une erreur.
+  Preuve : trois tests Pest, dont la contre-epreuve mord (vue retiree = 2 echecs sur
+  `View [dashboard] not found`, exactement la 500 subie en production).
+
 ## [1.258.3] - 2026-09-11
 
 ### Corrige

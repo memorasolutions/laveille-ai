@@ -8,6 +8,7 @@ use Modules\Authors\Http\Controllers\PostController;
 use Modules\Authors\Http\Controllers\AffiliateController;
 use Modules\Authors\Http\Controllers\UpgradeController;
 use Modules\Authors\Http\Controllers\OgImageController;
+use Modules\Authors\Models\AuthorProfile;
 
 // S121 — Dynamic OG image (PNG GD) per post, distinct prefix to avoid /@slug collision
 Route::get('/og-image/{slug}/{postSlug}.png', [OgImageController::class, 'show'])
@@ -138,8 +139,11 @@ Route::post('/auteur/{slug}/newsletter/unsubscribe-1click/{token}', [MiniSiteCon
 
 // Dashboard auteur (auth required)
 Route::middleware(['web', 'auth'])->prefix('/auteur')->group(function () {
-    Route::get('/dashboard', fn () => view('authors::dashboard'))
-        ->name('authors.dashboard');
+    Route::get('/dashboard', function () {
+        $authorProfile = AuthorProfile::where('user_id', auth()->id())->first();
+
+        return view('authors::dashboard', compact('authorProfile'));
+    })->name('authors.dashboard');
 
     Route::get('/curation/save', fn () => response()->json(['todo' => true]))
         ->name('authors.curation.save');
