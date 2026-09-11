@@ -26,23 +26,26 @@
             <div class="bg-gray-50 rounded-lg p-6">
                 <h2 class="text-xl font-bold mb-4">Composer</h2>
                 <div class="space-y-4">
-                    <button type="button" class="w-full py-3 px-4 bg-[#064E5A] text-white rounded-md hover:bg-[#085f6b] min-h-[44px]">
-                        Nouveau statut court (≤ 280 caractères)
+                    <button type="button" disabled aria-disabled="true"
+                            title="Cette fonctionnalité n'est pas encore disponible."
+                            class="w-full py-3 px-4 bg-gray-200 text-gray-500 rounded-md min-h-[44px] cursor-not-allowed">
+                        Nouveau statut court (≤ 280 caractères) - bientôt disponible
                     </button>
-                    <button type="button" class="w-full py-3 px-4 bg-[#C2410C] text-white rounded-md hover:bg-orange-700 min-h-[44px]">
+                    <a href="{{ route('authors.editor') }}"
+                       class="block w-full text-center py-3 px-4 bg-[#C2410C] text-white rounded-md hover:bg-orange-700 min-h-[44px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C]">
                         Nouvel article long
-                    </button>
+                    </a>
                 </div>
             </div>
         @elseif($activeTab === 'articles')
             <div class="bg-gray-50 rounded-lg p-6">
                 <h2 class="text-xl font-bold mb-4">Tes articles</h2>
-                <p class="text-gray-500 italic">Liste des articles à brancher sur Modules\Blog\Models\Article::where('user_id', $author->user_id).</p>
+                <p class="text-gray-500 italic">Cette section n'affiche pas encore tes articles. Utilise le bouton « Nouvel article long » de l'onglet Composer pour en créer un.</p>
             </div>
         @elseif($activeTab === 'curation')
             <div class="bg-gray-50 rounded-lg p-6">
                 <h2 class="text-xl font-bold mb-4">Curation Inbox</h2>
-                <p class="text-gray-500 italic">Composant CurationInbox Livewire à brancher (Phase 2).</p>
+                <p class="text-gray-500 italic">Cette section n'est pas encore disponible.</p>
             </div>
         @elseif($activeTab === 'builders')
             <div class="bg-gray-50 rounded-lg p-6 space-y-6">

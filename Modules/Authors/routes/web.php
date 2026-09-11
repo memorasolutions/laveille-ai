@@ -145,6 +145,17 @@ Route::middleware(['web', 'auth'])->prefix('/auteur')->group(function () {
         return view('authors::dashboard', compact('authorProfile'));
     })->name('authors.dashboard');
 
+    // Éditeur d'article long (branchement du bouton "Nouvel article long" du tableau de
+    // bord). Le profil auteur vient TOUJOURS de l'utilisateur connecté (trait
+    // HasAuthorProfile sur App\Models\User), jamais d'un identifiant de la requête : il
+    // n'existe donc aucune façon de viser le profil d'un autre auteur par cette route.
+    Route::get('/editeur', function () {
+        $authorProfile = auth()->user()->authorProfile;
+        abort_if($authorProfile === null, 403);
+
+        return view('authors::editor', ['authorProfile' => $authorProfile]);
+    })->name('authors.editor');
+
     Route::get('/curation/save', fn () => response()->json(['todo' => true]))
         ->name('authors.curation.save');
 
