@@ -1,51 +1,95 @@
 # Changelog
 
+## [1.260.0] - 2026-09-11
+
+### Ajouté
+- **L'éditeur d'article des blogues perso devient enfin atteignable.** Le produit comptait 1 profil
+  d'auteur et 0 article en production. La cause n'était pas un manque de fonctionnalité : l'éditeur
+  existe, il est complet et testé, mais AUCUN bouton n'y menait. Les deux boutons de l'onglet
+  « Composer » étaient des `<button type="button">` sans `wire:click` ni `href` : ils ne faisaient
+  rien. « Nouvel article long » est désormais un vrai lien vers une route dédiée, placée dans le
+  groupe déjà protégé par `web` et `auth`. Le profil vient de `auth()->user()->authorProfile`,
+  jamais d'un identifiant porté par la requête : viser le profil d'un autre est structurellement
+  impossible, et un test le verrouille.
+  Le bouton « statut court » n'a PAS été fabriqué. Le modèle existe, son affichage public aussi,
+  mais aucun formulaire de création nulle part : l'écrire aurait inventé une fonctionnalité. Le
+  bouton est désactivé et le dit. Un bouton qui ment coûte plus cher qu'un bouton absent.
+  Preuve : 8 tests, dont l'accès croisé entre deux auteurs. Module complet : 217 tests verts.
+- **L'espace auteur cesse d'être introuvable.** La page existait depuis le matin même, mais seuls
+  sept gabarits de courriel y menaient. Le lien vit dans le composant qui alimentait DÉJÀ le menu
+  déroulant de l'avatar ET la barre latérale : une entrée de données couvre les deux zones. La
+  question « cet utilisateur est-il auteur ? », recopiée en requête à trois endroits, vit désormais
+  dans un seul trait monté sur `User`, selon le patron déjà en place pour les équipes.
+- **Une date de modification ÉDITORIALE, distincte de la date technique.** Elle ne bouge que si le
+  contenu change réellement, et c'est elle que publient désormais le balisage, les plans de site et
+  le texte visible.
+
+### Corrigé
+- **Lire une page ne la déclare plus modifiée.** Consulter une fiche réécrivait sa date de
+  modification : sur les 80 termes de glossaire vérifiables, 78 portaient une date fausse, jusqu'à
+  50 jours de dérive. Le plus visible n'était pas le balisage, c'était le texte « Mis à jour le… »
+  affiché au lecteur sur chaque fiche d'annuaire. Deux défauts empilés : `Builder::increment()`
+  pose l'horodatage sauf si la clé est déjà fournie, et surtout on publiait une date TECHNIQUE
+  comme si elle était ÉDITORIALE. Quand la révision n'est pas connue - 464 termes sur 544 -
+  l'affichage ne montre RIEN plutôt qu'une date de repli, et le libellé devient « Révisé le ».
+  Preuve : 15 tests, et la contre-épreuve rougit (3 échecs) dès qu'on retire le correctif.
+- **Un déploiement vert ne peut plus taire un transport incomplet.** Un `--exclude` qui piège un
+  fichier de code vivant ne le disait jamais : c'est arrivé sur un correctif de SÉCURITÉ, commité,
+  poussé, CI verte, serveur inchangé. Le garde-fou recalcule, à partir du MÊME tableau que le
+  transfert réel, quels fichiers suivis resteraient au sol, et fait échouer le job. Mesuré : 8906
+  fichiers suivis, zéro piégé ; contre-épreuve : en remettant l'ancienne exclusion, il nomme le
+  fichier perdu et sort en erreur.
+- **Le témoin de version ne ment plus.** `public/_lvversion.txt` affichait 1.63.22 alors que la
+  production servait 1.259.0 : il n'était écrit que par le point d'entrée de secours, jamais par le
+  pipeline qui déploie réellement. Il est désormais rafraîchi à chaque déploiement depuis la source
+  unique. S'il ne peut pas la lire, il écrit « inconnu » plutôt qu'une valeur vide.
+
 ## [1.259.0] - 2026-09-11
 
-### Ajoute
-- **L'espace d'edition des blogues perso existe enfin.** La route `/auteur/dashboard` rendait
+### Ajouté
+- **L'espace d'édition des blogues perso existe enfin.** La route `/auteur/dashboard` rendait
   `view('authors::dashboard')`, une vue qui n'existait dans AUCUN fichier, ni en local ni sur le
-  serveur : tout utilisateur CONNECTE y recevait une erreur 500 (`View [dashboard] not found`),
-  alors que l'invite ne voyait qu'une redirection vers la connexion, ce qui masquait le defaut.
-  Sept vues de courriel y renvoyaient pourtant (relances de reactivation, pourboire recu, digest
+  serveur : tout utilisateur CONNECTÉ y recevait une erreur 500 (`View [dashboard] not found`),
+  alors que l'invité ne voyait qu'une redirection vers la connexion, ce qui masquait le défaut.
+  Sept vues de courriel y renvoyaient pourtant (relances de réactivation, pourboire reçu, digest
   hebdomadaire), plus le bouton « Retour au tableau de bord » de la page d'abonnement.
-  Le composant Livewire `AuthorDashboard` existait et fonctionnait depuis toujours : il n'etait
-  monte que par `test-dashboard.blade.php`, une route gardee par `app()->environment('local')`,
-  donc injoignable en production. La vue manquante est ecrite, et la route resout desormais le
-  profil d'auteur de l'utilisateur connecte pour le lui passer. Un compte sans profil d'auteur
-  recoit une page d'explication plutot qu'une erreur.
-  Preuve : trois tests Pest, dont la contre-epreuve mord (vue retiree = 2 echecs sur
+  Le composant Livewire `AuthorDashboard` existait et fonctionnait depuis toujours : il n'était
+  monté que par `test-dashboard.blade.php`, une route gardée par `app()->environment('local')`,
+  donc injoignable en production. La vue manquante est écrite, et la route résout désormais le
+  profil d'auteur de l'utilisateur connecté pour le lui passer. Un compte sans profil d'auteur
+  reçoit une page d'explication plutôt qu'une erreur.
+  Preuve : trois tests Pest, dont la contre-épreuve mord (vue retirée = 2 échecs sur
   `View [dashboard] not found`, exactement la 500 subie en production).
 
 ## [1.258.3] - 2026-09-11
 
-### Corrige
-- **SECURITE - une sauvegarde restee EXECUTABLE annulait le correctif du jour.** Le fichier
-  `public/_lvgit.php.avant-durcissement-serveur-20260911-0730`, ecrit comme filet avant le depot
-  manuel du correctif, portait la version pre-durcissement (jeton accepte dans la chaine de
-  requete, execution d'une semence depuis la requete). Le gestionnaire PHP de cPanel se declenche
-  sur toute extension CONTENANT `.php` : la copie vulnerable restait donc joignable a cote du
-  fichier corrige. Preuve avant : reponse 403 avec un corps de 9 octets valant « forbidden »,
-  c'est-a-dire la sortie du script lui-meme. Fichier neutralise (410, corps vide, y compris avec
-  les anciens parametres d'attaque) ; contenu d'origine conserve dans git, donc aucune perte.
-- **Le pipeline de deploiement ne transportait pas les fichiers `_*.php`.** Les deux motifs etaient
-  des `--exclude`, qui empechent aussi la MISE A JOUR : CI verte, deploiement reussi, et l'ancien
-  code toujours servi. Remplaces par `--filter='P ...'` (protect), qui empeche la suppression sans
-  empecher le transfert. Verifie empiriquement avec rsync 3.5.0 sur trois cas : mise a jour d'un
-  fichier divergent, creation d'un fichier absent, survie au `--delete` d'un fichier non versionne.
+### Corrigé
+- **SÉCURITÉ - une sauvegarde restée EXÉCUTABLE annulait le correctif du jour.** Le fichier
+  `public/_lvgit.php.avant-durcissement-serveur-20260911-0730`, écrit comme filet avant le dépôt
+  manuel du correctif, portait la version pré-durcissement (jeton accepté dans la chaîne de
+  requête, exécution d'une semence depuis la requête). Le gestionnaire PHP de cPanel se déclenche
+  sur toute extension CONTENANT `.php` : la copie vulnérable restait donc joignable à côté du
+  fichier corrigé. Preuve avant : réponse 403 avec un corps de 9 octets valant « forbidden »,
+  c'est-à-dire la sortie du script lui-même. Fichier neutralisé (410, corps vide, y compris avec
+  les anciens paramètres d'attaque) ; contenu d'origine conservé dans git, donc aucune perte.
+- **Le pipeline de déploiement ne transportait pas les fichiers `_*.php`.** Les deux motifs étaient
+  des `--exclude`, qui empêchent aussi la MISE À JOUR : CI verte, déploiement réussi, et l'ancien
+  code toujours servi. Remplacés par `--filter='P ...'` (protect), qui empêche la suppression sans
+  empêcher le transfert. Vérifié empiriquement avec rsync 3.5.0 sur trois cas : mise à jour d'un
+  fichier divergent, création d'un fichier absent, survie au `--delete` d'un fichier non versionné.
 
 ## [1.258.2] - 2026-09-11
 
 ### Ajouté
-- **Test de regression sur la rotation des sauvegardes de `news:prune-drafts`.** Le mecanisme
+- **Test de régression sur la rotation des sauvegardes de `news:prune-drafts`.** Le mécanisme
   existait depuis le 2026-08-20 (`PruneDraftsCommand::rotateBackups()`, `BACKUPS_TO_KEEP = 14`)
-  mais n'avait JAMAIS ete couvert par un test : rien n'aurait signale sa disparition. Le test
-  ecrit 16 fichiers puis verifie qu'il n'en reste que 14 apres execution. Contre-epreuve faite
-  dans les deux sens : sans l'appel a `rotateBackups()`, il reste 16 fichiers et le test echoue
-  (`actual size 16 matches expected size 14`) ; avec, il passe. Suite complete du module News
+  mais n'avait JAMAIS été couvert par un test : rien n'aurait signalé sa disparition. Le test
+  écrit 16 fichiers puis vérifie qu'il n'en reste que 14 après exécution. Contre-épreuve faite
+  dans les deux sens : sans l'appel à `rotateBackups()`, il reste 16 fichiers et le test échoue
+  (`actual size 16 matches expected size 14`) ; avec, il passe. Suite complète du module News
   verte : 821 tests, 2666 assertions.
-- Aucun fichier de code source touche. La mesure de production confirme le comportement reel :
-  14 sauvegardes presentes, du 2026-08-29 au 2026-09-11, sans aucun trou.
+- Aucun fichier de code source touché. La mesure de production confirme le comportement réel :
+  14 sauvegardes présentes, du 2026-08-29 au 2026-09-11, sans aucun trou.
 
 ## [1.258.1] - 2026-09-11
 
@@ -1007,7 +1051,7 @@ ignorés. `modules_statuses.json` et `.env` intacts après les six exécutions.
 
 ## [1.247.5] - 2026-09-02
 
-### Ajoute
+### Ajouté
 
 - **Article de fond : « Est-ce que l'intelligence artificielle boit toute l'eau de la planete ? »**
   8 648 mots, publie apres relecture et feu vert du fondateur. Repond a la peur d'une bouteille
@@ -1018,7 +1062,7 @@ ignorés. `modules_statuses.json` et `.env` intacts après les six exécutions.
   troisieme document officiel et reattribue.
   Image de couverture produite via le compte Gemini du fondateur, 1200x630.
 
-### Corrige
+### Corrigé
 
 - **Aucun article du blogue n'affichait sa vraie image** (ticket #2183). Mesure en production sur
   un article dont le fichier existe pourtant :
@@ -1050,7 +1094,7 @@ ignorés. `modules_statuses.json` et `.env` intacts après les six exécutions.
 
 ## [1.247.4] - 2026-09-02
 
-### Corrige
+### Corrigé
 
 - **La decouverte automatique ne fabrique plus de doublons d'annuaire** (ticket #2175). Le
   pipeline creait une fiche pour le site propre d'un outil ET une seconde pour sa page
