@@ -34,6 +34,15 @@
                 ['route' => 'academy.courses.create', 'label' => __('Créer un cours'), 'icon' => 'fa-plus', 'emoji' => '➕', 'active_patterns' => ['academy.courses.create'], 'show' => auth()->check() && (auth()->user()->can('academy.manage') || auth()->user()->hasRole('instructor'))],
             ],
         ],
+        'auteur' => [
+            'label' => __('Espace auteur'),
+            'links' => [
+                // Visible seulement pour un utilisateur qui a un profil d'auteur (author_profiles.user_id) -
+                // jamais pour tout le monde. Gate déléguée à User::isAuthor() (Modules\Authors\Traits\HasAuthorProfile),
+                // source unique de vérité, jamais une requête Eloquent recopiée ici.
+                ['route' => 'authors.dashboard', 'label' => __('Mon espace auteur'), 'icon' => 'fa-pencil', 'emoji' => '✍️', 'active_patterns' => ['authors.dashboard'], 'show' => auth()->check() && auth()->user()->isAuthor()],
+            ],
+        ],
         'contenu' => [
             'label' => __('Mon contenu'),
             'links' => [

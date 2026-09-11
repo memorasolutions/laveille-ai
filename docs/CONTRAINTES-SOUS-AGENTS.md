@@ -75,6 +75,24 @@ consignes à chaque tâche. Tout ce qui suit est acquis, permanent, et non négo
 - Le terminal cPanel et le gestionnaire de fichiers sont **hors service** sur ce compte. La commande
   `tinker` est muette via SSH. Contournement établi : script PHP autonome qui amorce Laravel, écrit
   son résultat dans un fichier, puis se supprime lui-même.
+- **L'erreur exacte que renvoie `cpanel_terminal`, pour que tu la reconnaisses sans perdre de temps**
+  (re-mesurée le 2026-09-11, elle est réelle et non transitoire) : `Shell API not available` suivi de
+  `Failed to load module "Shell" ... Can't locate Cpanel/API/Shell.pm in @INC`. Le module Perl est
+  simplement **absent du serveur** : aucune façon de s'y prendre ne le fera répondre, et réessayer
+  autrement est du temps perdu.
+- **Cette panne ne concerne QUE l'exécution de commandes. Le reste du MCP cPanel fonctionne.** Une
+  panne constatée sur UNE opération ne se généralise jamais à tout un outil : un cycle entier a déjà
+  été perdu ici à contourner un pare-feu imaginaire parce qu'une panne partielle avait été prise
+  pour une panne totale. `cpanel_file_write`, `cpanel_file_read`, `cpanel_file_list`,
+  `cpanel_file_upload_binary` et les outils DNS, SSL et cron répondent normalement.
+- **La voie normale pour mesurer ou exécuter en production**, donc : déposer par
+  `cpanel_file_write` un script PHP à usage unique, protégé par un jeton dans son URL, qui amorce
+  Laravel, écrit son résultat, puis se supprime lui-même
+  (`register_shutdown_function(fn () => @unlink(__FILE__));`). Vérifier ENSUITE qu'il a bien disparu,
+  en relisant le répertoire plutôt qu'en se fiant au code écrit. Deux pièges mesurés : le pare-feu
+  répond une fausse **404** à toute requête dont le contenu porte `file_put_contents(` ou
+  `base64_decode(` en clair ; et un contenu JSON RETRANSCRIT à la main perd ses espaces insécables,
+  auquel cas `cpanel_file_upload_binary` est plus sûr car il transfère octet pour octet.
 - **Tout cron temporaire créé doit être retiré immédiatement après usage**, et son absence vérifiée.
 - Le pipeline de déploiement purge déjà Cloudflare et vide les caches - ne pas le refaire à la main.
 - **Versionnement** : `config/version.php`. Une fonctionnalité nouvelle est un MINOR, une correction

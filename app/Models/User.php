@@ -23,6 +23,7 @@ use Laravel\Scout\Searchable;
 use Modules\Academy\Traits\HasSubscriptionTier;
 use Modules\Auth\Models\LoginAttempt;
 use Modules\Auth\Observers\UserObserver;
+use Modules\Authors\Traits\HasAuthorProfile;
 use Modules\Core\Contracts\UserInterface;
 use Modules\Team\Traits\HasTeams;
 use NotificationChannels\WebPush\HasPushSubscriptions;
@@ -38,7 +39,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements HasMedia, HasPasskeys, MustVerifyEmail, UserInterface
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Billable, HasApiTokens, HasFactory, HasPushSubscriptions, HasRoles, HasSubscriptionTier, HasTeams, InteractsWithMedia, InteractsWithPasskeys, LogsActivity, Notifiable, Searchable;
+    use Billable, HasApiTokens, HasAuthorProfile, HasFactory, HasPushSubscriptions, HasRoles, HasSubscriptionTier, HasTeams, InteractsWithMedia, InteractsWithPasskeys, LogsActivity, Notifiable, Searchable;
 
     // Community module trait — guard class_exists for portability
     use \Modules\Community\Traits\HasCategorySubscriptions;
