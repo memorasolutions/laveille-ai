@@ -112,22 +112,58 @@ jobs:
         #   survie au --delete d'un fichier non versionne present seulement sur le serveur.
         #   NE JAMAIS remettre --exclude ici. Et aucun commentaire DANS la commande :
         #   un `#` apres une continuation `\` tronque toute la ligne logique.
+        # GARDE-FOU AJOUTE le 2026-09-11 (audit docs/specs/2026-09-11-chaine-de-deploiement-qui-ment.md,
+        #   suite du ticket #2429) : le vrai defaut n'etait pas la liste d'exclusions elle-meme,
+        #   c'est qu'un --exclude qui piege un fichier de code vivant ne le DIT JAMAIS - la CI
+        #   reste verte, rien ne signale que le transport a echoue. Ce bloc calcule, a partir du
+        #   MEME tableau EXCLUDES/PROTECT que le transfert reel plus bas (jamais une deuxieme
+        #   liste copiee - une seule source dans ce fichier), quels fichiers SUIVIS PAR GIT un
+        #   futur --exclude laisserait de cote, et fait ECHOUER le job si un seul d'entre eux
+        #   sort des zones reconnues comme legitimement generees/hors-perimetre en prod (le
+        #   depot lui-meme : .git/, .github/, tests/ ; les dependances reconstruites par les
+        #   etapes suivantes : vendor/, node_modules/ ; l'etat runtime jamais versionne :
+        #   storage/, bootstrap/cache/, .env, *.log, error_log ; le contenu genere en prod que le
+        #   depot ne doit jamais ecraser : public/screenshots/). Verifie le 2026-09-11 sur l'etat
+        #   reel du depot (16 357 entrees rsync, 0 fichier piege hors de ces zones) avant d'etre
+        #   pose ici.
         run: |
-          rsync -azP \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='/vendor/' \
-            --exclude='node_modules/' \
-            --exclude='storage/' \
-            --exclude='.env' \
-            --exclude='.env.example' \
-            --exclude='public/screenshots/' \
-            --exclude='bootstrap/cache/' \
-            --exclude='tests/' \
-            --filter='P public/_*.php' \
-            --filter='P /_*.php' \
-            --exclude='*.log' \
-            --exclude='error_log' \
+          set -euo pipefail
+          EXCLUDES=(
+            --exclude='.git/'
+            --exclude='.github/'
+            --exclude='/vendor/'
+            --exclude='node_modules/'
+            --exclude='storage/'
+            --exclude='.env'
+            --exclude='.env.example'
+            --exclude='public/screenshots/'
+            --exclude='bootstrap/cache/'
+            --exclude='tests/'
+            --exclude='*.log'
+            --exclude='error_log'
+          )
+          PROTECT=(
+            --filter='P public/_*.php'
+            --filter='P /_*.php'
+          )
+
+          echo "--- Garde-fou transport : aucune exclusion ne doit piéger un fichier de code vivant ---"
+          mkdir -p /tmp/lv-dryrun-target
+          git -c core.quotePath=false ls-files | sort > /tmp/lv-tracked.txt
+          rsync -an --out-format='%n' "${EXCLUDES[@]}" "${PROTECT[@]}" ./ /tmp/lv-dryrun-target/ \
+            | sort > /tmp/lv-would-transfer.txt
+          SAFE_ZONES='(^|/)(\.git|\.github|vendor|node_modules|storage|tests|public/screenshots|bootstrap/cache)/'
+          TRAPPED=$(comm -23 /tmp/lv-tracked.txt /tmp/lv-would-transfer.txt \
+            | grep -Ev "$SAFE_ZONES" \
+            | grep -Ev '(^|/)\.env(\.example)?$|\.log$|(^|/)error_log$' || true)
+          if [ -n "$TRAPPED" ]; then
+            echo "::error::Deploiement bloque - fichier(s) suivi(s) par git piege(s) par une exclusion rsync hors zone reconnue :"
+            echo "$TRAPPED"
+            exit 1
+          fi
+          echo "OK - aucun fichier de code vivant piege par une exclusion."
+
+          rsync -azP "${EXCLUDES[@]}" "${PROTECT[@]}" \
             ./ gmemora@server.memora.pro:/home/gmemora/public_html/apps_diverses/laveille.ai/
 
       - name: Install composer dependencies on server
@@ -225,6 +261,36 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             -H "Content-Type: application/json" \
             --data '{"purge_everything":true}' || true
+
+      - name: Rafraîchir le témoin statique de version (public/_lvversion.txt)
+        # ACTION: écrire public/_lvversion.txt avec le semver RÉELLEMENT déployé à l'instant
+        #   (lu depuis config/version.php du commit DEPLOY_SHA sur ce runner - la MÊME source
+        #   unique que app/Helpers/version.php::lv_semver(), qui alimente déjà le footer public
+        #   et le footer admin). Jamais un numéro saisi à la main : un second endroit saisi à la
+        #   main recréerait le défaut sous une autre forme.
+        # RAISON (défaut B, docs/specs/2026-09-11-chaine-de-deploiement-qui-ment.md) : ce fichier
+        #   n'était écrit QUE par le point d'entrée de secours public/_lvgit.php (option
+        #   &cache=1) - jamais par CE pipeline, qui est la voie qui déploie RÉELLEMENT le site
+        #   depuis avril (rsync/SSH). Mesuré en prod le 2026-09-11 : le fichier affichait encore
+        #   "1.63.22" (dernier appel manuel du point d'entrée de secours, il y a des mois) alors
+        #   que la prod servait déjà 1.259.0 selon le footer (source unique, lui déjà correct).
+        #   Un témoin qui ment est pire qu'un témoin absent. Placé APRÈS la purge Cloudflare et
+        #   SANS if:always() : si une étape antérieure sans `|| true` (migrate) a fait échouer
+        #   le job, ce témoin n'est pas rafraîchi non plus - il ne doit jamais affirmer un
+        #   déploiement réussi qui ne l'a pas été.
+        run: |
+          SEMVER=$(php -r '$c = include "config/version.php"; echo $c["semver"] ?? "";' 2>/dev/null || true)
+          # Ce runner n'installe PAS php explicitement (ubuntu-latest en fournit un, mais rien ne
+          # le garantit). Si la lecture echoue, SEMVER serait VIDE et on ecrirait un temoin vide -
+          # c'est-a-dire exactement le defaut qu'on corrige ici, sous une autre forme. Un temoin
+          # ne ment jamais : soit il dit la version, soit il dit qu'il ne la connait pas.
+          case "${SEMVER}" in
+            [0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "::error::Semver illisible depuis config/version.php - le temoin dira 'inconnu'"
+               SEMVER="inconnu-${DEPLOY_SHA:0:7}" ;;
+          esac
+          echo "Semver déployé : ${SEMVER}"
+          ssh gmemora@server.memora.pro "echo '${SEMVER}' > /home/gmemora/public_html/apps_diverses/laveille.ai/public/_lvversion.txt && cat /home/gmemora/public_html/apps_diverses/laveille.ai/public/_lvversion.txt" || true
 
       - name: Deploy notification
         # DEPLOY_SHA (jamais github.sha, voir l'étape "Déterminer le commit exact à déployer" en
