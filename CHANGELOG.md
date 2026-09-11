@@ -1,6 +1,28 @@
 # Changelog
 
-## [1.258.0] - 2026-09-10
+## [1.258.1] - 2026-09-11
+
+### Corrigé
+- **Mandat sécurité (identifié le 2026-08-25) - durcissement de `public/_lvgit.php`**, le point
+  d'entrée de secours qui resynchronise la prod avec `origin/master` quand le Shell API cPanel
+  est indisponible. Le fichier reste (seul filet si la chaîne de déploiement CI tombe), mais deux
+  défauts sont corrigés, sans compatibilité résiduelle avec l'ancienne forme : (1) le jeton
+  voyageait dans la chaîne de requête (`?t=`), donc en clair dans les journaux d'accès, les
+  journaux des intermédiaires réseau et l'en-tête `Referer` - il voyage désormais UNIQUEMENT par
+  l'en-tête HTTP `X-Lv-Git-Token`, `?t=` est retiré sans aucun repli ; (2) l'option
+  `&seed=ClassName` autorisait, derrière un seul jeton, l'exécution d'une classe de semence de
+  base de données - donc une réécriture possible de données de PRODUCTION - l'option est
+  entièrement retirée du code exécutable (le commentaire d'en-tête l'annonçait déjà le
+  2026-09-10, mais le bloc `if (! empty($_GET['seed']))` restait exécutable ; retiré ici pour de
+  vrai).
+
+### Note technique
+- 4 tests nouveaux (`tests/Feature/LvGitEndpointSecurityTest.php`), qui exécutent réellement le
+  script (copié tel quel) dans un bac à sable `git` jetable servi par le serveur intégré de PHP,
+  jeton factice généré par le test lui-même. Contre-épreuve faite : rejoués avec le correctif
+  temporairement retiré, les 4 tests échouent chacun pour sa propre raison (403 attendu 200, 200
+  attendu 403) ; remis en place, les 4 repassent au vert. Suite `--testsuite=Feature` du projet
+  relancée en entier après correctif, aucune régression.
 
 ### Ajouté
 - **Ticket #2246 - fenêtre glissante de 30 minutes / 3 échecs, propre aux travaux réseau,

@@ -7,9 +7,19 @@ declare(strict_types=1);
  *
  * #250 — Endpoint git-pull token-protégé pour resync prod avec origin/master.
  * Évite les multiples cpanel_file_write par déploiement quand Shell API cPanel
- * est désactivée. Usage : curl "https://laveille.ai/_lvgit.php?t=$LV_GIT_TOKEN"
+ * est désactivée. Usage : curl -H "X-Lv-Git-Token: $LV_GIT_TOKEN" "https://laveille.ai/_lvgit.php"
  * Restrictions : token .env LV_GIT_TOKEN (64-char hex), commandes git
  * allowlist uniquement (fetch + reset --hard + log).
+ *
+ * 2026-09-10 - Durcissement (mandat sécurité du 2026-08-25, posé 16 jours après) :
+ * (1) le jeton ne voyage plus dans la chaîne de requête (fuite via journaux d'accès, journaux
+ *     des intermédiaires réseau, et en-tête de provenance) - il voyage désormais UNIQUEMENT dans
+ *     l'en-tête X-Lv-Git-Token. L'ancienne forme ?t= est RETIRÉE sans compatibilité conservée
+ *     (une compatibilité « au cas où » laisserait l'ancienne voie ouverte et annulerait le
+ *     correctif). (2) l'option &seed=ClassName est retirée de l'allowlist : une semence de base
+ *     de données peut réécrire des données de production derrière un seul jeton, ce qui n'a rien
+ *     à faire dans un filet de déploiement d'urgence. Preuve comportementale :
+ *     tests/Feature/LvGitEndpointSecurityTest.php.
  */
 
 // Lit le token depuis .env sans booter Laravel (faster + no autoload required).
@@ -26,7 +36,11 @@ if (!preg_match('/^LV_GIT_TOKEN=(.+)$/m', $envContent, $matches)) {
 }
 $expectedToken = trim($matches[1]);
 
-$providedToken = (string)($_GET['t'] ?? '');
+// Le jeton voyage UNIQUEMENT par en-tête de requête HTTP - jamais par la chaîne de requête
+// (une adresse s'inscrit en clair dans les journaux d'accès, les journaux des intermédiaires
+// réseau, et peut fuiter par l'en-tête Referer). Aucune lecture de repli sur $_GET['t'] : la
+// conserver « au cas où » laisserait la voie non sécurisée ouverte et annulerait le correctif.
+$providedToken = (string)($_SERVER['HTTP_X_LV_GIT_TOKEN'] ?? '');
 if ($expectedToken === '' || !hash_equals($expectedToken, $providedToken)) {
     http_response_code(403);
     exit('forbidden');
@@ -65,7 +79,10 @@ $commands[] = ['/usr/bin/git', 'status', '-s'];
 // bullet-proof quand cPanel UAPI est down (Shell API désactivée + File Manager API
 // en restart). Workaround validé en S128 incident cPanel maintenance prolongée.
 // Allowlist commandes artisan (view:clear + route:cache-atomic + event:cache + view:cache).
-// 2026-05-27 #313 : ajout options `&migrate=1` + `&seed=ClassName` (allowlist Modules\ ou Database\Seeders\).
+// 2026-05-27 #313 : ajout option `&migrate=1` (migration prod).
+// 2026-09-10 : option `&seed=ClassName` RETIRÉE de l'allowlist (mandat sécurité du 2026-08-25) -
+// une semence de base de données peut réécrire des données de production derrière un seul jeton,
+// ce qui n'a rien à faire dans un filet de déploiement de secours. Voir commentaire d'en-tête.
 $phpBin = null;
 $resolvePhpBin = function () use (&$phpBin) {
     if ($phpBin !== null) {
@@ -102,18 +119,6 @@ if (! empty($_GET['migrate'])) {
     $phpBin = $resolvePhpBin();
     $commands[] = [$phpBin, 'artisan', 'migrate', '--force'];
 }
-if (! empty($_GET['seed'])) {
-    $seedClass = trim((string) $_GET['seed']);
-    $isAllowed = (bool) preg_match('/^[A-Za-z0-9_\\\\]+$/', $seedClass)
-        && (str_starts_with($seedClass, 'Modules\\') || str_starts_with($seedClass, 'Database\\Seeders\\'));
-    if ($isAllowed) {
-        $phpBin = $resolvePhpBin();
-        $commands[] = [$phpBin, 'artisan', 'db:seed', '--class='.$seedClass, '--force'];
-    } else {
-        $commands[] = ['/bin/echo', '[seed skipped: invalid class '.preg_replace('/[^A-Za-z0-9_\\\\]/', '?', $seedClass).']'];
-    }
-}
-
 foreach ($commands as $cmd) {
     echo '$ '.implode(' ', $cmd)."\n";
     $proc = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
