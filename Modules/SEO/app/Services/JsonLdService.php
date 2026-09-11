@@ -245,7 +245,14 @@ final class JsonLdService
             'description' => $description,
             'image' => $article->image_url ? url($article->image_url) : asset('images/og-image.png'),
             'datePublished' => $article->pub_date?->toIso8601String(),
-            'dateModified' => $article->updated_at?->toIso8601String(),
+            // ACTION : updated_at est réécrit par une simple consultation (Modules\Core\Services\
+            // ViewCounterService::record()) - editorialModifiedAt() (Modules\Core\Traits\
+            // TracksEditorialModification) ne bouge que si le CONTENU a réellement changé, avec
+            // repli sur created_at si jamais renseigné. Peut être remplacé plus bas par
+            // reviewed_at (relecture humaine réelle), qui reste prioritaire quand elle existe.
+            // MCP: SELF (<5 lignes)
+            // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B.
+            'dateModified' => $article->editorialModifiedAt()?->toIso8601String(),
             'inLanguage' => 'fr-CA',
             'isAccessibleForFree' => true,
             'author' => $authors,

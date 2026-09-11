@@ -36,7 +36,13 @@
             'Conforme Loi 25 + RGPD',
         ],
         'softwareVersion' => '2.0',
-        'dateModified' => now()->toIso8601String(),
+        // ACTION : now() prétendait que la page venait d'être modifiée à CHAQUE chargement -
+        // même mensonge que updated_at rafraîchi par une simple vue (voir Modules\Core\Traits\
+        // TracksEditorialModification). editorialModifiedAt() ne bouge que si $tool a réellement
+        // changé, avec repli sur created_at si jamais renseigné.
+        // MCP: SELF (<5 lignes)
+        // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B, point 4.
+        'dateModified' => $tool->editorialModifiedAt()?->toIso8601String(),
         'author' => function_exists('lv_jsonld_author_stephane') ? lv_jsonld_author_stephane() : null,
         'publisher' => function_exists('lv_jsonld_publisher') ? lv_jsonld_publisher() : null,
     ];

@@ -69,3 +69,60 @@ it('n\'incrémente rien pour un robot déclaré (Googlebot) - le point qui compt
     $term->refresh();
     expect($term->views_count)->toBe(0);
 });
+
+// ── Partie 2 (docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md + complément
+//      coordinateur 2026-09-11) : le glossaire affiche AUSSI une date au lecteur - elle ne doit
+//      ni bouger sous l'effet d'une simple consultation, ni se présenter comme une révision
+//      quand aucune trace éditoriale réelle n'existe.
+
+it('consulter un terme du glossaire ne fait pas avancer sa date éditoriale', function () {
+    $term = makeViewCounterDictionaryTerm('fraicheur');
+    $term->refresh();
+    $editorialAvant = $term->editorialModifiedAt()->toIso8601String();
+
+    Carbon\Carbon::setTestNow(now()->addDays(3));
+    $reponse = $this->get('/glossaire/'.$term->slug, [
+        'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/128.0',
+    ]);
+    Carbon\Carbon::setTestNow();
+
+    $reponse->assertOk();
+    $term->refresh();
+
+    expect($term->views_count)->toBe(1)
+        ->and($term->editorialModifiedAt()->toIso8601String())->toBe($editorialAvant);
+});
+
+it('un terme jamais révisé n\'affiche AUCUNE date de révision (jamais la date de création présentée comme une révision)', function () {
+    $term = makeViewCounterDictionaryTerm('sans-revision');
+
+    // Fraîchement créé : content_updated_at = created_at, aucune révision connue.
+    expect($term->hasKnownEditorialRevision())->toBeFalse();
+
+    $reponse = $this->get('/glossaire/'.$term->slug, [
+        'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/128.0',
+    ]);
+    // Mord si la garde disparaît : l'ancien code affichait TOUJOURS "Mis à jour le [date]",
+    // même pour un terme jamais révisé (updated_at existe toujours) - présenter la date de
+    // création comme une date de mise à jour est le mensonge que ce correctif retire.
+    $reponse->assertOk()->assertDontSee('Révisé le')->assertDontSee('Mis à jour le');
+});
+
+it('un terme réellement révisé affiche sa date de révision, sous le libellé « Révisé le »', function () {
+    $term = makeViewCounterDictionaryTerm('revise');
+
+    Carbon\Carbon::setTestNow(now()->addDays(10));
+    $term->definition = ['fr_CA' => 'Nouvelle définition, réellement modifiée.', 'fr' => 'Nouvelle définition, réellement modifiée.'];
+    $term->save();
+    Carbon\Carbon::setTestNow();
+
+    $term->refresh();
+    expect($term->hasKnownEditorialRevision())->toBeTrue();
+
+    $reponse = $this->get('/glossaire/'.$term->slug, [
+        'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/128.0',
+    ]);
+    $reponse->assertOk()
+        ->assertSee('Révisé le')
+        ->assertDontSee('Mis à jour le');
+});

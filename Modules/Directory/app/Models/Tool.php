@@ -21,6 +21,7 @@ use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasFallbackTranslatedSlug;
 use Modules\Core\Traits\HasLifecycleStatus;
 use Modules\Core\Traits\HasSponsorship;
+use Modules\Core\Traits\TracksEditorialModification;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -35,6 +36,7 @@ class Tool extends Model implements Searchable
     use HasSuggestions;
     use HasTranslations;
     use LogsActivity;
+    use TracksEditorialModification;
     use \Modules\Voting\Traits\HasCommunityVotes;
     use \Modules\SEO\Traits\NotifiesIndexNow;
 
@@ -52,6 +54,18 @@ class Tool extends Model implements Searchable
                 default => "Outil {$event}",
             });
     }
+
+    // ACTION : mêmes valeurs que getActivitylogOptions() ci-dessus par choix éditorial cohérent -
+    // propriété VOLONTAIREMENT distincte (voir Modules\Core\Traits\TracksEditorialModification) :
+    // le journal d'audit Spatie et le signal de fraîcheur publié (JSON-LD, sitemap, texte visible
+    // « Mis à jour le… » de show.blade.php) n'ont pas vocation à toujours évoluer ensemble.
+    // MCP: SELF (<5 lignes)
+    // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B - cas le plus
+    // visible (texte affiché sur chaque fiche de l'annuaire).
+    protected array $editorialFields = [
+        'name', 'url', 'pricing', 'status', 'short_description', 'description',
+        'is_featured', 'lifecycle_status', 'lifecycle_date',
+    ];
 
     public function getPublicUrl(): string
     {
@@ -242,6 +256,7 @@ class Tool extends Model implements Searchable
         'is_multimodal' => 'boolean',
         'output_types' => 'array',
         'last_change_detected_at' => 'datetime', // S90 #43 freshness signals
+        'content_updated_at' => 'datetime',
     ];
 
     public function setPricingAttribute($value): void

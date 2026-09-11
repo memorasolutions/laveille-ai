@@ -1764,7 +1764,13 @@ window.addEventListener('load', function () {
         'author' => function_exists('lv_jsonld_author_stephane') ? lv_jsonld_author_stephane() : ['@type' => 'Person', 'name' => 'Stéphane Lapointe'],
         'publisher' => function_exists('lv_jsonld_publisher') ? lv_jsonld_publisher() : ['@type' => 'Organization', 'name' => 'La veille'],
         'softwareVersion' => '1.0',
-        'dateModified' => now()->toIso8601String(),
+        // ACTION : now() prétendait que la page venait d'être modifiée à CHAQUE chargement -
+        // même mensonge que updated_at rafraîchi par une simple vue (voir Modules\Core\Traits\
+        // TracksEditorialModification). editorialModifiedAt() ne bouge que si $tool a réellement
+        // changé, avec repli sur created_at si jamais renseigné.
+        // MCP: SELF (<5 lignes)
+        // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B, point 4.
+        'dateModified' => $tool->editorialModifiedAt()?->toIso8601String(),
     ];
 @endphp
 <script type="application/ld+json">{!! json_encode($_swApp, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>

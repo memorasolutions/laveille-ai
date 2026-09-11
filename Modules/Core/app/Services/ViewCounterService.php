@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Modules\Core\Services;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -70,14 +71,52 @@ final class ViewCounterService
                 $columns[] = $verifiedColumn;
             }
 
-            $model::query()->whereKey($model->getKey())->increment($columns[0]);
+            // ACTION : lire une page n'est pas la modifier - `Builder::increment()` pose sinon
+            // `updated_at` à chaque vue (vendor addUpdatedAtColumn()), que ce compteur alimente
+            // ensuite une date de modification publiée (JSON-LD/sitemap/texte visible) à tort.
+            // `addUpdatedAtColumn()` n'écrase QUE les clés absentes de $extra : y placer déjà
+            // `updated_at` figé sur lui-même (colonne = colonne, échappée par la grammaire du
+            // connecteur - jamais une concaténation de chaîne) neutralise l'écriture sans toucher
+            // au reste de la ligne. Vaut pour les DEUX incréments ci-dessous (compteur historique
+            // et compteur "propre").
+            // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md (MESURE B) - 78 des
+            // 80 termes du glossaire mesurables portaient déjà plus de 24h de dérive, jusqu'à ~50
+            // jours, entre updated_at et leur dernière vraie édition.
+            $pinnedUpdatedAt = self::pinUpdatedAtExtra($model, $table);
+
+            $model::query()->whereKey($model->getKey())->increment($columns[0], 1, $pinnedUpdatedAt);
             if (isset($columns[1])) {
-                $model::query()->whereKey($model->getKey())->increment($columns[1]);
+                $model::query()->whereKey($model->getKey())->increment($columns[1], 1, $pinnedUpdatedAt);
             }
         } catch (Throwable $e) {
             // Silence volontaire (garde-fou zéro casse) : un échec de comptage ne doit
             // jamais empêcher l'affichage d'une page publique.
         }
+    }
+
+    /**
+     * Construit le tableau `$extra` à passer à `increment()` pour figer `updated_at` sur
+     * lui-même, plutôt que de laisser `addUpdatedAtColumn()` (vendor) le réécrire à `now()`.
+     * Ne pose la clé QUE si le modèle utilise réellement les horodatages ET que la colonne
+     * existe sur la table : un modèle sans horodatages (`usesTimestamps() === false`) ou dont
+     * la colonne `updated_at` n'existe pas recevrait sinon une écriture sur une colonne absente.
+     * Le nom de colonne est échappé par la grammaire du connecteur courant (jamais par
+     * concaténation de chaîne) avant d'être posé dans l'expression brute.
+     */
+    private static function pinUpdatedAtExtra(Model $model, string $table): array
+    {
+        if (! $model->usesTimestamps()) {
+            return [];
+        }
+
+        $updatedAtColumn = $model->getUpdatedAtColumn();
+        if ($updatedAtColumn === null || ! Schema::hasColumn($table, $updatedAtColumn)) {
+            return [];
+        }
+
+        $grammar = $model->getConnection()->getQueryGrammar();
+
+        return [$updatedAtColumn => new Expression($grammar->wrap($updatedAtColumn))];
     }
 
     /**

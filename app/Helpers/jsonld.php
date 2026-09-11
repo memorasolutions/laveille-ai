@@ -174,7 +174,14 @@ if (! function_exists('lv_jsonld_blog_posting')) {
             'description' => $post->excerpt ?? \Illuminate\Support\Str::words($body, 30, ''),
             'articleBody' => \Illuminate\Support\Str::limit($body, 500, ''),
             'datePublished' => $post->published_at?->toIso8601String() ?? now()->toIso8601String(),
-            'dateModified' => ($post->updated_at ?? $post->published_at ?? now())->toIso8601String(),
+            // ACTION : updated_at (réécrit par une simple consultation, cf. Modules\Core\Services\
+            // ViewCounterService::record()) et now() (toujours "maintenant") sont remplacés par
+            // editorialModifiedAt() (Modules\Core\Traits\TracksEditorialModification), qui ne
+            // bouge que si le CONTENU a réellement changé. Repli sur published_at puis created_at
+            // - jamais now() : une date qu'on ne peut pas prouver n'est jamais fabriquée.
+            // MCP: SELF (<5 lignes)
+            // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B.
+            'dateModified' => ($post->editorialModifiedAt() ?? $post->published_at ?? $post->created_at)->toIso8601String(),
             'author' => function_exists('lv_jsonld_author_from_profile') ? lv_jsonld_author_from_profile($author) : ['@type' => 'Person', 'name' => $author->display_name],
             'publisher' => function_exists('lv_jsonld_author_website') ? lv_jsonld_author_website($author) : ['@type' => 'Organization', 'name' => config('app.name')],
             'image' => $post->cover_image ? [url($post->cover_image)] : null,

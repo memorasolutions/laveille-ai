@@ -67,7 +67,12 @@ final class AuthorsSitemapService
             }
             $xmlWriter->startElement('url');
             $xmlWriter->writeElement('loc', url("/@{$post->authorProfile->slug}/{$post->slug}"));
-            $xmlWriter->writeElement('lastmod', $post->updated_at->toIso8601String());
+            // ACTION : updated_at est réécrit par une simple consultation (Modules\Core\Services\
+            // ViewCounterService::record()) - editorialModifiedAt() (Modules\Core\Traits\
+            // TracksEditorialModification) ne bouge que si le CONTENU a réellement changé.
+            // MCP: SELF (<5 lignes)
+            // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B.
+            $xmlWriter->writeElement('lastmod', $post->editorialModifiedAt()->toIso8601String());
             $xmlWriter->writeElement('changefreq', 'monthly');
             $xmlWriter->writeElement('priority', '0.6');
             $xmlWriter->endElement();

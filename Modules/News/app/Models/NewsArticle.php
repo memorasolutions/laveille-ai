@@ -19,6 +19,7 @@ use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
+use Modules\Core\Traits\TracksEditorialModification;
 use Modules\News\Services\EditorialProofNormalizer;
 use Modules\Voting\Traits\HasCommunityVotes;
 
@@ -35,6 +36,7 @@ class NewsArticle extends Model implements Searchable
     use HasComments, HasReports, HasCommunityVotes;
     use HasPublishedState;
     use LogsActivityStandard;
+    use TracksEditorialModification;
     use \Modules\SEO\Traits\NotifiesIndexNow;
 
     // ACTION : 'description' retiré des champs journalisés (design doc "Actus - zéro copie du
@@ -53,6 +55,20 @@ class NewsArticle extends Model implements Searchable
     // RAISON: garde-fou zéro-copie, cohérent avec l'exclusion déjà en place pour 'description'.
     protected array $activitylogFields = ['title', 'seo_title', 'summary', 'is_published', 'published_at', 'relevance_score'];
     protected string $activitylogName = 'news_article';
+
+    // ACTION : liste distincte de $activitylogFields ci-dessus (DRY nuancé, CLAUDE.md) - le
+    // journal d'audit et le signal de fraîcheur publié (JSON-LD dateModified, lastmod sitemap)
+    // n'ont pas vocation à toujours coïncider. 'relevance_score' est volontairement ABSENT ici :
+    // il est recalculé par un pipeline automatisé (EditorialTriageScorer), pas par une main
+    // humaine - l'inclure recréerait exactement le défaut qu'on corrige (une écriture non
+    // éditoriale qui fait avancer une date publiée comme éditoriale).
+    // MCP: SELF (<5 lignes)
+    // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B.
+    protected array $editorialFields = [
+        'title', 'summary', 'structured_summary', 'seo_title', 'meta_description',
+        'image_url', 'image_credit', 'category_tag', 'primary_sources',
+        'is_published', 'published_at',
+    ];
 
     public function getPublicUrl(): string
     {
@@ -195,6 +211,7 @@ class NewsArticle extends Model implements Searchable
         'reviewed_at' => 'datetime',
         'title_fr_at' => 'datetime',
         'fact_check_inconclusive_at' => 'datetime',
+        'content_updated_at' => 'datetime',
     ];
 
     /**

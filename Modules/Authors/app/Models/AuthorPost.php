@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Traits\TracksEditorialModification;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -18,6 +19,7 @@ class AuthorPost extends Model
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;
+    use TracksEditorialModification;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -27,6 +29,15 @@ class AuthorPost extends Model
             ->dontSubmitEmptyLogs()
             ->useLogName('author_post');
     }
+
+    // ACTION : proche de getActivitylogOptions() ci-dessus (+ excerpt/cover_image, réellement
+    // affichés mais absents du journal d'audit) - propriété VOLONTAIREMENT distincte, voir
+    // Modules\Core\Traits\TracksEditorialModification (DRY nuancé, CLAUDE.md).
+    // MCP: SELF (<5 lignes)
+    // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B.
+    protected array $editorialFields = [
+        'title', 'excerpt', 'body_markdown', 'cover_image', 'status', 'visibility', 'tags', 'published_at',
+    ];
 
     protected $table = 'author_posts';
 
@@ -49,6 +60,7 @@ class AuthorPost extends Model
     protected $casts = [
         'tags' => 'array',
         'published_at' => 'datetime',
+        'content_updated_at' => 'datetime',
     ];
 
     public const STATUS_DRAFT = 'draft';

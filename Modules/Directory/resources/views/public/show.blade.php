@@ -558,7 +558,16 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
         <div style="border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
             <span style="display: inline-flex; align-items: center; color: #065F46; font-weight: 600; font-size: 12px; background: #D1FAE5; padding: 4px 10px; border-radius: 99px; border: 1px solid #A7F3D0;">✓ {{ __('Vérifié par La veille') }}</span>
-            <span style="font-size: 12px; color: #6B7280;">{{ __('Mis à jour le') }} {{ format_date($tool->updated_at) }}</span>
+            {{-- ACTION : updated_at (réécrit par une simple consultation, cf. Modules\Core\
+                 Services\ViewCounterService::record()) remplacé par editorialModifiedAt()
+                 (Modules\Core\Traits\TracksEditorialModification), qui ne bouge que si le
+                 CONTENU a réellement changé - c'était le cas le plus visible mesuré (78 des 80
+                 termes du glossaire vérifiables dérivaient déjà de plus de 24h, jusqu'à ~50
+                 jours ; ce texte publiait le même mensonge pour chaque fiche de l'annuaire).
+                 MCP: SELF (<5 lignes) / RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md --}}
+            @if($tool->hasKnownEditorialRevision())
+                <span style="font-size: 12px; color: #6B7280;">{{ __('Révisé le') }} {{ format_date($tool->editorialModifiedAt()) }}</span>
+            @endif
         </div>
     </div>
 

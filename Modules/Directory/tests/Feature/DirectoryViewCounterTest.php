@@ -116,3 +116,59 @@ test('une visite de /annuaire/{slug} par un robot déclaré n\'incrémente ni cl
     expect($tool->clicks_count)->toBe(0)
         ->and($tool->clicks_count_verified)->toBe(0);
 });
+
+// ── 3. Partie 2 (docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md) : la date de
+//      modification ÉDITORIALE publiée (texte visible « Mis à jour le… », le cas le plus visible
+//      mesuré) ne doit pas bouger quand la fiche n'est que CONSULTÉE - ni via increment() sur
+//      clicks_count (Partie 1), ni via un contenu qui n'a en réalité pas changé (Partie 2).
+
+test('consulter la fiche /annuaire/{slug} ne fait pas avancer la date « Mis à jour le » publiée', function () {
+    $tool = makeViewCounterTestTool('outil-vc-freshness');
+
+    // La fiche doit porter une révision RÉELLEMENT connue, sinon la page n'affiche aucune date
+    // du tout (et c'est voulu : présenter la date de création comme une date de révision serait
+    // le même mensonge sous un autre nom). C'est donc le cas où la date est publiée qu'on éprouve
+    // ici ; l'autre cas est couvert par le test suivant.
+    $tool->content_updated_at = $tool->created_at->copy()->addDays(10);
+    $tool->saveQuietly();
+    $tool->refresh();
+    expect($tool->hasKnownEditorialRevision())->toBeTrue();
+
+    $editorialAvant = $tool->editorialModifiedAt()->toIso8601String();
+
+    // Horloge avancée pour que le test morde à coup sûr si la moindre écriture (increment()
+    // sur clicks_count OU un save() du modèle) faisait avancer la date publiée.
+    Carbon\Carbon::setTestNow(now()->addDays(3));
+    $response = $this->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0'])
+        ->get(route('directory.show', $tool->slug));
+    Carbon\Carbon::setTestNow();
+
+    $response->assertOk();
+    $tool->refresh();
+
+    // Partie 1 : la consultation a bien compté (preuve que le compteur fonctionne toujours).
+    expect($tool->clicks_count)->toBe(1)
+        // Partie 2 : mais la date éditoriale publiée, elle, n'a pas bougé.
+        ->and($tool->editorialModifiedAt()->toIso8601String())->toBe($editorialAvant);
+
+    // Preuve visuelle : le texte réellement affiché sur la page porte la MÊME date qu'avant la
+    // consultation (format_date() en 'short' => jour/mois/année, insensible aux secondes).
+    $response->assertSee(format_date($tool->editorialModifiedAt()));
+});
+
+test('une fiche sans révision connue n\'affiche AUCUNE date - jamais la date de création déguisée', function () {
+    // Le repli du trait (content_updated_at = created_at quand aucune trace n'existe) ne doit
+    // JAMAIS être publié : 464 des 544 termes mesurés le 2026-09-11 n'ont aucune trace de
+    // révision. Ce test mord si quelqu'un réintroduit un affichage inconditionnel de la date.
+    $tool = makeViewCounterTestTool('outil-vc-sans-revision');
+    $tool->refresh();
+
+    expect($tool->hasKnownEditorialRevision())->toBeFalse();
+
+    $response = $this->withHeaders(['User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0'])
+        ->get(route('directory.show', $tool->slug));
+
+    $response->assertOk()
+        ->assertDontSee('Révisé le')
+        ->assertDontSee(format_date($tool->created_at));
+});

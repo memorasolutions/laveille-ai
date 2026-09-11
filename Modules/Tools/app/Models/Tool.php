@@ -12,12 +12,24 @@ namespace Modules\Tools\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Concerns\HasAdminShareContents;
+use Modules\Core\Traits\TracksEditorialModification;
 use Modules\Tools\Models\Concerns\Shareable;
 
 class Tool extends Model
 {
     use HasAdminShareContents;
     use Shareable;
+    use TracksEditorialModification;
+
+    // ACTION : contenu réellement éditorial de l'outil (voir Modules\Core\Traits\
+    // TracksEditorialModification) - exclut is_active/is_under_construction/construction_mode/
+    // sort_order/views_count, qui décrivent un ÉTAT opérationnel, pas le contenu affiché.
+    // MCP: SELF (<5 lignes)
+    // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B - le sitemap
+    // publiait déjà `updated_at` (touché par ViewCounterService::record()) comme lastmod.
+    protected array $editorialFields = [
+        'name', 'description', 'answer_summary', 'answer_points', 'icon', 'featured_image', 'category',
+    ];
 
     protected $fillable = [
         'name',
@@ -40,6 +52,7 @@ class Tool extends Model
         'is_under_construction' => 'boolean',
         'views_count' => 'integer',
         'answer_points' => 'array',
+        'content_updated_at' => 'datetime',
     ];
 
     public function scopeActive($query)

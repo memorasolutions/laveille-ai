@@ -73,6 +73,26 @@ test('deux requêtes rapprochées du même visiteur ne comptent qu\'une seule fo
     expect($tool->views_count)->toBe(1);
 });
 
+test('compter une vue n\'écrit jamais updated_at - lire n\'est pas modifier', function () {
+    // Mord si le correctif de ViewCounterService::pinUpdatedAtExtra() disparaît : sans lui,
+    // Builder::increment() (vendor addUpdatedAtColumn()) réécrit updated_at à chaque vue, ce qui
+    // fabrique un faux signal de fraîcheur (docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md).
+    $tool = makeVcTool();
+    $tool->refresh();
+    $originalUpdatedAt = $tool->updated_at->toIso8601String();
+
+    // Horloge figée puis avancée : si updated_at bouge, ce test le voit à coup sûr (aucune
+    // dépendance à la vitesse d'exécution du test).
+    Carbon\Carbon::setTestNow(now()->addMinutes(5));
+    bindVcRequest();
+    ViewCounterService::record($tool, 'views_count');
+    Carbon\Carbon::setTestNow();
+
+    $tool->refresh();
+    expect($tool->views_count)->toBe(1)
+        ->and($tool->updated_at->toIso8601String())->toBe($originalUpdatedAt);
+});
+
 test('une défaillance du mécanisme de comptage n\'empêche jamais l\'affichage de la page', function () {
     // Modèle jamais persisté (pas de clé primaire) : whereKey(null) doit être
     // absorbé silencieusement, sans exception, exactement comme si la page

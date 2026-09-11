@@ -324,10 +324,20 @@
                         @endif
                     </div>
 
-                    {{-- Date de mise à jour (signal freshness GEO 2026) --}}
-                    @if($term->updated_at)
+                    {{-- Date de révision (signal freshness GEO 2026) - ACTION : updated_at
+                         (réécrit par une simple consultation, cf. Modules\Core\Services\
+                         ViewCounterService::record()) remplacé par editorialModifiedAt()
+                         (Modules\Core\Traits\TracksEditorialModification), affiché SEULEMENT
+                         quand hasKnownEditorialRevision() est vrai - 464 des 544 termes mesurés
+                         le 2026-09-11 n'ont AUCUNE trace de révision réelle ; leur présenter la
+                         date de création comme une date de mise à jour serait le même mensonge
+                         sous un autre nom. Libellé "Révisé le" (jamais "Mis à jour le", qui
+                         laisse croire que la ligne a bougé) pour ne réserver ce mot qu'à une
+                         révision éditoriale RÉELLEMENT connue.
+                         MCP: SELF (<5 lignes) / RAISON: complément coordinateur 2026-09-11. --}}
+                    @if($term->hasKnownEditorialRevision())
                         <p style="text-align:center; color: var(--c-text-muted, #52586a); font-size: 0.82rem; margin: -8px 0 20px; font-style: italic;">
-                            {{ __('Mis à jour le') }} <time datetime="{{ $term->updated_at->toDateString() }}">{{ $term->updated_at->locale('fr_CA')->translatedFormat('j F Y') }}</time>
+                            {{ __('Révisé le') }} <time datetime="{{ $term->editorialModifiedAt()->toDateString() }}">{{ $term->editorialModifiedAt()->locale('fr_CA')->translatedFormat('j F Y') }}</time>
                         </p>
                     @endif
 

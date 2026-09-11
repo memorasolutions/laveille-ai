@@ -17,6 +17,7 @@ use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasFallbackTranslatedSlug;
 use Modules\Core\Traits\HasPublishedState;
 use Modules\Core\Traits\LogsActivityStandard;
+use Modules\Core\Traits\TracksEditorialModification;
 use Modules\Directory\Traits\HasSuggestions;
 use Spatie\Translatable\HasTranslations;
 
@@ -28,9 +29,19 @@ class Term extends Model implements Searchable
     use HasSuggestions;
     use HasTranslations;
     use LogsActivityStandard;
+    use TracksEditorialModification;
 
     protected array $activitylogFields = ['name', 'definition', 'analogy', 'example', 'did_you_know', 'is_published'];
     protected string $activitylogName = 'term';
+
+    // ACTION : mêmes valeurs que $activitylogFields ci-dessus par choix éditorial cohérent -
+    // propriété VOLONTAIREMENT distincte (voir Modules\Core\Traits\TracksEditorialModification) :
+    // le journal d'audit et le signal de fraîcheur publié (texte visible « Révisé le… ») n'ont
+    // pas vocation à toujours évoluer ensemble.
+    // MCP: SELF (<5 lignes)
+    // RAISON: complément du 2026-09-11 (coordinateur) - le glossaire affiche aussi une date au
+    // lecteur (show.blade.php, "signal freshness GEO 2026"), pas seulement l'annuaire.
+    protected array $editorialFields = ['name', 'definition', 'analogy', 'example', 'did_you_know', 'is_published'];
 
     protected array $suggestableFields = [
         'definition' => 'Définition',
@@ -77,6 +88,7 @@ class Term extends Model implements Searchable
         'sources' => 'array',
         'broader_slugs' => 'array',
         'narrower_slugs' => 'array',
+        'content_updated_at' => 'datetime',
     ];
 
     public function category(): BelongsTo

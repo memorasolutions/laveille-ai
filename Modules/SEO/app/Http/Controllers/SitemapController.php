@@ -81,10 +81,16 @@ class SitemapController
                 // même priorité 0.8 hebdomadaire qu'un outil pleinement fonctionnel. Le filtre est posé
                 // ICI et non dans scopeActive() : ce scope est partagé avec la liste /outils, qui doit
                 // justement continuer d'afficher les outils gatés (avec leur badge) aux superadmins.
-                \Modules\Tools\Models\Tool::active()->where('is_under_construction', false)->ordered()->select(['id', 'slug', 'updated_at', 'sort_order'])->get()->each(function ($tool) use ($sitemap) {
+                // ACTION : content_updated_at/created_at ajoutés au select() - editorialModifiedAt()
+                // (Modules\Core\Traits\TracksEditorialModification) lit ces deux colonnes ; sans elles,
+                // un modèle partiellement chargé renverrait toujours null. updated_at reste sélectionné
+                // uniquement parce qu'il alimente d'autres usages ailleurs sur ce même queryset.
+                // MCP: SELF (<5 lignes)
+                // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B.
+                \Modules\Tools\Models\Tool::active()->where('is_under_construction', false)->ordered()->select(['id', 'slug', 'updated_at', 'content_updated_at', 'created_at', 'sort_order'])->get()->each(function ($tool) use ($sitemap) {
                     $sitemap->add(
                         Url::create(route('tools.show', $tool->slug))
-                            ->setLastModificationDate($tool->updated_at)
+                            ->setLastModificationDate($tool->editorialModifiedAt())
                             ->setPriority(0.8)
                             ->setChangeFrequency('weekly')
                     );
@@ -128,7 +134,12 @@ class SitemapController
                     'resources as approved_resources_count' => fn ($q) => $q->where('is_approved', true),
                     'screenshots as approved_screenshots_count' => fn ($q) => $q->approved(),
                 ])
-                ->select(['id', 'slug', 'updated_at', 'screenshot', 'lifecycle_status', 'short_description'])
+                // ACTION : content_updated_at/created_at ajoutés - editorialModifiedAt() (Modules\
+                // Core\Traits\TracksEditorialModification) lit ces deux colonnes.
+                // MCP: SELF (<5 lignes)
+                // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B - le
+                // cas le plus visible mesuré (texte affiché sur chaque fiche de l'annuaire).
+                ->select(['id', 'slug', 'updated_at', 'content_updated_at', 'created_at', 'screenshot', 'lifecycle_status', 'short_description'])
                 ->get()
                 ->reject(function ($tool) {
                     $shortDescriptionLength = mb_strlen(trim(strip_tags((string) ($tool->short_description ?? ''))));
@@ -141,7 +152,7 @@ class SitemapController
                 })
                 ->each(function ($tool) use ($sitemap) {
                     $url = Url::create($tool->getPublicUrl())
-                        ->setLastModificationDate($tool->updated_at)
+                        ->setLastModificationDate($tool->editorialModifiedAt())
                         ->setPriority(0.7)
                         ->setChangeFrequency('monthly');
 
@@ -252,9 +263,14 @@ class SitemapController
                 // pour qu'une fiche retirée (réponse 410) sorte du sitemap principal.
                 // MCP: SELF (<5 lignes)
                 // RAISON: design doc du chantier - toutes les surfaces publiques couvertes.
-                \Modules\News\Models\NewsArticle::where('is_published', true)->where('seo_status', 'index')->whereNull('retired_at')->select(['id', 'slug', 'updated_at', 'image_url'])->get()->each(function ($article) use ($sitemap) {
+                // ACTION : content_updated_at/created_at ajoutés - editorialModifiedAt() (Modules\
+                // Core\Traits\TracksEditorialModification) lit ces deux colonnes.
+                // MCP: SELF (<5 lignes)
+                // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B - ce
+                // canal n'avait AUCUNE garde reviewed_at (contrairement au JSON-LD de la page).
+                \Modules\News\Models\NewsArticle::where('is_published', true)->where('seo_status', 'index')->whereNull('retired_at')->select(['id', 'slug', 'updated_at', 'content_updated_at', 'created_at', 'image_url'])->get()->each(function ($article) use ($sitemap) {
                     $url = Url::create(url('/actualites/'.$article->slug))
-                        ->setLastModificationDate($article->updated_at)
+                        ->setLastModificationDate($article->editorialModifiedAt())
                         ->setPriority(0.6)
                         ->setChangeFrequency('weekly');
 
