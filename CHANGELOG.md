@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.261.4] - 2026-09-11
+
+### Corrigé
+- **Deux adresses différentes de la même vidéo passaient toutes les deux.** La soumission
+  communautaire d'une ressource ne refusait un doublon que sur l'URL EXACTE. Une même vidéo
+  soumise sous `youtube.com/watch?v=X` puis sous `youtu.be/X` créait donc deux lignes. La clé de
+  dédoublonnage devient l'identifiant de la vidéo, **ré-extrait côté serveur** depuis l'URL plutôt
+  que repris du champ transmis par le navigateur, qui n'est rempli que si le script de la page a
+  interrogé l'API au préalable. L'extracteur employé est celui qui existait déjà dans le module
+  d'intelligence artificielle : aucun second extracteur n'a été écrit, les deux auraient fini par
+  diverger.
+- **Deux finalités que la clé unique confondait sont désormais séparées.** Une vidéo retirée par
+  la modération reste bloquée pour TOUS les outils, quelle que soit l'adresse employée pour la
+  resoumettre (portée globale, c'est le garde-fou qui empêche le traitement automatique de la
+  recréer). Un simple doublon, lui, n'est refusé que pour l'outil concerné (portée locale) : la
+  même vidéo peut légitimement illustrer deux outils différents, et la mesure en production en
+  compte un cas réel. Les ressources sans identifiant vidéo, article ou documentation, conservent
+  le contrôle par URL, inchangé.
+
+### Sécurité
+- **Une seule des cinq voies de création laissait dégrader l'état d'approbation depuis un fichier
+  d'import.** La commande d'importation de vidéos lisait ce drapeau dans le fichier de
+  configuration fourni en argument, alors que les quatre autres voies le fixent en dur. Un fichier
+  qui l'aurait mis à « faux » n'aurait pas mis la ressource en attente : il aurait déclenché le
+  garde-fou de modération, bloquant la vidéo pour tout le catalogue. La valeur est désormais fixée
+  sans condition, et un test de garde couvre les cinq voies.
+
+### Vérifié
+- 302 tests du module annuaire, 839 assertions, zéro échec. La contre-épreuve des cinq voies a
+  bien rougi avant correction, puis reverdi.
+- Mesure en production, lecture seule : 1830 ressources, 74 désapprouvées, zéro cas de même vidéo
+  sous deux adresses pour un même outil. Deux doublons stricts subsistent sur un seul outil, tous
+  deux antérieurs ; ils empêchent la pose d'une contrainte d'unicité en base, traitée à part.
+
 ## [1.261.3] - 2026-09-11
 
 ### Corrigé

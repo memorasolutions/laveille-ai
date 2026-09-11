@@ -46,7 +46,13 @@ class ImportYoutubeResourcesCommand extends Command
 
         $data = $config['data'] ?? [];
         $language = $config['language'] ?? 'fr';
-        $isApproved = $config['is_approved'] ?? true;
+        // TOUJOURS true, jamais configurable depuis le JSON - ticket #2436 (2026-09-11) : la
+        // clé is_approved=false signifie « désapprouvé par la modération » (le VACCIN qui
+        // empêche EnrichTutorialsCommand de la re-créer), jamais « en attente ». Un JSON qui
+        // fixait 'is_approved' => false confondrait les deux : cette voie d'insertion était la
+        // SEULE des 4 (avec EnrichTutorialsCommand, EnrichFormationsCommand,
+        // EnrichTutorialsSonarCommand) à ne pas coder cette valeur en dur.
+        $isApproved = true;
         $minViews = (int) ($config['min_views'] ?? 1500);
         $minDuration = (int) ($config['min_duration'] ?? 60);
         $isDryRun = (bool) $this->option('dry-run');

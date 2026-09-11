@@ -138,14 +138,49 @@ class CommunityController extends Controller
             'channel_url' => ['nullable', 'url', 'max:500'],
         ]);
 
-        // Vérification doublon URL pour cet outil
-        $exists = ToolResource::where('directory_tool_id', $tool->id)->where('url', $validated['url'])->exists();
-        if ($exists) {
+        // Identifiant vidéo RE-EXTRAIT côté serveur depuis l'URL - jamais une confiance aveugle
+        // au seul champ transmis par le client (qui ne remplit video_id que si le JS a appelé
+        // fetchYoutubeMeta() ci-dessous). Même extracteur que fetchYoutubeMeta(), déjà présent
+        // dans le code (Modules/AI/Services/YouTubeService::getVideoId()) - pas de 2e extracteur
+        // qui divergerait (règle DRY du projet). Repli sur le video_id client si l'URL n'est pas
+        // reconnue comme YouTube (autre plateforme vidéo).
+        //
+        // Ticket #2436, volet « clés de dédoublonnage » (2026-09-11) - défaut (c) corrigé ici :
+        // deux URL différentes désignant la même vidéo (ex. youtube.com/watch?v=X et youtu.be/X)
+        // passaient toutes les deux, car le doublon n'était détecté que sur l'URL EXACTE. La clé
+        // de dédoublonnage devient le video_id, avec l'architecture retenue et figée (deux fins
+        // séparées, là où une seule clé les confondait) :
+        //   1. VACCIN (portée GLOBALE) : une vidéo désapprouvée par la modération
+        //      (is_approved=false) reste bloquée pour TOUS les outils, quelle que soit l'URL
+        //      utilisée pour la resoumettre.
+        //   2. DOUBLON (portée LOCALE) : sinon, refuse seulement si CET outil a déjà cette vidéo.
+        // Repli sur l'URL (comportement historique inchangé) pour les ressources SANS video_id
+        // (article/documentation), qui n'ont pas d'identifiant vidéo à comparer.
+        $videoId = $validated['video_id'] ?? null;
+        if (class_exists(\Modules\AI\Services\YouTubeService::class)) {
+            $extractedVideoId = \Modules\AI\Services\YouTubeService::getVideoId($validated['url']);
+            if ($extractedVideoId) {
+                $videoId = $extractedVideoId;
+            }
+        }
+
+        $duplicateMessage = null;
+        if ($videoId !== null) {
+            if (ToolResource::where('video_id', $videoId)->where('is_approved', false)->exists()) {
+                $duplicateMessage = __('Cette ressource a été retirée par la modération et ne peut pas être resoumise.');
+            } elseif (ToolResource::where('directory_tool_id', $tool->id)->where('video_id', $videoId)->exists()) {
+                $duplicateMessage = __('Cette ressource existe déjà pour cet outil.');
+            }
+        } elseif (ToolResource::where('directory_tool_id', $tool->id)->where('url', $validated['url'])->exists()) {
+            $duplicateMessage = __('Cette ressource existe déjà pour cet outil.');
+        }
+
+        if ($duplicateMessage !== null) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['error' => __('Cette ressource existe déjà pour cet outil.')], 422);
+                return response()->json(['error' => $duplicateMessage], 422);
             }
 
-            return back()->withErrors(['url' => __('Cette ressource existe déjà pour cet outil.')]);
+            return back()->withErrors(['url' => $duplicateMessage]);
         }
 
         $user = Auth::user();
@@ -158,7 +193,7 @@ class CommunityController extends Controller
             'title' => $validated['title'],
             'type' => $validated['type'],
             'language' => $validated['language'],
-            'video_id' => $validated['video_id'] ?? null,
+            'video_id' => $videoId,
             'thumbnail' => $validated['thumbnail'] ?? null,
             'duration_seconds' => $validated['duration'] ?? null,
             'channel_name' => $validated['channel_name'] ?? null,
@@ -166,8 +201,10 @@ class CommunityController extends Controller
             'is_approved' => $autoApprove,
         ];
 
-        // Auto-résumé YouTube si le module AI est disponible
-        if (! empty($validated['video_id']) && class_exists(\Modules\AI\Services\YouTubeService::class)) {
+        // Auto-résumé YouTube si le module AI est disponible. $videoId (pas $validated['video_id'])
+        // : couvre aussi le cas où le client n'a pas fourni de video_id mais où le serveur vient
+        // de l'extraire lui-même depuis l'URL (cf. bloc de dédoublonnage ci-dessus).
+        if (! empty($videoId) && class_exists(\Modules\AI\Services\YouTubeService::class)) {
             try {
                 $ytService = app(\Modules\AI\Services\YouTubeService::class);
                 $transcript = $ytService->extractTranscript($validated['url'], $validated['language']);
@@ -177,7 +214,7 @@ class CommunityController extends Controller
                     // Fallback : résumé basé sur description YouTube + métadonnées
                     $videoDesc = '';
                     try {
-                        $ytResp = Http::withoutVerifying()->timeout(15)->get("https://www.youtube.com/watch?v={$validated['video_id']}");
+                        $ytResp = Http::withoutVerifying()->timeout(15)->get("https://www.youtube.com/watch?v={$videoId}");
                         $ytHtml = $ytResp->successful() ? $ytResp->body() : '';
                         if ($ytHtml && preg_match('/"shortDescription":"(.*?)(?<!\\\\)"/', $ytHtml, $dm)) {
                             $videoDesc = str_replace(['\\n', '\\r', '\\"'], ["\n", '', '"'], $dm[1]);
