@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.261.0] - 2026-09-11
+
+### Ajouté
+- **Un article réservé garde sa page, et affiche un mur de lecture.** Jusqu'ici, publier un article
+  en « abonnés » ou en « premium » le faisait disparaître pour TOUT LE MONDE, y compris pour son
+  propre auteur : la page renvoyait 404. Sept portes du module filtraient sur la seule visibilité
+  « public », alors que la restriction porte sur le CORPS, jamais sur l'existence de la page. La
+  page existe désormais pour tous, avec son titre, son résumé et son fil d'Ariane ; le corps est
+  remplacé par un encadré qui nomme la raison et renvoie vers la page de l'auteur.
+  La règle d'accès vit à UN SEUL endroit, `AuthorPost::isReadableBy()`, et n'est jamais redécidée
+  en vue ni en contrôleur. L'auteur lit toujours son propre article. Un abonné confirmé lit les
+  articles « abonnés ». « premium » refuse même à un abonné confirmé, parce qu'aucun mécanisme de
+  paiement n'existe dans ce module : la mesure a été faite avant d'écrire la règle.
+
+### Corrigé
+- **Le balisage machine ne livrait plus au moteur ce qu'on refusait au lecteur.** Le correctif du
+  mur protégeait le corps VISIBLE ; deux autres portes le publiaient quand même, en dehors de lui.
+  `articleBody` du JSON-LD exposait 500 caractères du corps, et la balise `description` de l'en-tête
+  200 caractères de plus, quelle que soit la visibilité. Les deux obéissent maintenant à la même
+  règle unique. Ce ne sont pas mes tests qui l'ont deviné : ils l'ont ATTRAPÉ, en rougissant sur
+  `assertDontSee` alors que le mur, lui, fonctionnait déjà.
+  Contre-épreuve faite pour les deux correctifs : sans la règle de visibilité, 4 tests sur 7
+  échouent ; sans la garde du balisage, les 2 tests de fuite échouent. Les deux mordent.
+- **Le plan de site et l'infolettre distinguent « réservé » et « secret ».** Le plan de site indexe
+  le public et les articles d'abonnés, jamais les « premium » : proposer aux moteurs une page dont
+  le visiteur ne verra RIEN reviendrait à leur montrer ce qu'on refuse au lecteur. L'envoi aux
+  abonnés, lui, inclut justement les articles « abonnés » - c'est leur raison d'être.
+- **L'encadré « En bref » de l'annuaire n'affiche plus une date de fraîcheur fausse.** Cinquième et
+  dernier point de fuite du ticket de la date technique, trouvé par contrôle visuel de la
+  production et non par la recherche de code qui l'avait manqué : l'appel passait par un composant
+  partagé, invisible depuis les vues de fiche. Quand aucune révision éditoriale n'est connue, la
+  ligne disparaît au lieu d'afficher une date qu'on ne peut pas prouver.
+
 ## [1.260.0] - 2026-09-11
 
 ### Ajouté

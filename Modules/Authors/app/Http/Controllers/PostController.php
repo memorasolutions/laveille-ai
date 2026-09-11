@@ -21,7 +21,7 @@ final class PostController extends Controller
         $post = AuthorPost::where('author_profile_id', $author->id)
             ->where('slug', $postSlug)
             ->published()
-            ->public()
+            ->listable()
             ->firstOrFail();
 
         // Incident 2026-08-13 : increment views_count délégué au service partagé
@@ -48,6 +48,12 @@ final class PostController extends Controller
 
         $jsonLd = ['@context' => 'https://schema.org', '@graph' => $graph];
 
-        return view('authors::mini-site.post', compact('author', 'post', 'jsonLd'));
+        // ACTION : la regle unique du modele decide si le CORPS est lisible ; la vue ne
+        // redecide jamais de ces conditions.
+        // MCP: SELF (<5 lignes)
+        // RAISON : ticket #2445 - la page existe pour tous, le corps est protege.
+        $canRead = $post->isReadableBy(auth()->user());
+
+        return view('authors::mini-site.post', compact('author', 'post', 'jsonLd', 'canRead'));
     }
 }

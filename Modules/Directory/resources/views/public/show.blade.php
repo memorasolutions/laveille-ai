@@ -463,7 +463,12 @@ document.addEventListener('DOMContentLoaded', function () {
          aux moteurs de réponse IA). Composant réutilisé tel quel (DRY), déjà utilisé sur blog/show.blade.php. --}}
     <x-core::answer-box
         :summary="$tool->short_description ?? null"
-        :updated="$tool->updated_at ? $tool->updated_at->timezone('America/Toronto')->format('Y-m-d') : null"
+        {{-- ACTION : la date affichee doit etre EDITORIALE, jamais technique.
+             MCP: SELF (<5 lignes)
+             RAISON: ticket #2448 - updated_at est touche par ViewCounterService a chaque
+             consultation. hasKnownEditorialRevision() renvoie false tant qu'aucune revision
+             n'est connue, et la ligne disparait alors au lieu d'afficher une date fausse. --}}
+        :updated="$tool->hasKnownEditorialRevision() ? $tool->editorialModifiedAt()->timezone('America/Toronto')->format('Y-m-d') : null"
     />
 
     {{-- Screenshot ou gradient fallback --}}

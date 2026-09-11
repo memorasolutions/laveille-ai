@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Authors\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -99,6 +100,25 @@ class AuthorPost extends Model
         return $query->where('visibility', self::VISIBILITY_PUBLIC);
     }
 
+    /**
+     * Articles dont la PAGE doit exister et qui ont leur place dans une liste, quelle
+     * que soit la restriction de lecture. A ne pas confondre avec scopePublic(), qui
+     * ne retient que la visibilite strictement publique.
+     *
+     * Ticket #2445 : scopePublic() etait appele par les portes publiques, si bien qu'un
+     * article « abonnes » ou « premium » renvoyait 404 a tout le monde, y compris a son
+     * propre auteur. La page existe desormais ; c'est le CORPS qui est protege, par
+     * isReadableBy().
+     */
+    public function scopeListable($query)
+    {
+        return $query->whereIn('visibility', [
+            self::VISIBILITY_PUBLIC,
+            self::VISIBILITY_SUBSCRIBERS,
+            self::VISIBILITY_PREMIUM,
+        ]);
+    }
+
     public function scopeScheduled($query)
     {
         return $query->where('status', self::STATUS_SCHEDULED)
@@ -115,6 +135,46 @@ class AuthorPost extends Model
     public function isPaywalled(): bool
     {
         return $this->visibility === self::VISIBILITY_PREMIUM;
+    }
+
+    /**
+     * LA regle unique qui decide si le CORPS de l'article est lisible. Aucune vue,
+     * aucun controleur, aucune commande ne redecide de ces conditions : tous appellent
+     * cette methode (DRY strict - la connaissance vit a un seul endroit).
+     */
+    public function isReadableBy(?User $user): bool
+    {
+        if ($this->visibility === self::VISIBILITY_PUBLIC) {
+            return true;
+        }
+
+        if ($user === null) {
+            return false;
+        }
+
+        // L'auteur lit toujours son propre article, quelle que soit la restriction.
+        if ($this->authorProfile !== null && (int) $this->authorProfile->user_id === (int) $user->id) {
+            return true;
+        }
+
+        if ($user->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($this->visibility === self::VISIBILITY_SUBSCRIBERS) {
+            return AuthorSubscriber::query()
+                ->where('author_profile_id', $this->author_profile_id)
+                ->where('email', $user->email)
+                ->confirmed()
+                ->exists();
+        }
+
+        // ACTION : « premium » refuse meme a un abonne confirme.
+        // MCP: SELF (<5 lignes)
+        // RAISON : aucun mecanisme de paiement n'existe dans ce module, mesure le
+        // 2026-09-11 (aucune table d'abonnement payant cote Authors). Refuser est le
+        // seul comportement honnete ; rouvrir cette branche le jour ou le paiement existe.
+        return false;
     }
 
     public function isPublished(): bool

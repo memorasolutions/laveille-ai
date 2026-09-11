@@ -25,7 +25,7 @@ final class TagArchiveController extends Controller
         }
 
         $posts = AuthorPost::published()
-            ->public()
+            ->listable()
             ->where('author_profile_id', $author->id)
             ->whereJsonContains('tags', $tag)
             ->orderByDesc('published_at')

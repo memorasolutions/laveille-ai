@@ -107,6 +107,11 @@ final class WebmentionService
         return AuthorPost::where('author_profile_id', $author->id)
             ->where('slug', $matches[2])
             ->published()
+            // ACTION : ici on garde volontairement public(), a l'inverse des autres portes
+            // basculees vers listable() au ticket #2445.
+            // MCP: SELF (<5 lignes)
+            // RAISON : on n'accepte une mention entrante que sur un contenu reellement
+            // public. Ne PAS « corriger » cet appel en le croyant oublie.
             ->public()
             ->first();
     }

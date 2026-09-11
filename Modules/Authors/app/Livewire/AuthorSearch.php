@@ -40,7 +40,7 @@ class AuthorSearch extends Component
             $results = AuthorPost::query()
                 ->where('author_profile_id', $this->authorProfileId)
                 ->published()
-                ->public()
+                ->listable()
                 ->where(function ($qb) use ($escaped) {
                     $qb->where('title', 'like', "%{$escaped}%")
                         ->orWhere('body_markdown', 'like', "%{$escaped}%")

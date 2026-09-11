@@ -120,7 +120,7 @@ final class MiniSiteController extends Controller
         if ($searchQuery !== '' && mb_strlen($searchQuery) >= 2) {
             $escaped = '%'.addcslashes($searchQuery, '%_\\').'%';
             $searchResults = \Modules\Authors\Models\AuthorPost::published()
-                ->public()
+                ->listable()
                 ->where('author_profile_id', $author->id)
                 ->where(function ($q) use ($escaped) {
                     $q->where('title', 'like', $escaped)

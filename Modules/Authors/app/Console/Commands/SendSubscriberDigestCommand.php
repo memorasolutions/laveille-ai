@@ -39,7 +39,12 @@ final class SendSubscriberDigestCommand extends Command
             $since = $subscriber->last_digest_at ?? $subscriber->confirmed_at;
 
             $posts = AuthorPost::published()
-                ->public()
+                // ACTION : le digest part aux abonnes CONFIRMES de cet auteur, il inclut
+                // donc les articles « abonnes ». Jamais les « premium ».
+                // MCP: SELF (<5 lignes)
+                // RAISON : ticket #2445. Priver les abonnes du contenu qui leur est
+                // destine etait le defaut exactement inverse.
+                ->whereIn('visibility', [AuthorPost::VISIBILITY_PUBLIC, AuthorPost::VISIBILITY_SUBSCRIBERS])
                 ->where('author_profile_id', $subscriber->author_profile_id)
                 ->when($since !== null, fn ($q) => $q->where('published_at', '>', $since))
                 ->orderByDesc('published_at')

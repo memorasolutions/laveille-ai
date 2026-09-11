@@ -2,7 +2,7 @@
 
 @php
     $popularPosts = \Modules\Authors\Models\AuthorPost::published()
-        ->public()
+        ->listable()
         ->where('author_profile_id', $author->id)
         ->orderByDesc('views_count')
         ->orderByDesc('published_at')

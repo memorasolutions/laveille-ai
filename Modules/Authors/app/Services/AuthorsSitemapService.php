@@ -56,7 +56,12 @@ final class AuthorsSitemapService
     private function writeAuthorPostUrls(XMLWriter $xmlWriter): void
     {
         $posts = AuthorPost::published()
-            ->public()
+            // ACTION : le plan de site porte les articles publics ET « abonnes » (dont
+            // l'extrait est visible de tous), jamais les « premium ».
+            // MCP: SELF (<5 lignes)
+            // RAISON : ticket #2445. Indexer une page dont le visiteur ne verra RIEN
+            // reviendrait a montrer aux moteurs ce qu'on refuse au lecteur.
+            ->whereIn('visibility', [AuthorPost::VISIBILITY_PUBLIC, AuthorPost::VISIBILITY_SUBSCRIBERS])
             ->whereHas('authorProfile', fn ($q) => $q->whereNull('archived_at'))
             ->with('authorProfile')
             ->get();

@@ -4,7 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $post->title }} · {{ $author->display_name ?? $author->slug }}</title>
-    <meta name="description" content="{{ $post->excerpt ?? \Illuminate\Support\Str::limit(strip_tags((string)$post->body_html), 200) }}">
+    {{-- ACTION : la meta description ne se rabat sur le CORPS que si le corps est lisible.
+         MCP: SELF (<5 lignes)
+         RAISON: ticket #2445 - sans cette garde, un article « abonnes » ou « premium » livrait
+         200 caracteres de son corps dans l'en-tete, alors que la page le refuse au lecteur.
+         $canRead vient de PostController (regle unique AuthorPost::isReadableBy) ; le repli
+         « true » sert la PREVISUALISATION SIGNEE, ou la signature EST l'autorisation. --}}
+    <meta name="description" content="{{ $post->excerpt ?? (($canRead ?? true) ? \Illuminate\Support\Str::limit(strip_tags((string)$post->body_html), 200) : '') }}">
     <link rel="canonical" href="{{ url()->current() }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -62,6 +68,12 @@
         .lv-post-byline-meta { color: #64748B; font-size: 13px; }
         h1.lv-post-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 40px; line-height: 1.2; color: #0F172A; margin: 24px 0 16px; }
         .lv-post-excerpt { font-size: 18px; color: #475569; font-style: italic; margin: 16px 0 32px; }
+        /* Mur de lecture (#2445) - charte : teal #064E5A, contraste AAA sur fond pâle. */
+        .lv-post-wall { background: #F3F8F9; border-left: 4px solid #064E5A; border-radius: 8px; padding: 24px; margin: 24px 0; }
+        .lv-post-wall__title { font-size: 19px; font-weight: 700; color: #064E5A; margin: 0 0 8px; }
+        .lv-post-wall__text { color: #1F2937; margin: 0 0 16px; line-height: 1.6; }
+        .lv-post-wall__cta { display: inline-block; background: #064E5A; color: #FFFFFF; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: 600; min-height: 44px; line-height: 24px; }
+        .lv-post-wall__cta:hover, .lv-post-wall__cta:focus { background: #043A43; color: #FFFFFF; }
         .lv-post-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; }
         .lv-post-tag { background: #E0F2F1; color: #0B7285; padding: 4px 12px; border-radius: 16px; font-size: 13px; font-weight: 600; }
         .lv-post-body { max-width: 720px; margin: 0 auto; padding: 0 24px 48px; }
@@ -208,7 +220,26 @@
         @endif
 
         <div class="lv-post-body">
-            {!! $post->body_html !!}
+            @if($canRead ?? true)
+                {!! $post->body_html !!}
+            @else
+                {{-- ACTION : mur de lecture. Le titre, l'image de couverture et l'extrait
+                     restent visibles ; seul le CORPS est remplacé.
+                     MCP: SELF (<5 lignes)
+                     RAISON : ticket #2445 - la page renvoyait 404 à tout le monde, y compris
+                     à son auteur. isReadableBy() est la SEULE règle qui décide ; cette vue ne
+                     fait que rendre sa décision, elle ne la reprend jamais. --}}
+                <div class="lv-post-wall" role="note">
+                    @if($post->visibility === \Modules\Authors\Models\AuthorPost::VISIBILITY_SUBSCRIBERS)
+                        <p class="lv-post-wall__title">La suite est réservée aux abonnés de {{ $author->display_name ?? $author->slug }}</p>
+                        <p class="lv-post-wall__text">Abonnez-vous à son infolettre depuis sa page pour recevoir ses articles.</p>
+                    @else
+                        <p class="lv-post-wall__title">Cet article est réservé</p>
+                        <p class="lv-post-wall__text">Son auteur en a restreint la lecture. Ses autres articles restent accessibles sur sa page.</p>
+                    @endif
+                    <a class="lv-post-wall__cta" href="{{ url('/@'.$author->slug) }}">Voir la page de l'auteur</a>
+                </div>
+            @endif
         </div>
     </article>
 

@@ -21,7 +21,7 @@ final class OgImageController extends Controller
             ->firstOrFail();
 
         $post = AuthorPost::published()
-            ->public()
+            ->listable()
             ->where('author_profile_id', $author->id)
             ->where('slug', $postSlug)
             ->firstOrFail();

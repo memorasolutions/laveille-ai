@@ -163,16 +163,24 @@ if (! function_exists('lv_jsonld_blog_posting')) {
     function lv_jsonld_blog_posting(\Modules\Authors\Models\AuthorPost $post, \Modules\Authors\Models\AuthorProfile $author): array
     {
         $url = url()->current();
-        $body = strip_tags((string) ($post->body_html ?? ''));
         $tags = $post->tags ?? [];
+
+        // ACTION : le balisage machine obeit a la MEME regle d'acces que la page.
+        // MCP: SELF (<5 lignes)
+        // RAISON: ticket #2445 - un article « abonnes » ou « premium » livrait son corps aux
+        // moteurs alors qu'on le refuse au lecteur. isReadableBy() est la regle unique, elle
+        // vit dans le modele et n'est jamais redecidee ici.
+        $body = $post->isReadableBy(auth()->user())
+            ? strip_tags((string) ($post->body_html ?? ''))
+            : '';
 
         return array_filter([
             '@type' => 'BlogPosting',
             '@id' => $url.'#blogposting',
             'mainEntityOfPage' => $url,
             'headline' => $post->title,
-            'description' => $post->excerpt ?? \Illuminate\Support\Str::words($body, 30, ''),
-            'articleBody' => \Illuminate\Support\Str::limit($body, 500, ''),
+            'description' => $post->excerpt ?? ($body !== '' ? \Illuminate\Support\Str::words($body, 30, '') : null),
+            'articleBody' => $body !== '' ? \Illuminate\Support\Str::limit($body, 500, '') : null,
             'datePublished' => $post->published_at?->toIso8601String() ?? now()->toIso8601String(),
             // ACTION : updated_at (réécrit par une simple consultation, cf. Modules\Core\Services\
             // ViewCounterService::record()) et now() (toujours "maintenant") sont remplacés par
@@ -186,7 +194,7 @@ if (! function_exists('lv_jsonld_blog_posting')) {
             'publisher' => function_exists('lv_jsonld_author_website') ? lv_jsonld_author_website($author) : ['@type' => 'Organization', 'name' => config('app.name')],
             'image' => $post->cover_image ? [url($post->cover_image)] : null,
             'keywords' => ! empty($tags) ? implode(',', $tags) : null,
-            'wordCount' => str_word_count($body),
+            'wordCount' => $body !== '' ? str_word_count($body) : null,
             'inLanguage' => app()->getLocale(),
             'articleSection' => $tags[0] ?? 'Blog',
         ], fn ($value) => $value !== null);

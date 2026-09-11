@@ -25,7 +25,7 @@ final class AuthorRelatedPosts extends Component
     public function render()
     {
         $query = AuthorPost::published()
-            ->public()
+            ->listable()
             ->with('authorProfile.user:id,name')
             ->where('author_profile_id', $this->authorProfileId)
             ->where('id', '!=', $this->currentPostId);

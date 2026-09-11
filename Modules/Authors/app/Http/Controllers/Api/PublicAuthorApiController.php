@@ -31,7 +31,13 @@ final class PublicAuthorApiController extends Controller
 
         $posts = AuthorPost::where('author_profile_id', $author->id)
             ->published()
-            ->public()
+            // ACTION : l'API liste aussi les articles restreints.
+            // MCP: SELF (<5 lignes)
+            // RAISON : ticket #2445. Verifie le 2026-09-11 : PublicAuthorPostResource
+            // n'expose QUE 'excerpt', jamais body_html ni body_markdown. Lister ne fuit
+            // donc aucun corps protege. Si la ressource gagne un jour le corps, il faudra
+            // y ajouter un filtre isReadableBy().
+            ->listable()
             ->with('authorProfile')
             ->latest('published_at')
             ->paginate(20);
