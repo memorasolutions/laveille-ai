@@ -40,10 +40,13 @@ namespace Modules\News\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Modules\Core\Traits\RotatesCommandBackups;
 use Modules\News\Models\NewsArticle;
 
 class PruneDraftsCommand extends Command
 {
+    use RotatesCommandBackups;
+
     protected $signature = 'news:prune-drafts
         {--dry-run : Compte et liste les ids candidats SANS supprimer ni écrire de backup}
         {--keep=200 : Nombre de brouillons bruts les plus récents (par pub_date) à conserver}
@@ -283,16 +286,15 @@ class PruneDraftsCommand extends Command
      */
     private function rotateBackups(): void
     {
-        $files = glob(storage_path('app/news-prune-drafts-backup-*.json')) ?: [];
-        sort($files);
-
-        $excess = count($files) - self::BACKUPS_TO_KEEP;
-        if ($excess <= 0) {
-            return;
-        }
-
-        foreach (array_slice($files, 0, $excess) as $oldFile) {
-            File::delete($oldFile);
-        }
+        // ACTION : la regle de suppression vit desormais dans un trait partage.
+        // MCP: SELF (<5 lignes)
+        // RAISON: ticket #2434 - trois AUTRES commandes ecrivaient une sauvegarde sans jamais
+        // retirer les anciennes. Le mecanisme etait ici, et nulle part ailleurs. Il est extrait
+        // dans Modules\Core\Traits\RotatesCommandBackups pour que les quatre partagent UNE
+        // seule regle : une divergence sur un effacement de fichiers est dangereuse par nature.
+        $this->rotateCommandBackups(
+            storage_path('app/news-prune-drafts-backup-*.json'),
+            self::BACKUPS_TO_KEEP
+        );
     }
 }

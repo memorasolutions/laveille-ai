@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.261.2] - 2026-09-11
+
+### Corrigé
+- **Trois commandes d'administration écrivaient une sauvegarde avant chaque mutation, sans
+  jamais retirer les anciennes.** Le garde-fou « backup avant toute écriture » fonctionnait ;
+  c'est le ménage qui n'existait pas. Aucune des trois n'étant planifiée, l'accumulation suivait
+  l'usage humain, ce qui explique qu'elle soit passée inaperçue : mesuré ce jour, un seul poste
+  portait 117 fichiers pour la seule commande de retrait d'articles.
+- **La règle de suppression est désormais UNIQUE et partagée.** Elle vivait dans une seule
+  commande sur quatre ; elle est extraite dans un trait commun, parce qu'une divergence sur un
+  effacement de fichiers est dangereuse par nature. La borne porte sur le MOTIF exact du nom de
+  fichier, jamais sur le dossier : un fichier voisin ne peut pas être emporté, et un test le
+  prouve. Une borne de conservation inférieure à 1 est refusée plutôt qu'appliquée, puisqu'elle
+  viderait tout.
+
 ## [1.261.1] - 2026-09-11
 
 ### Corrigé

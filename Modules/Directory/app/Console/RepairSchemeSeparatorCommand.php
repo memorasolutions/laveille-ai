@@ -40,9 +40,12 @@ namespace Modules\Directory\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Modules\Directory\Models\Tool;
+use Modules\Core\Traits\RotatesCommandBackups;
 
 class RepairSchemeSeparatorCommand extends Command
 {
+    use RotatesCommandBackups;
+
     protected $signature = 'tools:repair-scheme-separator
         {--dry-run : Affiche seulement le compte et le détail, n\'écrit rien}
         {--restore= : Chemin d\'un fichier de sauvegarde JSON produit par une exécution précédente ; restaure les valeurs d\'AVANT correction}';
@@ -202,6 +205,14 @@ class RepairSchemeSeparatorCommand extends Command
         $filename = 'directory-repair-scheme-separator-backup-'.now('America/Toronto')->format('Ymd-His').'.json';
         $fullPath = storage_path('app/'.$filename);
         File::put($fullPath, json_encode($affectes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        // ACTION : la rotation borne les sauvegardes de CETTE commande, par leur motif exact.
+        // MCP: hermes/codex (trait partage) - cablage SELF (<5 lignes)
+        // RAISON: ticket #2434 - la sauvegarde etait ecrite avant chaque mutation mais jamais
+        // retiree, et aucune de ces commandes n'est planifiee : l'accumulation suit l'usage
+        // humain, donc elle est passee inapercue. La regle de suppression est UNIQUE
+        // (Modules\Core\Traits\RotatesCommandBackups) parce qu'une divergence sur un
+        // effacement de fichiers est dangereuse par nature.
+        $this->rotateCommandBackups(storage_path('app/directory-repair-scheme-separator-backup-*.json'));
 
         return $fullPath;
     }

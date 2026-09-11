@@ -8,9 +8,12 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Services\OpenRouterService;
+use Modules\Core\Traits\RotatesCommandBackups;
 
 class ConvertPricesCadCommand extends Command
 {
+    use RotatesCommandBackups;
+
     protected $signature = 'directory:convert-prices-cad {--dry-run : afficher sans sauvegarder} {--limit=20 : nombre max d outils} {--rate=1.38 : taux USD vers CAD}';
 
     protected $description = 'Convertit les montants USD présents dans les fiches outils en dollars canadiens approximatifs (≈ X $ CA, facturé ~Y $ US).';
@@ -58,6 +61,14 @@ class ConvertPricesCadCommand extends Command
             }
             $backupPath = $backupDir . '/backup-' . now()->format('Ymd-His') . '.json';
             File::put($backupPath, json_encode($backupData, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        // ACTION : la rotation borne les sauvegardes de CETTE commande, par leur motif exact.
+        // MCP: hermes/codex (trait partage) - cablage SELF (<5 lignes)
+        // RAISON: ticket #2434 - la sauvegarde etait ecrite avant chaque mutation mais jamais
+        // retiree, et aucune de ces commandes n'est planifiee : l'accumulation suit l'usage
+        // humain, donc elle est passee inapercue. La regle de suppression est UNIQUE
+        // (Modules\Core\Traits\RotatesCommandBackups) parce qu'une divergence sur un
+        // effacement de fichiers est dangereuse par nature.
+            $this->rotateCommandBackups($backupDir . '/backup-*.json');
             $this->line("Backup: {$backupPath}");
         }
 

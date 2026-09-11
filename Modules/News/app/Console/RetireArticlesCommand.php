@@ -27,9 +27,12 @@ namespace Modules\News\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Modules\News\Models\NewsArticle;
+use Modules\Core\Traits\RotatesCommandBackups;
 
 class RetireArticlesCommand extends Command
 {
+    use RotatesCommandBackups;
+
     protected $signature = 'news:retire
         {--ids-file= : Chemin du fichier JSON {"ids":[...]} désignant les fiches visées}
         {--restore : Restaure (retired_at = null) au lieu de retirer}
@@ -136,6 +139,14 @@ class RetireArticlesCommand extends Command
         $filename = 'news-retire-backup-'.now('America/Toronto')->format('Ymd-His').'.json';
         $fullPath = storage_path('app/'.$filename);
         \Illuminate\Support\Facades\File::put($fullPath, json_encode($snapshot, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        // ACTION : la rotation borne les sauvegardes de CETTE commande, par leur motif exact.
+        // MCP: hermes/codex (trait partage) - cablage SELF (<5 lignes)
+        // RAISON: ticket #2434 - la sauvegarde etait ecrite avant chaque mutation mais jamais
+        // retiree, et aucune de ces commandes n'est planifiee : l'accumulation suit l'usage
+        // humain, donc elle est passee inapercue. La regle de suppression est UNIQUE
+        // (Modules\Core\Traits\RotatesCommandBackups) parce qu'une divergence sur un
+        // effacement de fichiers est dangereuse par nature.
+        $this->rotateCommandBackups(storage_path('app/news-retire-backup-*.json'));
 
         return $fullPath;
     }
