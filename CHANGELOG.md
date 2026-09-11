@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.258.3] - 2026-09-11
+
+### Corrige
+- **SECURITE - une sauvegarde restee EXECUTABLE annulait le correctif du jour.** Le fichier
+  `public/_lvgit.php.avant-durcissement-serveur-20260911-0730`, ecrit comme filet avant le depot
+  manuel du correctif, portait la version pre-durcissement (jeton accepte dans la chaine de
+  requete, execution d'une semence depuis la requete). Le gestionnaire PHP de cPanel se declenche
+  sur toute extension CONTENANT `.php` : la copie vulnerable restait donc joignable a cote du
+  fichier corrige. Preuve avant : reponse 403 avec un corps de 9 octets valant « forbidden »,
+  c'est-a-dire la sortie du script lui-meme. Fichier neutralise (410, corps vide, y compris avec
+  les anciens parametres d'attaque) ; contenu d'origine conserve dans git, donc aucune perte.
+- **Le pipeline de deploiement ne transportait pas les fichiers `_*.php`.** Les deux motifs etaient
+  des `--exclude`, qui empechent aussi la MISE A JOUR : CI verte, deploiement reussi, et l'ancien
+  code toujours servi. Remplaces par `--filter='P ...'` (protect), qui empeche la suppression sans
+  empecher le transfert. Verifie empiriquement avec rsync 3.5.0 sur trois cas : mise a jour d'un
+  fichier divergent, creation d'un fichier absent, survie au `--delete` d'un fichier non versionne.
+
 ## [1.258.2] - 2026-09-11
 
 ### Ajouté

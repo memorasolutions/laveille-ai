@@ -101,6 +101,17 @@ jobs:
         #   --delete un jour : ajouter --exclude='public/fonts/' --exclude='public/hot'
         #   --exclude='public/storage' (+ auditer tout autre chemin gitignore non exclu ici) et
         #   tester d'abord avec `rsync --delete --dry-run` en observant la liste de suppression.
+        # Les motifs `_*.php` sont en --filter='P' (protect), PAS en --exclude.
+        #   Corrige le 2026-09-11 (ticket #2429). Un --exclude empeche AUSSI la mise a
+        #   jour : ce jour-la, un correctif de SECURITE sur public/_lvgit.php a ete
+        #   commite, pousse, la CI est passee au vert et le deploiement a reussi, pendant
+        #   que le serveur continuait de servir l'ancien code vulnerable. Aucun signal.
+        #   `P` agit cote RECEPTEUR : il empeche la SUPPRESSION par un futur --delete,
+        #   sans jamais empecher le TRANSFERT. Verifie avec rsync 3.5.0 (ubuntu-latest)
+        #   sur 3 cas : mise a jour d'un fichier divergent, creation d'un fichier absent,
+        #   survie au --delete d'un fichier non versionne present seulement sur le serveur.
+        #   NE JAMAIS remettre --exclude ici. Et aucun commentaire DANS la commande :
+        #   un `#` apres une continuation `\` tronque toute la ligne logique.
         run: |
           rsync -azP \
             --exclude='.git/' \
@@ -113,8 +124,8 @@ jobs:
             --exclude='public/screenshots/' \
             --exclude='bootstrap/cache/' \
             --exclude='tests/' \
-            --exclude='public/_*.php' \
-            --exclude='/_*.php' \
+            --filter='P public/_*.php' \
+            --filter='P /_*.php' \
             --exclude='*.log' \
             --exclude='error_log' \
             ./ gmemora@server.memora.pro:/home/gmemora/public_html/apps_diverses/laveille.ai/
