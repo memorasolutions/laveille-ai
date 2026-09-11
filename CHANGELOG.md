@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.261.3] - 2026-09-11
+
+### Corrigé
+- **L'audit quotidien des tutoriels ne laissait aucune trace consultable.** Son bilan ne partait
+  que par courriel : personne ne pouvait établir l'état du système sans fouiller une boîte de
+  réception, et c'est pour cette raison que le compte des approuvés contre les désapprouvés est
+  resté « non établi » dans deux mandats successifs.
+- **Pire : le cas « zéro non conforme » sortait de la commande AVANT tout envoi.** « Tout va
+  bien » était donc indiscernable de « la commande n'a jamais tourné ». Un zéro rassurant sans
+  trace n'est pas un contrôle, c'est un silence. Le bilan s'écrit désormais dans les deux cas, sur
+  disque et dans le journal applicatif, et sa rétention est bornée par la rotation livrée en
+  v1.261.2. Une écriture de bilan qui échoue ne fait jamais tomber l'audit : elle est journalisée
+  et la commande poursuit.
+
 ## [1.261.2] - 2026-09-11
 
 ### Corrigé
