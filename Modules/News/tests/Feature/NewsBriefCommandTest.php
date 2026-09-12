@@ -255,3 +255,32 @@ it('news:brief rend seo_title à null (présent dans le JSON, jamais omis) quand
     expect(array_key_exists('seo_title', $decoded))->toBeTrue()
         ->and($decoded['seo_title'])->toBeNull();
 });
+
+// ── Option --with-source (2026-09-12) : l'agent /actu2 doit écrire des paires de preuve de type
+// « fact » dont l'extrait est contrôlé comme SOUS-CHAÎNE EXACTE de internal_source_text, mais
+// aucune commande ne rendait ce texte avant cette option - impossible de citer un extrait exact
+// sans l'avoir lu. Défaut OFF : ce texte est tiers, il ne doit circuler que sur demande explicite,
+// donc les deux comportements (avec/sans) sont testés séparément. ─────────────────────────────
+
+it('news:brief expose internal_source_text quand --with-source est fourni', function () {
+    $sourceText = 'Le texte source réellement collecté pour cette fiche.';
+    $article = nbcArticle(['internal_source_text' => $sourceText]);
+
+    \Illuminate\Support\Facades\Artisan::call('news:brief', [
+        'article' => $article->id,
+        '--with-source' => true,
+    ]);
+    $decoded = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true);
+
+    expect(array_key_exists('internal_source_text', $decoded))->toBeTrue()
+        ->and($decoded['internal_source_text'])->toBe($sourceText);
+});
+
+it('news:brief n\'expose PAS internal_source_text sans --with-source (défaut OFF, comportement inchangé)', function () {
+    $article = nbcArticle(['internal_source_text' => 'Le texte source réellement collecté pour cette fiche.']);
+
+    \Illuminate\Support\Facades\Artisan::call('news:brief', ['article' => $article->id]);
+    $decoded = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true);
+
+    expect(array_key_exists('internal_source_text', $decoded))->toBeFalse();
+});

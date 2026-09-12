@@ -68,12 +68,24 @@ use Modules\News\Services\NewsImageService;
  * RAISON: ticket #2475 - « décrire ce qui est déjà en base » ne peut pas omettre le champ que la
  * publication exige.
  *
+ * ACTION : option --with-source ajoutée (2026-09-12) - SANS elle, la sortie JSON reste identique
+ * à avant : internal_source_text n'apparaît PAS. Ce champ est un TEXTE TIERS (extrait de
+ * l'article source, jamais réécrit par MEMORA), donc il ne doit PAS circuler par défaut à chaque
+ * appel du prévol - contrairement à seo_title ci-dessus, rendu systématiquement. L'agent /actu2 a
+ * besoin de le LIRE pour écrire une paire de preuve de type « fact » : NewsArticle::
+ * publishReadinessCheck() exige que l'extrait cité soit une SOUS-CHAÎNE EXACTE de
+ * internal_source_text, mais aucune commande n'exposait ce texte avant --with-source - seul
+ * news:source l'écrit (jamais rendu). Impossible d'écrire un extrait exact sans l'avoir lu.
+ * MCP: SELF (<5 lignes utiles)
+ * RAISON: sans lecture possible du texte source, une paire « fact » ne peut être écrite qu'en
+ * devinant l'extrait, ce que publishReadinessCheck() rejette à raison (voir fact_substring).
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
 class NewsBriefCommand extends Command
 {
-    protected $signature = 'news:brief {article : id de la fiche news_articles}';
+    protected $signature = 'news:brief {article : id de la fiche news_articles} {--with-source : ajoute internal_source_text au JSON (texte tiers, jamais rendu par défaut)}';
 
     protected $description = 'Sort un JSON canonique (lecture seule) décrivant une fiche - point d\'entrée du skill /actu2.';
 
@@ -93,7 +105,7 @@ class NewsBriefCommand extends Command
             return self::FAILURE;
         }
 
-        $this->line(json_encode([
+        $payload = [
             'id' => $article->id,
             'slug' => $article->slug,
             'title' => $article->title,
@@ -113,7 +125,18 @@ class NewsBriefCommand extends Command
             'publish_readiness' => $article->publishReadinessCheck(),
             'policy_version' => CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION,
             'site_url' => url('/actualites/'.$article->slug),
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        ];
+
+        // ACTION : clé ajoutée SEULEMENT si --with-source (voir docblock de classe, 2026-09-12) -
+        // jamais dans le tableau ci-dessus, pour que l'appel sans l'option reste bit-à-bit
+        // identique à avant (aucune clé internal_source_text, même absente à null).
+        // MCP: SELF (2 lignes)
+        // RAISON: défaut OFF explicite - texte tiers, ne circule que sur demande.
+        if ($this->option('with-source')) {
+            $payload['internal_source_text'] = $article->internal_source_text;
+        }
+
+        $this->line(json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
         return self::SUCCESS;
     }

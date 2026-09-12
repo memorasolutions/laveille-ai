@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.262.0] - 2026-09-12
+
+### Ajouté
+- **`news:brief --with-source` rend enfin lisible le texte source d'une fiche.** Le texte
+  récolté par `news:source` était écrit en base et n'était rendu par AUCUNE commande. Or l'agent
+  de composition doit écrire des paires de preuve de type `fact`, dont l'extrait est contrôlé
+  comme SOUS-CHAÎNE EXACTE de ce texte : il devait donc citer à l'aveugle un texte qu'il ne
+  pouvait pas lire. Le drapeau ouvre cette lecture, et seulement sur demande.
+- **Défaut OFF, volontairement.** Sans l'option, la sortie JSON est identique à ce qu'elle était :
+  c'est du texte tiers, il ne circule que lorsqu'on le demande explicitement. Un test verrouille
+  les deux états, et ils sont testés SÉPARÉMENT - « la clé existe » et « la clé vaut null » sont
+  deux affirmations différentes, et c'est leur confusion qui a coûté le faux diagnostic du
+  ticket #2475 la veille.
+- **Même famille que #2475, une couche plus loin** : un champ que la porte d'écriture remplit
+  doit être relisible par la porte de lecture. Deux fois en deux jours, l'angle mort était là.
+  Contre-épreuve exécutée : sans le correctif, le test échoue sur
+  `InvalidOptionException: The "--with-source" option does not exist.`
+
 ## [1.261.6] - 2026-09-11
 
 ### Corrigé
