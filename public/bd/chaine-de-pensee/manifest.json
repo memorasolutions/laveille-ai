@@ -1,0 +1,17 @@
+{
+  "term_slug": "chaine-de-pensee",
+  "title": "La chaîne de pensée, et celle qu'on ne voit pas",
+  "alt": "Bande dessinée pédagogique : Octopus demande au Robot de montrer ses étapes de raisonnement - une chaîne de maillons apparaît entre la question et la réponse, un maillon fissuré révèle où le raisonnement peut dérailler, puis une seconde chaîne cachée montre que le chemin affiché n'est pas toujours celui qui a vraiment produit la réponse.",
+  "planches": [
+    {
+      "avif": "bd-chaine-de-pensee-site.avif",
+      "webp": "bd-chaine-de-pensee-site.webp",
+      "jpg": "bd-chaine-de-pensee-site.jpg",
+      "avif_1024": "bd-chaine-de-pensee-site-1024.avif",
+      "webp_1024": "bd-chaine-de-pensee-site-1024.webp",
+      "thumb": "bd-chaine-de-pensee-thumb.jpg",
+      "width": 1600,
+      "height": 2426
+    }
+  ]
+}
