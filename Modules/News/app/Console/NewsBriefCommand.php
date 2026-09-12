@@ -51,6 +51,23 @@ use Modules\News\Services\NewsImageService;
  * RAISON: ticket #2237 - le prévol de /actu2 doit vérifier ce que la publication exige réellement,
  * pas seulement si la fiche est déjà publiée.
  *
+ * ACTION : seo_title ajouté au JSON (2026-09-11, ticket #2475). Cette clé était ABSENTE de la
+ * sortie - pas à null, absente - alors que NewsApplyCommand l'écrit depuis toujours et que
+ * publishReadinessCheck() la contrôle. Un agent /actu2 qui relisait le brief après écriture
+ * concluait donc « seo_title = null », c'est-à-dire « l'écriture a échoué », et le ticket #2475 a
+ * accusé NewsApplyCommand de mentir pendant plusieurs jours. La mesure qui a tranché : la page
+ * publiée de la fiche 48721 sert bien le seo_title soumis dans sa balise <title>, DIFFÉRENT du
+ * titre de la fiche - l'écriture n'a jamais échoué, c'est la relecture qui était aveugle.
+ * Rappel de méthode, plus durable que le correctif : une clé absente d'un JSON se lit comme un
+ * null par tout consommateur, donc un champ écrivable par news:apply DOIT être relisible par
+ * news:brief - sinon la porte d'écriture se fait accuser à la place de la fenêtre.
+ * À noter pour ne pas rouvrir le faux procès sur l'autre champ : meta_description à null APRÈS
+ * un payload qui ne la fournit pas n'est PAS un défaut, c'est l'invalidation volontaire de
+ * NewsApplyCommand (le rendu public la recalcule alors depuis le summary).
+ * MCP: SELF (1 ligne utile)
+ * RAISON: ticket #2475 - « décrire ce qui est déjà en base » ne peut pas omettre le champ que la
+ * publication exige.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -87,6 +104,7 @@ class NewsBriefCommand extends Command
             'source_captured_at' => $article->source_captured_at?->toIso8601String(),
             'updated_at' => $article->updated_at?->toIso8601String(),
             'primary_sources' => $article->primary_sources ?? [],
+            'seo_title' => $article->seo_title,
             'meta_description' => $article->meta_description,
             'structured_summary' => $article->structured_summary,
             'nature_original' => $article->nature_original,

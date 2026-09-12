@@ -226,3 +226,32 @@ it('news:brief exposes the invalid_pair verdict of publishReadinessCheck, pas se
         ->and($decoded['publish_readiness']['missing'])->toBe([])
         ->and($decoded['publish_readiness']['invalid_pair']['reason'])->toBe('fact_substring');
 });
+
+// ── Défaut 3 (2026-09-11, ticket #2475) : seo_title était ABSENT du JSON - pas à null, ABSENT.
+// L'agent /actu2 qui relisait le brief après écriture lisait cette absence comme un null, donc
+// comme un échec d'écriture, et le ticket a accusé news:apply de mentir pendant plusieurs jours
+// alors que la page publiée servait bien le seo_title soumis dans sa balise <title>.
+// Les deux cas sont testés SÉPARÉMENT, parce que c'est précisément leur confusion qui a coûté
+// le faux diagnostic : « la clé existe » et « la clé vaut null » sont deux affirmations
+// différentes, et seule la première manquait. ──────────────────────────────────────────────────
+
+it('news:brief expose le seo_title réellement en base (ticket #2475 : la clé était absente, donc lue comme null)', function () {
+    $article = nbcArticle(['seo_title' => 'Un titre pour Google, différent du titre de la fiche']);
+
+    \Illuminate\Support\Facades\Artisan::call('news:brief', ['article' => $article->id]);
+    $decoded = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true);
+
+    expect(array_key_exists('seo_title', $decoded))->toBeTrue()
+        ->and($decoded['seo_title'])->toBe('Un titre pour Google, différent du titre de la fiche')
+        ->and($decoded['seo_title'])->not->toBe($decoded['title']);
+});
+
+it('news:brief rend seo_title à null (présent dans le JSON, jamais omis) quand la fiche n\'en a pas', function () {
+    $article = nbcArticle();
+
+    \Illuminate\Support\Facades\Artisan::call('news:brief', ['article' => $article->id]);
+    $decoded = json_decode(trim(\Illuminate\Support\Facades\Artisan::output()), true);
+
+    expect(array_key_exists('seo_title', $decoded))->toBeTrue()
+        ->and($decoded['seo_title'])->toBeNull();
+});

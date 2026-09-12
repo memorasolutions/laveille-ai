@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.261.6] - 2026-09-11
+
+### Corrigé
+- **`news:brief` n'exposait pas `seo_title`, et cette absence a fait accuser le mauvais
+  composant pendant plusieurs jours.** La clé n'était pas à `null` dans le JSON de sortie :
+  elle était ABSENTE. Or un agent qui relit ce JSON après une écriture lit une clé absente
+  exactement comme un `null`, c'est-à-dire comme un échec d'écriture. Le ticket #2475 en a
+  conclu que `news:apply` annonçait un champ qu'il n'écrivait pas, et il a porté ce titre
+  jusqu'à aujourd'hui.
+- **La mesure qui a tranché** : la page publiée de la fiche 48721 sert bien, dans sa balise
+  `<title>`, le `seo_title` soumis - un texte DIFFÉRENT du titre de la fiche. L'écriture n'a
+  donc jamais échoué ; c'est la relecture qui était aveugle. `publishReadinessCheck()`
+  contrôlait d'ailleurs ce champ depuis toujours, ce qui était le seul indice indirect qu'il
+  existait bien en base.
+- **Le faux procès voisin, refermé lui aussi** : `meta_description` à `null` après un payload
+  qui ne la fournit pas n'est PAS un défaut. C'est une invalidation VOLONTAIRE de
+  `news:apply` (le rendu public recalcule alors la description depuis le résumé). Les deux
+  champs étaient annoncés ensemble par le même message, d'où la confusion.
+- **La leçon, plus durable que le correctif** : un champ écrivable par la porte d'écriture
+  doit être relisible par la porte de lecture, sinon la porte d'écriture se fait accuser à la
+  place de la fenêtre. Deux tests le verrouillent, et ils couvrent SÉPARÉMENT « la clé existe »
+  et « la clé vaut null », parce que c'est précisément leur confusion qui a coûté le faux
+  diagnostic. Contre-épreuve exécutée : les deux rougissent quand la ligne est retirée.
+
+## [1.261.5] - 2026-09-11
+
+### Corrigé
+- **Un commentaire cassait le formulaire de soumission de l'annuaire, et personne ne le voyait.**
+  Sur `/annuaire`, la console du navigateur rendait 50 erreurs et le composant de soumission
+  d'outil ne s'initialisait jamais. La cause n'est pas dans la logique : un COMMENTAIRE
+  JavaScript placé à l'intérieur de l'attribut `x-data="{ ... }"` contenait
+  `data-refresh-expired="auto"` avec des guillemets DOUBLES. Le navigateur ferme un attribut
+  HTML au premier guillemet double : l'expression arrivait donc tronquée à 4670 caractères sur
+  6896, ce qui produisait une erreur de syntaxe et emportait le composant ENTIER. Toutes ses
+  variables devenaient introuvables, d'où les 50 erreurs en cascade. Le commentaire venait du
+  travail sur le contrôle anti-robots ; son contenu n'avait aucun effet fonctionnel, mais sa
+  ponctuation, si. Les guillemets ont été remplacés par des guillemets français.
+- **Ce qui rendait le défaut invisible** : la page s'affichait parfaitement. Seul le formulaire
+  était mort, et rien ne le signalait. La mesure a été faite dans un vrai navigateur, sur la
+  production, pas sur le code source - un premier contrôle automatique avait d'ailleurs produit
+  un faux positif en coupant l'attribut au mauvais endroit.
+- **Le motif est désormais gardé** : un test parcourt tous les gabarits et refuse un attribut
+  `x-data` multi-lignes qui contiendrait un guillemet double, en nommant le fichier et la ligne.
+  La fiche d'outil et les quatre autres pages publiques ont été vérifiées : elles n'ont jamais
+  été touchées.
+
 ## [1.261.4] - 2026-09-11
 
 ### Corrigé
