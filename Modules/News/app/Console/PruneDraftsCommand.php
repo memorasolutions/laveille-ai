@@ -15,14 +15,20 @@ namespace Modules\News\Console;
  *          borne le BACKLOG en supprimant le surplus de BROUILLONS BRUTS au-delà des `--keep`
  *          (défaut 200) plus récents par `pub_date`, jamais une fiche à valeur.
  *
- *          Garde-fou ABSOLU (le coeur de la sûreté) : la cible de suppression exige les QUATRE
- *          conditions à la fois - `is_published = false`, `retired_at` nul, `reviewed_at` nul, ET
- *          `hasComposedSummary() === false`. Le critère composé vit dans une colonne JSON : un
- *          DELETE SQL massif ne peut pas le tester fiablement, donc la sélection charge les
- *          candidats par lot (`chunk`) et filtre en PHP via le helper existant du modèle - jamais
- *          de requête SQL brute sur `structured_summary`. Une fiche qui échoue UNE seule de ces
- *          conditions n'entre même pas dans le décompte des « brouillons bruts éligibles » : elle
- *          ne concurrence jamais la fenêtre des `--keep` plus récents.
+ *          Garde-fou ABSOLU (le coeur de la sûreté) : la cible de suppression exige les CINQ
+ *          conditions à la fois - `is_published = false`, `retired_at` nul, `reviewed_at` nul,
+ *          `composition_hold_until` nul OU passé, ET `hasComposedSummary() === false`. Le critère
+ *          composé vit dans une colonne JSON : un DELETE SQL massif ne peut pas le tester
+ *          fiablement, donc la sélection charge les candidats par lot (`chunk`) et filtre en PHP
+ *          via le helper existant du modèle - jamais de requête SQL brute sur
+ *          `structured_summary`. `composition_hold_until`, à l'inverse, est une colonne SCALAIRE
+ *          ordinaire : sa condition vit DANS la requête de sélection elle-même (`whereNull()`
+ *          OU `where(..., '<=', now())`), jamais un filtre PHP après coup - mécanisme de
+ *          rétention imposé (mesuré 2026-09-12 : 17 fiches d'un lot éditorial en attente de
+ *          composition supprimées faute de tout moyen de les distinguer d'un brouillon orphelin).
+ *          Une fiche qui échoue UNE seule de ces conditions n'entre même pas dans le décompte des
+ *          « brouillons bruts éligibles » : elle ne concurrence jamais la fenêtre des `--keep`
+ *          plus récents, quel que soit son rang d'ancienneté.
  *
  *          Hard delete (ce modèle n'a pas de SoftDeletes) mais RÉVERSIBLE : backup JSON complet
  *          (toutes les colonnes brutes, lignes entières) écrit dans
@@ -151,6 +157,21 @@ class PruneDraftsCommand extends Command
             ->where('is_published', false)
             ->whereNull('retired_at')
             ->whereNull('reviewed_at')
+            // ACTION : rétention de composition (mécanisme imposé, mesuré 2026-09-12) - exemptée
+            // DANS la requête de sélection (colonne scalaire ordinaire, contrairement au critère
+            // composé de structured_summary ci-dessous qui exige un filtre PHP après hydratation).
+            // Une fiche dont composition_hold_until est dans le futur n'entre même pas dans le
+            // jeu de résultats : elle ne concurrence jamais la fenêtre des --keep plus récents,
+            // quel que soit son rang d'ancienneté - exactement le même garde-fou ABSOLU que
+            // is_published/retired_at/reviewed_at ci-dessus, jamais un filtre après coup.
+            // MCP: SELF (<5 lignes)
+            // RAISON: design imposé - « news:prune-drafts EXEMPTE toute fiche dont
+            // composition_hold_until est dans le futur, quel que soit son rang d'ancienneté.
+            // Mets-le dans la requête de sélection, pas en filtrant après coup. »
+            ->where(function ($query) {
+                $query->whereNull('composition_hold_until')
+                    ->orWhere('composition_hold_until', '<=', now());
+            })
             ->orderByDesc('pub_date')
             ->orderByDesc('id')
             ->chunk(self::CHUNK_SIZE, function ($rows) use ($keep, $limiteCollecte, &$eligibleCount, &$keptCount, &$candidateIds) {

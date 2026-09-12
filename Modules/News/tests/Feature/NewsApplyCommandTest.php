@@ -204,6 +204,30 @@ it('applies a valid payload: seo_title, summary and editorial_proof_pairs, never
         ->and($article->is_published)->toBeFalse();
 });
 
+// ── (d) Rétention de composition AUTOMATIQUE (mécanisme imposé, mesuré 2026-09-12) ─────
+//
+// Une fiche sur laquelle on a commencé à écrire ne doit jamais être purgée par
+// news:prune-drafts : --payload pose désormais automatiquement composition_hold_until à
+// maintenant + NewsArticle::DEFAULT_COMPOSITION_HOLD_DAYS (14) jours, sans qu'aucune clé
+// dédiée n'ait besoin d'être fournie dans le payload lui-même.
+
+it('(d) applying a --payload sets composition_hold_until ~14 days in the future', function () {
+    $article = nacArticle(['composition_hold_until' => null]);
+    $payload = nacPayloadFile(array_merge(nacFreshMeta($article), [
+        'seo_title' => 'MARQUEUR-RETENTION',
+    ]));
+
+    $this->artisan('news:apply', ['article' => $article->id, '--payload' => $payload])
+        ->assertSuccessful();
+
+    $article->refresh();
+    expect($article->composition_hold_until)->not->toBeNull();
+    expect(abs($article->composition_hold_until->diffInDays(now())))
+        ->toBeGreaterThanOrEqual(13)
+        ->toBeLessThanOrEqual(14);
+    expect(\Modules\News\Models\NewsArticle::DEFAULT_COMPOSITION_HOLD_DAYS)->toBe(14);
+});
+
 it('refuses a payload whose "fact" excerpt is not an exact substring of the source text', function () {
     $article = nacArticle([
         'internal_source_text' => 'Le ministère a annoncé un budget de 12 millions de dollars.',

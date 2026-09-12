@@ -279,3 +279,51 @@ it('la rotation des backups ne garde que les 14 derniers et ne cible que son pro
     expect(is_file($intrus))->toBeTrue();
     @unlink($intrus);
 });
+
+// ── Rétention de composition (mécanisme imposé, mesuré 2026-09-12) ─────────────────────
+//
+// 17 fiches d'un lot éditorial en attente de composition ont été entièrement supprimées par
+// cette même commande, faute de tout moyen de les distinguer d'un brouillon orphelin. Trois
+// garanties couvertes séparément (jamais groupées : un test qui les grouperait masquerait
+// lequel a lâché) : (a) une fiche RETENUE survit même hors des --keep plus récents, (b) une
+// fiche NON retenue est purgée exactement comme avant ce mécanisme, (c) une rétention EXPIRÉE
+// ne protège plus - la fiche redevient purgeable normalement.
+
+it('(a) une fiche RETENUE (composition_hold_until dans le futur) survit à la purge même hors des N plus récents', function () {
+    $retenue = npdArticle([
+        'pub_date' => now()->subDays(10),
+        'composition_hold_until' => now()->addDays(14),
+    ]);
+    for ($j = 0; $j < 3; $j++) {
+        npdArticle(['pub_date' => now()->subMinutes($j)]);
+    }
+
+    $this->artisan('news:prune-drafts', ['--keep' => 2])->assertExitCode(0);
+
+    expect(NewsArticle::find($retenue->id))->not->toBeNull();
+});
+
+it('(b) une fiche NON retenue (composition_hold_until = null) est purgée comme avant', function () {
+    $nonRetenue = npdArticle(['pub_date' => now()->subDays(10), 'composition_hold_until' => null]);
+    for ($j = 0; $j < 3; $j++) {
+        npdArticle(['pub_date' => now()->subMinutes($j)]);
+    }
+
+    $this->artisan('news:prune-drafts', ['--keep' => 2])->assertExitCode(0);
+
+    expect(NewsArticle::find($nonRetenue->id))->toBeNull();
+});
+
+it('(c) une rétention EXPIRÉE (composition_hold_until dans le passé) ne protège plus la fiche', function () {
+    $expiree = npdArticle([
+        'pub_date' => now()->subDays(10),
+        'composition_hold_until' => now()->subDay(),
+    ]);
+    for ($j = 0; $j < 3; $j++) {
+        npdArticle(['pub_date' => now()->subMinutes($j)]);
+    }
+
+    $this->artisan('news:prune-drafts', ['--keep' => 2])->assertExitCode(0);
+
+    expect(NewsArticle::find($expiree->id))->toBeNull();
+});

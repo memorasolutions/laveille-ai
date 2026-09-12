@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.263.0] - 2026-09-12
+
+### Ajouté
+- **Une fiche en cours de composition ne peut plus être supprimée par la purge nocturne.** Le
+  2026-09-12, `news:prune-drafts` a emporté un lot éditorial ENTIER en attente de composition
+  (13 fiches sur 13) : rien, dans la base, ne distinguait une fiche retenue pour être écrite d'un
+  brouillon orphelin. La colonne `news_articles.composition_hold_until` porte désormais cette
+  distinction, et la purge la respecte. Trois voies, une seule formule de date
+  (`NewsArticle::holdForComposition()`, jamais dupliquée) :
+  - `news:apply --payload` pose AUTOMATIQUEMENT une rétention de 14 jours dès qu'une charge utile
+    s'applique avec succès - écrire sur une fiche suffit à la protéger, sans geste supplémentaire ;
+  - `news:hold {article} [--days=N]` pose ou prolonge une rétention à la main, de 1 à 365 jours ;
+  - `news:hold {article} --release` la retire, pour une fiche abandonnée.
+- **`news:brief` expose `composition_hold_until`** dans son JSON, au même titre que `seo_title` :
+  l'état de rétention se lit avant de décider quoi que ce soit, jamais après.
+
+### Corrigé
+- **`--days` était validé sur le CAST, pas sur la valeur saisie.** `--days=3jours` passait
+  silencieusement pour 3, et `--days=0` posait 1 jour au lieu de retirer la rétention. La
+  validation porte maintenant sur la chaîne brute (`/^\d+$/`), et le message d'erreur nomme la
+  bonne porte de sortie : `--release`, jamais `--days=0`.
+- **Aucune borne haute n'existait.** `--days=999999999` atteignait `addDays()` et pouvait le faire
+  déborder. La constante `NewsArticle::MAX_COMPOSITION_HOLD_DAYS` (365) borne les deux portes -
+  la commande et la méthode du modèle lisent le MÊME chiffre.
+
 ## [1.262.0] - 2026-09-12
 
 ### Ajouté

@@ -122,6 +122,14 @@ class NewsBriefCommand extends Command
             'nature_original' => $article->nature_original,
             'niveau_preuve' => $article->niveau_preuve,
             'has_image' => $this->imageService->exists($article->id),
+            // ACTION : composition_hold_until ajouté au JSON (2026-09-12, mécanisme de rétention
+            // imposé) - métadonnée interne inoffensive (jamais rendue sur la fiche publique),
+            // exposée systématiquement comme seo_title/meta_description ci-dessus : jamais
+            // derrière une option, même doctrine que le reste de ce point d'entrée.
+            // MCP: SELF (1 ligne utile)
+            // RAISON: mécanisme de rétention imposé - décrire ce qui est déjà en base avant toute
+            // décision de rédaction vaut aussi pour cette date.
+            'composition_hold_until' => $article->composition_hold_until?->toIso8601String(),
             'publish_readiness' => $article->publishReadinessCheck(),
             'policy_version' => CompositionPromptBuilder::PROMPT_TEMPLATE_VERSION,
             'site_url' => url('/actualites/'.$article->slug),

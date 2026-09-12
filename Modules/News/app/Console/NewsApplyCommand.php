@@ -109,6 +109,16 @@ use Modules\News\Services\NewsImageService;
  *     savait qu'attacher. Voir detachRelatedTools(). Même doctrine que (1) : le retrait est une
  *     intention explicite (clé dédiée), jamais un mode "remplacer" où une omission supprimerait.
  *
+ * NOTE DATÉE 2026-09-12 (mécanisme de rétention de composition) - un lot de 17 fiches en attente
+ * de composition a été entièrement supprimé par `news:prune-drafts`, faute de tout moyen de les
+ * distinguer d'un brouillon orphelin. Le mode --payload pose désormais AUTOMATIQUEMENT une
+ * rétention de NewsArticle::DEFAULT_COMPOSITION_HOLD_DAYS (14) jours dès qu'il s'applique avec
+ * succès (voir la fin d'applyPayload() ci-dessous) : une fiche sur laquelle on vient d'écrire ne
+ * concurrence plus jamais la fenêtre des `--keep` plus récents de `news:prune-drafts`, le temps
+ * que la composition aboutisse. Retrait manuel anticipé (fiche abandonnée) ou prolongation :
+ * `news:hold {article} --release` / `news:hold {article} --days=N`, seule autre porte d'écriture
+ * de `composition_hold_until`.
+ *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai
  */
@@ -1128,6 +1138,24 @@ class NewsApplyCommand extends Command
             $article->syncEntities($entities);
             $this->info("Fiche {$article->id} : ".$article->entities()->count().' entité(s) enregistrée(s).');
         }
+
+        // ACTION : rétention de composition AUTOMATIQUE (mécanisme de rétention imposé, mesuré
+        // 2026-09-12 - 17 fiches d'un lot éditorial en attente de composition ont toutes été
+        // supprimées par news:prune-drafts, faute de tout moyen de les distinguer d'un brouillon
+        // orphelin). Ce point n'est atteint qu'après un --payload appliqué avec succès (le refus
+        // « Payload sans effet » plus haut retourne avant) : une fiche sur laquelle on vient
+        // d'écrire ne doit jamais être purgée avant que la composition ait eu le temps d'aboutir.
+        // NewsArticle::holdForComposition() est le SEUL point d'écriture partagé avec
+        // Modules\News\Console\NewsHoldCommand (DRY, jamais deux formules de date dupliquées).
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: design imposé - « news:apply pose AUTOMATIQUEMENT une rétention de 14 jours dès
+        // qu'une fiche reçoit un --payload. »
+        $article->holdForComposition();
+
+        Log::channel('composition')->info('news:apply - rétention de composition posée automatiquement', [
+            'article_id' => $article->id,
+            'composition_hold_until' => $article->composition_hold_until?->toIso8601String(),
+        ]);
 
         return self::SUCCESS;
     }

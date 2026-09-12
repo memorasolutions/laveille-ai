@@ -82,6 +82,9 @@ class NewsServiceProvider extends ServiceProvider
             // d'écriture bornée, aux côtés de NewsApplyCommand) - voir docblocs des classes.
             \Modules\News\Console\NewsBriefCommand::class,
             \Modules\News\Console\NewsSourceCommand::class,
+            // Mécanisme de rétention de composition (2026-09-12) - porte d'écriture bornée de
+            // composition_hold_until, que PruneDraftsCommand respecte ; voir docblock de la classe.
+            \Modules\News\Console\NewsHoldCommand::class,
             // Améliorations en attente (2026-08-17), point 1 - création manuelle d'une fiche
             // brouillon à partir d'un lien, voir docblock de la classe et
             // NewsArticle::createManualDraft() (DRY, même implémentation que l'écran web).

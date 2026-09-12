@@ -189,6 +189,16 @@ class NewsArticle extends Model implements Searchable
         // de composition lui-même (voir NewsCompositionController::titresTraduits()).
         'title_fr',
         'title_fr_at',
+        // ACTION : rétention de composition (mesuré 2026-09-12 - 17 fiches d'un lot éditorial en
+        // attente de composition ont toutes été supprimées par `news:prune-drafts`, faute de tout
+        // mécanisme distinguant un brouillon orphelin d'un brouillon RETENU). Seuls écrivains :
+        // holdForComposition()/releaseCompositionHold() ci-dessous (Modules\News\Console\
+        // NewsHoldCommand et l'automatisme de Modules\News\Console\NewsApplyCommand quand un
+        // --payload est appliqué), jamais une écriture directe ailleurs.
+        // MCP: SELF (<5 lignes)
+        // RAISON: mécanisme de rétention imposé - une fiche sur laquelle un travail éditorial est
+        // en cours ne doit jamais concurrencer la fenêtre des N plus récents de la purge.
+        'composition_hold_until',
     ];
 
     protected $casts = [
@@ -212,6 +222,7 @@ class NewsArticle extends Model implements Searchable
         'title_fr_at' => 'datetime',
         'fact_check_inconclusive_at' => 'datetime',
         'content_updated_at' => 'datetime',
+        'composition_hold_until' => 'datetime',
     ];
 
     /**
@@ -803,6 +814,82 @@ class NewsArticle extends Model implements Searchable
     public function unretire(): void
     {
         $this->retired_at = null;
+        $this->save();
+    }
+
+    /**
+     * ACTION : nombre de jours par défaut d'une rétention de composition - source UNIQUE du
+     * chiffre 14, reprise par `Modules\News\Console\NewsHoldCommand` (`--days=14` dans sa
+     * signature, valeur miroir documentée dans son docblock) ET par l'automatisme de
+     * `Modules\News\Console\NewsApplyCommand` (`--payload`), pour qu'un futur changement de
+     * durée ne puisse jamais diverger entre les deux appelants.
+     * MCP: SELF (<5 lignes)
+     * RAISON: DRY explicite - même chiffre métier, deux appelants, jamais deux constantes.
+     */
+    public const DEFAULT_COMPOSITION_HOLD_DAYS = 14;
+
+    /**
+     * ACTION : borne HAUTE de la rétention de composition (2026-09-12). Sans elle, `--days` acceptait
+     * n'importe quel entier positif : `addDays(999999999)` produit une date hors de la plage que
+     * Carbon sait représenter, donc soit une exception opaque, soit une échéance absurde qui aurait
+     * rendu la fiche IMPURGEABLE pour toujours - l'inverse exact de ce que la rétention protège.
+     * 365 jours couvre très largement tout travail de composition réel : une fiche d'actualité est
+     * périmée bien avant. Au-delà, c'est une faute de frappe, et une faute de frappe se REFUSE.
+     * MCP: SELF (1 ligne utile)
+     * RAISON: symétrique de la borne basse - une entrée absurde ne se réinterprète jamais en silence.
+     */
+    public const MAX_COMPOSITION_HOLD_DAYS = 365;
+
+    /**
+     * ACTION : pose une rétention de composition - `composition_hold_until` = maintenant + N
+     * jours (mécanisme de rétention imposé, mesuré 2026-09-12 : 17 fiches d'un lot éditorial en
+     * attente de composition ont toutes été supprimées par `news:prune-drafts`). Tant que cette
+     * date reste dans le futur, `PruneDraftsCommand::collectCandidates()` exempte la fiche de la
+     * purge, quel que soit son rang d'ancienneté. Écrase la date existante (pose la nouvelle
+     * échéance, ne l'additionne jamais à l'ancienne) - deux appels successifs (ex. deux payloads
+     * appliqués le même jour) ne font qu'avancer la même échéance.
+     * MCP: SELF (<5 lignes)
+     * RAISON: design imposé - seul point d'écriture partagé par `news:hold` et l'automatisme de
+     * `news:apply --payload` (DRY, jamais deux formules de date dupliquées).
+     */
+    public function holdForComposition(int $days = self::DEFAULT_COMPOSITION_HOLD_DAYS): void
+    {
+        // ACTION : contrat interne durci (mesuré 2026-09-12) - un ENTIER déjà typé, reçu d'un
+        // appelant interne fautif, doit échouer BRUYAMMENT plutôt que de produire une date de
+        // rétention fausse : l'ancien `max(1, $days)` réinterprétait silencieusement 0 ou une
+        // valeur négative en 1 jour. Ce contrôle N'EST PAS une duplication de celui de
+        // NewsHoldCommand::handle() : la commande valide une CHAÎNE venue d'un humain (faute de
+        // frappe possible, ex. « 3jours ») avant même le cast ; ce modèle défend son propre contrat
+        // sur un ENTIER déjà casté, pour tout appelant interne (y compris l'automatisme de
+        // NewsApplyCommand) - deux surfaces différentes, deux raisons de changer différentes
+        // (CLAUDE.md, section DRY : ne pas fusionner deux gardes qui n'évolueront pas ensemble).
+        // MCP: SELF (<5 lignes)
+        // RAISON: doctrine du projet - une entrée invalide est REFUSÉE explicitement, jamais
+        // réinterprétée en silence.
+        if ($days < 1) {
+            throw new \InvalidArgumentException("holdForComposition() attend un nombre de jours d'au moins 1, {$days} reçu.");
+        }
+
+        if ($days > self::MAX_COMPOSITION_HOLD_DAYS) {
+            throw new \InvalidArgumentException(
+                'holdForComposition() refuse '.$days.' jours : le maximum est '.self::MAX_COMPOSITION_HOLD_DAYS.'.'
+            );
+        }
+
+        $this->composition_hold_until = now()->addDays($days);
+        $this->save();
+    }
+
+    /**
+     * ACTION : retire la rétention de composition (`composition_hold_until` = null) - réversibilité
+     * symétrique de holdForComposition() ci-dessus, `news:hold {article} --release`.
+     * MCP: SELF (<5 lignes)
+     * RAISON: garde-fou zéro-suppression - retirer une rétention ne supprime aucune donnée, seule
+     * la date de rétention change.
+     */
+    public function releaseCompositionHold(): void
+    {
+        $this->composition_hold_until = null;
         $this->save();
     }
 
