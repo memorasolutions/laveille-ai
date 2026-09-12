@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.263.2] - 2026-09-12
+
+### Corrigé
+- **La page de maintenance affichait « Service Unavailable » au lieu de son message français.**
+  v1.263.1 avait bien fait servir NOTRE vue (titre « Maintenance en cours · La veille » observé
+  en production pendant la fenêtre réelle), mais `artisan down --render` la pré-rend avec une
+  exception dont `getMessage()` vaut ce générique anglais - et un simple `?:` le laissait
+  écraser la phrase prévue. La vue n'affiche désormais le message de l'exception que s'il est
+  vraiment personnalisé. Mesure après correctif : la page pré-rendue porte bien la phrase
+  française. Note d'honnêteté : `artisan down --message` n'existe pas dans cette version de
+  Laravel, la branche « message personnalisé » n'a donc PAS pu être éprouvée par ce chemin.
+
 ## [1.263.1] - 2026-09-12
 
 ### Corrigé

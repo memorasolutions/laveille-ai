@@ -114,7 +114,14 @@
         </div>
         <p class="err-code">{{ __('Erreur') }} 503</p>
         <h1 class="err-title">{{ __('Maintenance en cours') }}</h1>
-        <p class="err-message">{{ (isset($exception) ? $exception->getMessage() : null) ?: __('Octopus améliore la veille en coulisses. C’est une mise à jour, pas une panne : la page revient d’elle-même dans quelques minutes.') }}</p>
+        {{-- MESURÉ EN PRODUCTION le 2026-09-12 : `artisan down --render` pré-rend cette vue avec une
+             exception dont getMessage() vaut « Service Unavailable ». Un simple `?:` laissait donc
+             ce générique anglais ÉCRASER notre phrase - la vue était bien servie, et disait quand
+             même la mauvaise chose. On n'affiche le message de l'exception que s'il est VRAIMENT
+             personnalisé (cas `artisan down --message="..."`). --}}
+        @php($errMsgBrut = isset($exception) ? trim((string) $exception->getMessage()) : '')
+        @php($errMsgGenerique = in_array(mb_strtolower($errMsgBrut), ['', 'service unavailable', 'service temporarily unavailable'], true))
+        <p class="err-message">{{ $errMsgGenerique ? __('Octopus améliore la veille en coulisses. C’est une mise à jour, pas une panne : la page revient d’elle-même dans quelques minutes.') : $errMsgBrut }}</p>
         <div class="err-pulse" aria-hidden="true">
             <span></span><span></span><span></span>
         </div>
