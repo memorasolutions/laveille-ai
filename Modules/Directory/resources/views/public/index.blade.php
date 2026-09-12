@@ -493,7 +493,7 @@
                 // soumission qui suit un premier envoi (refus de validation, deuxième
                 // proposition) repartirait avec un jeton brûlé, et un visiteur légitime
                 // serait refusé comme robot. L'EXPIRATION, elle, n'est pas en cause : le
-                // défaut data-refresh-expired="auto" régénère seul un jeton après 300 s.
+                // défaut data-refresh-expired, réglé à « auto », régénère seul un jeton après 300 s.
                 window.turnstile?.reset(document.querySelector('.cf-turnstile'));
             }
         },
