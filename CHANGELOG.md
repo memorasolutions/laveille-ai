@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.263.3] - 2026-09-12
+
+### Corrigé
+- **Deux faux auto-liens mesurés le même jour sur un article du blogue, par deux mécanismes
+  distincts.** (a) « libre » ouvrait la fiche « Open source » : c'était un alias posé À LA MAIN
+  sur ce terme, à côté de « logiciel libre » qui, lui, est juste. Or « libre » seul est un
+  adjectif courant du français. Mesure : 4 occurrences en production, 4 FAUSSES, zéro légitime
+  (« Usage libre » au sens sans restriction dans un tableau de politiques de cours, « libre,
+  limitée, exigée, interdite », et « laisser l'IA opérer en roue libre » sur un autre article) ;
+  balayage de 60 pages tirées au hasard sur cinq familles, une seule occurrence, fausse. L'alias
+  est retiré de la base ET « libre » entre dans `ALIAS_NEVER_AUTO`, pour que sa réintroduction
+  reste sans effet. (b) « MEQ » ouvrait « Direction de l'accès à l'information et des plaintes »
+  au lieu du ministère : le nom long de cette direction finit par « (MEQ) », et
+  `extractQualifierAliases()` en dérivait l'alias « MEQ » vers CETTE fiche. Recensement sur les
+  311 acronymes publiés : SEPT fiches portent ce même qualifiant et le revendiquaient toutes.
+  Les sigles du ministère de l'Éducation entrent donc dans `QUALIFIER_ORGANISATION`, dont c'est
+  exactement la raison d'être - un qualifiant qui nomme l'organisation propriétaire désambiguïse,
+  il n'est jamais un synonyme. Quatre tests neufs, chacun avec son jumeau qui prouve que les
+  liens légitimes (« logiciel libre », le nom long de la direction) survivent : sans les
+  correctifs, exactement trois rougissent.
+
 ## [1.263.2] - 2026-09-12
 
 ### Corrigé

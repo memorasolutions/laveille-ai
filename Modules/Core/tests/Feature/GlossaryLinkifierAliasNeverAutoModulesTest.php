@@ -292,3 +292,49 @@ it('« haïku » (le poeme) ne lie plus, « Haiku » (le modele) lie toujours', 
     $modele = GlossaryLinkifier::linkify('<p>Le modele Haiku repond plus vite que les autres.</p>');
     expect($modele)->toContain('/glossaire/'.$slug);
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VOLET 3 - 2026-09-12 : deux faux liens MESURÉS le même jour sur un article
+// du blogue, par DEUX mécanismes distincts. Chacun a son jumeau qui prouve que
+// le correctif ne coûte aucun lien légitime : un correctif qui tue des liens
+// vrais est une régression, pas un progrès (leçon de l'incident du 27 août).
+// ═══════════════════════════════════════════════════════════════════════════
+
+// « libre » était un alias posé À LA MAIN sur « Open source ». Mesure du jour :
+// 4 occurrences en production, 4 fausses, zéro légitime (« Usage libre » au sens
+// sans restriction, « libre, limitée, exigée, interdite », « en roue libre »).
+it('« libre » seul ne lie plus vers open source, « logiciel libre » lie toujours', function () {
+    $terme = anrTerm('Open source', 'open-source-test', ['logiciel libre', 'libre']);
+    $slug = $terme->getTranslation('slug', 'fr_CA');
+    GlossaryLinkifier::flushCache();
+
+    GlossaryLinkifier::resetState();
+    $adjectif = GlossaryLinkifier::linkify('<p>Usage libre : le cours autorise tous les outils sur les travaux.</p>');
+    expect($adjectif)->not->toContain('/glossaire/'.$slug);
+
+    GlossaryLinkifier::resetState();
+    $vrai = GlossaryLinkifier::linkify('<p>Un logiciel libre peut être étudié, modifié et redistribué.</p>');
+    expect($vrai)->toContain('/glossaire/'.$slug);
+});
+
+// « MEQ » : sept fiches d'acronymes publiées portent « (MEQ) » en fin de nom long
+// et revendiquaient toutes ce sigle par extractQualifierAliases(). Le qualifiant
+// nomme l'organisation PROPRIÉTAIRE de la direction, jamais un synonyme de son nom.
+it('le sigle du ministère en qualifiant ne devient plus un alias de la direction', function () {
+    expect(GlossaryLinkifier::extractQualifierAliases("Direction de l'accès à l'information et des plaintes (MEQ)"))
+        ->toBe(["Direction de l'accès à l'information et des plaintes"]);
+});
+
+it('« MEQ » ne lie plus vers une direction du ministère, son nom long lie toujours', function () {
+    $fiche = anrAcronym('DAIP', "Direction de l'accès à l'information et des plaintes (MEQ)", 'daip-test');
+    $slug = $fiche->getTranslation('slug', 'fr_CA');
+    GlossaryLinkifier::flushCache();
+
+    GlossaryLinkifier::resetState();
+    $sigle = GlossaryLinkifier::linkify('<p>Le guide du MEQ précise les usages pédagogiques autorisés.</p>');
+    expect($sigle)->not->toContain('/acronymes-education/'.$slug);
+
+    GlossaryLinkifier::resetState();
+    $nomLong = GlossaryLinkifier::linkify("<p>La Direction de l'accès à l'information et des plaintes traite ces demandes.</p>");
+    expect($nomLong)->toContain('/acronymes-education/'.$slug);
+});

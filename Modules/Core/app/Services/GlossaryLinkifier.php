@@ -894,6 +894,20 @@ class GlossaryLinkifier
         'google', 'anthropic', 'openai', 'meta', 'microsoft', 'apple', 'amazon',
         'nvidia', 'mistral', 'adobe', 'ibm', 'deepseek', 'alibaba',
         'perplexity', 'stability', 'cohere', 'huggingface', 'salesforce',
+        'meq', 'mes', 'mees', 'meesr', 'mesrst', 'mels',
+        // 2026-09-12, MESURE : « MEQ » ouvrait /acronymes-education/daip sur un article du blogue,
+        // avec l'infobulle de la Direction de l'acces a l'information et des plaintes posee sur le
+        // sigle du MINISTERE. Cause : le nom long de cette direction est « Direction de l'acces a
+        // l'information et des plaintes (MEQ) », et extractQualifierAliases() en derive l'alias
+        // « MEQ » vers CETTE fiche. Recensement en base le meme jour, sur les 311 acronymes
+        // publies : SEPT fiches portent « (MEQ) » en fin de nom long (daip, dasi, deaac, deafp,
+        // dfga, drd, drdp) et revendiquent donc toutes le meme sigle, en concurrence avec la vraie
+        // fiche MEQ. C'est exactement la regle de fond ci-dessus, transposee au secteur public :
+        // le qualifiant nomme l'ORGANISATION PROPRIETAIRE de la direction, il n'en est pas un
+        // synonyme - personne qui ecrit « MEQ » ne parle de la DAIP.
+        // Les cinq autres sigles sont les noms SUCCESSIFS du meme ministere (leurs fiches existent
+        // toutes en base) : une direction de l'ere courante fera entrer « (MES) » demain par le
+        // meme chemin. Ce n'est donc pas un ajout par ressemblance, c'est la meme entite.
     ];
 
     /**
@@ -1035,7 +1049,18 @@ class GlossaryLinkifier
     // d'une autre fiche l'emporte toujours sur un alias, #199) et aurait semé une confusion
     // éditoriale sur QUEL terme les revendique. Le nom PRINCIPAL « Autonomie (IA) » et son pluriel
     // dérivé restent, eux, pleinement trouvables (jamais concernés par ALIAS_NEVER_AUTO).
-    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral', 'ia', 'ai', 'pathway', 'pathways', 'autonomie', 'autonomies', 'haïku'];
+    public const ALIAS_NEVER_AUTO = ['cnn', 'dos', 'requête', 'requêtes', 'témoin', 'mistral', 'ia', 'ai', 'pathway', 'pathways', 'autonomie', 'autonomies', 'haïku', 'libre'];
+    // 2026-09-12 (#2516) : « libre » n'est PAS un alias derive - il etait pose A LA MAIN dans la
+    // colonne `aliases` du terme « Open source » (dictionary_terms id 26, match_strategy=loose),
+    // juste a cote de « logiciel libre » qui, lui, est juste. Or « libre » seul est un adjectif
+    // ultra-courant du francais, et le linkifier le rendait vers le LOGICIEL libre partout.
+    // MESURE du jour, 4 occurrences trouvees en production, 4 FAUSSES, zero legitime : trois dans
+    // l'article du MIT (« Usage libre » au sens SANS RESTRICTION dans un tableau de politiques de
+    // cours, puis « (libre, limitee, exigee, interdite) » deux fois), et une quatrieme sur un autre
+    // article du blogue, « laisser l'IA operer en roue libre ». Aucune ne parlait d'open source.
+    // Balayage de 60 pages tirees au hasard (blogue, actualites, glossaire, acronymes, annuaire) :
+    // une seule occurrence, fausse. L'alias a ete retire de la base le meme jour ; cette entree-ci
+    // ferme la porte pour de bon, y compris si quelqu'un le repose un jour dans `aliases`.
     // 2026-09-05 (#2238) : « ai » ferme le chemin JUMEAU de celui d'ACRONYM_NEVER_AUTO. Le cas
     // MESURE en production passe par le NOM PRINCIPAL de la fiche /acronymes-education/ai (verifie
     // le 2026-09-05 : son h1 est « AI », sa forme longue « Artificial Intelligence »), donc par
