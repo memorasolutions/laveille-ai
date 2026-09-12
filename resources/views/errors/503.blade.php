@@ -114,7 +114,7 @@
         </div>
         <p class="err-code">{{ __('Erreur') }} 503</p>
         <h1 class="err-title">{{ __('Maintenance en cours') }}</h1>
-        <p class="err-message">{{ $exception->getMessage() ?: __('Octopus améliore la veille en coulisses. Le site revient très vite, promis.') }}</p>
+        <p class="err-message">{{ (isset($exception) ? $exception->getMessage() : null) ?: __('Octopus améliore la veille en coulisses. C’est une mise à jour, pas une panne : la page revient d’elle-même dans quelques minutes.') }}</p>
         <div class="err-pulse" aria-hidden="true">
             <span></span><span></span><span></span>
         </div>

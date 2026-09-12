@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.263.1] - 2026-09-12
+
+### Corrigé
+- **La page de maintenance servie pendant un déploiement était celle, nue, de Laravel.** Le
+  site possède une vue `errors/503` qui explique au visiteur que le site revient - elle n'était
+  JAMAIS servie : `php artisan down` sans `--render` laisse `template` à `null` (mesuré dans
+  `storage/framework/down`). Le déploiement passe désormais `--render=errors.503`, avec repli
+  sans option si la vue ne se rendait pas. Le message dit maintenant que c'est une mise à jour
+  et non une panne, et qu'elle dure quelques minutes - sans aucun détail technique, qui
+  n'aiderait pas le visiteur et renseignerait un attaquant.
+- **La vue 503 exigeait une exception pour se rendre**, ce qui rendait `--render` impossible.
+  `$exception` est désormais facultatif.
+
 ## [1.263.0] - 2026-09-12
 
 ### Ajouté

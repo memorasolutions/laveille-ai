@@ -86,7 +86,11 @@ jobs:
         #   fenetre de maintenance elimine cette classe entiere de race condition, pas seulement
         #   le cas des routes (idem colonnes de migration pas encore appliquees, etc.).
         run: |
-          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && php artisan down --retry=15" || true
+          # --render : sans lui, Laravel sert sa page 503 NUE pendant toute la fenetre (mesure
+          # du 2026-09-12 : template=null dans storage/framework/down). Notre vue errors/503
+          # explique au visiteur que c'est une mise a jour et non une panne. Repli sans --render
+          # si la vue ne se rendait pas : mieux vaut une page nue que pas de maintenance du tout.
+          ssh gmemora@server.memora.pro "cd /home/gmemora/public_html/apps_diverses/laveille.ai && (php artisan down --retry=15 --render=errors.503 || php artisan down --retry=15)" || true
 
       - name: Deploy via rsync
         # NOTE (incident P0 2026-07-11) : ce rsync n'a volontairement PAS de --delete/--delete-after.
