@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.270.8] - 2026-09-13
+
+### Ajoute
+- **Terme « NameTag » au glossaire**, le sujet le plus delicat de la serie : un systeme de
+  reconnaissance faciale de Meta qui n a JAMAIS ete active, decouvert en juin 2026 dans le code
+  d une application livree sur plus de 50 millions d appareils, et retire des le lendemain de sa
+  revelation. La nuance que tout le monde rate - le code etait la, la fonction ne l etait pas - est
+  posee des la premiere phrase et fait l objet d une FAQ entiere.
+  PRUDENCE JURIDIQUE, contrainte principale de cette fiche : le sujet fait l objet d une action
+  collective EN COURS. Une plainte est un acte de procedure d une PARTIE, pas une decision de
+  tribunal ; a ce stade aucun fait n est etabli par un jugement et aucune classe n a ete certifiee.
+  Tout ce qui vient de la plainte est donc ecrit comme une allegation, la fiche n affirme nulle part
+  que Meta a fait ce qui lui est reproche, et AUCUN plaignant n est nomme - la poursuite est portee
+  notamment par des enfants, qui n ont pas a figurer dans un glossaire. La position de Meta est
+  rapportee pour l equilibre.
+  TROIS FABRICATIONS INTERCEPTEES dans la redaction deleguee, et sur ce sujet elles etaient graves :
+  « Meta conteste fermement ces accusations » (purement invente, aucune source ne dit rien de la
+  reponse de Meta), « ce qui est corrobore par les analyses techniques » (corroboration que rien ne
+  soutient), et « cela souleve des questions sur les intentions et les tests internes » (une
+  insinuation, sur un sujet ou elle n a pas sa place). Les trois sont retirees.
+  Sources verifiees avec controle du titre servi : l enquete de WIRED et le dossier judiciaire
+  lui-meme sur CourtListener.
+  Image : aucun visage, aucun oeil, aucune silhouette, interdits poses DANS le prompt - illustrer la
+  collecte d empreintes faciales par un visage, meme synthetique, serait exactement ce qu il ne faut
+  pas faire. L illustration montre un module entierement cable dont l interrupteur est reste en
+  position arret.
+
 ## [1.270.7] - 2026-09-13
 
 ### Ajoute
