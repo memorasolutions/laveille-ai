@@ -14,7 +14,10 @@
         : null;
 @endphp
 @if($_ogImagePath)
-    @section('og_image', asset($_ogImagePath).'?v='.($term->updated_at?->timestamp ?? '0'))
+    {{-- 2026-09-12 (#2451, plan glossaire section 5) : cache-buster aligné sur editorialModifiedAt()
+         (jamais updated_at, réécrit par une simple consultation) - un cache-buster doit changer
+         quand le CONTENU change, jamais quand quelqu'un regarde la page. --}}
+    @section('og_image', asset($_ogImagePath).'?v='.($term->editorialModifiedAt()?->timestamp ?? '0'))
 @endif
 
 @php

@@ -103,9 +103,20 @@ class SitemapController
             $sitemap->add(Url::create(route('dictionary.index'))->setPriority(0.8)->setChangeFrequency('weekly'));
             // 2026-08-31 (#2092) : même défaut que le plan de site cassé le 18 juillet 2026 (accès
             // brut à un slug traduisible) - protégé par Term::getPublicUrl() (HasFallbackTranslatedSlug).
-            \Modules\Dictionary\Models\Term::published()->select(['id', 'slug', 'updated_at', 'hero_image'])->get()->each(function ($term) use ($sitemap) {
+            // 2026-09-12 (ticket #2523, docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md) :
+            // `updated_at` ne peut pas servir de lastmod ici, une simple consultation le réécrit
+            // (Modules\Core\Services\ViewCounterService::record() incrémente par le query builder
+            // brut) - mesuré jusqu'à quatre mois d'écart sur laveille.ai/glossaire/sora. Le select()
+            // doit porter `content_updated_at` et `created_at` : editorialModifiedAt() (Modules\
+            // Core\Traits\TracksEditorialModification) lit exactement ces deux colonnes et, sur un
+            // modèle partiellement chargé qui ne les porterait pas, renverrait silencieusement null.
+            // ACTION : updated_at retiré du select (aucune autre ligne de cette fermeture ne s'en
+            // sert), content_updated_at et created_at ajoutés.
+            // MCP: SELF (<5 lignes)
+            // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B (glossaire).
+            \Modules\Dictionary\Models\Term::published()->select(['id', 'slug', 'content_updated_at', 'created_at', 'hero_image'])->get()->each(function ($term) use ($sitemap) {
                 $url = Url::create($term->getPublicUrl())
-                    ->setLastModificationDate($term->updated_at)
+                    ->setLastModificationDate($term->editorialModifiedAt())
                     ->setPriority(0.7)
                     ->setChangeFrequency('monthly');
 

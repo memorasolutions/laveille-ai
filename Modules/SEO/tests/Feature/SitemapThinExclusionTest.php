@@ -17,6 +17,7 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Dictionary\Models\Term;
 use Modules\Directory\Models\Tool;
 use Modules\Roadmap\Models\Board;
 use Modules\Roadmap\Models\Idea;
@@ -74,4 +75,67 @@ test('le sitemap inclut /roadmap dès qu\'une proposition publique existe', func
 
     $response->assertOk();
     $response->assertSee(route('roadmap.boards.index'), false);
+});
+
+// ── Ticket #2523 (docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B) : le lastmod
+//      du glossaire suivait `updated_at`, réécrit par une simple consultation (Modules\Core\
+//      Services\ViewCounterService::record(), qui incrémente par le query builder brut) - mesuré
+//      jusqu'à quatre mois d'écart sur laveille.ai/glossaire/sora. Couvre le correctif du bloc
+//      Dictionary\Term de SitemapController::index() : editorialModifiedAt() remplace updated_at.
+//      Même convention de construction que Modules/Dictionary/tests/Feature/
+//      TermSchemaDateModifiedTest.php (pas de TermFactory dans ce module).
+
+function makeSitemapTestTerm(string $suffixe): Term
+{
+    config(['app.locale' => 'fr_CA']);
+    $locale = app()->getLocale();
+    $slug = 'terme-sitemap-'.$suffixe.'-'.uniqid();
+
+    return Term::create([
+        'name' => [$locale => 'Terme sitemap '.$suffixe, 'fr' => 'Terme sitemap '.$suffixe],
+        'slug' => [$locale => $slug, 'fr' => $slug],
+        'definition' => [$locale => 'Définition de test.', 'fr' => 'Définition de test.'],
+        'is_published' => true,
+    ]);
+}
+
+test('le lastmod du glossaire suit content_updated_at, jamais un updated_at poussé par une consultation', function () {
+    $term = makeSitemapTestTerm('derive');
+
+    // Simule la dérive mesurée en production : une consultation (ViewCounterService::record(),
+    // qui passe par increment() sur le query builder brut, sans déclencher l'évènement 'saving')
+    // pousse updated_at loin devant SANS jamais faire avancer content_updated_at.
+    $derive = now()->addMonths(4);
+    Term::query()->whereKey($term->getKey())->update(['updated_at' => $derive]);
+    $term->refresh();
+
+    expect($term->updated_at->toIso8601String())->not->toBe($term->content_updated_at->toIso8601String());
+
+    $lastmodAttendu = $term->content_updated_at->format(DateTime::ATOM);
+    $dateDerivee = $derive->format(DateTime::ATOM);
+
+    $response = $this->get(route('sitemap'));
+
+    $response->assertOk();
+    $response->assertSee('<lastmod>'.$lastmodAttendu.'</lastmod>', false);
+    $response->assertDontSee($dateDerivee, false);
+});
+
+test('le lastmod du glossaire ne disparaît pas pour un terme publié sans révision éditoriale connue', function () {
+    $term = makeSitemapTestTerm('sans-revision');
+
+    // Fraîchement créé : content_updated_at = created_at (même convention que
+    // Modules/Dictionary/tests/Feature/TermSchemaDateModifiedTest.php), aucune révision connue -
+    // le lastmod doit malgré tout être présent (repli sur la date de création), jamais disparaître.
+    expect($term->hasKnownEditorialRevision())->toBeFalse();
+
+    $lastmodAttendu = $term->content_updated_at->format(DateTime::ATOM);
+
+    $response = $this->get(route('sitemap'));
+
+    // Mord si le select() du contrôleur oublie created_at/content_updated_at : editorialModifiedAt()
+    // renverrait alors null, et Url::setLastModificationDate() (paramètre DateTimeInterface non
+    // nullable) ferait échouer la génération du sitemap au lieu de se replier proprement.
+    $response->assertOk();
+    $response->assertSee('<lastmod>'.$lastmodAttendu.'</lastmod>', false);
 });

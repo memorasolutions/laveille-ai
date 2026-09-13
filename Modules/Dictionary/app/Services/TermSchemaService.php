@@ -49,7 +49,17 @@ final class TermSchemaService
         $description = mb_substr($description, 0, 250);
         $imageUrl = $term->hero_image ? asset($term->hero_image) : null;
         $datePublished = optional($term->created_at)->toIso8601String();
-        $dateModified = optional($term->updated_at)->toIso8601String();
+        // 2026-09-12 (#2451, plan glossaire section 5) : ACTION - $dateModified alignée sur
+        // hasKnownEditorialRevision()/editorialModifiedAt() (Modules\Core\Traits\
+        // TracksEditorialModification), plus jamais sur updated_at (réécrit par une simple
+        // consultation via Modules\Core\Services\ViewCounterService::record()). Un moteur et un
+        // visiteur doivent recevoir la MÊME affirmation ; la page ne ment plus au visiteur
+        // depuis show.blade.php, mais mentait encore aux moteurs via ce JSON-LD sur 544 fiches.
+        // Sans révision éditoriale connue, $dateModified reste null : ne jamais présenter une
+        // date de CRÉATION comme une date de RÉVISION. RAISON: <5 lignes, correctif ciblé (SELF).
+        $dateModified = $term->hasKnownEditorialRevision()
+            ? $term->editorialModifiedAt()->toIso8601String()
+            : null;
 
         $graph = [];
 

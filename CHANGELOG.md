@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.264.2] - 2026-09-12
+
+### Corrige
+- **Le glossaire avait cessé de mentir au visiteur, mais continuait de mentir aux moteurs**
+  (#2451, étape 1 du plan `docs/specs/2026-09-11-glossaire-plan-complet.md`). La colonne
+  `updated_at` d'un terme est réécrite par une simple consultation de page : sur les 80 termes
+  mesurables, 78 avaient plus de 24 heures d'écart avec leur vraie révision, jusqu'à une
+  cinquantaine de jours. La date affichée au lecteur avait été corrigée la veille. Le JSON-LD,
+  lui, alimentait toujours `dateModified` avec cette même valeur, sur les 544 fiches : Google et
+  les moteurs génératifs recevaient donc un signal de fraîcheur qui bougeait à chaque visite.
+  `TermSchemaService` s'aligne désormais sur ce que voit le visiteur : `dateModified` n'est émis
+  que si une révision éditoriale est réellement connue, et vaut alors `content_updated_at`.
+  Sinon, aucune clé n'est émise du tout, plutôt qu'une date approximative.
+- **Le paramètre anti-cache de l'image de partage changeait à chaque consultation**, pour la
+  même raison. L'URL de l'image n'était donc jamais stable et ne pouvait être mise en cache par
+  personne. Il suit maintenant la date de révision éditoriale : un paramètre anti-cache doit
+  changer quand le CONTENU change, jamais quand quelqu'un regarde la page.
+- **Et le plan de site disait la même chose à Google**, ce qui était la porte la plus lourde des
+  trois : le `lastmod` des termes sortait lui aussi d'`updated_at`. Or c'est le signal sur lequel
+  Google décide quand revenir explorer une page. Mesuré sur une fiche réelle : le contenu de
+  `/glossaire/sora` n'a pas bougé depuis le 2026-05-11, et les trois portes annonçaient toutes
+  `2026-09-11T13:24:24`, l'horodatage d'une simple consultation. Corrigé pour les termes
+  uniquement ; les cinq autres familles d'URL du plan de site (articles, pages, collections,
+  acronymes, produits) portent le même motif mais chacune doit d'abord être mesurée séparément,
+  ce qui est l'objet du ticket #2523.
+  Le correctif emporte une subtilité qui aurait pu passer inaperçue : la requête ne chargeait pas
+  les colonnes de la date éditoriale, et sans elles la méthode renvoie `null`, donc le `lastmod`
+  aurait disparu en silence. Un test vérifie spécifiquement qu'il ne disparaît pas.
+
+### Note
+- Les trois recommandations en attente du ticket #2451 sont appliquées, conformément à ce que le
+  ticket prévoyait lui-même en l'absence de réponse : privilégier le vide plutôt que le faux ;
+  champ « à ne pas confondre avec » borné aux cinq cas réellement mesurés, jamais généré à
+  volume ; les actualités d'un terme restent une section secondaire et non un pilier pédagogique,
+  parce qu'un contenu périssable ne doit pas porter la charge pédagogique principale.
+
 ## [1.264.1] - 2026-09-12
 
 ### Corrige
