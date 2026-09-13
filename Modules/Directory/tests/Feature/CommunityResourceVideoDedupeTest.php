@@ -165,3 +165,53 @@ test('4. ressources NON vidéo (sans video_id) : le repli sur URL reste inchang�
 
     expect(ToolResource::where('directory_tool_id', $tool->id)->count())->toBe(2);
 });
+
+/**
+ * Ticket #2465 (2026-09-12) : la garde applicative ci-dessus ferme les voies d'insertion
+ * CONNUES. Ce test-ci vérifie la ceinture posée en base par la migration
+ * 2026_09_12_230000_add_unique_tool_video_to_directory_resources : elle ferme aussi les
+ * voies qu'on n'a pas encore écrites. Le test MORD sans la migration (l'insertion passe).
+ */
+test('5. CEINTURE EN BASE : un doublon (outil, vidéo) inséré en contournant la garde applicative est refusé par l\'index unique', function () {
+    $tool = makeDedupeTestTool('unique-db');
+
+    $premier = new ToolResource();
+    $premier->directory_tool_id = $tool->id;
+    $premier->url = 'https://www.youtube.com/watch?v=CEINTURE001';
+    $premier->video_id = 'CEINTURE001';
+    $premier->title = 'Première insertion';
+    $premier->type = 'video';
+    $premier->is_approved = true;
+    $premier->save();
+
+    // Insertion DIRECTE, qui court-circuite volontairement CommunityController : seule la
+    // contrainte de base peut encore l'arrêter.
+    $doublon = new ToolResource();
+    $doublon->directory_tool_id = $tool->id;
+    $doublon->url = 'https://youtu.be/CEINTURE001';
+    $doublon->video_id = 'CEINTURE001';
+    $doublon->title = 'Doublon strict';
+    $doublon->type = 'video';
+    $doublon->is_approved = true;
+
+    expect(fn () => $doublon->save())->toThrow(\Illuminate\Database\QueryException::class);
+
+    expect(ToolResource::where('directory_tool_id', $tool->id)->where('video_id', 'CEINTURE001')->count())->toBe(1);
+});
+
+test('6. l\'index unique ne gêne PAS les ressources sans vidéo : plusieurs NULL pour le même outil restent permis', function () {
+    $tool = makeDedupeTestTool('unique-null');
+
+    foreach (['un', 'deux', 'trois'] as $i => $mot) {
+        $r = new ToolResource();
+        $r->directory_tool_id = $tool->id;
+        $r->url = 'https://doc.example/page-'.$mot;
+        $r->video_id = null;
+        $r->title = 'Documentation '.$mot;
+        $r->type = 'article';
+        $r->is_approved = true;
+        $r->save();
+    }
+
+    expect(ToolResource::where('directory_tool_id', $tool->id)->whereNull('video_id')->count())->toBe(3);
+});

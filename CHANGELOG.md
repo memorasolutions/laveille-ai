@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.263.4] - 2026-09-12
+
+### Corrige
+- **Annuaire, ressources vidéo : la ceinture manquait en base.** Quatre voies d'insertion
+  alimentent `directory_resources` avec trois clés de dédoublonnage différentes (#2436) ;
+  le correctif applicatif ferme les voies connues, mais aucune contrainte ne fermait celles
+  qui restent à écrire. Index unique `(directory_tool_id, video_id)` posé par migration
+  réversible. Mesure faite AVANT : les 579 lignes sans vidéo sont toutes `NULL` et aucune
+  n'est une chaîne vide, ce qui est la condition pour que 143 outils puissent garder
+  plusieurs ressources sans vidéo (MySQL tolère plusieurs `NULL`, pas plusieurs `''`).
+- **Deux doublons stricts retirés de la production** (#2465) : outil 23, vidéos
+  `rGlEuUOSdS4` et `gN_cV6TT5ow`, en double avec la même URL, le même titre et le même
+  `created_at` à la seconde. Sauvegarde des quatre lignes écrite avant la mutation.
+- **Acronymes : deux fiches portaient un nom long strictement identique** (#2518). `IFPT` est
+  le sigle officiel selon le glossaire de `inforoutefpt.org`, et la graphie soudée
+  `InforouteFPT` que portait une fiche était fautive ; `OFPQ` est le sigle employé par
+  `observatoirefp.org`. Les deux fiches redondantes sont dépubliées, pas supprimées, et
+  redirigées en 301 vers la fiche canonique, qui reçoit les autres graphies en alias.
+
 ## [1.263.3] - 2026-09-12
 
 ### Corrigé
