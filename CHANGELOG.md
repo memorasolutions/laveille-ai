@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.270.5] - 2026-09-13
+
+### Corrige
+- **La fiche « GPU » du glossaire etait la plus consultee de sa famille et la plus courte.**
+  Demande « /glossaire GPU » du fondateur : la fiche existait deja, donc AUCUNE fiche nouvelle n a
+  ete creee - un doublon aurait divise le referencement entre deux pages et casse l auto-lien, qui
+  doit pouvoir choisir une seule cible.
+  La mesure qui a justifie l enrichissement, comparative plutot qu absolue : definition de 418
+  caracteres contre 723 en moyenne sur les 530 fiches publiees, soit le 15e centile. Ses voisines
+  directes disent la meme chose : tpu 411, npu 621, nvidia 880, cuda 1192. GPU et TPU datent tous
+  deux du 23 mars 2026, avant la stabilisation du standard editorial, alors que nvidia, npu et cuda
+  ont ete refaits en mai-juin. Et GPU est la plus vue des cinq avec 536 consultations.
+  La definition passe de 418 a 1125 caracteres et explique desormais le MECANISME (parallelisme
+  massif, unites dediees au calcul matriciel en basse precision, memoire HBM, interconnexions entre
+  puces, ecosysteme logiciel) la ou elle se contentait d affirmer que le GPU convient a l IA.
+  Le fait « le saviez-vous » annoncait une valeur boursiere de 2024 : remplace par un fait durable
+  et contre-intuitif, a savoir que dans un tres grand entrainement la limite n est souvent pas la
+  puissance des puces mais la vitesse de circulation des donnees entre elles.
+  Les deux sources sont remplacees. L ancienne source NVIDIA repondait 200 mais servait « About Us:
+  Company Leadership, History, Jobs, News » : l adresse avait ete redirigee vers une page generique.
+  Un code 200 ne prouve pas qu une source sert encore le document annonce, il faut lire le titre.
+  L autre etait Wikipedia, qui n est pas une source primaire. Les deux nouvelles sont verifiees avec
+  controle du titre servi.
+  Analogie, exemple ancre au Quebec, FAQ, icone, alias et strategie de correspondance sont
+  INCHANGES : on enrichit ce qui manque, on ne refait pas ce qui tient. Le down() de la migration
+  RESTAURE les anciennes valeurs plutot que de supprimer une fiche publiee depuis mars.
+
 ## [1.270.4] - 2026-09-13
 
 ### Ajoute
