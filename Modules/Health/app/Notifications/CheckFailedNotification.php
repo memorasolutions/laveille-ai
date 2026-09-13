@@ -52,9 +52,7 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
             ->line($urgent
                 ? 'Un contrôle de santé du site a échoué et demande une intervention rapide.'
                 : 'Un contrôle de santé du site approche d’une limite et doit être surveillé.')
-            ->line($urgent
-                ? 'Les visiteurs peuvent subir des ralentissements, des erreurs ou une indisponibilité si la situation persiste.'
-                : 'Les visiteurs ne sont pas nécessairement touchés maintenant, mais les performances pourraient se dégrader sans intervention.')
+            ->line($this->phraseImpact($urgent))
             ->line('---')
             ->line('Détails techniques et marche à suivre :');
 
@@ -151,12 +149,73 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
      * @param  array<string, mixed>  $meta
      * @return array<int, string>
      */
+    /**
+     * Controles dont l'echec n'a AUCUN effet sur un visiteur : ils arretent une chaine de FOND
+     * (enrichissement de l'annuaire, decouverte de nouveaux outils), pendant que le site continue
+     * de repondre normalement.
+     *
+     * RAISON D'ETRE (2026-09-13, signale par le fondateur sur un courriel reel) : la phrase
+     * d'impact etait posee sur TOUT echec, et annoncait « ralentissements, erreurs ou
+     * indisponibilite » pour un jeton d'API tiers refuse. C'etait faux, et une alerte qui exagere
+     * apprend a etre ignoree - le jour ou le courriel annoncera une vraie panne, il faut qu'on le
+     * croie. Le defaut preexistait pour OpenRouter ; ProductHunt l'a rendu visible.
+     */
+    private const CHECKS_CHAINE_INTERNE = [
+        OpenRouterCreditCheck::class,
+        ProductHuntApiCheck::class,
+    ];
+
+    /**
+     * Metadonnees qui servent au CODE (aiguillage de la marche a suivre) et jamais au lecteur.
+     */
+    private const META_INTERNES = ['cause'];
+
+    /**
+     * La phrase d'impact dit ce que le visiteur subit VRAIMENT.
+     *
+     * Regle de composition quand plusieurs controles echouent dans le meme courriel : le visiteur
+     * passe en premier. Des qu'UN SEUL controle d'infrastructure est en echec, c'est sa phrase qui
+     * s'applique, meme si trois chaines de fond sont tombees en meme temps.
+     */
+    private function phraseImpact(bool $urgent): string
+    {
+        $enEchec = collect($this->results)->reject(fn ($result): bool => $result->status->equals(Status::ok()));
+
+        $toucheLeVisiteur = $enEchec->contains(function ($result): bool {
+            foreach (self::CHECKS_CHAINE_INTERNE as $classe) {
+                if ($result->check instanceof $classe) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        if (! $toucheLeVisiteur) {
+            return $urgent
+                ? 'Le site reste accessible et les visiteurs ne sont pas touchés : c\'est une chaîne de fond qui est à l\'arrêt, et elle ne repartira pas seule.'
+                : 'Le site reste accessible et les visiteurs ne sont pas touchés : une chaîne de fond approche d\'une limite.';
+        }
+
+        return $urgent
+            ? 'Les visiteurs peuvent subir des ralentissements, des erreurs ou une indisponibilité si la situation persiste.'
+            : 'Les visiteurs ne sont pas nécessairement touchés maintenant, mais les performances pourraient se dégrader sans intervention.';
+    }
+
     private function mesuresLisibles(array $meta): array
     {
         $lignes = [];
 
         foreach ($meta as $cle => $valeur) {
             if (! is_scalar($valeur)) {
+                continue;
+            }
+
+            // Metadonnee INTERNE : elle sert a aiguiller la marche a suivre, pas a etre lue.
+            // Affichee telle quelle, elle donnait une ligne « cause : jeton » qui ne disait rien
+            // de plus que le resume deux lignes plus haut (signale par le fondateur le
+            // 2026-09-13, sur le premier courriel reellement envoye par ce mecanisme).
+            if (in_array($cle, self::META_INTERNES, true)) {
                 continue;
             }
 

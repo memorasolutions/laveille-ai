@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.271.2] - 2026-09-13
+
+### Corrige
+- **Le courriel d alerte annoncait une panne VISITEUR pour une panne qui n en est pas une**
+  (#2556), signale par le fondateur en recollant le premier courriel reellement envoye par le
+  mecanisme livre le matin meme. Le message disait « Les visiteurs peuvent subir des
+  ralentissements, des erreurs ou une indisponibilite » pour un jeton d API tiers refuse - or le
+  site repond normalement, rien n est lent, rien n est casse. Ce qui est a l arret est une chaine
+  de FOND.
+  La phrase etait posee sur TOUT echec depuis l origine, sans distinction de nature. Elle etait
+  donc **deja fausse pour OpenRouter** avant ce train ; le controle ProductHunt l a rendue visible,
+  et aggravee puisqu il reste rouge en permanence et repetait l exageration toutes les heures.
+  Desormais deux familles : les controles qui touchent le VISITEUR (base de donnees, cache, disque,
+  planificateur, OPcache) gardent EXACTEMENT leur phrase, et ceux qui arretent une chaine interne
+  (OpenRouter, ProductHunt) disent « Le site reste accessible et les visiteurs ne sont pas touches ».
+  Quand les deux familles echouent dans le meme courriel, **le visiteur passe en premier**.
+- **La ligne « cause : jeton » disparait du courriel** : cette metadonnee sert a aiguiller la
+  marche a suivre, elle n apprend rien au lecteur, et elle redisait le resume affiche deux lignes
+  plus haut. La marche a suivre continue de s aiguiller dessus.
+  6 tests neufs, contre-epreuve faite : en remettant la phrase generique pour tout le monde, les
+  deux tests de retenue virent au rouge, et ceux qui gardent la phrase des vraies pannes restent
+  verts. Suite Health complete : 83 tests, 204 assertions.
+
 ## [1.271.1] - 2026-09-13
 
 ### Corrige
