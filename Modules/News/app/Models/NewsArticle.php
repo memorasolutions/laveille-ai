@@ -328,6 +328,21 @@ class NewsArticle extends Model implements Searchable
     }
 
     /**
+     * Fiches de glossaire liées à cette actualité (curation manuelle ou auto). Jumelle exacte
+     * de tools() ci-dessus - même forme de relation, même pivot à 3 colonnes (source,
+     * timestamps) - voir NewsToolSyncAction (ticket #2524) pour l'écriture automatique.
+     */
+    public function terms(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            \Modules\Dictionary\Models\Term::class,
+            'news_article_term',
+            'news_article_id',
+            'term_id'
+        )->withPivot('source')->withTimestamps();
+    }
+
+    /**
      * Article(s) de blogue lié(s) à cette actualité (curation manuelle ou auto). Jumeau exact de
      * tools() ci-dessus (même forme de relation, même pivot à 3 colonnes) - seul le plafond de 1
      * diffère, et il n'est JAMAIS imposé ici (aucune contrainte SQL, même doctrine que le

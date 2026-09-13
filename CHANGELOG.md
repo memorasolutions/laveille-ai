@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.265.0] - 2026-09-13
+
+### Ajoute
+- **Socle du lien entre les fiches de glossaire et les actualités** (#2524, étape 2 du plan
+  `docs/specs/2026-09-11-glossaire-plan-complet.md`). Rien n'est encore visible sur le site : ce
+  train pose la donnée, la partie affichée est un lot séparé.
+  Le point remarquable est qu'aucun moteur de détection n'a été écrit. Il en existait déjà un, qui
+  tournait déjà sur chaque actualité : `GlossaryLinkifier` renvoie les correspondances de type
+  `glossary` en même temps que celles de type `tool`, et `NewsToolSyncAction::suggest()` les
+  calculait puis les jetait à la ligne suivante pour ne garder que les outils. Il suffisait de
+  cesser de les jeter.
+  - Table pivot `news_article_term`, jumelle exacte de `news_article_tool` (mêmes colonnes, même
+    contrainte unique, mêmes clés étrangères en cascade).
+  - Relations dans les deux sens : les termes d'une actualité, les actualités d'un terme.
+  - Écriture automatique avec `source` = `auto`, en ajout pur : une liaison existante, manuelle ou
+    automatique, n'est jamais touchée. Seuls les termes publiés sont liés.
+  - Commande de rattrapage `news:backfill-auto-terms` pour le corpus existant, jumelle de celle qui
+    existe pour les outils, avec les mêmes options et le même mode d'essai à blanc.
+  Une subtilité a été traitée au passage : le mode d'essai à blanc des commandes de rattrapage
+  annonce « aucune écriture ». Sans garde-fou, l'ajout l'aurait rendu menteur, puisque la détection
+  aurait écrit les termes malgré tout. Le drapeau qui porte cette garantie traverse donc l'appel.
+  Le traitement des outils est inchangé, et c'est vérifié par un test de non-régression dédié.
+
 ## [1.264.2] - 2026-09-12
 
 ### Corrige

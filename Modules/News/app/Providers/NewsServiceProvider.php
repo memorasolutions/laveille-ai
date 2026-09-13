@@ -70,6 +70,9 @@ class NewsServiceProvider extends ServiceProvider
             \Modules\News\Console\ReprocessArticlesCommand::class,
             \Modules\News\Console\PruneSeoCommand::class,
             \Modules\News\Console\BackfillAutoToolDetectionCommand::class,
+            // Ticket #2524 (2026-09-13, socle glossaire↔actualités) - jumelle exacte de
+            // BackfillAutoToolDetectionCommand ci-dessus, pour le pivot news_article_term.
+            \Modules\News\Console\BackfillAutoTermDetectionCommand::class,
             \Modules\News\Console\NotifyNewsDigestCommand::class,
             // Actus 2.0, révision 2026-08-17 (prompt d'orchestration Claude Code CLI) - SEULE
             // porte d'écriture bornée pour l'agent, voir docblock de la classe.

@@ -19,6 +19,7 @@ namespace Modules\News\Actions;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Services\GlossaryLinkifier;
+use Modules\Dictionary\Models\Term;
 use Modules\Directory\Models\Tool;
 use Modules\News\Models\NewsArticle;
 
@@ -272,34 +273,41 @@ final class NewsToolSyncAction
      *
      * Renvoie une Collection d'IDs d'outils (sans enregistrer - l'admin valide).
      *
+     * 2026-09-13 (ticket #2524, socle glossaire↔actualités) : EFFET DE BORD distinct de ce
+     * contrat « outils » - les correspondances de GLOSSAIRE (type='glossary') détectées par le
+     * même appel linkify() sont, elles, écrites immédiatement (source=auto) dans le pivot
+     * news_article_term via attachAutoGlossaryTerms() ci-dessous. Contrairement aux outils, il
+     * n'existe aucun écran d'admin qui valide un terme suggéré avant liaison dans ce lot (la
+     * partie visible est un chantier séparé) - la donnée brute est donc posée dès que le
+     * détecteur tourne, quel que soit l'appelant (Job de publication, admin, backfill réel).
+     *
+     * $persistAutoTerms=false PRÉSERVE le contrat « mesurer sans rien écrire » du mode
+     * --dry-run des commandes de rattrapage (outils ET termes) : sans ce garde-fou, un simple
+     * appel de simulation écrirait quand même dans news_article_term, ce que son propre message
+     * console (« Aucune écriture, aucune purge ») nierait faussement.
+     *
      * @return Collection<int, int>
      */
-    public function suggest(NewsArticle $article): Collection
+    public function suggest(NewsArticle $article, bool $persistAutoTerms = true): Collection
     {
         GlossaryLinkifier::resetState();
 
-        // ACTION : ne chercher QUE dans le texte RÉELLEMENT affiché au lecteur (décision
-        // mesurée du 2026-08-31 - voir docblock ci-dessus) - jamais dans le titre BRUT
-        // de la source ni dans description (déjà exclue depuis le design doc "Actus - zéro
-        // copie du texte source", 2026-08-13, section 4.1). Le titre suit EXACTEMENT le même
-        // repli que show.blade.php (seo_title ?? title) : un repli différent introduirait un
-        // nouvel écart entre ce qui est cherché et ce qui est vu. Le corps réutilise
-        // structuredBodyText() - source unique de vérité du corps affiché, déjà consommée par
-        // le JSON-LD et le temps de lecture - plutôt que de reconstruire ici la cascade
-        // résumé structuré aplati/summary : si cette cascade change un jour, ce mécanisme suit
-        // sans code additionnel.
-        // MCP: SELF (<5 lignes)
-        $displayedTitle = $article->seo_title ?? $article->title;
-
-        $text = implode(' ', array_filter([
-            strip_tags((string) $displayedTitle),
-            strip_tags($article->structuredBodyText()),
-        ]));
+        $text = $this->displayedText($article);
 
         GlossaryLinkifier::linkify($text);
 
         $matchedTerms = collect(GlossaryLinkifier::getLastMatchedTerms());
         $matchedTools = $matchedTerms->filter(fn (array $t) => ($t['type'] ?? '') === 'tool');
+
+        // ACTION : ticket #2524 (2026-09-13, socle glossaire↔actualités) - traitement PARALLÈLE
+        // des correspondances type='glossary', jusqu'ici jetées par le filtre ->filter() ci-dessus
+        // (elles ne survivent que dans $matchedTerms, jamais dans $matchedTools). N'altère ni
+        // $matchedTools ni rien de ce qui suit pour les outils - voir attachAutoGlossaryTerms()
+        // plus bas pour le détail de la résolution et de l'écriture (source=auto, ajout PUR).
+        // MCP: SELF (délègue à une méthode dédiée, cf. attachAutoGlossaryTerms ci-dessous)
+        if ($persistAutoTerms) {
+            $this->attachAutoGlossaryTerms($article, $matchedTerms);
+        }
 
         // 2026-07-04 : JSON_UNQUOTE indispensable sous MySQL (règle projet permanente, cf. #227/#306) -
         // sans lui, JSON_EXTRACT renvoie la valeur JSON-quotée (ex. "claude" avec guillemets littéraux),
@@ -353,5 +361,132 @@ final class NewsToolSyncAction
             : Tool::published()->whereIn("name->{$locale}", $namesMaskedByGlossary->all())->pluck('id');
 
         return $detectedBySlug->merge($detectedByName)->merge($neverAutoIds)->unique()->values();
+    }
+
+    /**
+     * Texte RÉELLEMENT affiché au lecteur (titre optimisé, à défaut le titre brut + corps
+     * affiché) - factorisé depuis suggest() (voir son docblock pour la mesure complète du
+     * 2026-08-31 : 350 fiches, 217 liens exploitables, 0 perte sur les vraies mentions) pour que
+     * suggest() ET suggestGlossaryTermIds() ci-dessous ne scannent JAMAIS un texte différent -
+     * toute divergence romprait la garantie « ce que le lecteur voit est ce qui justifie un
+     * lien », qu'il s'agisse d'un outil ou d'une fiche de glossaire.
+     * MCP: SELF (<5 lignes)
+     */
+    private function displayedText(NewsArticle $article): string
+    {
+        $displayedTitle = $article->seo_title ?? $article->title;
+
+        return implode(' ', array_filter([
+            strip_tags((string) $displayedTitle),
+            strip_tags($article->structuredBodyText()),
+        ]));
+    }
+
+    /**
+     * ACTION : ticket #2524 (2026-09-13, socle glossaire↔actualités) - attache automatiquement
+     * (source=auto) les fiches de GLOSSAIRE détectées par GlossaryLinkifier (type='glossary')
+     * dans le pivot news_article_term, jumeau de news_article_tool. Aucun nouveau moteur de
+     * détection : $matchedTerms provient du MÊME appel linkify() que celui déjà utilisé pour
+     * les outils dans suggest() - seule la capture change (elle était jusqu'ici jetée par le
+     * filtre ->filter(type==='tool')).
+     *
+     * Ajout PUR, même patron qu'attachAuto() : ne touche JAMAIS une liaison déjà existante
+     * (manuelle ou automatique), et n'écrit QUE des termes PUBLIÉS (résolution déléguée à
+     * resolveAutoGlossaryTermIds() ci-dessous, partagée avec la mesure en lecture seule).
+     *
+     * @param  Collection<int, array<string, mixed>>  $matchedTerms
+     * @return int nombre de termes effectivement attachés
+     */
+    private function attachAutoGlossaryTerms(NewsArticle $article, Collection $matchedTerms): int
+    {
+        $termIds = $this->resolveAutoGlossaryTermIds($matchedTerms);
+
+        if ($termIds->isEmpty()) {
+            return 0;
+        }
+
+        $existingIds = $article->terms()
+            ->pluck('dictionary_terms.id')
+            ->map(fn ($id) => (int) $id);
+
+        $newIds = $termIds->diff($existingIds)->values();
+
+        if ($newIds->isEmpty()) {
+            return 0;
+        }
+
+        $article->terms()->attach(
+            $newIds->mapWithKeys(fn (int $id) => [$id => ['source' => 'auto']])->all()
+        );
+
+        return $newIds->count();
+    }
+
+    /**
+     * Résout, SANS rien écrire, les IDs de fiches de glossaire PUBLIÉES présentes dans
+     * $matchedTerms (type='glossary') - coeur partagé par attachAutoGlossaryTerms() (écriture)
+     * et suggestGlossaryTermIds() (mesure pure, mode --dry-run de la commande de rattrapage).
+     *
+     * Résolution par le SLUG (traduit selon la locale courante), jamais par le nom ni par un
+     * identifiant : une entrée getLastMatchedTerms() de type 'glossary' ne porte PAS l'ID du
+     * terme (voir GlossaryLinkifier::loadTerms(), le tableau poussé dans $terms ne contient que
+     * name/slug/definition/type/url/match_strategy/origin_rank/exclude_suffix - jamais 'id').
+     * Le NOM varie selon l'alias qui a matché (nom canonique, alias manuel, alias dérivé du
+     * qualificatif, variante morphologique), mais le SLUG reste TOUJOURS celui de la fiche
+     * canonique (url = '/glossaire/'.$slug, posé une seule fois par fiche) - c'est donc la
+     * seule clé stable pour retrouver le Term, exactement le même principe que
+     * $slugsFromLinkifier = $matchedTools->pluck('slug') utilisé juste après dans suggest()
+     * pour les outils.
+     *
+     * Silencieux et sans effet si le module Dictionary est désactivé (class_exists), même
+     * garde que attachBySlug()/detachBySlug() ci-dessus.
+     *
+     * @param  Collection<int, array<string, mixed>>  $matchedTerms
+     * @return Collection<int, int>
+     */
+    private function resolveAutoGlossaryTermIds(Collection $matchedTerms): Collection
+    {
+        if (! class_exists(Term::class)) {
+            return collect();
+        }
+
+        $slugs = $matchedTerms
+            ->filter(fn (array $t) => ($t['type'] ?? '') === 'glossary')
+            ->pluck('slug')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($slugs->isEmpty()) {
+            return collect();
+        }
+
+        $locale = app()->getLocale();
+
+        return Term::published()
+            ->whereIn("slug->{$locale}", $slugs->all())
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->values();
+    }
+
+    /**
+     * ACTION : ticket #2524 (2026-09-13) - jumelle en LECTURE SEULE de suggest() pour le
+     * glossaire : détecte les fiches PUBLIÉES mentionnées dans le texte affiché, sans RIEN
+     * écrire. Utilisée par le mode simulation (--dry-run) de la commande de rattrapage
+     * news:backfill-auto-terms pour mesurer sans muter la base - le pendant exact de suggest()
+     * appelé (sans écriture, pour les outils) par le mode simulation de
+     * news:backfill-auto-tools.
+     *
+     * @return Collection<int, int>
+     */
+    public function suggestGlossaryTermIds(NewsArticle $article): Collection
+    {
+        GlossaryLinkifier::resetState();
+        GlossaryLinkifier::linkify($this->displayedText($article));
+
+        $matchedTerms = collect(GlossaryLinkifier::getLastMatchedTerms());
+
+        return $this->resolveAutoGlossaryTermIds($matchedTerms);
     }
 }

@@ -28,6 +28,7 @@ declare(strict_types=1);
  * majuscule ne suit directement le nom), sans dépendre d'un nom de produit qui n'existe pas.
  */
 
+use Illuminate\Support\Facades\DB;
 use Modules\Dictionary\Models\Term;
 use Modules\Directory\Models\Tool;
 use Modules\News\Actions\NewsToolSyncAction;
@@ -192,6 +193,167 @@ it('suggest() détecte un outil dont le nom est aussi une fiche de glossaire', f
     $suggested = app(NewsToolSyncAction::class)->suggest($article);
 
     expect($suggested->all())->toContain($tool->id);
+});
+
+// ── Ticket #2524 (2026-09-13, socle glossaire↔actualités) : suggest() attache aussi
+// automatiquement (source=auto) les fiches de GLOSSAIRE détectées, dans news_article_term -
+// en PARALLÈLE de la détection d'outils ci-dessus, qui doit rester STRICTEMENT inchangée. ──
+
+it('suggest() attache automatiquement (source=auto) un terme de glossaire PUBLIÉ mentionné dans le texte affiché', function () {
+    $term = Term::create([
+        'name'         => 'Vecteur Latent NTSA',
+        'slug'         => 'vecteur-latent-ntsa',
+        'definition'   => "Une représentation numérique compacte utilisée par les modèles d'IA.",
+        'is_published' => true,
+    ]);
+
+    $article = NewsArticle::create([
+        'news_source_id' => ntsaSource()->id,
+        'title'          => 'Une actualité qui explique le concept de Vecteur Latent NTSA',
+        'guid'           => 'guid-ntsa-terme-vecteur',
+        'url'            => 'https://exemple.com/ntsa-terme-vecteur',
+        'description'    => '',
+        'summary'        => '',
+        'structured_summary' => [
+            'hook' => 'Les chercheurs détaillent comment le Vecteur Latent NTSA structure les données.',
+            'key_points' => [],
+            'why_important' => 'Ce concept explique une part du fonctionnement des modèles actuels.',
+        ],
+        'slug'         => 'article-ntsa-terme-vecteur',
+        'pub_date'     => now()->subDay(),
+        'is_published' => true,
+        'seo_status'   => 'index',
+    ]);
+
+    app(NewsToolSyncAction::class)->suggest($article);
+
+    $pivot = DB::table('news_article_term')
+        ->where('news_article_id', $article->id)
+        ->where('term_id', $term->id)
+        ->first();
+
+    expect($pivot)->not->toBeNull();
+    expect($pivot->source)->toBe('auto');
+});
+
+it('suggest() ne lie jamais un terme de glossaire NON publié (témoin négatif)', function () {
+    $term = Term::create([
+        'name'         => 'Brouillon Glossaire NTSA',
+        'slug'         => 'brouillon-glossaire-ntsa',
+        'definition'   => 'Une fiche de glossaire encore en brouillon.',
+        'is_published' => false,
+    ]);
+
+    $article = NewsArticle::create([
+        'news_source_id' => ntsaSource()->id,
+        'title'          => 'Une actualité qui mentionne Brouillon Glossaire NTSA',
+        'guid'           => 'guid-ntsa-terme-brouillon',
+        'url'            => 'https://exemple.com/ntsa-terme-brouillon',
+        'description'    => '',
+        'summary'        => '',
+        'structured_summary' => [
+            'hook' => 'Le concept de Brouillon Glossaire NTSA reste à valider par la rédaction.',
+            'key_points' => [],
+            'why_important' => "Un terme non publié ne doit jamais apparaître comme une source légitime.",
+        ],
+        'slug'         => 'article-ntsa-terme-brouillon',
+        'pub_date'     => now()->subDay(),
+        'is_published' => true,
+        'seo_status'   => 'index',
+    ]);
+
+    app(NewsToolSyncAction::class)->suggest($article);
+
+    $pivot = DB::table('news_article_term')
+        ->where('news_article_id', $article->id)
+        ->where('term_id', $term->id)
+        ->first();
+
+    expect($pivot)->toBeNull();
+});
+
+it('relancer suggest() sur la même actualité ne crée pas de doublon dans news_article_term (idempotence)', function () {
+    $term = Term::create([
+        'name'         => 'Fenetre De Contexte NTSA',
+        'slug'         => 'fenetre-de-contexte-ntsa',
+        'definition'   => "La quantité de texte qu'un modèle peut traiter en une seule fois.",
+        'is_published' => true,
+    ]);
+
+    $article = NewsArticle::create([
+        'news_source_id' => ntsaSource()->id,
+        'title'          => "La Fenetre De Contexte NTSA s'agrandit chez plusieurs fournisseurs",
+        'guid'           => 'guid-ntsa-terme-idempotent',
+        'url'            => 'https://exemple.com/ntsa-terme-idempotent',
+        'description'    => '',
+        'summary'        => '',
+        'structured_summary' => [
+            'hook' => 'La Fenetre De Contexte NTSA permet de traiter des documents plus longs.',
+            'key_points' => [],
+            'why_important' => 'Cette évolution change la manière dont les modèles sont utilisés.',
+        ],
+        'slug'         => 'article-ntsa-terme-idempotent',
+        'pub_date'     => now()->subDay(),
+        'is_published' => true,
+        'seo_status'   => 'index',
+    ]);
+
+    app(NewsToolSyncAction::class)->suggest($article);
+    app(NewsToolSyncAction::class)->suggest($article);
+
+    $liaisons = DB::table('news_article_term')
+        ->where('news_article_id', $article->id)
+        ->where('term_id', $term->id)
+        ->count();
+
+    expect($liaisons)->toBe(1);
+});
+
+// ── Non-régression : la détection des OUTILS ne doit JAMAIS être affectée par l'écriture
+// parallèle des termes de glossaire ci-dessus - même texte, un outil ET un terme distincts. ──
+
+it('suggest() détecte toujours un outil correctement quand un terme de glossaire est aussi présent dans le même texte (non-régression)', function () {
+    $tool = ntsaTool('Redigeo NTSA', 'redigeo-ntsa');
+    $term = Term::create([
+        'name'         => 'Apprentissage Federe NTSA',
+        'slug'         => 'apprentissage-federe-ntsa',
+        'definition'   => "Une méthode d'entraînement distribuée qui ne centralise jamais les données.",
+        'is_published' => true,
+    ]);
+
+    $article = NewsArticle::create([
+        'news_source_id' => ntsaSource()->id,
+        'title'          => 'Une actualité qui combine outil et concept de glossaire',
+        'guid'           => 'guid-ntsa-outil-et-terme',
+        'url'            => 'https://exemple.com/ntsa-outil-et-terme',
+        'description'    => '',
+        'summary'        => '',
+        'structured_summary' => [
+            'hook' => "Redigeo NTSA s'appuie sur l'Apprentissage Federe NTSA pour améliorer ses suggestions.",
+            'key_points' => [
+                'Redigeo NTSA a annoncé cette intégration cette semaine.',
+            ],
+            'why_important' => 'Cette combinaison illustre une tendance de fond.',
+        ],
+        'slug'         => 'article-ntsa-outil-et-terme',
+        'pub_date'     => now()->subDay(),
+        'is_published' => true,
+        'seo_status'   => 'index',
+    ]);
+
+    $suggested = app(NewsToolSyncAction::class)->suggest($article);
+
+    // L'outil est toujours détecté exactement comme avant l'ajout du traitement parallèle
+    // des termes de glossaire - c'est la preuve de non-régression exigée par le ticket #2524.
+    expect($suggested->all())->toContain($tool->id);
+
+    $pivotTerme = DB::table('news_article_term')
+        ->where('news_article_id', $article->id)
+        ->where('term_id', $term->id)
+        ->first();
+
+    expect($pivotTerme)->not->toBeNull();
+    expect($pivotTerme->source)->toBe('auto');
 });
 
 // ── Faille fermée le 2026-08-28 : un nom de TOOL_NEVER_RECAPTURE ne doit JAMAIS être
@@ -440,4 +602,81 @@ it('detachBySlug() rapporte un slug introuvable dans l\'annuaire sans rien déta
 
     expect($result['unknown'])->toBe(['jamais-existe'])
         ->and($result['detached_count'])->toBe(0);
+});
+
+// ── Ticket #2524 (2026-09-13) : commande de rattrapage news:backfill-auto-terms, jumelle
+// exacte de news:backfill-auto-tools (voir BackfillAutoToolDetectionCommandTest.php) - pour le
+// pivot news_article_term. Smoke-test de bout en bout de la commande elle-même (au-delà de
+// suggest()/suggestGlossaryTermIds() déjà couverts ci-dessus). ──
+
+it('news:backfill-auto-terms en --dry-run ne fait aucune écriture', function () {
+    Term::create([
+        'name'         => 'Distillation De Modele NTSA',
+        'slug'         => 'distillation-de-modele-ntsa',
+        'definition'   => "Le transfert des connaissances d'un grand modèle vers un plus petit.",
+        'is_published' => true,
+    ]);
+
+    $source = ntsaSource();
+    $article = NewsArticle::withoutEvents(fn () => NewsArticle::create([
+        'news_source_id' => $source->id,
+        'title'          => 'La Distillation De Modele NTSA gagne en popularité',
+        'guid'           => 'guid-ntsa-backfill-terme-dryrun',
+        'url'            => 'https://exemple.com/ntsa-backfill-terme-dryrun',
+        'description'    => '',
+        'summary'        => "La Distillation De Modele NTSA réduit les coûts d'inférence.",
+        'slug'           => 'article-ntsa-backfill-terme-dryrun',
+        'pub_date'       => now()->subDay(),
+        'is_published'   => true,
+        'seo_status'     => 'index',
+    ]));
+
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50, '--dry-run' => true])
+        ->assertExitCode(0);
+
+    expect(DB::table('news_article_term')->where('news_article_id', $article->id)->count())->toBe(0);
+});
+
+it('news:backfill-auto-terms hors simulation attache réellement (source=auto) le terme mentionné', function () {
+    $term = Term::create([
+        'name'         => 'Distillation De Modele Reelle NTSA',
+        'slug'         => 'distillation-de-modele-reelle-ntsa',
+        'definition'   => "Le transfert des connaissances d'un grand modèle vers un plus petit.",
+        'is_published' => true,
+    ]);
+
+    $source = ntsaSource();
+    $article = NewsArticle::withoutEvents(fn () => NewsArticle::create([
+        'news_source_id' => $source->id,
+        'title'          => 'La Distillation De Modele Reelle NTSA gagne en popularité',
+        'guid'           => 'guid-ntsa-backfill-terme-reel',
+        'url'            => 'https://exemple.com/ntsa-backfill-terme-reel',
+        'description'    => '',
+        'summary'        => "La Distillation De Modele Reelle NTSA réduit les coûts d'inférence.",
+        'slug'           => 'article-ntsa-backfill-terme-reel',
+        'pub_date'       => now()->subDay(),
+        'is_published'   => true,
+        'seo_status'     => 'index',
+    ]));
+
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50])
+        ->assertExitCode(0);
+
+    $pivot = DB::table('news_article_term')
+        ->where('news_article_id', $article->id)
+        ->where('term_id', $term->id)
+        ->first();
+
+    expect($pivot)->not->toBeNull();
+    expect($pivot->source)->toBe('auto');
+
+    // Relancer sans nouvelle mention ne crée aucun doublon (idempotence, cf. whereDoesntHave
+    // ('terms') dans la commande - l'article n'apparaît plus dans son propre périmètre).
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50])
+        ->assertExitCode(0);
+
+    expect(DB::table('news_article_term')
+        ->where('news_article_id', $article->id)
+        ->where('term_id', $term->id)
+        ->count())->toBe(1);
 });

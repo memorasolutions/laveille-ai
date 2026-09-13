@@ -57,7 +57,14 @@ class BackfillAutoToolDetectionCommand extends Command
         $reparables = 0;
 
         foreach ($articles as $article) {
-            $suggested = $action->suggest($article);
+            // ACTION : ticket #2524 (2026-09-13) - suggest() écrit désormais aussi (source=auto)
+            // les fiches de glossaire détectées dans news_article_term, en PARALLÈLE du présent
+            // rattrapage des outils (comportement des outils lui-même strictement inchangé).
+            // persistAutoTerms:false en --dry-run PRÉSERVE le contrat "Aucune écriture, aucune
+            // purge" affiché plus bas par cette même commande - sans ce garde, la simulation
+            // écrirait quand même dans news_article_term, rendant ce message faux.
+            // MCP: SELF (<5 lignes)
+            $suggested = $action->suggest($article, persistAutoTerms: ! $dryRun);
 
             if ($suggested->isNotEmpty()) {
                 $reparables++;

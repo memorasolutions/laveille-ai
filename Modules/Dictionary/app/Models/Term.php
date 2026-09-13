@@ -12,6 +12,7 @@ namespace Modules\Dictionary\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Core\Concerns\HasAdminShareContents;
 use Modules\Core\Contracts\Searchable;
 use Modules\Core\Traits\HasFallbackTranslatedSlug;
@@ -94,6 +95,22 @@ class Term extends Model implements Searchable
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'dictionary_category_id');
+    }
+
+    /**
+     * Actualités liées à cette fiche de glossaire (curation manuelle ou auto). Jumelle exacte
+     * de Modules\Directory\Models\Tool::newsArticles() - même forme de relation, même pivot à
+     * 3 colonnes (source, timestamps) - voir Modules\News\Actions\NewsToolSyncAction (ticket
+     * #2524) pour l'écriture automatique côté news_article_term.
+     */
+    public function newsArticles(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            \Modules\News\Models\NewsArticle::class,
+            'news_article_term',
+            'term_id',
+            'news_article_id'
+        )->withPivot('source')->withTimestamps();
     }
 
     // 2026-05-05 #144 : scopePublished mutualise via HasPublishedState (DRY Core).
