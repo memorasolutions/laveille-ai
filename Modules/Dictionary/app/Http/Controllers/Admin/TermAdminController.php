@@ -41,6 +41,10 @@ class TermAdminController extends Controller
             'type' => 'required|in:acronym,ai_term,explainer',
             'dictionary_category_id' => 'nullable|exists:dictionary_categories,id',
             'is_published' => 'nullable|boolean',
+            // Ticket #2528 (2026-09-13) : cette colonne n'est lue par AUCUN tri de termes (le glossaire public
+            // et la liste admin trient par nom, seules les catégories utilisent sort_order) ; le champ a donc
+            // été retiré du formulaire. On la conserve intacte pour ne rien détruire : la rebrancher ne coûterait
+            // que deux lignes si un besoin réel de tri manuel apparaissait.
             'sort_order' => 'nullable|integer',
             // 2026-05-06 #157 : auto-link WSD
             'match_strategy' => 'nullable|in:loose,partial_case_sensitive,case_sensitive,exact_phrase,never_auto',
@@ -82,6 +86,7 @@ class TermAdminController extends Controller
             'type' => 'required|in:acronym,ai_term,explainer',
             'dictionary_category_id' => 'nullable|exists:dictionary_categories,id',
             'is_published' => 'nullable|boolean',
+            // Ticket #2528 : champ retiré du formulaire, voir le motif complet dans store() ci-dessus.
             'sort_order' => 'nullable|integer',
             'match_strategy' => 'nullable|in:loose,partial_case_sensitive,case_sensitive,exact_phrase,never_auto',
             'aliases' => 'nullable|string',

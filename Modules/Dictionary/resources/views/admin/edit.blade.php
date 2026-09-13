@@ -70,14 +70,6 @@
                     <label class="form-check-label" for="is_published">Publié</label>
                 </div>
 
-                <div class="mb-3">
-                    <label for="sort_order" class="form-label">Ordre d'affichage</label>
-                    <input type="number" class="form-control @error('sort_order') is-invalid @enderror" id="sort_order" name="sort_order" value="{{ old('sort_order', $term->sort_order) }}">
-                    @error('sort_order')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i data-lucide="save"></i> Mettre à jour

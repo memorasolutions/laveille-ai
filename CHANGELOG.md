@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.270.1] - 2026-09-13
+
+### Corrige
+- **Le champ « Ordre d'affichage » des fiches de glossaire promettait un effet qu'il n'avait pas**
+  (#2528). Il était présenté dans le formulaire, validé, enregistré... et jamais lu. Le glossaire
+  public trie les termes par nom, la liste d'administration aussi, et les termes associés ne sont
+  pas triés du tout. Les seuls tris par cette colonne portent sur les CATÉGORIES, jamais sur les
+  termes. Un administrateur y saisissait une valeur, la sauvegarde réussissait, et rien ne bougeait.
+  **On retire le champ plutôt que de brancher le tri**, et c'est une décision : pour un glossaire,
+  l'ordre alphabétique est le bon ordre, parce qu'on y cherche un mot plutôt qu'on ne parcourt un
+  classement. Un ordre manuel sur 530 termes se désynchroniserait au premier ajout. Le comportement
+  était donc correct ; c'est la promesse affichée qui était de trop.
+  La colonne, le modèle et la validation restent INTACTS : aucune donnée n'est perdue, un appel qui
+  enverrait encore ce paramètre ne provoque aucune erreur, et la rebrancher un jour ne coûterait
+  que deux lignes. Le motif est écrit dans le contrôleur, à l'endroit exact où quelqu'un le
+  cherchera.
+
 ## [1.270.0] - 2026-09-13
 
 ### Ajoute
