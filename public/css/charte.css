@@ -19,6 +19,15 @@
     --c-dark: #1A1D23;
     --c-text-secondary: #4a4f5c;
     --c-text-muted: #52586a;
+    /* Note du bandeau de cycle de vie (lifecycle-banner.blade.php) : --c-text-muted (#52586a) y
+       échoue AAA sur le fond de statut le plus sombre (#EDEEF0 = 6,11:1, seuil 7:1). #3F4557
+       passe (8,22:1) sur ce pire cas, donc sur les 8 fonds de statut - audit bandeau cycle de
+       vie 2026-09-13. */
+    --c-lifecycle-note: #3F4557;
+    /* Titre du bandeau de cycle de vie (lifecycle-banner.blade.php) : valeur identique au rendu
+       actuel (#1a1a1a codé en dur) - AUCUN changement visuel en thème clair, seulement une
+       variable pour permettre une redéfinition propre en thème sombre (voir dark.css). */
+    --c-lifecycle-title: #1a1a1a;
     --f-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --f-body: 'DM Sans', system-ui, -apple-system, sans-serif;
     --c-danger: #DC2626;

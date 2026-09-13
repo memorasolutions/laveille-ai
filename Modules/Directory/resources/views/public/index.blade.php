@@ -82,9 +82,10 @@
             'lifecycleStatus' => $tool->lifecycle_status ?? 'active',
             'lifecycleLabel' => $tool->lifecycle_label ?? '',
             'lifecycleColor' => $tool->lifecycle_color ?? '#374151',
-            'lifecycleIconFa' => (function ($icon) {
-                $map = ['fa-circle-check'=>'fa-check-circle','fa-flask'=>'fa-flask','fa-pause-circle'=>'fa-pause-circle','fa-tag'=>'fa-tag','fa-shuffle'=>'fa-random','fa-handshake'=>'fa-handshake-o','fa-circle-xmark'=>'fa-times-circle','fa-triangle-exclamation'=>'fa-exclamation-triangle'];
-                return $map[$icon] ?? $icon;
+            // Correspondance d'icônes lue depuis Modules/Core/app/Traits/HasLifecycleStatus.php
+            // (source unique, voir lifecycleIconMap() - même table que lifecycle-banner.blade.php).
+            'lifecycleIconFa' => (function ($icon) use ($tool) {
+                return $tool::lifecycleIconMap()[$icon] ?? $icon;
             })($tool->lifecycle_icon ?? 'fa-circle-check'),
             'isLifecycleActive' => (bool) $tool->is_lifecycle_active,
             'isLifecycleDown' => (bool) $tool->is_lifecycle_down,

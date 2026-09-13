@@ -107,13 +107,51 @@ trait HasLifecycleStatus
         ], true);
     }
 
+    /**
+     * Source UNIQUE du message du bandeau de statut, pour la fiche (lifecycle-banner.blade.php)
+     * ET pour la carte de la liste (index.blade.php, via lifecycleBannerMsg). Avant ce correctif,
+     * le composant Blade portait sa propre table $messages (7 clés) pendant que cet accesseur
+     * n'en couvrait que 2 (closed, scam) - les deux textes avaient déjà divergé (point final,
+     * formulation de « scam »). Les textes ci-dessous reprennent VERBATIM ceux du composant, qui
+     * étaient les plus complets. 'beta' reste ici pour fidélité au composant d'origine, mais n'est
+     * jamais affiché en pratique : is_lifecycle_active classe 'beta' comme actif, et les deux vues
+     * consommatrices se ferment sur is_lifecycle_active / is_lifecycle_down avant d'y arriver -
+     * comportement inchangé, pas une régression introduite ici.
+     * Repli 'Statut : <libellé>' conservé pour tout statut inconnu du tableau (ex. 'archived',
+     * présent en base sur des fiches mais absent de lifecycleStatuses()).
+     */
     public function getLifecycleBannerMessageAttribute(): string
     {
         return match ($this->lifecycle_status) {
-            self::STATUS_CLOSED => 'Cette plateforme a fermé ses portes',
-            self::STATUS_SCAM => 'Site signalé comme arnaque – évitez-le',
+            self::STATUS_CLOSED => 'Cette plateforme a fermé ses portes.',
+            self::STATUS_ACQUIRED => 'Cette plateforme a été acquise par une autre entreprise.',
+            self::STATUS_RENAMED => 'Cette plateforme a été renommée.',
+            self::STATUS_PIVOTED => 'Cette plateforme a pivoté vers un nouveau positionnement.',
+            self::STATUS_PAUSED => 'Cette plateforme est temporairement en pause.',
+            self::STATUS_SCAM => '⚠️ Cette plateforme est signalée comme arnaque – évitez-la.',
+            self::STATUS_BETA => 'Cette plateforme est en phase bêta – fonctionnalités en développement.',
             default => 'Statut : ' . $this->lifecycle_label,
         };
+    }
+
+    /**
+     * Correspondance FontAwesome 6 (identifiants utilisés dans lifecycleStatuses() ci-dessus) vers
+     * FontAwesome 4 (bibliothèque chargée par le gabarit public). Source UNIQUE : cette table de
+     * 8 paires était recopiée à l'identique dans lifecycle-banner.blade.php ET dans index.blade.php,
+     * sans lien entre les deux copies.
+     */
+    public static function lifecycleIconMap(): array
+    {
+        return [
+            'fa-circle-check' => 'fa-check-circle',
+            'fa-flask' => 'fa-flask',
+            'fa-pause-circle' => 'fa-pause-circle',
+            'fa-tag' => 'fa-tag',
+            'fa-shuffle' => 'fa-random',
+            'fa-handshake' => 'fa-handshake-o',
+            'fa-circle-xmark' => 'fa-times-circle',
+            'fa-triangle-exclamation' => 'fa-exclamation-triangle',
+        ];
     }
 
     public function scopeLifecycle(Builder $query, string $status): Builder

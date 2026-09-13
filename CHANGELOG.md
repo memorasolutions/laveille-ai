@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.270.3] - 2026-09-13
+
+### Corrige
+- **Le message du bandeau de cycle de vie était écrit à DEUX endroits, qui disaient déjà deux
+  phrases différentes** (#2539). Le trait `HasLifecycleStatus` alimentait les cartes de la liste
+  du répertoire et ne couvrait que 2 statuts sur 8 ; le composant `lifecycle-banner` alimentait
+  la fiche et portait sa propre table de 7 messages. Les textes avaient divergé sans que personne
+  ne le voie : la carte affichait « Cette plateforme a fermé ses portes » et la fiche
+  « Cette plateforme a fermé ses portes. », et pour un statut « en pause » la carte disait
+  « Statut : En pause » quand la fiche disait « Cette plateforme est temporairement en pause. »
+  La même remarque vaut pour la table de correspondance des icônes, recopiée à l'identique dans
+  le composant et dans la liste. Les deux vivent désormais dans le trait, source unique, et les
+  deux vues y puisent. Un test le verrouille en comparant, pour chaque statut, le texte rendu
+  dans la fiche au texte de l'accesseur - il rougit si les deux se remettent à diverger.
+- **Le bandeau échouait le contraste AAA sur les huit statuts** (#2539). Sa note héritait de
+  `--c-text-muted` (#52586a), qui donne 6,05 à 6,55:1 selon le fond de statut, sous le seuil de
+  7:1 que la charte du projet impose. Une teinte dédiée (#3F4557) porte le pire cas à 8,15:1.
+- **Le titre du bandeau était invisible en thème sombre** (#2539). Sa couleur était écrite en dur
+  (#1a1a1a) : sur le fond translucide du bandeau posé sur une page sombre, cela donnait 1,00 à
+  1,10:1, c'est-à-dire du noir sur du noir. La phrase la plus importante du bandeau - celle qui
+  annonce la fermeture ou la mise en pause - ne se lisait pas, alors que la note juste en dessous,
+  elle, restait lisible. Le titre passe par une variable redéfinie en sombre (#F2F5F9), qui donne
+  14,50 à 15,94:1. Le rendu en thème clair est inchangé.
+
 ## [1.270.2] - 2026-09-13
 
 ### Corrige

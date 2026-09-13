@@ -2,35 +2,16 @@
 
 @if(! $tool->is_lifecycle_active)
 @php
-    $iconMap = [
-        'fa-circle-check'          => 'fa-check-circle',
-        'fa-flask'                 => 'fa-flask',
-        'fa-pause-circle'          => 'fa-pause-circle',
-        'fa-tag'                   => 'fa-tag',
-        'fa-shuffle'               => 'fa-random',
-        'fa-handshake'             => 'fa-handshake-o',
-        'fa-circle-xmark'          => 'fa-times-circle',
-        'fa-triangle-exclamation'  => 'fa-exclamation-triangle',
-    ];
-
+    // Message et icône lus depuis Modules/Core/app/Traits/HasLifecycleStatus.php (source unique -
+    // ce composant portait auparavant ses propres tables $messages/$iconMap, recopiées à
+    // l'identique dans index.blade.php, et les deux copies avaient déjà divergé).
     $rawIcon = $tool->lifecycle_icon;
-    $faClass = 'fa ' . ($iconMap[$rawIcon] ?? $rawIcon);
+    $faClass = 'fa ' . ($tool::lifecycleIconMap()[$rawIcon] ?? $rawIcon);
     $label   = $tool->lifecycle_label;
     $color   = $tool->lifecycle_color;
-    $status  = $tool->lifecycle_status;
     $date    = $tool->lifecycle_date;
     $notes   = $tool->lifecycle_notes;
-
-    $messages = [
-        'closed'   => 'Cette plateforme a fermé ses portes.',
-        'acquired' => 'Cette plateforme a été acquise par une autre entreprise.',
-        'renamed'  => 'Cette plateforme a été renommée.',
-        'pivoted'  => 'Cette plateforme a pivoté vers un nouveau positionnement.',
-        'paused'   => 'Cette plateforme est temporairement en pause.',
-        'scam'     => '⚠️ Cette plateforme est signalée comme arnaque – évitez-la.',
-        'beta'     => 'Cette plateforme est en phase bêta – fonctionnalités en développement.',
-    ];
-    $message = $messages[$status] ?? ('Statut : ' . $label);
+    $message = $tool->lifecycle_banner_message;
 
     $bgColor     = $color . '1A'; // ~10% opacité en hex
     $borderColor = $color;
@@ -58,7 +39,7 @@
         align-items: flex-start;
         gap: 16px;
         font-family: inherit;
-        color: var(--c-text-muted, #555);
+        color: var(--c-lifecycle-note, #3F4557);
     "
 >
     <div style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:40px;height:40px">
@@ -66,7 +47,7 @@
     </div>
 
     <div style="flex:1;min-width:0">
-        <h3 style="margin:0 0 4px 0;font-size:16px;font-weight:700;color:#1a1a1a;line-height:1.4">
+        <h3 style="margin:0 0 4px 0;font-size:16px;font-weight:700;color:var(--c-lifecycle-title,#1a1a1a);line-height:1.4">
             {{ $message }}
             @if($date)
                 <span style="font-weight:400;font-size:14px;opacity:.75">
@@ -76,7 +57,7 @@
         </h3>
 
         @if($notes)
-            <p style="margin:6px 0 0 0;font-size:14px;line-height:1.55;color:var(--c-text-muted,#666)">
+            <p style="margin:6px 0 0 0;font-size:14px;line-height:1.55;color:var(--c-lifecycle-note,#3F4557)">
                 {{ $notes }}
             </p>
         @endif

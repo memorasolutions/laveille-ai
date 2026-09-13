@@ -5,6 +5,15 @@ html[data-theme="dark"] {
   --c-dark: #E6E8EC;
   --c-text-secondary: #C2C7D0;
   --c-text-muted: #A7AEBA;
+  /* Même valeur que --c-text-muted en sombre : le fond du bandeau de cycle de vie reste
+     translucide sur fond sombre, la note doit y rester claire - voir charte.css pour la mesure
+     AAA en thème clair (audit bandeau cycle de vie 2026-09-13). */
+  --c-lifecycle-note: #A7AEBA;
+  /* Titre du bandeau de cycle de vie : #1a1a1a codé en dur était noir sur noir en thème sombre
+     (mesuré 1,00 à 1,10:1 sur les 6 statuts atteignables - phrase la plus importante du bandeau
+     invisible sur les 9 fiches concernées). #F2F5F9 passe AAA sur les 8 fonds de statut (14,50 à
+     15,94:1, pire cas paused) - audit bandeau cycle de vie 2026-09-13. */
+  --c-lifecycle-title: #F2F5F9;
   --c-surface: #1A1E25;
   --c-primary-light: #0E2A30;
   --c-primary-badge: #0E2A30;
