@@ -33,9 +33,22 @@ Route::middleware('web')->group(function () {
     })->where('id', '[0-9]+');
 
     // P17 #235 — wrapper smart : si slug existe affiche fiche, sinon 301 vers /actualites
-    Route::get('/actualites/{slug}', function (string $slug) {
+    Route::get('/actualites/{slug}', function (\Illuminate\Http\Request $request, string $slug) {
         $article = \Modules\News\Models\NewsArticle::where('slug', $slug)->first();
         if (! $article) {
+            // Ticket #2522 : les redirections curatées (table url_redirects) vivent dans le
+            // gestionnaire d'exception 404 de bootstrap/app.php, jamais atteint ici puisque ce
+            // repli répond lui-même au lieu de laisser le 404 survenir - ce qui a rendu 242
+            // redirections du préfixe /actualites/ invisibles d'avril 2026 au 2026-09-13. On
+            // consulte donc la table avant de retomber sur /actualites, sans rien changer au
+            // repli lui-même quand elle n'a pas de réponse.
+            if (class_exists(\Modules\SEO\Models\UrlRedirect::class)) {
+                $redirect = \Modules\SEO\Models\UrlRedirect::resolveForPath('/'.ltrim($request->path(), '/'));
+                if ($redirect) {
+                    return redirect($redirect->to_url, $redirect->status_code);
+                }
+            }
+
             return redirect('/actualites', 301);
         }
 

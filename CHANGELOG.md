@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.265.1] - 2026-09-13
+
+### Corrige
+- **244 redirections curatées étaient mortes depuis avril 2026, et rien ne le signalait** (#2522).
+  Les redirections d'URL vivent dans le gestionnaire d'exception 404 : elles ne sont consultées
+  que lorsqu'aucune route n'a répondu. Or deux routes, introduites par le ticket P17 #235,
+  répondaient elles-mêmes par un repli au lieu de laisser le 404 survenir : `/actualites/{slug}`
+  renvoyait vers la liste des actualités quand le slug était inconnu, et `/outil/{slug?}` vers la
+  liste des outils. Le gestionnaire n'était donc jamais atteint pour ces deux préfixes, ce qui a
+  rendu invisibles 242 redirections d'articles et 2 d'outils.
+  Mesuré sur le site servi : douze redirections `/actualites/` tirées au hasard, douze renvoyées
+  vers la page de liste au lieu de leur article. Les compteurs de visites confirment la date, ils
+  sont figés en avril et mai 2026, et plusieurs lignes n'ont jamais enregistré une seule visite.
+  Les deux replis consultent désormais la table avant de se déclencher. Le repli lui-même est
+  conservé, parce qu'il reste légitime pour un vieux lien sans redirection curatée : il cède
+  simplement le pas à une curation humaine. L'appel est protégé par `class_exists()`, pour qu'un
+  module SEO désactivé ne casse rien.
+  Les autres familles de redirections (annuaire, catégories, acronymes) ont été testées une par
+  une : elles fonctionnaient et n'ont pas été touchées.
+  **Ce que ce défaut coûtait vraiment** : une redirection 301 vers une page de liste affirme à un
+  moteur une équivalence entre l'ancienne adresse et un contenu sans rapport. Un 404 aurait été
+  plus honnête que ce qui a été servi pendant quatre mois.
+
 ## [1.265.0] - 2026-09-13
 
 ### Ajoute

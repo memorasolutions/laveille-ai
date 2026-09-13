@@ -23,12 +23,9 @@ Route::middleware('web')->group(function () {
     Route::get('/outils', [PublicToolController::class, 'index'])->name('tools.index')->middleware('cacheResponse:600');
 
     // P17 #235 — redirects 301 /outil/{slug} (singular, typo legacy) → /outils ou /outils/{slug} si match
-    Route::get('/outil/{slug?}', function (?string $slug = null) {
-        if (! $slug) {
-            return redirect('/outils', 301);
-        }
+    Route::get('/outil/{slug?}', function (\Illuminate\Http\Request $request, ?string $slug = null) {
         // Si le slug existe en DB (Tools), redirige vers la fiche, sinon vers l'index /outils
-        if (class_exists(\Modules\Tools\Models\Tool::class)) {
+        if ($slug && class_exists(\Modules\Tools\Models\Tool::class)) {
             try {
                 $exists = \Modules\Tools\Models\Tool::where('slug', $slug)->exists();
                 if ($exists) {
@@ -38,6 +35,20 @@ Route::middleware('web')->group(function () {
                 // ignore — fallback vers /outils
             }
         }
+
+        // Ticket #2522 : les redirections curatées (table url_redirects) vivent dans le
+        // gestionnaire d'exception 404 de bootstrap/app.php, jamais atteint ici puisque ce
+        // repli répond lui-même au lieu de laisser le 404 survenir - ce qui a rendu 2
+        // redirections du préfixe /outil/ invisibles d'avril 2026 au 2026-09-13. On consulte
+        // donc la table avant de retomber sur /outils, sans rien changer au repli lui-même
+        // quand elle n'a pas de réponse.
+        if (class_exists(\Modules\SEO\Models\UrlRedirect::class)) {
+            $redirect = \Modules\SEO\Models\UrlRedirect::resolveForPath('/'.ltrim($request->path(), '/'));
+            if ($redirect) {
+                return redirect($redirect->to_url, $redirect->status_code);
+            }
+        }
+
         return redirect('/outils', 301);
     })->where('slug', '[a-z0-9\-]*')->name('tools.singular.redirect');
 
