@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.264.0] - 2026-09-12
+
+### Ajoute
+- **Actualités : la nature de la source primaire devient une information pour le lecteur,
+  jamais une étiquette technique** (#2329). Le champ `nature_original` était rempli depuis
+  trois tickets et n'était affiché à AUCUN visiteur. La question posée était « interne ou
+  public » ; la réponse retenue est une troisième voie, parce que les huit valeurs ne se
+  valent pas. « Article journalistique », le cas le plus fréquent, n'apprend rien à qui voit
+  déjà le nom du média cité. Trois valeurs, à l'inverse, changent la confiance à accorder au
+  fait rapporté : elles seules déclenchent désormais une phrase rédigée, sous la ligne de
+  transparence de « L'essentiel ».
+  - `preimpression` : « Préimpression : ce document n'a pas été évalué par des pairs. »
+  - `annonce_commerciale` : « Annonce commerciale : ce document émane de l'entreprise concernée. »
+  - `message_personnel` : « Message personnel : publication d'un compte individuel, pas un
+    document officiel. »
+  Les cinq autres valeurs, et un champ vide, n'émettent aucun balisage : sur 6337 fiches
+  publiées, 6177 ont le champ vide (97,5 %) et ne voient donc rien apparaître. 125 fiches
+  affichent un avertissement (85 annonces commerciales, 31 messages personnels,
+  9 préimpressions). La valeur BRUTE reste interdite en HTML, verrou d'origine conservé et
+  toujours vert.
+
 ## [1.263.4] - 2026-09-12
 
 ### Corrige

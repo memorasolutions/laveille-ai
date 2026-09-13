@@ -552,6 +552,25 @@
                         </aside>
                         <p class="nw-essential-transparency">{{ $transparencyText }}</p>
 
+                        {{-- Avertissement 'nature_original' (ticket #2329) - jamais la valeur
+                             technique brute (verrouillée par Actu2PublicRenderTest.php), toujours
+                             la phrase rédigée par NewsArticle::natureOriginalAvertissement().
+                             Réutilise la classe nw-essential-transparency (même style que la
+                             ligne de transparence ci-dessus) : aucune charte visuelle nouvelle.
+                             N'émet aucun balisage quand null (préimpression/annonce commerciale/
+                             message personnel seulement - les cinq autres valeurs n'affichent
+                             rien ici).
+                             DÉPENDANCE ASSUMÉE, mesurée le 2026-09-12 : ce bloc vit DANS
+                             @if($essentialText), donc une fiche sans essentiel n'afficherait pas
+                             son avertissement. Sur les 125 fiches publiées portant l'une des trois
+                             valeurs (85 annonce_commerciale, 31 message_personnel, 9 preimpression),
+                             ZÉRO n'a de résumé vide : aucun cas réel n'est affecté. Si cette mesure
+                             cesse d'être vraie, sortir ce bloc du @if plutôt que de le laisser
+                             disparaître en silence. --}}
+                        @if($natureOriginalAvertissement = $article->natureOriginalAvertissement())
+                        <p class="nw-essential-transparency">{{ $natureOriginalAvertissement }}</p>
+                        @endif
+
                         {{-- Barre d'interactions (+ menu admin partage), descendue sous
                              « L'essentiel » (point 3). « Ajouter à mon journal » masqué pour un
                              visiteur non connecté : on ne transmet journalSourceType que si

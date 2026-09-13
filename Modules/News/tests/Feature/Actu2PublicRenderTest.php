@@ -178,6 +178,58 @@ it('never leaks the raw nature_original identifier on the public fiche, for any 
     }
 });
 
+// ── Avertissement nature_original RÉDIGÉ (ticket #2329) : trois valeurs sur huit seulement
+// (source unique NewsArticle::NATURE_ORIGINAL_AVERTISSEMENTS) affichent une phrase de mise en
+// garde au visiteur - jamais la valeur technique brute (même verrou que le test ci-dessus). Slugs
+// numérotés, même précaution que ci-dessus : jamais dérivés de $valeur.
+
+it('affiche la phrase d\'avertissement quand nature_original vaut preimpression', function () {
+    $source = a2rSource();
+    $article = a2rArticle($source->id, 'nature-original-avert-1', [
+        'structured_summary' => ['hook' => 'Accroche neutre, sans rapport avec la classification interne.'],
+        'nature_original' => 'preimpression',
+    ]);
+
+    $response = $this->get(route('news.show', $article));
+
+    $response->assertOk()
+        ->assertSee('Préimpression : ce document n&#039;a pas été évalué par des pairs.', false)
+        ->assertDontSee('preimpression', false);
+});
+
+it('n\'affiche aucune phrase d\'avertissement quand nature_original vaut article_journalistique', function () {
+    $source = a2rSource();
+    $article = a2rArticle($source->id, 'nature-original-avert-2', [
+        'structured_summary' => ['hook' => 'Accroche neutre, sans rapport avec la classification interne.'],
+        'nature_original' => 'article_journalistique',
+    ]);
+
+    $response = $this->get(route('news.show', $article));
+
+    $response->assertOk()
+        ->assertDontSee('évalué par des pairs', false)
+        ->assertDontSee('émane de l&#039;entreprise concernée', false)
+        ->assertDontSee('pas un document officiel', false);
+});
+
+it('n\'affiche aucune phrase d\'avertissement quand nature_original est vide ou absente', function () {
+    $source = a2rSource();
+
+    foreach ([null, ''] as $index => $valeurVide) {
+        $article = a2rArticle($source->id, 'nature-original-avert-vide-'.($index + 1), [
+            'structured_summary' => ['hook' => 'Accroche neutre, sans rapport avec la classification interne.'],
+            'nature_original' => $valeurVide,
+        ]);
+
+        $response = $this->get(route('news.show', $article));
+
+        $response->assertOk()
+            ->assertDontSee('évalué par des pairs', false)
+            ->assertDontSee('émane de l&#039;entreprise concernée', false)
+            ->assertDontSee('pas un document officiel', false);
+    }
+});
+
 // ── Provenance affichée : jamais « Soumission manuelle » (demande fondateur 2026-08-17) ──
 
 function a2rManualSource(): NewsSource

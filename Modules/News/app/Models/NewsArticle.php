@@ -1339,12 +1339,37 @@ class NewsArticle extends Model implements Searchable
     ];
 
     /**
+     * Ticket #2329 : source unique (DRY) des avertissements affichés au visiteur pour
+     * 'nature_original' - SEULEMENT trois des huit valeurs ci-dessus. Les cinq autres (dont
+     * 'article_journalistique', le cas le plus fréquent) n'apprennent rien de plus au lecteur, qui
+     * voit déjà le nom du média cité ; ces trois-là changent réellement la confiance à accorder au
+     * fait rapporté, d'où le seul avertissement rédigé. La valeur BRUTE ('nature_original') reste
+     * interne et ne fuit jamais en HTML (verrou Actu2PublicRenderTest.php) : cette constante
+     * n'associe une clé qu'à une PHRASE, jamais à l'identifiant technique lui-même.
+     */
+    public const NATURE_ORIGINAL_AVERTISSEMENTS = [
+        'preimpression' => "Préimpression : ce document n'a pas été évalué par des pairs.",
+        'annonce_commerciale' => "Annonce commerciale : ce document émane de l'entreprise concernée.",
+        'message_personnel' => 'Message personnel : publication d\'un compte individuel, pas un document officiel.',
+    ];
+
+    /**
      * Libellé français de 'nature_original', ou null si absente/inconnue - une valeur retirée du
      * vocabulaire après coup se comporte comme une absence, même garde-fou que factCheckVerdict().
      */
     public function natureOriginalLabel(): ?string
     {
         return self::NATURE_ORIGINAL_VALUES[$this->nature_original] ?? null;
+    }
+
+    /**
+     * Ticket #2329 : phrase d'avertissement à afficher au visiteur pour 'nature_original', ou null
+     * si la valeur est absente, vide, inconnue, ou ne fait pas partie des trois retenues dans
+     * NATURE_ORIGINAL_AVERTISSEMENTS ci-dessus - même garde-fou que natureOriginalLabel().
+     */
+    public function natureOriginalAvertissement(): ?string
+    {
+        return self::NATURE_ORIGINAL_AVERTISSEMENTS[$this->nature_original] ?? null;
     }
 
     /**
