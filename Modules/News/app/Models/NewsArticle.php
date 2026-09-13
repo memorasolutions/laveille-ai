@@ -339,7 +339,17 @@ class NewsArticle extends Model implements Searchable
             'news_article_term',
             'news_article_id',
             'term_id'
-        )->withPivot('source')->withTimestamps();
+        )->withPivot('source', 'is_approved')->withTimestamps();
+    }
+
+    /**
+     * Fiches de glossaire liées et APPROUVÉES seulement (pivot news_article_term.is_approved).
+     * Jumelle exacte de Modules\Dictionary\Models\Term::approvedNewsArticles() - même doctrine
+     * « désapprouver, jamais supprimer » (ticket #2524 étape 2).
+     */
+    public function approvedTerms(): BelongsToMany
+    {
+        return $this->terms()->wherePivot('is_approved', true);
     }
 
     /**

@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.266.0] - 2026-09-13
+
+### Ajoute
+- **« Dans l'actualité » sur les fiches du glossaire** (#2524, étape 2 du plan). Une fiche de terme
+  montre désormais jusqu'à cinq actualités récentes qui le mentionnent, détectées automatiquement
+  par le mécanisme déjà en place depuis v1.265.0.
+  **Position volontairement SECONDAIRE**, et c'est une décision, pas un hasard : la section vient
+  après tout le contenu qui enseigne (définition, exemples, questions fréquentes, sources) et après
+  « Termes liés », avec le même poids visuel qu'elle, jamais plus. Un contenu périssable ne porte
+  pas la charge pédagogique d'une fiche de référence.
+  Rien n'est émis quand aucune actualité ne correspond : pas de conteneur vide, pas de titre seul.
+  C'est la règle « le vide plutôt que le faux » appliquée partout dans ce dossier.
+- **Modération des liaisons détectées**, selon la doctrine « désapprouver, jamais supprimer » déjà
+  en vigueur pour les tutoriels de l'annuaire. Une liaison désapprouvée reste en base plutôt que
+  d'être effacée, sinon le détecteur la recréerait au passage suivant et la décision humaine serait
+  perdue. Le défaut est « approuvée », parce que l'inverse condamnerait les quelque 2940 liaisons
+  déjà posées à ne jamais s'afficher avant une revue humaine complète.
+  Contrôle qualité préalable sur quatorze liaisons tirées au hasard, chacune vérifiée contre le
+  texte réellement servi : quatorze justes.
+
+### Corrige
+- La couleur de la date dans cette nouvelle section a été **mesurée plutôt que choisie** : la teinte
+  d'abord retenue donnait 4,83:1 sur blanc, soit conforme AA mais en échec AAA, alors que la charte
+  du projet vise AAA. La teinte retenue donne 7,91:1 sur blanc et 7,56:1 sur le gris clair des
+  encadrés, donc conforme quel que soit le fond dont la boîte hérite.
+- La date relative portait la locale par défaut et serait sortie en anglais ; elle est désormais
+  posée explicitement, comme partout ailleurs dans cette vue.
+
 ## [1.265.3] - 2026-09-13
 
 ### Corrige

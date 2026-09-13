@@ -521,6 +521,46 @@
                             </div>
                         @endif
 
+                        {{-- Ticket #2524 étape 2 : « Dans l'actualité » - section VISIBLE mais SECONDAIRE
+                             (décision explicite : n'enseigne rien, vient après tout le contenu pédagogique
+                             et après « Termes liés », même poids visuel qu'elle, jamais plus). Jusqu'à 5
+                             actualités les plus récentes, PUBLIÉES et dont la liaison est APPROUVÉE
+                             (doctrine « désapprouver, jamais supprimer » - voir Term::approvedNewsArticles()
+                             et la migration 2026_09_13_020000_add_is_approved_to_news_article_term). Une
+                             seule requête, colonnes réduites au strict nécessaire de l'affichage : cette
+                             vue ne porte qu'un seul terme, donc aucun risque de N+1 ici. Règle « le vide
+                             plutôt que le faux » : aucun balisage si la liste est vide. --}}
+                        @php
+                            $_newsInActu = $term->approvedNewsArticles()
+                                ->published()
+                                ->orderByDesc('news_articles.pub_date')
+                                ->limit(5)
+                                ->get(['news_articles.id', 'news_articles.slug', 'news_articles.title', 'news_articles.seo_title', 'news_articles.pub_date']);
+                        @endphp
+                        @if($_newsInActu->isNotEmpty())
+                            <div class="gl-section gl-bento-full">
+                                <div class="gl-section-box">
+                                    <h2 class="gl-section-title">📰 {{ __('Dans l\'actualité') }}</h2>
+                                    <ul style="list-style: none; padding: 0; margin: 0;">
+                                        @foreach($_newsInActu as $newsItem)
+                                            <li style="margin-bottom: 10px; line-height: 1.5;">
+                                                <a href="{{ route('news.show', $newsItem) }}">{{ $newsItem->seo_title ?: $newsItem->title }}</a>
+                                                {{-- Couleur MESURÉE, pas choisie : #6B7280 donnait 4,83:1 sur blanc,
+                                                     soit AA mais ÉCHEC AAA, alors que la charte du projet vise AAA (7:1).
+                                                     #4B5163 donne 7,91:1 sur blanc et 7,56:1 sur #F8FAFC, donc AAA quel
+                                                     que soit le fond dont cette boîte hérite. Locale explicite : sans
+                                                     elle la date relative sort en anglais, comme partout ailleurs dans
+                                                     cette vue où elle est posée à la main. --}}
+                                                <span style="color: #4B5163; font-size: 0.9rem;">
+                                                    ({{ $newsItem->pub_date?->locale('fr_CA')->diffForHumans() }})
+                                                </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        @endif
+
                     </div>
 
                 </article>

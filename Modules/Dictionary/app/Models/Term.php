@@ -110,7 +110,20 @@ class Term extends Model implements Searchable
             'news_article_term',
             'term_id',
             'news_article_id'
-        )->withPivot('source')->withTimestamps();
+        )->withPivot('source', 'is_approved')->withTimestamps();
+    }
+
+    /**
+     * Actualités liées et APPROUVÉES seulement (pivot news_article_term.is_approved). C'est ce
+     * qu'utilise toute vue publique (section « Dans l'actualité », ticket #2524 étape 2) - jamais
+     * newsArticles() brut, qui inclut aussi les liaisons qu'un administrateur a désapprouvées.
+     * Doctrine « désapprouver, jamais supprimer » (voir migration
+     * 2026_09_13_020000_add_is_approved_to_news_article_term) : la liaison désapprouvée reste en
+     * base, ce scope l'exclut simplement de l'affichage.
+     */
+    public function approvedNewsArticles(): BelongsToMany
+    {
+        return $this->newsArticles()->wherePivot('is_approved', true);
     }
 
     // 2026-05-05 #144 : scopePublished mutualise via HasPublishedState (DRY Core).
