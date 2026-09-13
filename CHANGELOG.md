@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.270.9] - 2026-09-13
+
+### Ajoute
+- **Terme « LCCJTI » au glossaire** (Loi concernant le cadre juridique des technologies de
+  l information, RLRQ c. C-1.1), demande du fondateur portant sur les articles 44 et 45 qui
+  encadrent la biometrie au Quebec, puis « ajoute les autres importantes ».
+  « LES AUTRES IMPORTANTES » ETAIENT DEJA LA. La famille juridique du glossaire compte douze fiches
+  publiees - ai-act, loi-25, rgpd, liad, commission-acces-information, dpia, consentement-eclaire,
+  renseignement-personnel, donnees-personnelles, information-sensible, regulation-ia, biometrie. Le
+  seul manque REEL etait la LCCJTI : verifie fiche par fiche, AUCUNE des six plus proches ne la
+  mentionne, ni son nom long, ni les articles 44 ou 45. Le lien entre la biometrie et le droit
+  quebecois n etait fait nulle part. Ecartes avec motif : la Charte des droits et le Code civil ne
+  sont pas des termes d intelligence artificielle et depassent le perimetre d un glossaire techno.
+  GRANULARITE : une fiche pour la LOI, pas une par ARTICLE. Personne ne cherche « article 45
+  LCCJTI » isolement, et deux pages d un paragraphe se seraient cannibalisees.
+  Le texte officiel a ete LU sur LegisQuebec, pas resume : le passage fourni par le fondateur s est
+  revele exact sur les deux points, et la source a livre trois precisions qui n y figuraient pas -
+  l obligation de n utiliser que le MINIMUM de caracteristiques, celle de DETRUIRE tout autre
+  renseignement decouvert au passage, et le pouvoir de la Commission de rendre des ORDONNANCES.
+  QUATRE FAUTES JURIDIQUES INTERCEPTEES dans la redaction deleguee, dont une pouvait induire un
+  etablissement scolaire en erreur : « doit obtenir l APPROBATION de la Commission » alors que la
+  loi exige une DIVULGATION (une FAQ entiere est desormais consacree a cette distinction), des
+  « sanctions administratives pecuniaires » dont aucune source fournie ne parle, une affirmation
+  inventee sur ce que la Loi 25 aurait change en modifiant l article 44, et « consentement ecrit »
+  la ou le texte dit « consentement expres ». Les quatre sont corrigees.
+  La fiche ne se presente jamais comme un avis juridique et le DIT dans sa derniere FAQ.
+
 ## [1.270.8] - 2026-09-13
 
 ### Ajoute
