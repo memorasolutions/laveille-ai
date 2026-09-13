@@ -96,14 +96,27 @@ class BackfillAutoTermDetectionCommand extends Command
             // MCP: SELF (<5 lignes)
             if ($dryRun) {
                 $count = $action->suggestGlossaryTermIds($article)->count();
+                $aDesCorrespondances = $count > 0;
             } else {
                 $avant = $article->terms()->count();
                 $action->suggest($article);
-                $count = $article->terms()->count() - $avant;
+                $apres = $article->terms()->count();
+                $count = $apres - $avant;
+                // ACTION : ticket #2525 - ne JAMAIS déduire « aucune correspondance » d'un delta
+                // nul. Une fiche déjà liée lors d'un passage précédent en a évidemment, et son
+                // delta vaut pourtant zéro : mesuré le 2026-09-13, un lot de 400 a annoncé
+                // « 400 n'avaient aucune correspondance » alors que 323 d'entre elles portaient
+                // déjà des liaisons. Le delta mesure ce que CE passage a ajouté ; le total, lui,
+                // mesure si la fiche a des correspondances.
+                // MCP: SELF (<5 lignes)
+                $aDesCorrespondances = $apres > 0;
+            }
+
+            if ($aDesCorrespondances) {
+                $reparables++;
             }
 
             if ($count > 0) {
-                $reparables++;
 
                 if ($dryRun) {
                     $this->line("  [simulation] article #{$article->id} : {$count} terme(s) de glossaire seraient liés");
@@ -151,7 +164,7 @@ class BackfillAutoTermDetectionCommand extends Command
             // populations que ce ticket sépare).
             // MCP: SELF (<5 lignes)
             $sansCorrespondance = $processed - $reparables;
-            $this->info("{$processed} actualité(s) examinée(s), {$reparables} ont reçu au moins un terme de glossaire ({$totalAttached} terme(s) de glossaire auto-lié(s) au total), {$sansCorrespondance} n'avaient aucune correspondance. {$remaining} fiche(s) restent à examiner.");
+            $this->info("{$processed} actualité(s) examinée(s), {$reparables} ont au moins un terme de glossaire, dont {$totalAttached} liaison(s) NOUVELLE(S) posée(s) par ce passage, {$sansCorrespondance} n'ont aucune correspondance. {$remaining} fiche(s) restent à examiner.");
 
             if ($remaining > 0) {
                 $this->comment('Relancer la commande pour continuer le rattrapage.');

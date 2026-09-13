@@ -796,3 +796,45 @@ it('news:backfill-auto-terms - loption rescanner ramène une fiche déjà examin
         ->first();
     expect($pivot)->not->toBeNull();
 });
+
+it("news:backfill-auto-terms - une fiche DEJA liee n'est pas comptee comme sans correspondance", function () {
+    // MESURE DU 2026-09-13 qui a motivé ce test (#2525) : un lot de 400 fiches déjà traitées a
+    // annoncé « 400 n'avaient aucune correspondance », alors que 323 d'entre elles portaient
+    // déjà des liaisons. La cause : le compte se faisait sur le DELTA avant/après, qui vaut
+    // évidemment zéro pour une fiche déjà liée. Le delta mesure ce que CE passage a ajouté ;
+    // le total, lui, mesure si la fiche a des correspondances. Les deux ne se confondent pas.
+    $term = Term::create([
+        'name'         => 'Fenetre De Contexte Deja Liee NTSA',
+        'slug'         => 'fenetre-de-contexte-deja-liee-ntsa',
+        'definition'   => "La quantité de texte qu'un modèle peut prendre en compte d'un coup.",
+        'is_published' => true,
+    ]);
+
+    $source = ntsaSource();
+    $article = NewsArticle::withoutEvents(fn () => NewsArticle::create([
+        'news_source_id' => $source->id,
+        'title'          => 'La Fenetre De Contexte Deja Liee NTSA double chez les fournisseurs',
+        'guid'           => 'guid-ntsa-deja-liee',
+        'url'            => 'https://exemple.com/ntsa-deja-liee',
+        'description'    => '',
+        'summary'        => 'La Fenetre De Contexte Deja Liee NTSA change les usages.',
+        'slug'           => 'article-ntsa-deja-liee',
+        'pub_date'       => now()->subDay(),
+        'is_published'   => true,
+        'seo_status'     => 'index',
+    ]));
+
+    // Premier passage : la liaison est posée et la fiche est marquée examinée.
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50])->assertExitCode(0);
+    expect(DB::table('news_article_term')->where('news_article_id', $article->id)->count())->toBe(1);
+
+    // Second passage FORCÉ sur la même fiche : aucune liaison NOUVELLE (le delta est nul), mais
+    // la fiche a bel et bien une correspondance. Le message ne doit donc pas la ranger parmi
+    // celles qui n'en ont aucune.
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50, '--rescanner' => true])
+        ->expectsOutputToContain('1 ont au moins un terme de glossaire')
+        ->assertExitCode(0);
+
+    // Et rien n'a été dupliqué au passage.
+    expect(DB::table('news_article_term')->where('news_article_id', $article->id)->count())->toBe(1);
+});

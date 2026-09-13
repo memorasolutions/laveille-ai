@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.265.3] - 2026-09-13
+
+### Corrige
+- **Le rapport du rattrapage des termes annonçait « aucune correspondance » pour des fiches qui en
+  avaient** (#2525, suite). Le correctif de la veille comptait les fiches réparables sur le DELTA
+  de liaisons avant et après le passage. Or ce delta vaut évidemment zéro pour une fiche déjà liée
+  lors d'un passage précédent. Mesuré en production le jour même : un lot de 400 fiches a annoncé
+  « 400 n'avaient aucune correspondance », alors que 323 d'entre elles portaient déjà des liaisons.
+  Le delta mesure ce que CE passage a ajouté ; le total mesure si la fiche a des correspondances.
+  Les deux ne se confondent pas, et le message distingue désormais les deux clairement.
+  Un test verrouille le cas : une fiche déjà liée, réexaminée, doit être comptée parmi celles qui
+  ont un terme, sans qu'aucune liaison ne soit dupliquée.
+
 ## [1.265.2] - 2026-09-13
 
 ### Corrige
