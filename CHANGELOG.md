@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.270.4] - 2026-09-13
+
+### Ajoute
+- **Deux termes au glossaire, demandes par le fondateur : GPT-6 Astra et MolmoAct2.** Classe en
+  CORRECTIF plutot qu'en MINEUR : le mecanisme des fiches existait deja, on ajoute du contenu
+  dedans, aucune capacite logicielle nouvelle n'est offerte au lecteur.
+  L'anti-doublon a ete fait AVANT redaction, contre la base de production et par FAMILLE de motifs
+  sur le nom, le slug ET les alias - 17 fiches voisines pour la famille GPT, 6 pour la famille
+  robotique, aucune ne couvrait ces deux notions. La convention du glossaire est deja d'une fiche
+  par modele (o1, o3, whisper, sora, codex existent separement).
+  Chaque source a ete verifiee par requete reelle, titre servi controle. A RETENIR pour les
+  prochaines fiches OpenAI : openai.com repond 403 a tout recuperateur automatique, depuis ce poste
+  comme depuis le serveur de production, y compris help.openai.com. Le sous-domaine
+  deploymentsafety.openai.com est la seule porte officielle lisible.
+  DEUX affirmations ont ete ECARTEES faute de verification a la source primaire (licence Apache-2.0
+  et taille de 5 milliards de parametres pour MolmoAct2), et UN FAIT FABRIQUE a ete intercepte : le
+  modele sollicite pour la redaction avait ecrit que GPT-6 Astra « a exploite une faille dans un
+  systeme bancaire, contraignant OpenAI a avertir l'institution financiere concernee ». Controle sur
+  la fiche de securite officielle : zero occurrence du mot « bank ». Passage rejete et reecrit a
+  partir du texte reel.
+
 ## [1.270.3] - 2026-09-13
 
 ### Corrige
