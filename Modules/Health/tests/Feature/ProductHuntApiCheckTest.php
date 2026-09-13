@@ -23,6 +23,7 @@ beforeEach(function () {
         'check_interval_seconds' => 3600,
         'connection_failures_cache_key' => 'tests:ph:echecs',
         'measurement_cache_key' => 'tests:ph:mesure',
+        'notify_by_mail' => true,
     ]);
 
     Cache::forget('tests:ph:echecs');
@@ -143,4 +144,25 @@ it('mémorise aussi les pannes, pour ne pas rappeler ProductHunt chaque minute',
     expect($memoire)->toBeArray();
     expect($memoire)->toHaveKey('statut');
     expect($memoire)->toHaveKey('horodatage');
+});
+
+// Le drapeau coupe l'ENVOI, jamais la MESURE : c'est la sortie propre si le courriel horaire
+// (le delai anti-rafale de Spatie est global par canal) devient du bruit.
+it('peut taire le courriel sans rien perdre de la mesure', function () {
+    config()->set('health.producthunt.notify_by_mail', false);
+    producthuntFake(['errors' => [['error' => 'invalid_oauth_token']]], 401);
+
+    $resultat = ProductHuntApiCheck::new()->run();
+
+    expect($resultat->status->equals(Status::failed()))->toBeTrue();
+    expect($resultat->shortSummary)->toBe('jeton invalide');
+    expect($resultat->getNotificationMessage())->toBe('');
+});
+
+it('parle par défaut, contrairement au drapeau OpenRouter', function () {
+    producthuntFake(['errors' => [['error' => 'invalid_oauth_token']]], 401);
+
+    $resultat = ProductHuntApiCheck::new()->run();
+
+    expect($resultat->getNotificationMessage())->toContain('api.producthunt.com/v2/oauth/applications');
 });

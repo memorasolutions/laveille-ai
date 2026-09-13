@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.271.1] - 2026-09-13
+
+### Corrige
+- **Le nouveau controle de sante ProductHunt aurait envoye 24 courriels par jour** (#2552). Verifie
+  juste apres la mise en ligne, et c'est un defaut qu'aucun test ne pouvait attraper : le delai
+  anti-rafale de Spatie est GLOBAL par canal (cle `health:latestNotificationSentAt:` suffixee du
+  canal), pas par controle. Un verdict rouge qui DURE - et celui-ci dure tant que le jeton n'est
+  pas remplace - part donc toutes les heures.
+  Verifie aussi, parce que c'eut ete plus grave : ce rouge permanent ne MASQUE aucune autre alerte,
+  le courriel listant tous les controles en echec.
+  Ajout du drapeau `HEALTH_PRODUCTHUNT_NOTIFY_BY_MAIL`, qui coupe l'ENVOI sans jamais couper la
+  MESURE (le statut rouge et le journal `directory_discovery` subsistent) - meme mecanisme que
+  `HEALTH_OPENROUTER_NOTIFY_BY_MAIL`, mais **defaut INVERSE et assume** : celui d'OpenRouter est a
+  false parce que son alerte etait un faux positif recurrent (le compte se recharge seul), celui-ci
+  est a true parce que l'alerte est vraie et appelle une action humaine. Taire par defaut une panne
+  reelle reproduirait exactement le silence qu'on vient de corriger.
+  2 tests de plus (14 sur le controle, 17 en tout avec le courriel).
+
 ## [1.271.0] - 2026-09-13
 
 ### Ajoute

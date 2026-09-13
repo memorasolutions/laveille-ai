@@ -269,6 +269,16 @@ return [
         // etrangle, jamais le controle - un controle Spatie non echu rend « skipped », et
         // treat_skipped_as_failure passerait le site au rouge 59 minutes sur 60.
         'check_interval_seconds' => env('HEALTH_PRODUCTHUNT_CHECK_INTERVAL_SECONDS', 3600),
+
+        // ACTIF par defaut, a l'inverse du drapeau OpenRouter ci-dessus : celui-la est coupe parce
+        // que son alerte etait un faux positif recurrent (recharge automatique normale), celui-ci
+        // signale une panne reelle qui ne se resorbe pas seule.
+        // A savoir avant de le laisser a true : le delai anti-rafale de Spatie est GLOBAL par
+        // canal, pas par controle. Un rouge qui dure envoie donc un courriel par heure. Le
+        // courriel liste tous les controles en echec, donc rien n'est masque - mais passer ce
+        // drapeau a false reste la sortie propre si la repetition devient du bruit : la mesure,
+        // le statut rouge et le journal 'directory_discovery' subsistent.
+        'notify_by_mail' => env('HEALTH_PRODUCTHUNT_NOTIFY_BY_MAIL', true),
         'connection_failures_cache_key' => env('HEALTH_PRODUCTHUNT_CONNECTION_FAILURES_CACHE_KEY', 'health:producthunt:echecs_consecutifs'),
         'measurement_cache_key' => env('HEALTH_PRODUCTHUNT_MEASUREMENT_CACHE_KEY', 'health:producthunt:derniere_mesure'),
     ],

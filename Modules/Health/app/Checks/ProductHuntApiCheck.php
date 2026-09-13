@@ -148,9 +148,34 @@ final class ProductHuntApiCheck extends Check
 
         if ($statut !== 'ok') {
             Log::channel('directory_discovery')->warning('[ProductHuntApiCheck] '.$message);
+
+            return $this->silencerCourrielSiDesactive($result);
         }
 
         return $result;
+    }
+
+    /**
+     * Coupe l'ENVOI du courriel, jamais la MESURE - meme mecanisme que OpenRouterCreditCheck, mais
+     * DEFAUT INVERSE, et c'est deliberé : le drapeau OpenRouter est a false parce que son alerte
+     * etait un faux positif recurrent (le compte se recharge seul). Ici l'alerte est vraie et
+     * appelle une action humaine, donc elle parle par defaut.
+     *
+     * Ce qu'il faut savoir avant de le laisser a true : le delai anti-rafale de Spatie est GLOBAL
+     * par canal (cle 'health:latestNotificationSentAt:'.$channel), pas par controle. Un verdict
+     * rouge qui dure - et celui-ci dure tant que le jeton n'est pas remplace - envoie donc un
+     * courriel par heure. Le courriel liste TOUS les controles en echec, aucune autre alerte n'est
+     * donc masquee ; mais passer ce drapeau a false est la sortie propre si la repetition devient
+     * du bruit, sans rien perdre : le statut rouge et les chiffres restent au tableau de bord et
+     * dans le canal 'directory_discovery'.
+     */
+    private function silencerCourrielSiDesactive(Result $result): Result
+    {
+        if ((bool) config('health.producthunt.notify_by_mail', true)) {
+            return $result;
+        }
+
+        return $result->notificationMessage('');
     }
 
     /**
