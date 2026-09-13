@@ -466,6 +466,20 @@ final class NewsToolSyncAction
             $newIds->mapWithKeys(fn (int $id) => [$id => ['source' => 'auto']])->all()
         );
 
+        // ACTION : ticket #2526 - purger le cache public des fiches de terme NOUVELLEMENT
+        // enrichies. Sans cette purge, la section « Dans l'actualité » d'un terme continue
+        // d'être servie telle qu'elle était pendant la durée du cache de réponse, mesurée à
+        // dix minutes : on écrivait la liaison sans que personne ne puisse la voir.
+        // On ne purge QUE $newIds, jamais l'ensemble des termes de la fiche : une liaison déjà
+        // en place n'a rien changé à la page du terme, et pendant un rattrapage la différence
+        // se compte en milliers de purges évitées.
+        // MCP: SELF (<5 lignes)
+        // RAISON: #2526 - une écriture qui enrichit une page AUTRE que celle qu'on édite doit
+        //         purger cette autre page ; c'est le lien indirect qu'on oublie.
+        Term::whereIn('id', $newIds)->get()->each(
+            fn (Term $terme) => self::invalidateTermPublicCache($terme)
+        );
+
         return $newIds->count();
     }
 

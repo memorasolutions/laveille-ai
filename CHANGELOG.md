@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.269.1] - 2026-09-13
+
+### Corrige
+- **Une nouvelle liaison de glossaire n'était pas visible avant dix minutes** (#2526). Quand le
+  détecteur rattachait une actualité à une fiche de terme, il purgeait le cache de l'ARTICLE mais
+  jamais celui de la FICHE DE TERME que cette liaison venait pourtant d'enrichir. On écrivait donc
+  la liaison sans que personne ne puisse la voir avant l'expiration naturelle du cache.
+  La purge ne vise QUE les fiches nouvellement enrichies, jamais l'ensemble des termes d'un
+  article : une liaison déjà en place n'a rien changé à la page du terme, et pendant un rattrapage
+  cette distinction évite des milliers de purges inutiles.
+  Le motif général, écrit dans le code : une écriture qui enrichit une page AUTRE que celle qu'on
+  édite doit purger cette autre page, et c'est ce lien indirect qu'on oublie.
+
 ## [1.269.0] - 2026-09-13
 
 ### Ajoute
