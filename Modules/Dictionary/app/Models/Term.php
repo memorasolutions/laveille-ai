@@ -61,6 +61,7 @@ class Term extends Model implements Searchable
         'acronym_full',
         'slug',
         'definition',
+        'disambiguation_note', // 2026-09-13 #2524 étape 3 bis : « À ne pas confondre avec » - borné à 5 cas mesurés, voir migration
         'analogy',
         'example',
         'did_you_know',

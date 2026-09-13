@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.268.0] - 2026-09-13
+
+### Ajoute
+- **« À ne pas confondre avec » sur cinq fiches du glossaire** (#2524, étape 3 bis). Une mesure du
+  2026-09-11 avait montré que certains termes sont écrasés, dans les résultats de recherche vidéo,
+  par un homonyme externe plus gros. Cinq d'entre eux sont concernés, et eux seuls : Hub (100 % de
+  faux), Perplexité (100 %), Époque (100 %), Batch (100 % sur un échantillon court), Socket (80 %).
+  Chacun reçoit une mise en garde d'une phrase, nommant la confusion réelle. Elle est placée HAUT,
+  juste après la définition, parce qu'un avertissement contre une confusion ne sert à rien si le
+  lecteur le découvre après avoir lu toute la fiche.
+  **Le champ est volontairement BORNÉ à ces cinq cas** et ne doit pas être étendu par catégorie :
+  la même mesure a montré que l'intuition se trompe, Docker et Latence étant anticipés comme
+  risqués et mesurés à 0 % de faux. Une règle par catégorie aurait détruit 22 correspondances
+  justes pour n'en avoir jamais eu besoin. L'avertissement est écrit dans la migration elle-même.
+  Une fiche sans mise en garde n'émet aucun balisage.
+  Le remplissage passe par un peuplement idempotent qui n'écrase JAMAIS une valeur modifiée à la
+  main entre-temps : la curation humaine prime sur le script qui l'a semée.
+
+### Corrige
+- Un des cinq identifiants de fiche supposés était erroné (« perplexite » au lieu de
+  « perplexite-metrique »). Il a été vérifié en base plutôt que recopié de confiance, ce qui a
+  évité une valeur posée dans le vide.
+
 ## [1.267.0] - 2026-09-13
 
 ### Ajoute

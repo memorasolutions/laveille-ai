@@ -374,6 +374,22 @@
                         </div>
                     </div>
 
+                    {{-- Ticket #2524 étape 3 bis : « À ne pas confondre avec » - HAUT, juste après la
+                         Définition (jamais en bas comme « Dans l'actualité »/« Outils liés »,
+                         secondaires) : une mise en garde contre une confusion ne sert à rien si le
+                         lecteur la découvre après avoir lu toute la fiche. Borné à 5 termes MESURÉS
+                         (2026-09-11), jamais étendu par catégorie - voir la migration
+                         2026_09_13_040000_add_disambiguation_note_to_dictionary_terms. Rien du tout
+                         si la colonne est vide : aucun balisage, aucun conteneur, aucun titre seul. --}}
+                    @if(! empty($term->disambiguation_note))
+                        <div class="gl-section" style="margin-bottom: 24px;">
+                            <div class="gl-section-box">
+                                <h2 class="gl-section-title">⚠️ {{ __('À ne pas confondre avec') }}</h2>
+                                <p style="margin: 0;">{{ $term->disambiguation_note }}</p>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Bento grid : analogie + exemple côte à côte --}}
                     <div class="gl-bento">
 
