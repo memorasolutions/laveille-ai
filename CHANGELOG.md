@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.270.12] - 2026-09-13
+
+### Corrige
+- **Un nom de modele COMPOSE se faisait couper par un alias plus court** (#2551), signale par le
+  fondateur sur une phrase reelle du site : le texte disait « 98,8 % (GPT-4o mini) », l alias
+  « GPT-4o » existait sur la fiche ChatGPT, et le lien soulignait « GPT-4o » en laissant « mini » en
+  texte nu. Le lecteur atterrissait sur une fiche parlant d un AUTRE modele.
+  CE DEFAUT ECHAPPE AUX CONTROLES HABITUELS parce que le lien pointe vers une page qui EXISTE : un
+  controle de destination le declare sain. Seul un controle du TEXTE souligne peut le voir.
+  LE MOTEUR N EST PAS EN CAUSE : GlossaryLinkifier trie deja les candidats par longueur
+  decroissante, donc la forme longue gagne des qu elle existe. La preuve est dans la meme mesure -
+  « Gemini Flash » n est jamais coupe, parce que cette forme composee EST declaree en alias. Le
+  defaut venait du DICTIONNAIRE incomplet.
+  MESURE : sur 8 articles publies contenant des noms composes, DEUX liens coupes. Formes reellement
+  presentes dans le corpus et desormais declarees sur chatgpt : « GPT-4o mini », « GPT-4o-mini »,
+  « GPT-4.1 mini ». Un QUATRIEME trou est apparu en corrigeant le premier : « GPT-4.1 » n etait pas
+  declare non plus, et « GPT-4 » y aurait mordu pareil.
+  AUCUN ajout speculatif : « GPT-4 Turbo », « GPT-5 mini » et « GPT-5 nano » ont ete comptes a ZERO
+  dans le corpus et ne sont pas declares. Un alias qui ne correspond a rien est du bruit.
+  DEUX ORACLES CONSULTES, convergents (les trois autres du protocole n ont pas ete sollicites,
+  l enjeu etant technique, borne et reversible - signale plutot que taire) : DeepSeek retient
+  l option curative ; Perplexity nomme la doctrine du domaine, « leftmost-longest match plus
+  dictionnaire canonique complet », en precisant que les gardes de suffixe ne sont que des
+  exceptions et jamais le mecanisme principal.
+  Le skill /glossaire recoit une section neuve (0 quater) portant la regle, le controle executable
+  de detection, et le motif de ne PAS poser une garde generique : « Claude Pro » designe un niveau
+  d offre et lier « Claude » y est juste, tandis que « GPT-4o mini » designe un modele distinct et
+  lier « GPT-4o » y est trompeur. La liste TOOL_SUFFIX_SAFE_MODIFIERS melange aujourd hui ces deux
+  familles et ne teste que les majuscules - constat consigne, chantier non ouvert ici.
+
 ## [1.270.11] - 2026-09-13
 
 ### Corrige
