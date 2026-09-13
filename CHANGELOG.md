@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.270.6] - 2026-09-13
+
+### Ajoute
+- **Terme « GPT-5.6 Sol » au glossaire**, demande du fondateur formulee comme « GPT-5.6 Sol (et les
+  derives) ». Les derives ont ete identifies a la source et non supposes : la fiche de securite
+  d OpenAI ecrit que GPT-5.6 est une FAMILLE de trois modeles - Sol le modele phare, Terra l option
+  moins couteuse, Luna le plus rapide et economique.
+  GRANULARITE TRANCHEE PAR UN PRECEDENT, parce que le glossaire porte deux conventions opposees :
+  des fiches dediees par modele (o1, o3, whisper, sora, codex, gpt-6-astra) et une fiche chatgpt qui
+  absorbe GPT-4, GPT-5 et GPT-5.2 en alias. Le precedent qui departage est Gemini, ou gemini-google
+  (la famille) coexiste avec gemini-nano (une declinaison qui a merite sa page). UNE seule fiche
+  couvre donc les trois membres, motif mesure : la veille du site cite « GPT-5.6 » dans 73
+  actualites publiees, contre 2 pour GPT-5.1 et 1 pour GPT-5.2 - trois fiches auraient produit deux
+  pages maigres. Premiere mesure FAUSSE et corrigee au passage : le motif « Sol » ramenait 105
+  actualites parce qu il attrape « solution » et « console ».
+  ALIAS bornes aux formes composees : « GPT-5.6 Sol », « GPT-5.6 », « GPT-5.6 Terra », « GPT-5.6
+  Luna ». Ecartes d office : « Sol » seul (le sol, la note de musique, un prenom), « Terra » seul
+  (marque et toponyme), « Luna » seul (prenom courant).
+  L adresse de la source a d abord ete DEVINEE deux fois (/gpt-5-6-sol puis /gpt-5.6-sol : deux
+  404). La page d index du Deployment Safety Hub donne la vraie, /gpt-5-6. Lire l index plutot que
+  deviner l adresse.
+  Trois formulations fabriquees par la redaction deleguee ont ete interceptees : « conception de
+  toxines », « piratage assiste », et « evalue comme hautement risque » alors que la source dit
+  « High capability », un niveau de CAPACITE mesure avant diffusion et non un jugement de
+  dangerosite. La nuance est desormais expliquee dans la FAQ de la fiche.
+
 ## [1.270.5] - 2026-09-13
 
 ### Corrige
