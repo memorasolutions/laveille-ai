@@ -250,6 +250,29 @@ return [
         'measurement_cache_key' => env('HEALTH_OPENROUTER_MEASUREMENT_CACHE_KEY', 'health:openrouter:derniere_mesure'),
     ],
 
+    /*
+     * Validite du jeton d'API ProductHunt (alimente la decouverte quotidienne de nouveaux outils).
+     *
+     * ACTIF PAR DEFAUT, pour la meme raison que le bloc openrouter ci-dessus : un garde-fou qui
+     * exige une variable d'environnement pour exister n'existe pas.
+     *
+     * Ce bloc naît d'une panne REELLE, mesuree le 2026-09-13 : l'API repondait 401 chaque nuit
+     * depuis au moins 14 jours, la commande de decouverte se terminait en SUCCES a chaque fois,
+     * et rien nulle part ne le signalait. Ni courriel, ni statut rouge, ni compteur. Exactement
+     * le meme motif que l'epuisement de credit OpenRouter du 2026-08-23 - deuxieme occurrence,
+     * meme remede.
+     */
+    'producthunt' => [
+        'enabled' => env('HEALTH_PRODUCTHUNT_ENABLED', true),
+        // Intervalle entre deux interrogations REELLES de l'API. Le controle, lui, s'execute a
+        // chaque passage du planificateur (chaque minute) : c'est l'appel reseau qui est
+        // etrangle, jamais le controle - un controle Spatie non echu rend « skipped », et
+        // treat_skipped_as_failure passerait le site au rouge 59 minutes sur 60.
+        'check_interval_seconds' => env('HEALTH_PRODUCTHUNT_CHECK_INTERVAL_SECONDS', 3600),
+        'connection_failures_cache_key' => env('HEALTH_PRODUCTHUNT_CONNECTION_FAILURES_CACHE_KEY', 'health:producthunt:echecs_consecutifs'),
+        'measurement_cache_key' => env('HEALTH_PRODUCTHUNT_MEASUREMENT_CACHE_KEY', 'health:producthunt:derniere_mesure'),
+    ],
+
 /**
  * By default, conditionally skipped health checks are treated as failures.
  * You can override this behavior by uncommenting the configuration below.

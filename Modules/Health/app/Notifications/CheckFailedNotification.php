@@ -12,6 +12,7 @@ namespace Modules\Health\Notifications;
 
 use Illuminate\Notifications\Messages\MailMessage;
 use Modules\Health\Checks\OpenRouterCreditCheck;
+use Modules\Health\Checks\ProductHuntApiCheck;
 use Spatie\Health\Enums\Status;
 
 class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNotification
@@ -107,6 +108,24 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
                 $lignes = array_key_exists('restant', $result->meta ?? [])
                     ? $this->marcheASuivreOpenRouter()
                     : $this->marcheASuivreOpenRouterMesureImpossible();
+
+                foreach ($lignes as $ligne) {
+                    $mail->line($ligne);
+                }
+            }
+
+            // Meme regle que ci-dessus : on compare la CLASSE, jamais le libelle. Spatie
+            // derive « ProductHuntApiCheck » en « Product Hunt Api », et toute comparaison de
+            // chaine echouerait en silence.
+            if ($result->check instanceof ProductHuntApiCheck && ! $result->status->equals(Status::ok())) {
+                // Deux familles de pannes derriere le meme controle, et deux marches a suivre
+                // opposees : un jeton refuse se remplace a la main, une panne de transport se
+                // resorbe seule. Conseiller « cree un nouveau jeton » sur un simple timeout
+                // ferait perdre du temps, exactement comme le « augmente la directive saturee »
+                // affiche a tort sur un timeout OPcache le 2026-08-01.
+                $lignes = ($result->meta['cause'] ?? null) === 'jeton'
+                    ? $this->marcheASuivreProductHuntJeton()
+                    : $this->marcheASuivreProductHuntTransport();
 
                 foreach ($lignes as $ligne) {
                     $mail->line($ligne);
@@ -271,6 +290,39 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
             '1. Vérifier que https://openrouter.ai répond dans un navigateur : une indisponibilité de leur côté explique à elle seule cette alerte.',
             "2. Si un code HTTP 401 ou 403 est indiqué ci-dessus, la clé OPENROUTER_API_KEY du .env de production est refusée : la regénérer sur openrouter.ai puis la remplacer.",
             "3. Si l'alerte ne se répète pas au passage suivant, aucune action n'est requise : un échec isolé est déjà absorbé sans alerte, seule la répétition remonte.",
+        ];
+    }
+
+    /**
+     * Marche a suivre quand le jeton d'API ProductHunt est refuse ou absent.
+     *
+     * @return array<int, string>
+     */
+    private function marcheASuivreProductHuntJeton(): array
+    {
+        return [
+            'Marche à suivre :',
+            '1. Se connecter au compte ProductHunt, puis ouvrir https://api.producthunt.com/v2/oauth/applications.',
+            "2. Créer une application (un nom et une URI de redirection suffisent, même pour un usage de script) et récupérer le « developer token ».",
+            "3. Le déposer dans 1Password (coffre AI-Claude, étiquette projet:laveille) plutôt que directement dans le fichier .env : c'est là qu'on ira le rechercher la prochaine fois.",
+            "4. Ce qui reste cassé tant que le jeton n'est pas remplacé : la découverte quotidienne refuse les nouveaux outils venus de ProductHunt, faute de pouvoir résoudre l'adresse réelle du produit, et les fiches déjà enregistrées vers producthunt.com ne peuvent pas être corrigées.",
+            "5. Un developer token n'expire pas de lui-même : s'il est refusé, c'est qu'il a été révoqué, régénéré ailleurs, ou que son application a été supprimée.",
+        ];
+    }
+
+    /**
+     * Marche a suivre quand ProductHunt n'a pas pu etre CONTACTE (reseau, code HTTP inattendu).
+     * Distincte de la precedente : il n'y a rien a remplacer, seulement a attendre.
+     *
+     * @return array<int, string>
+     */
+    private function marcheASuivreProductHuntTransport(): array
+    {
+        return [
+            'Marche à suivre :',
+            "1. Ne rien remplacer : le jeton n'est pas en cause, c'est le contact avec l'API qui a échoué.",
+            '2. Vérifier https://api.producthunt.com/v2/docs depuis un navigateur pour confirmer que le service répond.',
+            "3. Si le contrôle repasse au vert de lui-même au passage suivant, il s'agissait d'un incident passager et il n'y a rien à faire.",
         ];
     }
 }

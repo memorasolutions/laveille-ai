@@ -13,6 +13,7 @@ namespace Modules\Health\Providers;
 use Modules\Core\Providers\BaseModuleServiceProvider;
 use Modules\Health\Checks\OpcacheCheck;
 use Modules\Health\Checks\OpenRouterCreditCheck;
+use Modules\Health\Checks\ProductHuntApiCheck;
 use Spatie\Health\Checks\Checks\CacheCheck;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
@@ -63,6 +64,15 @@ class HealthCheckServiceProvider extends BaseModuleServiceProvider
         // visible, et c'est precisement cette classe de panne muette qu'on cherche a eteindre.
         if ((bool) config('health.openrouter.enabled', true)) {
             $checks[] = OpenRouterCreditCheck::new();
+        }
+
+        // Actif par defaut, meme motif que le bloc ci-dessus : quand le jeton ProductHunt devient
+        // invalide, fetchProductHunt() journalise un warning dans un canal dedie, retourne un
+        // tableau vide, et la commande de decouverte se termine en SUCCES. Mesure du 2026-09-13 :
+        // 401 chaque nuit depuis au moins 14 jours, sans que rien ne le signale. C'est la
+        // deuxieme panne muette de la meme famille, apres le credit OpenRouter.
+        if ((bool) config('health.producthunt.enabled', true)) {
+            $checks[] = ProductHuntApiCheck::new();
         }
 
         Health::checks($checks);

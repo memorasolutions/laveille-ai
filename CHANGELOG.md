@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.271.0] - 2026-09-13
+
+### Ajoute
+- **Un controle de sante qui rend VISIBLE la mort de l API ProductHunt** (#2540, #2552). Mesure du
+  jour : `[ToolDiscovery] ProductHunt API erreur {"status":401}` s ecrivait chaque nuit a 04h00
+  Quebec (08:00 UTC) depuis AU MOINS 14 jours, et personne ne pouvait le savoir. Le code faisait
+  pourtant exactement ce qu il devait : journaliser un warning dans un canal dedie, retourner un
+  tableau vide, et laisser la commande se terminer en SUCCES. Ni courriel, ni statut rouge, ni
+  compteur. C est la DEUXIEME panne muette de cette famille apres l epuisement du credit
+  OpenRouter du 2026-08-23 - meme motif, meme remede.
+  Le nouveau `ProductHuntApiCheck` interroge l API et rend un verdict au tableau de bord de sante :
+  jeton absent, jeton invalide, cadence limitee, reponse vide, ou fonctionnelle.
+  - **Il regarde DEUX signaux, pas un** : le code HTTP, ET une erreur `invalid_oauth_token` logee
+    dans le corps d une reponse par ailleurs bien formee. Un controle qui ne testerait que le code
+    declarerait cette seconde reponse saine - c est le test le plus important du fichier.
+  - **L appel reseau est etrangle par un cache**, jamais par `->hourly()` de Spatie : un controle
+    non echu rend « skipped », et `treat_skipped_as_failure` vaut true par defaut, ce qui
+    passerait le site au rouge 59 minutes sur 60. Les pannes sont memorisees elles aussi, sans quoi
+    le controle rappellerait ProductHunt 1440 fois par jour pendant toute la duree d une panne.
+  - **Deux marches a suivre OPPOSEES dans le courriel d alerte**, choisies sur la cause : un jeton
+    refuse se remplace a la main, une panne de transport se resorbe seule. Envoyer creer un jeton
+    sur un simple timeout serait la faute deja corrigee le 2026-08-01 sur OPcache.
+  - La branche compare la CLASSE, jamais le libelle : Spatie derive `ProductHuntApiCheck` en
+    « Product Hunt Api », mesure par `getLabel()`. Une comparaison de chaine aurait fait
+    disparaitre la marche a suivre du courriel sans la moindre erreur - piege deja rencontre sur
+    OpenRouter le 2026-08-23, et desormais garde par un test.
+  - 12 tests neufs (9 sur le controle, 3 sur le courriel), contre-epreuve faite dans les trois
+    cas : sans la detection dans le corps, sans la memorisation des pannes, et avec une comparaison
+    de libellé a la place de la classe, les tests concernes virent au rouge.
+  - Actif par defaut (`HEALTH_PRODUCTHUNT_ENABLED`), pour la meme raison que le bloc OpenRouter :
+    un garde-fou qui exige une variable d environnement pour exister n existe pas.
+
+### Non livre, et c est deliberé
+- **La commande de rattrapage des 260 fiches pointant vers producthunt.com** n est PAS ecrite. Les
+  trois voies de resolution sont fermees : curl repond 403 depuis le serveur comme depuis le poste
+  de travail, l API refuse le jeton, et le navigateur reel recoit un defi anti-robot
+  (« Performing security verification ») qui ne sera pas franchi. Une commande ecrite aujourd hui
+  reposerait sur deux hypotheses invérifiables sans jeton valide : que l identifiant de
+  `/r/p/1129378` soit un identifiant de POST au sens de l API, et que le champ `website` soit
+  expose pour l entite derriere `/products/SLUG`. Elle s ecrira quand une requete temoin pourra
+  trancher, avec un arret net si cette requete ne rend pas le champ attendu.
+
 ## [1.270.12] - 2026-09-13
 
 ### Corrige
