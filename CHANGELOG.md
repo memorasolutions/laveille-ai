@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.267.0] - 2026-09-13
+
+### Ajoute
+- **« Outils liés » sur les fiches du glossaire** (#2524, étape 3 du plan). Une fiche de terme peut
+  désormais pointer vers les outils de l'annuaire qui s'y rapportent.
+  **Ce lien est CURATÉ, jamais détecté automatiquement**, et c'est la règle qui gouverne toute la
+  section : le panel l'a refusé explicitement dès son premier tour, « via champ structuré validé,
+  jamais texte promotionnel ». Aucun détecteur, aucune heuristique, aucun rattrapage n'a été écrit.
+  Conséquence directe sur la forme de la table : contrairement au pivot des actualités, celui-ci ne
+  porte ni colonne de source ni colonne d'approbation. Une association posée par un humain est
+  validée par construction ; y ajouter un filtre d'approbation reviendrait à se demander si on fait
+  confiance à sa propre curation.
+  La section n'apparaît que lorsqu'une association existe : tant que personne n'en a créé, aucune
+  fiche n'affiche quoi que ce soit, pas même un encadré vide. Le mécanisme est posé, la curation
+  viendra au rythme qu'on voudra.
+  Les outils masqués le restent : la section réutilise exactement la combinaison de filtres déjà
+  employée par toutes les listes publiques de l'annuaire, plutôt que de redéfinir localement ce
+  qu'est un outil visible.
+
 ## [1.266.0] - 2026-09-13
 
 ### Ajoute

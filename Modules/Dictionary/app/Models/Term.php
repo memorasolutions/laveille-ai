@@ -126,6 +126,26 @@ class Term extends Model implements Searchable
         return $this->newsArticles()->wherePivot('is_approved', true);
     }
 
+    /**
+     * Outils de l'annuaire associés à cette fiche de glossaire (ticket #2524, étape 3).
+     * Pivot CURATÉ (table term_tool) : un humain pose l'association dans l'admin, jamais de
+     * détecteur automatique - contrairement à newsArticles() ci-dessus, aucun filtre
+     * d'approbation n'est nécessaire ici, une ligne posée est validée par construction. La
+     * section publique « Outils liés » filtre malgré tout sur l'état de L'OUTIL lui-même
+     * (published()->notArchived(), scopes de Modules\Directory\Models\Tool - même règle que
+     * toutes les listes publiques de l'annuaire) : un outil peut devenir dépublié/archivé APRÈS
+     * avoir été curé, la curation ne fige pas l'état de sa cible.
+     */
+    public function tools(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            \Modules\Directory\Models\Tool::class,
+            'term_tool',
+            'term_id',
+            'tool_id'
+        )->withTimestamps();
+    }
+
     // 2026-05-05 #144 : scopePublished mutualise via HasPublishedState (DRY Core).
 
     public function scopeOfType($query, string $type)

@@ -561,6 +561,40 @@
                             </div>
                         @endif
 
+                        {{-- Ticket #2524 étape 3 : « Outils liés » - pivot CURATÉ (Term::tools(),
+                             table term_tool), jamais auto-détecté : c'est un humain qui associe un
+                             outil à un terme dans l'admin, aucun mécanisme de détection n'écrit
+                             ici. Filtre sur l'état de L'OUTIL (published()->notArchived()) : mêmes
+                             scopes que TOUTES les listes publiques de l'annuaire
+                             (Modules/Directory/app/Http/Controllers/PublicDirectoryController.php),
+                             règle réutilisée, jamais réinventée - une association curée peut viser
+                             un outil devenu entre-temps dépublié ou archivé. Ordre de curation (le
+                             plus récemment associé en premier, orderByPivot déjà utilisé ailleurs
+                             dans le module Directory - ToolCollection::tools()). Même règle « le
+                             vide plutôt que le faux » que « Dans l'actualité » juste au-dessus :
+                             aucun balisage si la liste est vide. --}}
+                        @php
+                            $_toolsLies = $term->tools()
+                                ->published()
+                                ->notArchived()
+                                ->orderByPivot('created_at', 'desc')
+                                ->get(['directory_tools.id', 'directory_tools.slug', 'directory_tools.name']);
+                        @endphp
+                        @if($_toolsLies->isNotEmpty())
+                            <div class="gl-section gl-bento-full">
+                                <div class="gl-section-box">
+                                    <h2 class="gl-section-title">🛠️ {{ __('Outils liés') }}</h2>
+                                    <ul style="list-style: none; padding: 0; margin: 0;">
+                                        @foreach($_toolsLies as $toolItem)
+                                            <li style="margin-bottom: 10px; line-height: 1.5;">
+                                                <a href="{{ $toolItem->getPublicUrl() }}">{{ $toolItem->name }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        @endif
+
                     </div>
 
                 </article>

@@ -410,6 +410,21 @@ class Tool extends Model implements Searchable
         )->withPivot('source')->withTimestamps();
     }
 
+    /**
+     * Fiches de glossaire (Modules\Dictionary\Models\Term) qui citent cet outil dans leur
+     * section « Outils liés » (ticket #2524, étape 3). Relation inverse de Term::tools() -
+     * pivot curaté (table term_tool), jamais de détection automatique.
+     */
+    public function terms(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            \Modules\Dictionary\Models\Term::class,
+            'term_tool',
+            'tool_id',
+            'term_id'
+        )->withTimestamps();
+    }
+
     public function allAlternatives()
     {
         return $this->alternatives->merge($this->alternativeOf)->unique('id');
