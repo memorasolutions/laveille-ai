@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.270.10] - 2026-09-13
+
+### Ajoute
+- **Terme « HarvestBench » au glossaire.** La premiere question n etait pas « que dire » mais
+  « existe-t-il publiquement » : le suffixe « Bench » avait deja produit un faux espoir le meme jour
+  avec REMAP, un banc d essai explicitement NON publie dont la fiche n a pas ete creee. Le controle
+  a donc ete refait, et le resultat est oppose : HarvestBench est publie sous forme de preimpression
+  arXiv:2609.04444 deposee le 3 septembre 2026, verifiee par requete reelle avec controle du titre
+  servi. Le resume officiel a ete LU, pas repris d un relais.
+  STATUT DE PREUVE dit explicitement dans la fiche et dans une FAQ : c est une preimpression, donc
+  un travail rendu public SANS evaluation par des pairs. Les chiffres sont attribues aux auteurs.
+  UNE DIVERGENCE ENTRE DEUX SOURCES DU SITE, relevee et expliquee plutot que tranchee : l actualite
+  49044, ecrite a partir de The Register, affirme que le texte « ne donne ni la taille de
+  l echantillon ni la methode statistique ». Le resume arXiv, lui, donne des chiffres precis.
+  L actualite s appuyait sur un relais, la fiche s appuie sur la source primaire.
+  UNE FABRICATION INTERCEPTEE, la sixieme de la journee : la redaction deleguee pretait aux auteurs
+  l hypothese que « des biais dans les donnees d entrainement » expliqueraient l ecart entre animaux
+  sauvages et d elevage. Le resume ne dit rien de tel : les auteurs constatent sans expliquer.
+  SUJET SENSIBLE traite sobrement : animaux SIMULES, aucun animal reel en cause, dit dans la
+  premiere FAQ. L image ne montre aucun animal - interdit pose dans le prompt, parce qu illustrer ce
+  sujet par un animal serait de mauvais gout.
+  ALIAS bornes a la forme composee : « Harvest » seul est un mot courant et un nom de logiciel,
+  « Bench » seul est courant. Les deux sont ecartes.
+
 ## [1.270.9] - 2026-09-13
 
 ### Ajoute
