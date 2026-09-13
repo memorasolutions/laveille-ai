@@ -97,18 +97,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 404);
             }
 
-            // Check URL redirects before returning 404
+            // Redirection d'URL avant de rendre le 404. La résolution complète (cache,
+            // comptage de la visite, retour) vit dans Modules\SEO\Models\UrlRedirect,
+            // méthode resolveForPath : ce fichier ne fait que la câbler, et le comportement
+            // observable est inchangé.
             $path = '/'.ltrim($request->path(), '/');
-            $redirect = \Illuminate\Support\Facades\Cache::remember(
-                "url_redirect:{$path}",
-                3600,
-                fn () => \Modules\SEO\Models\UrlRedirect::findRedirect($path),
-            );
+            $redirect = \Modules\SEO\Models\UrlRedirect::resolveForPath($path);
 
             if ($redirect) {
-                $redirect->recordHit();
-                \Illuminate\Support\Facades\Cache::forget("url_redirect:{$path}");
-
                 return redirect($redirect->to_url, $redirect->status_code);
             }
         });

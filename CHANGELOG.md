@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.264.1] - 2026-09-12
+
+### Corrige
+- **Le mécanisme de redirection d'URL était écrit deux fois** (#2520). Un middleware complet,
+  `Modules/SEO/.../HandleUrlRedirects.php`, dupliquait à l'identique la logique du gestionnaire
+  d'exception 404 de `bootstrap/app.php` : même clé de cache, même durée, même comptage de visite.
+  Il n'était branché nulle part : la chaîne « HandleUrlRedirects » n'apparaissait qu'à un seul
+  endroit du dépôt, sa propre déclaration de classe. Aucun test, aucun import, aucun fournisseur
+  de services, aucune route.
+  La résolution vit désormais dans `UrlRedirect::resolveForPath()`, et le gestionnaire 404 se
+  contente de la câbler. Le comportement observable est inchangé : même cible, même code de
+  statut, même comptage.
+  **On a retiré le middleware au lieu de le brancher**, et le motif vaut d'être écrit : un
+  middleware du groupe « web » ne s'exécute jamais sur un vrai 404, puisque le routeur lève
+  l'exception avant d'entrer dans le groupe ; et branché globalement, il tournerait sur chaque
+  requête du site, où un `from_url` coïncidant par erreur avec une page existante détournerait
+  silencieusement une page vivante. Le gestionnaire 404 ne peut structurellement jamais faire ça.
+- **Le comportement du cache des redirections est maintenant documenté sur place**, parce qu'il
+  est contre-intuitif et qu'il invite au faux correctif : `Cache::remember` ne distingue pas une
+  clé absente d'une valeur nulle déjà en cache, donc l'absence de redirection n'est jamais mise
+  en cache. C'est un coût à chaque 404, mais c'est aussi ce qui fait qu'une redirection tout juste
+  créée prend effet immédiatement au lieu d'attendre une heure. La condition qui débloquerait la
+  correction est écrite au ticket #2521.
+- Les trois tests du module SEO qui portaient encore le mot « middleware » dans leur nom sont
+  renommés : ils documentaient un composant qui n'existe plus.
+
 ## [1.264.0] - 2026-09-12
 
 ### Ajoute

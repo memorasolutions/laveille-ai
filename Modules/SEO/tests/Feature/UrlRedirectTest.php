@@ -74,9 +74,12 @@ test('recordHit increments hits counter and sets last_hit_at', function () {
         ->and($redirect->last_hit_at)->not->toBeNull();
 });
 
-// ── Middleware tests ──
+// ── Resolution des redirections (gestionnaire d'exception 404, bootstrap/app.php) ──
+// Le seul mecanisme vivant est le handler NotFoundHttpException, qui delegue a
+// UrlRedirect::resolveForPath() ; il n'y a plus de middleware (supprime, mort, jamais
+// branche - voir ticket #2520).
 
-test('middleware redirects with 301 status', function () {
+test('une redirection active repond avec le bon statut', function () {
     UrlRedirect::create(['from_url' => '/old-301', 'to_url' => '/new-301', 'status_code' => 301, 'is_active' => true]);
 
     $response = $this->get('/old-301');
@@ -85,7 +88,7 @@ test('middleware redirects with 301 status', function () {
     $response->assertStatus(301);
 });
 
-test('middleware redirects with 302 status', function () {
+test('une redirection active peut aussi repondre en 302', function () {
     UrlRedirect::create(['from_url' => '/old-302', 'to_url' => '/new-302', 'status_code' => 302, 'is_active' => true]);
 
     $response = $this->get('/old-302');
@@ -94,7 +97,48 @@ test('middleware redirects with 302 status', function () {
     $response->assertStatus(302);
 });
 
-test('middleware passes through when no redirect found', function () {
+test('une URL inexistante avec une redirection active redirige et incremente les visites', function () {
+    $redirect = UrlRedirect::create([
+        'from_url' => '/ancienne-page-resolution',
+        'to_url' => '/nouvelle-page-resolution',
+        'status_code' => 301,
+        'is_active' => true,
+    ]);
+
+    expect($redirect->hits)->toBe(0);
+
+    $response = $this->get('/ancienne-page-resolution');
+
+    $response->assertRedirect('/nouvelle-page-resolution');
+    $response->assertStatus(301);
+
+    expect($redirect->refresh()->hits)->toBe(1);
+});
+
+test('une URL inexistante sans redirection reste un 404 (temoin negatif)', function () {
+    // Sans ce temoin, un correctif qui redirigerait tout finirait par passer pour un succes.
+    $response = $this->get('/cette-page-ne-existe-nulle-part-et-na-aucune-redirection');
+
+    $response->assertNotFound();
+});
+
+test('une URL qui existe reellement sur le site nest jamais detournee par une redirection', function () {
+    // Le gestionnaire ne s'execute que sur une NotFoundHttpException : une page qui existe
+    // ne leve jamais cette exception, donc une redirection dont le from_url coinciderait
+    // avec elle ne peut structurellement jamais la detourner.
+    UrlRedirect::create([
+        'from_url' => '/login',
+        'to_url' => '/nouvelle-page-resolution',
+        'status_code' => 301,
+        'is_active' => true,
+    ]);
+
+    $response = $this->get('/login');
+
+    $response->assertOk();
+});
+
+test('une page existante sans redirection correspondante reste inchangee', function () {
     // A known route that exists (/ redirects to /login with 302)
     $response = $this->get('/');
 
