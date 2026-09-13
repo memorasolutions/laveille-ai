@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.269.0] - 2026-09-13
+
+### Ajoute
+- **Écran d'administration pour modérer les liaisons entre une actualité et les fiches du
+  glossaire** (#2524). Les liaisons sont détectées automatiquement et il y en a près de douze
+  mille : il fallait un moyen de refuser celles qui se trompent, sans quoi la détection n'était
+  corrigeable qu'en base.
+  **La doctrine est « désapprouver, jamais supprimer »**, la même que pour les tutoriels de
+  l'annuaire, et elle a une raison mécanique : une liaison supprimée serait recréée au passage
+  suivant du détecteur, et la décision humaine serait perdue à chaque rattrapage. Une liaison
+  refusée reste donc en base, marquée comme telle, et la fiche publique cesse de l'afficher.
+  La bascule est réversible dans les deux sens.
+  Le cache de la fiche de terme est purgé au moment de la bascule, sinon la modération ne se
+  verrait qu'au bout de dix minutes.
+- Une purge de cache dédiée aux fiches de terme, qui n'existait pas : l'observateur du glossaire
+  ne purgeait que les listes, jamais la fiche elle-même.
+
 ## [1.268.0] - 2026-09-13
 
 ### Ajoute

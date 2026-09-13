@@ -82,6 +82,16 @@ Route::prefix('admin/news')
         Route::post('articles/{article}/marquer-partage/{platform}', [AdminNewsController::class, 'markShared'])
             ->where('platform', 'linkedin|facebook')
             ->name('articles.mark-shared');
+
+        // ── Ticket #2524 (2026-09-13, écran d'admin) - liaisons glossaire↔actualité : liste et
+        // bascule d'approbation d'une liaison détectée automatiquement. Même pile d'intergiciels
+        // que le reste de ce groupe (jumelle exacte des routes related-tools.store/destroy de
+        // NewsCompositionController, elle aussi PATCH sur une ressource déjà existante plutôt
+        // qu'un store/destroy : ici il n'y a jamais rien à créer ni à détruire, seulement une
+        // colonne à basculer sur une ligne déjà en base - doctrine « désapprouver, jamais
+        // supprimer », voir NewsToolSyncAction::invalidateTermPublicCache()).
+        Route::get('articles/{article}/termes', [AdminNewsController::class, 'articleTerms'])->name('articles.terms.index');
+        Route::patch('articles/{article}/termes/{term}/toggle', [AdminNewsController::class, 'toggleArticleTerm'])->name('articles.terms.toggle');
     });
 
 // ── Concentre Builder (admin, S90) ──

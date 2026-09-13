@@ -18,6 +18,7 @@ namespace Modules\News\Actions;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Modules\Core\Services\GlossaryLinkifier;
 use Modules\Dictionary\Models\Term;
 use Modules\Directory\Models\Tool;
@@ -208,6 +209,52 @@ final class NewsToolSyncAction
         // ce qui tromperait PHPStan si chaîné avec forget() de CacheItemSelector.
         $cacheSelector = \Spatie\ResponseCache\Facades\ResponseCache::selectCachedItems()
             ->forUrls(route('news.show', $article->slug));
+        $cacheSelector->usingSuffix('');
+        $cacheSelector->forget();
+    }
+
+    /**
+     * ACTION : ticket #2524 (2026-09-13, écran d'admin de bascule d'approbation) - invalidation
+     * ciblée du cache de réponse de la fiche PUBLIQUE d'un terme de glossaire (route
+     * dictionary.show, cacheResponse:3600 - Modules/Dictionary/routes/web.php), après une
+     * bascule d'approbation d'une liaison news_article_term. Jumelle exacte de
+     * invalidatePublicCache() ci-dessus (même mécanique Spatie ResponseCache), seule la route
+     * cible change.
+     *
+     * AUCUNE méthode équivalente n'existait avant pour la fiche de terme elle-même :
+     * Modules\Dictionary\Observers\TermObserver::purgePublicListCache() purge volontairement
+     * les LISTES (home, dictionary.index) mais jamais 'dictionary.show' - son propre docblock
+     * explique pourquoi (une fiche dépubliée répond 404 avant d'avoir jamais été mise en cache,
+     * et l'édition de contenu d'une fiche qui RESTE publiée est un chantier hors périmètre
+     * assumé là-bas, laissé à l'expiration naturelle de 3600s). Le cas d'ici est différent : le
+     * Term lui-même ne change PAS (c'est le PIVOT qui bouge), donc TermObserver ne se déclenche
+     * même pas - sans cette purge dédiée, la section « Dans l'actualité » de la fiche
+     * resterait périmée jusqu'à 3600s après une désapprobation ou une réapprobation.
+     *
+     * RAISON: fait ce que demande le ticket ("regarde comment le projet purge déjà le cache
+     *         d'une fiche... et fais la même chose pour le terme"), à l'endroit qui centralise
+     *         déjà toute la logique du pivot news_article_term (ce fichier) et juste à côté de
+     *         sa jumelle - jamais un service dédié séparé : seulement 2 occurrences de la même
+     *         mécanique de purge à ce jour, sous le seuil d'abstraction du projet (CLAUDE.md,
+     *         "DRY et anti-sur-ingénierie" - 3e occurrence requise hors risque légal/financier).
+     *
+     * Utilise Term::getPublicUrl() et JAMAIS route('dictionary.show', $term->slug) en accès
+     * brut : régression #2092 (2026-08-31, voir Modules\Dictionary\Models\Term::getPublicUrl())
+     * où l'accès direct au slug traduit renvoie null et fait tomber la génération d'URL dès
+     * qu'un terme n'a pas de traduction pour la locale courante - getPublicUrl() passe par
+     * HasFallbackTranslatedSlug::resolveTranslatedSlug(), qui replie sur 'fr' puis sur la
+     * première traduction disponible.
+     */
+    public static function invalidateTermPublicCache(Term $term): void
+    {
+        if (! class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class) || ! Route::has('dictionary.show')) {
+            return;
+        }
+
+        // Même rupture de chaîne que invalidatePublicCache() ci-dessus (usingSuffix() retourne
+        // AbstractRequestBuilder, pas CacheItemSelector).
+        $cacheSelector = \Spatie\ResponseCache\Facades\ResponseCache::selectCachedItems()
+            ->forUrls($term->getPublicUrl());
         $cacheSelector->usingSuffix('');
         $cacheSelector->forget();
     }

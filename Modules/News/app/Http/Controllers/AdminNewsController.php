@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -17,6 +18,7 @@ use Modules\News\Models\NewsSource;
 use Modules\News\Services\AiSummaryService;
 use Modules\News\Services\NewsImageService;
 use Modules\News\Services\RssFetcherService;
+use Modules\Dictionary\Models\Term;
 use Modules\Directory\Models\Tool;
 use Modules\Settings\Facades\Settings;
 
@@ -249,6 +251,62 @@ class AdminNewsController extends Controller
         $allIds = app(NewsToolSyncAction::class)->suggest($article);
 
         return response()->json(['tool_ids' => $allIds]);
+    }
+
+    /**
+     * Écran d'administration (ticket #2524) : liste les liaisons glossaire↔actualité de CETTE
+     * actualité - nom du terme, source ('auto'/'manual') et état d'approbation - pour que
+     * l'admin puisse désapprouver une liaison détectée à tort. Écran minimal, jamais un
+     * gestionnaire complet : aucune création/suppression ici, seulement la bascule servie par
+     * toggleArticleTerm() ci-dessous.
+     */
+    public function articleTerms(NewsArticle $article): View
+    {
+        $article->load('terms');
+
+        return view('news::admin.articles.terms', [
+            'article' => $article,
+            'terms' => $article->terms,
+        ]);
+    }
+
+    /**
+     * Bascule l'approbation d'UNE liaison actualité↔glossaire (ticket #2524, écran d'admin).
+     * Ne fait QUE inverser 'is_approved' sur le pivot news_article_term - ne détache et ne
+     * supprime JAMAIS la ligne. Doctrine « désapprouver, jamais supprimer » (migration
+     * 2026_09_13_020000_add_is_approved_to_news_article_term) : une liaison supprimée serait
+     * recréée par le détecteur automatique (NewsToolSyncAction::suggest()) au prochain
+     * passage, et la décision humaine serait perdue.
+     *
+     * Refuse proprement (flash 'error', jamais une exception) une liaison qui n'existe pas
+     * entre CETTE actualité et CE terme précis - {article} et {term} sont chacun résolus par
+     * liaison de route implicite, mais rien ne garantit qu'une ligne les relie l'un à l'autre.
+     */
+    public function toggleArticleTerm(NewsArticle $article, Term $term): RedirectResponse
+    {
+        $pivot = DB::table('news_article_term')
+            ->where('news_article_id', $article->id)
+            ->where('term_id', $term->id)
+            ->first();
+
+        if ($pivot === null) {
+            return back()->with('error', __("Aucune liaison entre cette actualité et cette fiche de glossaire."));
+        }
+
+        $newState = ! (bool) $pivot->is_approved;
+
+        $article->terms()->updateExistingPivot($term->id, ['is_approved' => $newState]);
+
+        // ACTION : purge du cache public de la FICHE DE TERME (jamais celle de l'actualité, qui
+        // n'affiche aucun terme lié - voir NewsToolSyncAction::invalidateTermPublicCache()).
+        // MCP: SELF (<5 lignes)
+        // RAISON: sans purge, la section « Dans l'actualité » du glossaire reste périmée
+        //         jusqu'à 3600s (cacheResponse:3600, Modules/Dictionary/routes/web.php).
+        NewsToolSyncAction::invalidateTermPublicCache($term);
+
+        return back()->with('success', $newState
+            ? __('Liaison approuvée - le terme réapparaît sur la fiche de glossaire.')
+            : __('Liaison désapprouvée - le terme disparaît de la fiche de glossaire, la ligne reste en base.'));
     }
 
     public function rescoreArticle(NewsArticle $article, AiSummaryService $aiService): RedirectResponse

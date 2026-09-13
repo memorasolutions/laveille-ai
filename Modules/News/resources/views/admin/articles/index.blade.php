@@ -113,6 +113,7 @@
                             @include('core::components.action-menu', ['actions' => [
                                 ['label' => __('Voir l\'article'), 'icon' => 'external-link', 'url' => route('news.show', $a), 'target' => '_blank'],
                                 ['label' => __('Modifier'), 'icon' => 'edit', 'url' => route('admin.news.articles.edit', $a)],
+                                ['label' => __('Termes liés'), 'icon' => 'book-open', 'url' => route('admin.news.articles.terms.index', $a)],
                                 ['label' => __('Source originale'), 'icon' => 'link', 'url' => $a->url, 'target' => '_blank'],
                                 ['label' => __('Re-scorer IA'), 'icon' => 'refresh-cw', 'url' => route('admin.news.articles.rescore', $a), 'method' => 'POST', 'confirm' => __('Re-scorer cet article via IA?')],
                                 ['label' => $a->is_published ? __('Dépublier') : __('Publier'), 'icon' => $a->is_published ? 'pause' : 'play', 'url' => route('admin.news.articles.toggle', $a), 'method' => 'PATCH'],
