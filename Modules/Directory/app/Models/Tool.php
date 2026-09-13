@@ -109,6 +109,11 @@ class Tool extends Model implements Searchable
         // MCP: SELF (<5 lignes)
         // RAISON: ticket #2087 lot 1 (2026-09-03) - convention $fillable des champs screenshot_* voisins.
         'screenshot_last_attempt_at', 'screenshot_last_attempt_result',
+        // ACTION: resultat du dernier controle de lien externe (directory:check-links), ecrit
+        // par requete brute (DB::table()->update()) pour ne jamais faire avancer updated_at -
+        // presents ici pour permettre un affichage/edition admin eventuel via Eloquent.
+        // MCP: SELF (<5 lignes) / RAISON: ticket controle de liens, mesure 2026-09-13.
+        'url_last_checked_at', 'url_last_status', 'url_last_note', 'url_failure_streak',
         'prices_converted_cad_at', 'website_type', 'launch_year', 'target_audience',
         'submitted_by',
         'last_enriched_at', 'enrichment_version',
@@ -236,6 +241,8 @@ class Tool extends Model implements Searchable
         // ACTION: cast datetime - ticket #2087 lot 1 (voir $fillable ci-dessus pour le contexte).
         // MCP: SELF (<5 lignes) / RAISON: comparaisons de grace (now()->subDays()) fiables cote appelant.
         'screenshot_last_attempt_at' => 'datetime',
+        'url_last_checked_at' => 'datetime',
+        'url_failure_streak' => 'integer',
         'prices_converted_cad_at' => 'datetime',
         'has_education_pricing' => 'boolean',
         'education_target_audience' => 'array',

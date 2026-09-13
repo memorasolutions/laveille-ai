@@ -31,6 +31,15 @@ Schedule::command('tools:expire-featured')->dailyAt('02:45')->withoutOverlapping
 // Audit images screenshot annuaire (hebdo dimanche 04:30 UTC) — log les 404, fix manuel via --auto-fix
 Schedule::command('tools:check-images')->weeklyOn(0, '04:30')->withoutOverlapping();
 
+// Controle des liens externes de l'annuaire (hebdo dimanche 05:45 UTC, heure creuse sans
+// collision avec les autres taches planifiees ce jour-la - shop:sync-gelato 03:00,
+// tools:check-images 04:30, ai:scrape-urls 05:00 quotidien). Ecrit le resultat sur chaque fiche
+// (url_last_checked_at/url_last_status/url_last_note/url_failure_streak) SANS jamais fixer une
+// fiche seul : pas de --fix ici, le controle OBSERVE, une quarantaine reste une decision humaine
+// via `php artisan directory:check-links --fix`. Avant ce correctif (2026-09-13), la commande
+// existait mais n'etait planifiee nulle part et son resultat disparaissait a chaque execution.
+Schedule::command('directory:check-links')->weeklyOn(0, '05:45')->withoutOverlapping();
+
 // Health checks - ORDRE CRITIQUE : le heartbeat DOIT être enregistré AVANT health:check.
 // Sinon, à la première minute après un optimize:clear (déploiement), health:check lit un
 // témoin absent et envoie un faux courriel « The schedule did not run yet » (2 occurrences

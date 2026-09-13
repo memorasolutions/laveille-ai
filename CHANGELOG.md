@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.270.11] - 2026-09-13
+
+### Corrige
+- **Le controle des adresses de l annuaire existait, bien concu, mais n avait jamais tourne seul et
+  jetait son resultat** (#2536). Ne de trois fiches perimees signalees par le fondateur en une heure
+  - Sora, lead-qualifier et headroom - qu il avait trouvees par hasard.
+  CE QUI EXISTAIT DEJA : la commande `directory:check-links` classe les codes d echec en trois
+  familles et n agit qu avec `--fix`. Son commentaire contenait deja, mot pour mot, la lecon qu on
+  croyait devoir apporter : tout 4xx hors 404/410 est « un refus, jamais une disparition ».
+  SES TROIS DEFAUTS : elle n etait PLANIFIEE nulle part (rien dans routes/console.php, aucun cron
+  serveur), elle n ecrivait RIEN sur la fiche, et son User-Agent `LaVeilleBot/1.0` maximise les
+  refus.
+  CE QUI CHANGE : quatre colonnes additives sur directory_tools (url_last_checked_at,
+  url_last_status, url_last_note, url_failure_streak), ecrites par le CONSTRUCTEUR DE REQUETES et
+  jamais par Eloquent, pour ne pas faire avancer `updated_at` d une fiche dont le contenu n a pas
+  bouge. Un echec FRANC incremente le compteur ; un refus de robot ou un ennui serveur ne
+  l incremente JAMAIS. Un extrait court du corps est conserve pour les codes ambigus (401, 402,
+  403, 503), parce que c est lui qui distingue un vrai arret d un pare-feu - mesure sur le terrain :
+  « Just a moment... » signale un defi Cloudflare donc un site VIVANT, « Payment required /
+  DEPLOYMENT_DISABLED » un deploiement desactive, et `{\"status\": \"warming_up\"}` un service en
+  train de demarrer.
+  AVANT de conclure a un 404, la variante `www` est desormais tentee. Cas reel et decisif :
+  `fusioo.com` repond 404 alors que `www.fusioo.com` repond 200 - l outil est parfaitement vivant,
+  seul le prefixe manquait dans la fiche. La commande n ecrit PAS la nouvelle adresse : elle
+  l enregistre dans la note, un humain tranche.
+  La commande est planifiee le dimanche, SANS `--fix` : le controle OBSERVE, il ne ferme jamais une
+  fiche tout seul. Les trois signalements du fondateur ont produit trois ecritures differentes
+  (fermee, en pause, privee) et le cas fusioo en ajoute une quatrieme : aucune automatisation ne
+  peut trancher entre les quatre.
+  MESURE DE REFERENCE, faite a la main sur les 2233 adresses actives : 2083 repondent (93,3 %), dont
+  129 qui n avaient repondu 429 qu a cause de la cadence du controle lui-meme. 15 domaines ne
+  resolvent plus, 28 repondent 404, et 51 refusent le robot tout en etant vivants - ChatGPT, Claude,
+  Midjourney et Perplexity en font partie.
+
 ## [1.270.10] - 2026-09-13
 
 ### Ajoute
