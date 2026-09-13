@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.265.2] - 2026-09-13
+
+### Corrige
+- **Les deux commandes de rattrapage retraitaient sans fin les fiches sans correspondance**
+  (#2525). Elles sélectionnaient leur lot par « n'a pas de liaison », alors que la question posée
+  est « n'a pas encore été examinée ». Une actualité qui ne mentionne aucun terme, ou aucun outil,
+  n'obtient jamais de liaison : elle restait donc éternellement dans le périmètre et revenait à
+  chaque exécution. Ces fiches s'accumulaient en tête de liste et formaient un bouchon grandissant.
+  Mesuré sur cinq lots consécutifs en production : 400 fiches examinées par lot, mais seulement
+  303, puis 249, puis 189, puis 149 réellement évacuées. Le coût par résultat doublait toutes les
+  deux exécutions et la commande n'aurait jamais atteint zéro, alors qu'un échantillon aléatoire
+  montrait que 82 % des fiches restantes étaient encore réparables : le travail utile était bien
+  là, c'était l'ordre de parcours qui le rendait inatteignable.
+  Deux colonnes d'examen sont posées sur les actualités, et chaque fiche traitée les reçoit,
+  qu'elle ait produit une liaison ou non. Une option de réexamen complet est prévue, sans quoi on
+  ne pourrait plus jamais repasser sur le corpus après une amélioration du détecteur.
+  **Le marquage passe volontairement par le constructeur de requêtes et non par le modèle**, pour
+  ne déclencher aucun observateur et ne pas faire avancer la date de modification : marquer 6337
+  fiches comme examinées aurait autrement fabriqué un signal de fraîcheur massivement faux, soit
+  exactement le défaut corrigé la veille sur le glossaire.
+  Le défaut était présent dans les deux commandes, celle des outils l'ayant transmis à celle des
+  termes qui l'a prise pour modèle : la sélection et le marquage vivent désormais à un seul
+  endroit, partagé par les deux.
+  Un piège de test a été refermé au passage : le détecteur met ses termes en cache et certains
+  utilitaires de test créent leurs données sans déclencher l'observateur qui l'invalide, ce qui
+  faisait échouer à tort le test du réexamen.
+
 ## [1.265.1] - 2026-09-13
 
 ### Corrige

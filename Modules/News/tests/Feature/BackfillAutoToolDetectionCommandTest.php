@@ -23,6 +23,7 @@ declare(strict_types=1);
  */
 
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Services\GlossaryLinkifier;
 use Modules\Directory\Models\Tool;
 use Modules\News\Models\NewsArticle;
 use Modules\News\Models\NewsSource;
@@ -137,4 +138,73 @@ it('le tirage au hasard reste une simulation et nécrit rien', function () {
     // deux fois sur la meme fiche sans que rien ne soit cassé.
     expect(bfatLiaisons($a->id))->toBe(0);
     expect(bfatLiaisons($b->id))->toBe(0);
+});
+
+// ── Correctif ticket #2525 : une fiche examinée sans correspondance ne revient plus ────────────
+//
+// Avant #2525, la sélection reposait sur whereDoesntHave('tools') : une fiche sans AUCUNE
+// mention réelle d'outil (absence normale) n'obtenait jamais de liaison, restait donc pour
+// toujours dans ce périmètre et se faisait retraiter à CHAQUE exécution - mesuré en production
+// sur cinq lots consécutifs : 400 fiches traitées par lot, seulement 303 puis 249 puis 189 puis
+// 149 réellement évacuées (coût par résultat qui double toutes les deux exécutions).
+
+it('une fiche examinée sans correspondance reçoit son horodatage et ne revient pas dans le lot suivant', function () {
+    $source = bfatSource();
+    // Aucun outil ne correspond à ce texte : absence normale, jamais un défaut à corriger.
+    $normale = bfatArticle($source->id, 'Le gouvernement dépose un projet de loi sur la vie privée.');
+
+    expect(DB::table('news_articles')->where('id', $normale->id)->value('tools_examined_at'))->toBeNull();
+
+    $this->artisan('news:backfill-auto-tools', ['--limit' => 50])->assertExitCode(0);
+
+    // L'horodatage d'examen est posé MÊME sans liaison - c'est le coeur du correctif.
+    expect(DB::table('news_articles')->where('id', $normale->id)->value('tools_examined_at'))->not->toBeNull();
+    expect(bfatLiaisons($normale->id))->toBe(0);
+
+    // Relancer la commande ne la retraite plus : elle est déjà examinée, donc exclue du lot -
+    // c'est précisément le test qui rougirait si l'on revenait à whereDoesntHave('tools').
+    $this->artisan('news:backfill-auto-tools', ['--limit' => 50])
+        ->expectsOutputToContain('Aucune actualité publiée en attente d\'examen pour les outils')
+        ->assertExitCode(0);
+});
+
+it('une fiche examinée avec correspondance reçoit son horodatage et sa liaison', function () {
+    $source = bfatSource();
+    bfatTool('Zorglubulator', 'zorglubulator');
+    $reparable = bfatArticle($source->id, 'Le nouvel outil Zorglubulator change la donne.');
+
+    expect(DB::table('news_articles')->where('id', $reparable->id)->value('tools_examined_at'))->toBeNull();
+
+    $this->artisan('news:backfill-auto-tools', ['--limit' => 50])->assertExitCode(0);
+
+    expect(DB::table('news_articles')->where('id', $reparable->id)->value('tools_examined_at'))->not->toBeNull();
+    expect(bfatLiaisons($reparable->id))->toBe(1);
+});
+
+it('loption rescanner ramène une fiche déjà examinée et lui permet une nouvelle liaison', function () {
+    $source = bfatSource();
+    // Aucun outil "Zorglubulator" ne publié pour l'instant : absence normale au 1er passage.
+    $reparable = bfatArticle($source->id, 'Le nouvel outil Zorglubulator change la donne.');
+
+    $this->artisan('news:backfill-auto-tools', ['--limit' => 50])->assertExitCode(0);
+    expect(bfatLiaisons($reparable->id))->toBe(0);
+    expect(DB::table('news_articles')->where('id', $reparable->id)->value('tools_examined_at'))->not->toBeNull();
+
+    // Le détecteur "s'améliore" en cours de route (l'outil est publié APRÈS le premier passage).
+    // Sans --rescanner, rien ne reconsidère la fiche déjà examinée, même si elle mentionne
+    // désormais un outil connu.
+    bfatTool('Zorglubulator', 'zorglubulator');
+    // bfatTool() crée via Tool::withoutEvents() (délibéré, cf. docblock du helper) - ce qui
+    // saute AUSSI l'observateur Tool::saved() qui invalide le cache de GlossaryLinkifier
+    // (CoreServiceProvider). Sans ce flush explicite, loadTerms() resservirait la liste mise en
+    // cache par le premier passage (sans Zorglubulator), et --rescanner échouerait à tort à
+    // détecter l'outil pourtant désormais publié - même patron que les autres suites du module
+    // (ToolNameProperNounSuffixTest, ComposerParagraphFauxComposeTest...).
+    GlossaryLinkifier::flushCache();
+    $this->artisan('news:backfill-auto-tools', ['--limit' => 50])->assertExitCode(0);
+    expect(bfatLiaisons($reparable->id))->toBe(0);
+
+    // Avec --rescanner : la fiche redevient éligible et obtient désormais sa liaison.
+    $this->artisan('news:backfill-auto-tools', ['--limit' => 50, '--rescanner' => true])->assertExitCode(0);
+    expect(bfatLiaisons($reparable->id))->toBe(1);
 });

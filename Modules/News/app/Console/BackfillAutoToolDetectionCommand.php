@@ -6,7 +6,7 @@ namespace Modules\News\Console;
 
 use Illuminate\Console\Command;
 use Modules\News\Actions\NewsToolSyncAction;
-use Modules\News\Models\NewsArticle;
+use Modules\News\Console\Concerns\SelectsArticlesPendingAutoDetection;
 
 /**
  * Backfill BORNÉ (source=auto) des outils annuaire pour les actualités publiées AVANT
@@ -19,35 +19,49 @@ use Modules\News\Models\NewsArticle;
  * `--limit` par défaut à 200 garantit une exécution rapide ; relancer plusieurs fois pour
  * rattraper tout le retard (idempotent, sans doublon - attachAuto() ne touche jamais une
  * liaison déjà existante).
+ *
+ * CORRECTIF ticket #2525 (2026-09-13) : la sélection du lot ne repose plus sur
+ * whereDoesntHave('tools') (confond « aucune liaison » et « jamais examinée » - une fiche sans
+ * AUCUNE mention réelle d'outil, absence normale, restait éternellement dans ce périmètre et se
+ * faisait retraiter à chaque exécution ; mesuré en production sur cinq lots consécutifs : 400
+ * fiches traitées par lot, mais seulement 303 puis 249 puis 189 puis 149 réellement évacuées).
+ * Elle s'appuie désormais sur la colonne horodatée `tools_examined_at` (voir migration
+ * 2026_09_13_010000 et Modules\News\Console\Concerns\SelectsArticlesPendingAutoDetection,
+ * partagée avec BackfillAutoTermDetectionCommand - même défaut corrigé une seule fois aux deux
+ * endroits). CHAQUE fiche traitée reçoit désormais son horodatage d'examen, qu'elle ait ou non
+ * produit une liaison : une fiche examinée sans correspondance ne revient plus jamais dans le
+ * lot, sauf demande explicite de réexamen complet (--rescanner).
  */
 class BackfillAutoToolDetectionCommand extends Command
 {
-    protected $signature = 'news:backfill-auto-tools {--limit=200 : Nombre maximal d\'actualités traitées par exécution} {--dry-run : Mesurer sans rien écrire ni purger} {--echantillon : Tirer les fiches AU HASARD au lieu des plus anciennes, pour une mesure representative (simulation seulement)}';
+    use SelectsArticlesPendingAutoDetection;
 
-    protected $description = 'Détecte et lie automatiquement (source=auto) les outils annuaire pour les actualités publiées sans outil lié';
+    private const EXAMINED_COLUMN = 'tools_examined_at';
+
+    protected $signature = 'news:backfill-auto-tools {--limit=200 : Nombre maximal d\'actualités traitées par exécution} {--dry-run : Mesurer sans rien écrire ni purger} {--echantillon : Tirer les fiches AU HASARD au lieu des plus anciennes, pour une mesure representative (simulation seulement)} {--rescanner : Ignorer l\'horodatage d\'examen et repasser sur tout le corpus déjà examiné (nécessaire après une amélioration du détecteur)}';
+
+    protected $description = 'Détecte et lie automatiquement (source=auto) les outils annuaire pour les actualités publiées jamais examinées';
 
     public function handle(NewsToolSyncAction $action): int
     {
         $limit = max(1, (int) $this->option('limit'));
         $dryRun = (bool) $this->option('dry-run');
-        // ACTION : tirage AU HASARD, reserve a la simulation.
+        $rescanner = (bool) $this->option('rescanner');
+        // ACTION : tirage AU HASARD, réservé à la simulation.
         // MCP: SELF (<5 lignes)
-        // RAISON: en simulation rien n'est ecrit, donc deux appels successifs renvoient
-        // exactement les MEMES premieres fiches par identifiant - c'est-a-dire les PLUS
-        // ANCIENNES. Mesurer un taux sur cet echantillon, c'est mesurer le passe et le
-        // presenter comme le tout. Le tirage aleatoire donne une proportion representative
-        // en un seul appel, ce qui compte quand une execution complete depasse la limite
+        // RAISON: en simulation rien n'est écrit, donc deux appels successifs renvoient
+        // exactement les MÊMES premières fiches par identifiant - c'est-à-dire les PLUS
+        // ANCIENNES. Mesurer un taux sur cet échantillon, c'est mesurer le passé et le
+        // présenter comme le tout. Le tirage aléatoire donne une proportion représentative
+        // en un seul appel, ce qui compte quand une exécution complète dépasse la limite
         // de temps du serveur. Interdit hors simulation : sur un vrai rattrapage, un ordre
-        // aleatoire empeche de reprendre la ou l'on s'etait arrete.
+        // aléatoire empêche de reprendre là où l'on s'était arrêté.
         $echantillon = $dryRun && (bool) $this->option('echantillon');
 
-        $requete = NewsArticle::published()->whereDoesntHave('tools');
-        $articles = ($echantillon ? $requete->inRandomOrder() : $requete->orderBy('id'))
-            ->limit($limit)
-            ->get();
+        $articles = $this->selectArticlesPendingExamination(self::EXAMINED_COLUMN, $limit, $rescanner, $echantillon);
 
         if ($articles->isEmpty()) {
-            $this->info('Aucune actualité publiée sans outil lié - rien à faire.');
+            $this->info('Aucune actualité publiée en attente d\'examen pour les outils - rien à faire.');
 
             return self::SUCCESS;
         }
@@ -86,10 +100,19 @@ class BackfillAutoToolDetectionCommand extends Command
                 }
             }
 
+            // ACTION : coeur du correctif ticket #2525 - marquer la fiche EXAMINÉE, qu'elle ait
+            // ou non produit une correspondance, pour qu'elle ne revienne plus jamais dans le
+            // lot d'un rattrapage normal. Jamais en --dry-run : le mode simulation promet
+            // « aucune écriture, aucune purge ».
+            // MCP: SELF (<5 lignes)
+            if (! $dryRun) {
+                $this->markArticleExamined($article, self::EXAMINED_COLUMN);
+            }
+
             $processed++;
         }
 
-        $remaining = NewsArticle::published()->whereDoesntHave('tools')->count();
+        $remaining = $this->countArticlesPendingExamination(self::EXAMINED_COLUMN);
 
         if ($dryRun) {
             // Deux populations à ne pas confondre : une fiche sans outil lié n'est pas
@@ -99,9 +122,15 @@ class BackfillAutoToolDetectionCommand extends Command
             $sansSuggestion = $processed - $reparables;
             $nature = $echantillon ? 'tirées AU HASARD' : 'les plus anciennes par identifiant';
             $this->info("[simulation] {$processed} fiche(s) examinée(s), {$nature} : {$reparables} mentionnent réellement un outil de l'annuaire (réparables), {$sansSuggestion} n'en mentionnent aucun (absence normale). Aucune écriture, aucune purge.");
-            $this->comment("Total de fiches publiées sans outil lié, toutes causes confondues : {$remaining}.");
+            $this->comment("Fiches publiées jamais examinées pour les outils (retard réel du rattrapage) : {$remaining}.");
         } else {
-            $this->info("{$processed} actualité(s) traitée(s), {$totalAttached} outil(s) auto-lié(s). {$remaining} restante(s) sans outil.");
+            // ACTION : ticket #2525 - message honnête qui distingue les QUATRE nombres :
+            // examinées, avec au moins une liaison, sans aucune correspondance, et restantes à
+            // EXAMINER (jamais « restantes sans outil », qui confondrait à nouveau les deux
+            // populations que ce ticket sépare).
+            // MCP: SELF (<5 lignes)
+            $sansCorrespondance = $processed - $reparables;
+            $this->info("{$processed} actualité(s) examinée(s), {$reparables} ont reçu au moins un outil ({$totalAttached} outil(s) auto-lié(s) au total), {$sansCorrespondance} n'avaient aucune correspondance. {$remaining} fiche(s) restent à examiner.");
 
             if ($remaining > 0) {
                 $this->comment('Relancer la commande pour continuer le rattrapage.');

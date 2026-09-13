@@ -680,3 +680,119 @@ it('news:backfill-auto-terms hors simulation attache réellement (source=auto) l
         ->where('term_id', $term->id)
         ->count())->toBe(1);
 });
+
+// ── Correctif ticket #2525 : une fiche examinée sans correspondance ne revient plus ────────────
+//
+// Avant #2525, la sélection reposait sur whereDoesntHave('terms') : une fiche sans AUCUNE
+// mention réelle de glossaire (absence normale) n'obtenait jamais de liaison, restait donc pour
+// toujours dans ce périmètre et se faisait retraiter à CHAQUE exécution - mesuré en production
+// sur cinq lots consécutifs : 400 fiches traitées par lot, seulement 303 puis 249 puis 189 puis
+// 149 réellement évacuées (coût par résultat qui double toutes les deux exécutions).
+
+it('news:backfill-auto-terms - une fiche examinée sans correspondance reçoit son horodatage et ne revient pas dans le lot suivant', function () {
+    $source = ntsaSource();
+    // Aucun terme de glossaire ne correspond à ce texte : absence normale, pas un défaut.
+    $normale = NewsArticle::withoutEvents(fn () => NewsArticle::create([
+        'news_source_id' => $source->id,
+        'title'          => 'Le gouvernement dépose un projet de loi sur la vie privée',
+        'guid'           => 'guid-ntsa-backfill-terme-normal',
+        'url'            => 'https://exemple.com/ntsa-backfill-terme-normal',
+        'description'    => '',
+        'summary'        => 'Aucune fiche de glossaire ne devrait matcher ce texte.',
+        'slug'           => 'article-ntsa-backfill-terme-normal',
+        'pub_date'       => now()->subDay(),
+        'is_published'   => true,
+        'seo_status'     => 'index',
+    ]));
+
+    expect(DB::table('news_articles')->where('id', $normale->id)->value('terms_examined_at'))->toBeNull();
+
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50])->assertExitCode(0);
+
+    // L'horodatage d'examen est posé MÊME sans liaison - c'est le coeur du correctif.
+    expect(DB::table('news_articles')->where('id', $normale->id)->value('terms_examined_at'))->not->toBeNull();
+    expect(DB::table('news_article_term')->where('news_article_id', $normale->id)->count())->toBe(0);
+
+    // Relancer la commande ne la retraite plus : elle est déjà examinée, donc exclue du lot -
+    // c'est précisément le test qui rougirait si l'on revenait à whereDoesntHave('terms').
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50])
+        ->expectsOutputToContain('Aucune actualité publiée en attente d\'examen pour le glossaire')
+        ->assertExitCode(0);
+});
+
+it('news:backfill-auto-terms - une fiche examinée avec correspondance reçoit son horodatage et sa liaison', function () {
+    $term = Term::create([
+        'name'         => 'Distillation De Modele Horodatage NTSA',
+        'slug'         => 'distillation-de-modele-horodatage-ntsa',
+        'definition'   => "Le transfert des connaissances d'un grand modèle vers un plus petit.",
+        'is_published' => true,
+    ]);
+
+    $source = ntsaSource();
+    $article = NewsArticle::withoutEvents(fn () => NewsArticle::create([
+        'news_source_id' => $source->id,
+        'title'          => 'La Distillation De Modele Horodatage NTSA gagne en popularité',
+        'guid'           => 'guid-ntsa-backfill-terme-horodatage',
+        'url'            => 'https://exemple.com/ntsa-backfill-terme-horodatage',
+        'description'    => '',
+        'summary'        => "La Distillation De Modele Horodatage NTSA réduit les coûts d'inférence.",
+        'slug'           => 'article-ntsa-backfill-terme-horodatage',
+        'pub_date'       => now()->subDay(),
+        'is_published'   => true,
+        'seo_status'     => 'index',
+    ]));
+
+    expect(DB::table('news_articles')->where('id', $article->id)->value('terms_examined_at'))->toBeNull();
+
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50])->assertExitCode(0);
+
+    expect(DB::table('news_articles')->where('id', $article->id)->value('terms_examined_at'))->not->toBeNull();
+
+    $pivot = DB::table('news_article_term')
+        ->where('news_article_id', $article->id)
+        ->where('term_id', $term->id)
+        ->first();
+    expect($pivot)->not->toBeNull();
+    expect($pivot->source)->toBe('auto');
+});
+
+it('news:backfill-auto-terms - loption rescanner ramène une fiche déjà examinée et lui permet une nouvelle liaison', function () {
+    $source = ntsaSource();
+    // Aucune fiche de glossaire "Zorglubulator Terminologique" ne publiée pour l'instant :
+    // absence normale au 1er passage.
+    $article = NewsArticle::withoutEvents(fn () => NewsArticle::create([
+        'news_source_id' => $source->id,
+        'title'          => 'Le nouveau Zorglubulator Terminologique change la donne',
+        'guid'           => 'guid-ntsa-backfill-terme-rescanner',
+        'url'            => 'https://exemple.com/ntsa-backfill-terme-rescanner',
+        'description'    => '',
+        'summary'        => 'Le nouveau Zorglubulator Terminologique change la donne.',
+        'slug'           => 'article-ntsa-backfill-terme-rescanner',
+        'pub_date'       => now()->subDay(),
+        'is_published'   => true,
+        'seo_status'     => 'index',
+    ]));
+
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50])->assertExitCode(0);
+    expect(DB::table('news_article_term')->where('news_article_id', $article->id)->count())->toBe(0);
+    expect(DB::table('news_articles')->where('id', $article->id)->value('terms_examined_at'))->not->toBeNull();
+
+    // Le glossaire "s'améliore" en cours de route (le terme est publié APRÈS le 1er passage).
+    // Sans --rescanner, rien ne reconsidère la fiche déjà examinée.
+    $terme = Term::create([
+        'name'         => 'Zorglubulator Terminologique',
+        'slug'         => 'zorglubulator-terminologique',
+        'definition'   => 'Terme fictif utilisé uniquement pour ce test.',
+        'is_published' => true,
+    ]);
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50])->assertExitCode(0);
+    expect(DB::table('news_article_term')->where('news_article_id', $article->id)->count())->toBe(0);
+
+    // Avec --rescanner : la fiche redevient éligible et obtient désormais sa liaison.
+    $this->artisan('news:backfill-auto-terms', ['--limit' => 50, '--rescanner' => true])->assertExitCode(0);
+    $pivot = DB::table('news_article_term')
+        ->where('news_article_id', $article->id)
+        ->where('term_id', $terme->id)
+        ->first();
+    expect($pivot)->not->toBeNull();
+});
