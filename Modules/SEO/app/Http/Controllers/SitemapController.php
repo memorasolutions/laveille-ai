@@ -144,7 +144,12 @@ class SitemapController
                     ->get()
                     ->each(function ($term) use ($sitemap) {
                         $sitemap->add(
-                            Url::create(route('dictionary.coverage', $term->getTranslation('slug', app()->getLocale())))
+                            // #2531 : resolveTranslatedSlug() et JAMAIS getTranslation() brut. Sans
+                            // repli de langue, un terme dont le slug manque dans la locale courante
+                            // produit une adresse vide et casse le plan de site entier - c'est
+                            // exactement l'incident du 2026-07-18 (#2092), et le test d'architecture
+                            // TranslatableSlugFallbackTest le refuse désormais à la porte.
+                            Url::create(route('dictionary.coverage', $term->resolveTranslatedSlug()))
                                 ->setLastModificationDate($term->editorialModifiedAt())
                                 ->setPriority(0.6)
                                 ->setChangeFrequency('daily')

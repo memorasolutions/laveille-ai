@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.270.2] - 2026-09-13
+
+### Corrige
+- **Le plan de site construisait l'adresse des pages de couverture sans repli de langue**, ce qui
+  a fait échouer la vérification automatique et, par conséquent, BLOQUÉ le déploiement de la
+  v1.270.0. La production est restée intacte : le garde-fou a fait exactement son travail.
+  Le défaut est celui que le projet connaît déjà : lire un identifiant traduisible directement,
+  sans repli, produit une adresse vide dès qu'il manque dans la langue courante, et une seule
+  adresse vide casse le plan de site entier. C'est l'incident du 2026-07-18, et un test
+  d'architecture le refuse désormais à la porte, en nommant le fichier, la ligne et le remède.
+  L'appel passe par la méthode de repli du projet, comme partout ailleurs.
+
 ## [1.270.1] - 2026-09-13
 
 ### Corrige
