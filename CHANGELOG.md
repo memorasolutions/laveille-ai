@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.270.7] - 2026-09-13
+
+### Ajoute
+- **Terme « Muse Image » au glossaire**, demande du fondateur formulee comme « modeles d images Emu
+  et Muse Image ». UNE seule fiche pour les deux, et le motif est une MESURE : « Muse Image » compte
+  5 actualites publiees sur le site, « Emu » en compte ZERO. Les 18 correspondances du motif « Emu »
+  dans la veille sont toutes des faux positifs - Temu la place de marche, « emulation »,
+  « consommateurs ». Une fiche Emu aurait ete une page que personne n atteint ; Emu est donc
+  explique DANS la fiche Muse Image, en definition et dans une FAQ dediee, comme le predecesseur de
+  2023 qu il est.
+  ALIAS : c est le risque le plus eleve rencontre jusqu ici, et il est ecarte par construction.
+  « Emu » est une sous-chaine de « Temu » (18 faux liens potentiels, mesures) ; « Muse » seul est un
+  nom commun francais, un groupe de musique celebre et le nom d au moins deux autres modeles d IA.
+  Seule la forme composee « Muse Image » est retenue, en case_sensitive.
+  SUJET SENSIBLE traite avec attribution systematique : chaque capacite est presentee comme
+  revendiquee par Meta, jamais comme un fait etabli. La distinction centrale est explicitee dans la
+  FAQ : c est une FONCTION qui a ete retiree vers le 10 juillet 2026 - celle qui generait des images
+  de personnes a partir de leur compte Instagram public, activee par defaut - et NON le modele, qui
+  est reste disponible. Ma premiere lecture du titre « Meta kills Muse Image feature » avait conclu
+  a tort que le modele entier avait ete supprime.
+  Deux ajouts non sources, fabriques par la redaction deleguee, ont ete retires : « pour un site
+  web » accole a la demonstration du code QR, et « suite a des preoccupations » accole au retrait de
+  la fonction - cette derniere formulation pretait a Meta une intention que la source n exprime pas.
+  A RETENIR pour les prochaines fiches Meta : ai.meta.com repond 400 a tout recuperateur
+  automatique, y compris sur la racine du blogue. Les adresses ai.meta.com citees par les moteurs ne
+  sont donc pas verifiables et n ont PAS ete retenues comme sources malgre leur pertinence
+  apparente ; about.fb.com repond normalement et sert bien les documents annonces.
+
 ## [1.270.6] - 2026-09-13
 
 ### Ajoute
