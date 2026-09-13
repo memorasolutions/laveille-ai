@@ -126,6 +126,31 @@ class SitemapController
 
                 $sitemap->add($url);
             });
+
+            // Ticket #2531 (étape 4) : pages de couverture du lot pilote (12 termes,
+            // Modules\Dictionary\Support\CoverageTerms) - une actualité liée peut se publier ou se
+            // désapprouver sans que le terme lui-même change, donc content_updated_at reste le
+            // meilleur signal disponible même s'il ne capture pas ce cas précis.
+            // MÊME piège que le bloc glossaire juste au-dessus (docs/specs/2026-09-11-mesure-
+            // visibilite-et-fraicheur.md, MESURE B) : editorialModifiedAt() (Modules\Core\Traits\
+            // TracksEditorialModification) lit content_updated_at et created_at - le select()
+            // ci-dessous DOIT porter ces deux colonnes, sinon la méthode renvoie silencieusement
+            // null sur un modèle partiellement chargé. Restreint aux 12 slugs retenus (jamais les
+            // 518 autres) via whereIn sur CoverageTerms::SLUGS.
+            if (Route::has('dictionary.coverage')) {
+                \Modules\Dictionary\Models\Term::published()
+                    ->whereIn('slug->'.app()->getLocale(), \Modules\Dictionary\Support\CoverageTerms::SLUGS)
+                    ->select(['id', 'slug', 'content_updated_at', 'created_at'])
+                    ->get()
+                    ->each(function ($term) use ($sitemap) {
+                        $sitemap->add(
+                            Url::create(route('dictionary.coverage', $term->getTranslation('slug', app()->getLocale())))
+                                ->setLastModificationDate($term->editorialModifiedAt())
+                                ->setPriority(0.6)
+                                ->setChangeFrequency('daily')
+                        );
+                    });
+            }
         }
 
         // Annuaire (si module Directory actif)

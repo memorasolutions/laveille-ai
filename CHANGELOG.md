@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.270.0] - 2026-09-13
+
+### Ajoute
+- **Une page de couverture par terme, pour douze termes seulement** (#2531, étape 4 du plan
+  glossaire). Elle liste TOUTES les actualités qui mentionnent le terme, là où sa fiche n'en
+  montre que les cinq plus récentes.
+  **Le nombre de douze est une décision, pas une limite technique.** La mesure donnait 530 termes
+  publiés, dont 335 portent au moins une actualité et 200 en portent plus de trois. Le seuil
+  envisagé par le plan aurait donc ouvert 200 pages d'un coup, ce que le socle de référencement du
+  projet documente comme sanctionné sous le nom de publication de masse. On publie donc un lot
+  pilote, on mesurera, et on étendra seulement si ces pages servent vraiment.
+  Les douze retenus sont les plus riches : google, openai, anthropic, ia-generative, chatgpt,
+  claude-anthropic, gemini-google, cybersecurite, agent-ia, cloud-computing, apple, microsoft.
+  Un terme hors de cette liste répond 404, et c'est vérifié par un test : les 518 autres pages
+  n'existent pas.
+  Ce qui évite la page mince : elle porte la définition du terme en tête, pas seulement une liste
+  de liens, et elle émet un `ItemList` calqué sur celui déjà en production côté annuaire.
+  Les douze adresses sont ajoutées au plan de site, avec la date de révision éditoriale et non la
+  date polluée par les consultations.
+  La liste des douze vit à UN seul endroit, consommé par la route et par le contrôleur. La route
+  elle-même ne reconnaît que ces douze identifiants : un terme hors liste n'atteint jamais le
+  contrôleur.
+
 ## [1.269.1] - 2026-09-13
 
 ### Corrige

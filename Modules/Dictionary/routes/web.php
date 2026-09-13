@@ -11,6 +11,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Modules\Dictionary\Http\Controllers\Admin\TermAdminController;
 use Modules\Dictionary\Http\Controllers\PublicDictionaryController;
+use Modules\Dictionary\Support\CoverageTerms;
 
 Route::middleware('web')->group(function () {
     Route::get('/glossaire', [PublicDictionaryController::class, 'index'])->name('dictionary.index')->middleware('cacheResponse:3600');
@@ -35,6 +36,22 @@ Route::middleware('web')->group(function () {
     Route::redirect('/glossaire/debridage-dia', '/glossaire/jailbreak', 301);
     Route::redirect('/glossaire/systeme-multiagent', '/glossaire/systeme-multi-agents', 301);
     Route::get('/glossaire/{slug}', [PublicDictionaryController::class, 'show'])->name('dictionary.show')->middleware('cacheResponse:3600');
+
+    // Ticket #2531 (étape 4) : page de couverture d'un terme - liste TOUTES ses actualités liées.
+    // Sous-ressource de la fiche du terme (même paramètre {slug} que dictionary.show juste
+    // au-dessus, un segment de plus), forme cohérente avec le reste du module : aucune route
+    // racine distincte, /actualites nomme la vue « actualités » de ce terme précis. La contrainte
+    // regex (CoverageTerms::routePattern(), liste UNIQUE dans Modules\Dictionary\Support\
+    // CoverageTerms) fait que le ROUTEUR lui-même ne répond qu'aux 12 slugs retenus pour ce lot
+    // pilote : un terme publié hors liste ne correspond à aucune route ici et reçoit le 404
+    // générique de Laravel sans jamais atteindre le contrôleur - aucune des 518 autres pages
+    // n'existe, même au niveau du routage. Nombre de segments différent de dictionary.show
+    // ({slug} vs {slug}/actualites) : aucun risque de collision entre les deux routes, l'ordre de
+    // déclaration n'a pas d'incidence.
+    Route::get('/glossaire/{slug}/actualites', [PublicDictionaryController::class, 'coverage'])
+        ->where('slug', CoverageTerms::routePattern())
+        ->name('dictionary.coverage')
+        ->middleware('cacheResponse:3600');
 });
 
 // Suggestions glossaire (authentifié)

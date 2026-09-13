@@ -16,6 +16,7 @@ use Illuminate\View\View;
 use Modules\Core\Services\ViewCounterService;
 use Modules\Dictionary\Models\Category;
 use Modules\Dictionary\Models\Term;
+use Modules\Dictionary\Support\CoverageTerms;
 
 class PublicDictionaryController extends Controller
 {
@@ -78,5 +79,40 @@ class PublicDictionaryController extends Controller
             ->get();
 
         return view('dictionary::public.show', compact('term', 'relatedTerms'));
+    }
+
+    /**
+     * Ticket #2531 (étape 4) : page de couverture d'un terme - liste TOUTES les actualités qui le
+     * mentionnent (contrairement à la section « Dans l'actualité » de show(), plafonnée à 5).
+     *
+     * Défense en profondeur : la contrainte de route (routes/web.php, CoverageTerms::routePattern())
+     * empêche déjà tout slug hors liste d'atteindre ce contrôleur, mais on revérifie ici même,
+     * jamais de confiance aveugle dans un seul filtre - un terme retiré de la liste demain ne doit
+     * pas non plus dépendre d'un redéploiement du cache de routes pour cesser de répondre.
+     *
+     * Actualités : uniquement les liaisons APPROUVÉES (pivot news_article_term.is_approved, même
+     * doctrine « désapprouver, jamais supprimer » que Term::approvedNewsArticles()) et les articles
+     * PUBLIÉS (NewsArticle::scopePublished()), les plus récents d'abord, paginées comme le fait
+     * CollectionController::index() (Modules\Directory) - même mécanique Eloquent paginate() +
+     * Blade ->links(), taille de page alignée sur celle du module News lui-même (PublicNewsController
+     * ::index(), paginate(20)) puisque cette page-ci liste des actualités, pas des outils. Colonnes
+     * réduites au strict nécessaire de l'affichage (titre, date, lien) - jamais un select complet.
+     */
+    public function coverage(string $slug): View
+    {
+        if (! in_array($slug, CoverageTerms::SLUGS, true)) {
+            abort(404);
+        }
+
+        $term = Term::published()
+            ->where('slug->'.app()->getLocale(), $slug)
+            ->firstOrFail();
+
+        $newsArticles = $term->approvedNewsArticles()
+            ->published()
+            ->orderByDesc('news_articles.pub_date')
+            ->paginate(20, ['news_articles.id', 'news_articles.slug', 'news_articles.title', 'news_articles.seo_title', 'news_articles.pub_date']);
+
+        return view('dictionary::public.coverage', compact('term', 'newsArticles'));
     }
 }
