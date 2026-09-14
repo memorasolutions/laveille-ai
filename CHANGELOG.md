@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.276.0] - 2026-09-14
+
+### Ajouté
+- **Commande `news:backfill-reviewed-at` : rallume le signal humain E-E-A-T qui était construit
+  mais éteint** (#2571). Mesuré en production : 313 fiches portent des paires de preuve
+  éditoriale - donc de vraies vérifications, avec extraits probants - mais **aucune** ne portait
+  de date de relecture. La signature « Vérifié par la rédaction de laveille.ai » et le JSON-LD
+  `reviewedBy`, livrés le 2026-08-20 et notés 93/100 par le club des sages, ne s'affichaient donc
+  nulle part. Le site faisait le travail sans jamais le montrer.
+
+  **La décision qui gouverne cette commande : la date posée doit être VRAIE.** L'avertissement du
+  club des sages était formel - une date de relecture fabriquée se retourne contre le site, et
+  c'est précisément le champ dont l'honnêteté fait tout l'argument. La commande copie donc
+  `content_updated_at`, la date réelle de modification du contenu (mesurée : renseignée sur les
+  313 fiches, aux dates de la campagne du 19 août). Elle n'utilise JAMAIS `now()`, et quand la
+  date manque elle IGNORE la fiche plutôt que d'en inventer une.
+
+  Trois garde-fous, chacun verrouillé par un test : jamais de réécriture d'une date existante
+  (idempotence), simulation par défaut (il faut `--appliquer` pour écrire), et `updated_at`
+  intact - dater une relecture ne modifie pas le contenu, donc l'écriture est directe plutôt que
+  par `save()`, qui aurait touché les horodatages et réveillé les observers.
+
+  **Un test a d'abord échoué, et c'était utile** : `content_updated_at` n'est pas dans `$fillable`,
+  donc `create()` l'ignorait en silence. Le test mesurait une valeur qu'il n'avait jamais réussi
+  à poser - un faux vert en puissance. Le helper écrit désormais la colonne directement.
+
 ## [1.275.1] - 2026-09-14
 
 ### Corrigé
