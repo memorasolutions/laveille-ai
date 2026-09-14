@@ -62,6 +62,7 @@ class NewsServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\News\Console\FetchNewsCommand::class,
             \Modules\News\Console\BackfillReviewedAtCommand::class,
+            \Modules\News\Console\BackfillSocialSharesCommand::class,
             // Isolation mémoire (2026-08-31, ticket #2110) - jamais planifiée, invoquée
             // uniquement en sous-processus par ContentExtractor::extract(), voir docblock.
             \Modules\News\Console\ExtractIsolatedCommand::class,

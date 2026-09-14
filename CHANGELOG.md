@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.278.0] - 2026-09-14
+
+### Ajouté
+- **Commande `news:backfill-social-shares`** (#2563) : marque rétroactivement les actualités déjà
+  publiées sur Facebook ou LinkedIn, à partir d'un relevé des publications réelles. Mesuré : 6337
+  actualités publiées, **12 marquées LinkedIn, 0 marquée Facebook**. L'admin ne pouvait donc pas
+  savoir ce qui était déjà parti, et risquait de republier en double.
+
+  Le marqueur lui-même (point coloré sur la liste, sur la fiche et dans l'admin) existait DÉJÀ et
+  fonctionne : 10 tests le couvrent, y compris le fait qu'il reste invisible aux visiteurs. Ce qui
+  manquait n'était pas l'affichage, c'était l'alimentation - personne n'appelait jamais la route de
+  marquage.
+
+  **La date posée est la date RÉELLE de publication sur le réseau**, lue dans le relevé, et jamais
+  `now()`. Même principe que pour la signature éditoriale : un marqueur qui affiche une fausse date
+  est pire qu'un marqueur absent, puisqu'il sert précisément à décider si l'on republie ou non.
+  L'heure est fixée à midi, pour qu'un décalage de fuseau ne fasse pas basculer l'affichage d'un
+  jour.
+
+  Trois refus délibérés, chacun verrouillé par un test : ne jamais remplacer une date existante
+  sans `--ecraser` (écraser une information vraie par une information supposée), rejeter une date
+  absurde plutôt que la corriger en silence (`2026-13-45` serait sinon reportée sur un autre mois
+  par `createFromFormat`), et poursuivre le fichier après un slug introuvable au lieu de tout
+  interrompre.
+
 ## [1.277.0] - 2026-09-14
 
 ### Ajouté
