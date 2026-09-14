@@ -98,6 +98,11 @@ class VideoGoalBuilderController extends Controller
         $validated = $request->validate([
             'article_ids' => ['required', 'array', 'min:1'],
             'article_ids.*' => ['integer', 'exists:news_articles,id'],
+            // Format demandé par le fondateur le 2026-09-14 : « sous forme de carroussel (choisir
+            // ça ou le prompteur) choix que je vais faire ». Un PARAMÈTRE, pas un second point
+            // d'entrée : la sélection d'actualités, les droits et la validation sont identiques,
+            // seule la sortie change. Défaut 'prompteur' pour ne rien modifier à l'existant.
+            'format' => ['nullable', 'in:prompteur,carrousel'],
         ]);
 
         $articles = NewsArticle::query()
@@ -108,19 +113,28 @@ class VideoGoalBuilderController extends Controller
             return response()->json(['error' => 'Aucune actualité valide trouvée pour ces identifiants.'], 422);
         }
 
+        // Hors du try : la réponse plus bas s'en sert, et une variable définie dans un bloc qui
+        // peut lever est une fragilité gratuite.
+        $format = $validated['format'] ?? 'prompteur';
+
         try {
-            $goal = $this->aiService->generateGoal($articles);
+            $goal = $format === 'carrousel'
+                ? $this->aiService->generateCarousel($articles)
+                : $this->aiService->generateGoal($articles);
         } catch (\Throwable $e) {
             report($e);
 
             return response()->json([
-                'error' => "Erreur inattendue lors de la génération de l'objectif de vidéo.",
+                'error' => 'Erreur inattendue lors de la génération.',
             ], 500);
         }
 
         return response()->json([
             'success' => true,
             'goal' => $goal,
+            // Renvoyé pour que la vue sache ce qu'elle affiche : le libellé et la mise en forme
+            // du résultat diffèrent (un paragraphe contre une suite de diapositives).
+            'format' => $format,
             'article_count' => $articles->count(),
         ]);
     }

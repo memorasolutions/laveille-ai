@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.274.0] - 2026-09-14
+
+### Ajouté
+- **Le générateur d'objectif vidéo offre désormais DEUX sorties au choix : « Prompteur » ou
+  « Carrousel »** (#2564), sur l'écran existant `/admin/objectif-video`. Demande du fondateur,
+  verbatim : « ok, mais sous forme de carroussel (choisir ça ou le prompteur) choix que je vais
+  faire ». La sélection d'actualités, les droits et la validation ne changent pas ; seule la
+  sortie change, et c'est l'organisateur qui tranche à chaque génération.
+
+  **Pourquoi deux sorties distinctes plutôt qu'un compromis.** Un prompteur et un support visuel
+  tirent en sens opposés : le prompteur veut peu de mots, lisibles à deux mètres, séquencés au
+  rythme de la parole ; un support visuel veut de la densité. Une même diapositive qui doit faire
+  les deux fait mal les deux. Le carrousel produit ici sert d'abord à lire face caméra, donc ce
+  sont les contraintes du prompteur qui gouvernent sa mise en forme : une seule idée par
+  diapositive, 20 mots maximum titre compris (borne dure, pas une moyenne), et un ordre imposé -
+  le fait, puis le chiffre ou la nuance décisive avec son unité, puis ce que ça change.
+
+  **Trois points qui ne se devinent pas en lisant le résultat :**
+
+  1. **Un PARAMÈTRE, pas un second point d'entrée.** `format` est facultatif et vaut « prompteur »
+     par défaut : qui ne choisit rien retrouve exactement l'écran d'avant. Un second contrôleur
+     aurait dupliqué les droits, la validation et la récupération des actualités pour ne changer
+     qu'un prompt.
+  2. **La mécanique d'appel à l'IA est PARTAGÉE, les prompts seuls diffèrent.** L'appel, le
+     nettoyage des clôtures markdown, la journalisation d'une réponse vide et le repli en cas
+     d'indisponibilité sont identiques aux deux formats - les factoriser évitait de recopier
+     quatre comportements pour n'en faire varier aucun.
+  3. **Le repli est celui du format DEMANDÉ, jamais une constante en dur.** Défaut attrapé pendant
+     l'implémentation : la première version de la mécanique partagée renvoyait le message de
+     l'objectif de vidéo. Un carrousel indisponible aurait affiché « Impossible de générer
+     l'objectif de vidéo », et le fondateur aurait cru s'être trompé de bouton. Un test le
+     verrouille désormais.
+
+  **Contre-épreuves faites, parce qu'un test vert ne prouve rien tant qu'il n'a pas échoué.**
+  (a) En forçant le contrôleur à toujours appeler la génération d'objectif tout en renvoyant
+  l'étiquette « carrousel », le test des consignes vire au rouge - il compare ce qui est
+  réellement ENVOYÉ à l'IA, pas l'étiquette de la réponse, qu'un contrôleur menteur passerait
+  sans peine. (b) En remettant la constante de repli en dur, seul le test du repli vire au rouge.
+
+### Modifié
+- `NewsVideoGoalAiService` : méthode interne renommée en anglais (`askAi`) pour suivre la
+  convention de la classe, dont toutes les autres méthodes le sont déjà. Aucun appel externe.
+
 ## [1.273.0] - 2026-09-14
 
 ### Ajoute

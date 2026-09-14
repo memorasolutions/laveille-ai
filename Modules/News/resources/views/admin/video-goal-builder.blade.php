@@ -122,8 +122,25 @@
     <div class="cb-card">
         <div class="cb-section-title">✨ Objectif de vidéo généré</div>
         <div class="mb-2 d-flex flex-wrap gap-2 align-items-center">
+            {{-- Choix du format, demandé par le fondateur le 2026-09-14 : « sous forme de
+                 carroussel (choisir ça ou le prompteur) choix que je vais faire ». Deux SORTIES
+                 distinctes plutôt qu'un compromis : un prompteur veut peu de mots lisibles à deux
+                 mètres, un support visuel veut de la densité - une diapositive qui doit faire les
+                 deux fait mal les deux. Défaut sur « prompteur » : l'existant ne change pas. --}}
+            <fieldset style="border:1px solid #e5e7eb; border-radius:8px; padding:12px 16px; margin-bottom:14px;">
+                <legend style="font-size:13px; font-weight:700; color:#0B7285; padding:0 6px; width:auto;">Format de sortie</legend>
+                <label style="display:inline-flex; align-items:center; gap:8px; margin-right:20px; cursor:pointer; min-height:44px;">
+                    <input type="radio" name="format" value="prompteur" x-model="format">
+                    <span>Objectif pour le <strong>Prompteur</strong> <span style="color:#475569;">(un paragraphe)</span></span>
+                </label>
+                <label style="display:inline-flex; align-items:center; gap:8px; cursor:pointer; min-height:44px;">
+                    <input type="radio" name="format" value="carrousel" x-model="format">
+                    <span><strong>Carrousel</strong> <span style="color:#475569;">(diapositives, lisibles face caméra)</span></span>
+                </label>
+            </fieldset>
+
             <button type="button" class="cb-btn" @click="generateGoal()" :disabled="selectedIds.length === 0 || loading.generate">
-                <span x-show="!loading.generate">⚡ Générer l'objectif</span>
+                <span x-show="!loading.generate" x-text="format === 'carrousel' ? '⚡ Générer le carrousel' : \"⚡ Générer l'objectif\""></span>
                 <span x-show="loading.generate" x-cloak>⏳ Génération en cours (peut prendre quelques secondes)…</span>
             </button>
             <button type="button" class="cb-btn cb-btn-secondary" @click="copyGoal()" :disabled="!generatedGoal" x-show="generatedGoal" x-cloak>📋 Copier</button>
@@ -155,6 +172,9 @@ function videoGoalBuilder(opts) {
         hasFetched: false,
         generateError: '',
         generatedGoal: '',
+        // Format de sortie choisi par l'admin (2026-09-14). Defaut 'prompteur' : l'ecran se
+        // comporte exactement comme avant tant qu'on ne touche a rien.
+        format: 'prompteur',
         loading: { news: false, generate: false },
         endpoints: { news: opts.newsEndpoint, generate: opts.generateEndpoint },
 
@@ -217,7 +237,7 @@ function videoGoalBuilder(opts) {
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                     credentials: 'same-origin',
-                    body: JSON.stringify({ article_ids: this.selectedIds }),
+                    body: JSON.stringify({ article_ids: this.selectedIds, format: this.format }),
                 });
                 const data = await res.json();
                 if (!res.ok) {

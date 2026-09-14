@@ -239,3 +239,144 @@ it('rejects generate request with nonexistent article ids', function () {
 
     $response->assertStatus(422);
 });
+
+// ── Choix du format : Prompteur ou Carrousel (ticket #2564, 2026-09-14) ───────
+// Demande du fondateur, verbatim : « ok, mais sous forme de carroussel (choisir ça ou le
+// prompteur) choix que je vais faire ».
+
+it("génère un carrousel quand le format 'carrousel' est demandé", function () {
+    $admin = vgbSuperAdmin();
+    $source = vgbSource();
+    $article = vgbArticle($source->id);
+
+    $this->mock(AiService::class, function ($mock) {
+        $mock->shouldReceive('chatWithHistory')
+            ->once()
+            ->andReturn("DIAPO 1 - OUVERTURE\nTrois nouvelles cette semaine.");
+    });
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.video-goal.generate'), [
+        'article_ids' => [$article->id],
+        'format' => 'carrousel',
+    ]);
+
+    $response->assertOk();
+    $response->assertJson([
+        'success' => true,
+        'format' => 'carrousel',
+        'article_count' => 1,
+    ]);
+    expect($response->json('goal'))->toContain('DIAPO 1');
+});
+
+// L'existant ne doit RIEN changer pour qui ne choisit rien : le champ est facultatif et son
+// absence vaut « prompteur », exactement comme avant l'ajout du choix.
+it("retombe sur le prompteur quand aucun format n'est transmis", function () {
+    $admin = vgbSuperAdmin();
+    $source = vgbSource();
+    $article = vgbArticle($source->id);
+
+    $this->mock(AiService::class, function ($mock) {
+        $mock->shouldReceive('chatWithHistory')->once()->andReturn('Un paragraphe.');
+    });
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.video-goal.generate'), [
+        'article_ids' => [$article->id],
+    ]);
+
+    $response->assertOk();
+    expect($response->json('format'))->toBe('prompteur');
+});
+
+it('refuse un format inconnu', function () {
+    $admin = vgbSuperAdmin();
+    $source = vgbSource();
+    $article = vgbArticle($source->id);
+
+    $this->actingAs($admin)->postJson(route('admin.news.video-goal.generate'), [
+        'article_ids' => [$article->id],
+        'format' => 'diaporama',
+    ])->assertStatus(422);
+});
+
+/**
+ * LE test qui porte la demande. Vérifier que la réponse renvoie l'étiquette « carrousel » ne
+ * prouverait RIEN : un contrôleur qui appellerait deux fois la même génération et se contenterait
+ * de changer l'étiquette passerait ce contrôle. La preuve doit porter sur ce qui est réellement
+ * ENVOYÉ à l'IA - deux consignes différentes, sinon les deux sorties seraient les mêmes.
+ */
+it('envoie à l\'IA des consignes RÉELLEMENT différentes selon le format', function () {
+    $admin = vgbSuperAdmin();
+    $source = vgbSource();
+    $article = vgbArticle($source->id);
+
+    $captures = [];
+
+    $this->mock(AiService::class, function ($mock) use (&$captures) {
+        $mock->shouldReceive('chatWithHistory')
+            ->twice()
+            ->andReturnUsing(function (array $messages) use (&$captures) {
+                $captures[] = $messages[0]['content'];
+
+                return 'sortie quelconque';
+            });
+    });
+
+    $this->actingAs($admin)->postJson(route('admin.news.video-goal.generate'), [
+        'article_ids' => [$article->id],
+        'format' => 'prompteur',
+    ])->assertOk();
+
+    $this->actingAs($admin)->postJson(route('admin.news.video-goal.generate'), [
+        'article_ids' => [$article->id],
+        'format' => 'carrousel',
+    ])->assertOk();
+
+    expect($captures)->toHaveCount(2);
+    expect($captures[0])->not->toBe($captures[1]);
+
+    // Et pas seulement « différentes » : la consigne du carrousel porte ce que l'autre n'a pas -
+    // le découpage en diapositives et la borne de mots qui le rend lisible face caméra.
+    expect($captures[1])->toContain('DIAPO 1');
+    expect($captures[1])->toContain('20 mots');
+    expect($captures[0])->not->toContain('DIAPO 1');
+});
+
+/**
+ * Défaut évité pendant l'implémentation, verrouillé ici parce qu'il est invisible à la relecture :
+ * la mécanique d'appel est PARTAGÉE entre les deux formats, et sa première version retournait la
+ * constante de repli de l'objectif en dur. Un carrousel indisponible aurait donc affiché
+ * « Impossible de générer l'objectif de vidéo », et le fondateur aurait cru s'être trompé de bouton.
+ */
+it('affiche le repli DU CARROUSEL quand le service IA est indisponible, jamais celui de l\'objectif', function () {
+    $admin = vgbSuperAdmin();
+    $source = vgbSource();
+    $article = vgbArticle($source->id);
+
+    $this->mock(AiService::class, function ($mock) {
+        $mock->shouldReceive('chatWithHistory')
+            ->once()
+            ->andThrow(new \RuntimeException('service indisponible'));
+    });
+
+    $response = $this->actingAs($admin)->postJson(route('admin.news.video-goal.generate'), [
+        'article_ids' => [$article->id],
+        'format' => 'carrousel',
+    ]);
+
+    $response->assertOk();
+    expect($response->json('goal'))
+        ->toContain('carrousel')
+        ->not->toContain("objectif de vidéo");
+});
+
+it('affiche les deux choix de format sur la page', function () {
+    $admin = vgbSuperAdmin();
+
+    $response = $this->actingAs($admin)->get(route('admin.news.video-goal.index'));
+
+    $response->assertOk();
+    $response->assertSee('value="prompteur"', false);
+    $response->assertSee('value="carrousel"', false);
+    $response->assertSee('Format de sortie', false);
+});
