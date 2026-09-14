@@ -148,3 +148,65 @@ it('laisse intacte une ressource dont le titre est déjà juste', function () {
     expect($r->fresh()->title)->toBe('Un titre déjà correct');
     expect($r->fresh()->updated_at->toString())->toBe($avant->toString());
 });
+
+/**
+ * 141 vidéos de l'annuaire sont déclarées ni françaises ni anglaises (hindi, espagnol,
+ * vietnamien), mesuré en production le 2026-09-14. Elles n'apportent rien à un lecteur
+ * québécois, et un lot de contenu tiers non relu expose au déclassement la SECTION entière.
+ */
+it('dépublie une vidéo hors français et anglais quand on le demande', function () {
+    $r = resyncRessource('hindiVIDEO1', 'Perplexity Pro Tutorial in Hindi', 'en');
+    resyncFauxYoutube([[
+        'video_id' => 'hindiVIDEO1',
+        'title' => 'Perplexity Pro Tutorial in Hindi',
+        'api_lang' => 'hi',
+    ]]);
+
+    $this->artisan('directory:resync-video-titles --apply --depublier-hors-langue')->assertSuccessful();
+
+    expect($r->fresh()->is_approved)->toBeFalse();
+    // Dépublier n'est PAS supprimer : la ligne et son contenu restent intacts.
+    expect(ToolResource::find($r->id))->not->toBeNull();
+    expect($r->fresh()->title)->toBe('Perplexity Pro Tutorial in Hindi');
+});
+
+it('ne dépublie rien sans l\'option, même en mode --apply', function () {
+    $r = resyncRessource('hindiVIDEO2', 'Un titre quelconque', 'en');
+    resyncFauxYoutube([[
+        'video_id' => 'hindiVIDEO2',
+        'title' => 'Un titre quelconque',
+        'api_lang' => 'hi',
+    ]]);
+
+    $this->artisan('directory:resync-video-titles --apply')->assertSuccessful();
+
+    expect($r->fresh()->is_approved)->toBeTrue();
+});
+
+// Une vidéo française ne doit JAMAIS tomber dans le filtre, même avec l'option active.
+it('ne dépublie pas une vidéo française', function () {
+    $r = resyncRessource('videoFRfrFR', 'Les bases de Midjourney', 'fr');
+    resyncFauxYoutube([[
+        'video_id' => 'videoFRfrFR',
+        'title' => 'Les bases de Midjourney',
+        'api_lang' => 'fr-CA',
+    ]]);
+
+    $this->artisan('directory:resync-video-titles --apply --depublier-hors-langue')->assertSuccessful();
+
+    expect($r->fresh()->is_approved)->toBeTrue();
+});
+
+// Un api_lang absent n'est pas une preuve de langue étrangère : on ne dépublie pas au doute.
+it('ne dépublie pas une vidéo dont la langue est inconnue', function () {
+    $r = resyncRessource('videoSANSlg', 'Titre sans langue déclarée', 'en');
+    resyncFauxYoutube([[
+        'video_id' => 'videoSANSlg',
+        'title' => 'Titre sans langue déclarée',
+        'api_lang' => null,
+    ]]);
+
+    $this->artisan('directory:resync-video-titles --apply --depublier-hors-langue')->assertSuccessful();
+
+    expect($r->fresh()->is_approved)->toBeTrue();
+});

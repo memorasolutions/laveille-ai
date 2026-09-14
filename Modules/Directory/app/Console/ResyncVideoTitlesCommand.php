@@ -21,13 +21,14 @@ use Modules\Directory\Services\YouTubeService;
 
 class ResyncVideoTitlesCommand extends Command
 {
-    protected $signature = 'directory:resync-video-titles {--apply : écrire réellement} {--limit=0 : plafond de ressources traitées, 0 = toutes}';
+    protected $signature = 'directory:resync-video-titles {--apply : écrire réellement} {--limit=0 : plafond de ressources traitées, 0 = toutes} {--depublier-hors-langue : retire de l\'affichage les vidéos ni françaises ni anglaises}';
 
     protected $description = 'Resynchronise le titre et la langue des ressources vidéo depuis YouTube';
 
     public function handle(): int
     {
         $apply = (bool) $this->option('apply');
+        $depublier = (bool) $this->option('depublier-hors-langue');
         $limit = (int) $this->option('limit');
 
         $examinees = 0;
@@ -36,6 +37,8 @@ class ResyncVideoTitlesCommand extends Command
         $ignorees = 0;
         $ecrites = 0;
         $horsLangue = 0;
+        $depubliees = 0;
+        $idsDepubliees = [];
 
         $exemplesDisparues = [];
         $exemplesDivergentes = [];
@@ -102,6 +105,17 @@ class ResyncVideoTitlesCommand extends Command
                     if (count($exemplesHorsLangue) < 15) {
                         $exemplesHorsLangue[] = "#{$ressource->id} [{$langueApi}] {$titreReel}";
                     }
+
+                    // Dépublier n'est PAS supprimer : la ligne reste intacte, seul is_approved
+                    // passe à false, et les identifiants sont journalisés pour un retour arrière
+                    // exact. Une vidéo en hindi ou en vietnamien n'apporte rien à un lecteur
+                    // québécois, et un lot de contenu tiers non relu expose au déclassement la
+                    // SECTION entière, pas la seule fiche fautive.
+                    if ($apply && $depublier && $ressource->is_approved) {
+                        $ressource->update(['is_approved' => false]);
+                        $depubliees++;
+                        $idsDepubliees[] = $ressource->id;
+                    }
                 }
 
                 if ($titreReel === $ressource->title && $langueReelle === $ressource->language) {
@@ -128,8 +142,8 @@ class ResyncVideoTitlesCommand extends Command
         }
 
         $this->table(
-            ['Examinées', 'Divergentes', 'Disparues', 'Hors fr/en', 'Ignorées', 'Écrites'],
-            [[$examinees, $divergentes, $disparues, $horsLangue, $ignorees, $ecrites]]
+            ['Examinées', 'Divergentes', 'Disparues', 'Hors fr/en', 'Dépubliées', 'Ignorées', 'Écrites'],
+            [[$examinees, $divergentes, $disparues, $horsLangue, $depubliees, $ignorees, $ecrites]]
         );
 
         if ($exemplesDivergentes !== []) {
@@ -151,6 +165,14 @@ class ResyncVideoTitlesCommand extends Command
             foreach ($exemplesHorsLangue as $exemple) {
                 $this->line('  '.$exemple);
             }
+        }
+
+        if ($idsDepubliees !== []) {
+            $fichier = storage_path('app/backups/depubliees-hors-langue-'.date('Ymd-His').'.txt');
+            @mkdir(dirname($fichier), 0755, true);
+            file_put_contents($fichier, implode("\n", $idsDepubliees)."\n");
+            $this->info('Identifiants dépubliés consignés dans : '.$fichier);
+            $this->line('  Retour arrière : remettre is_approved à 1 pour ces identifiants.');
         }
 
         if (! $apply) {

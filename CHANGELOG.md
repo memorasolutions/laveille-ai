@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.283.0] - 2026-09-14
+
+### Ajouté
+- **`--depublier-hors-langue`** sur `directory:resync-video-titles` (#2555) : retire de l'affichage
+  les vidéos dont la langue déclarée n'est ni le français ni l'anglais. **Mesuré en production :
+  141 sur 1255** - hindi, espagnol, vietnamien - sur un site québécois francophone.
+
+  **Dépublier n'est PAS supprimer** : la ligne et son contenu restent intacts, seul `is_approved`
+  passe à `false`, et les identifiants touchés sont consignés dans un fichier daté pour un retour
+  arrière exact. Une sauvegarde CSV complète des 1855 ressources a été prise avant toute écriture.
+
+  Deux gardes que les tests verrouillent : une vidéo dont la langue est INCONNUE n'est jamais
+  dépubliée (l'absence de déclaration n'est pas une preuve), et l'option ne fait rien sans
+  `--apply`.
+
+### Corrigé
+- **102 titres resynchronisés en production**, dont les 37 titres français qui s'affichaient
+  traduits en anglais. « The Basics of Midjourney: The A-Z Guide » est redevenu « Les bases de
+  Midjourney : Le Guide de A à Z ».
+
+### Vérification
+- 9 tests Pest verts (dont 4 sur les gardes de la dépublication).
+- Sauvegarde : `storage/app/backups/directory_resources-20260914-185550.csv`, 1855 lignes.
+
 ## [1.282.1] - 2026-09-14
 
 ### Corrigé
