@@ -12,7 +12,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 274;
+$lvMinor = 275;
 $lvPatch = 0;
 
 return [
@@ -21,7 +21,7 @@ return [
     'patch' => $lvPatch,
 
     // Codename optionnel (nom de la release courante). Vide ou null si pas de codename.
-    'codename' => 'prompteur-ou-carrousel',
+    'codename' => 'menus-au-clic',
 
     // Format du SemVer assemblé — DÉRIVÉ automatiquement de major.minor.patch (source unique).
     // NE JAMAIS figer cette valeur en dur (incident déjà survenu — voir archive, #319).

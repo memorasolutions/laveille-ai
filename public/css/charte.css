@@ -1665,3 +1665,61 @@ article h3 {
     font-weight: 600;
     border-left: 3px solid var(--c-primary, #064E5A);
 }
+
+/* ═══ SECTION 22 - Méga-menus : déclencheur au CLIC (tickets #2561 et #2562, 2026-09-14) ═══
+   Le déclencheur était un <a href> qui annulait sa propre navigation par @click.prevent : il se
+   présentait comme un lien, se comportait comme un bouton, et n'amenait nulle part. C'est
+   désormais un vrai <button> (patron « disclosure » du W3C APG). Les valeurs ci-dessous ne sont
+   pas inventées : elles reproduisent le style CALCULÉ de l'ancien lien, mesuré au navigateur,
+   pour que rien ne bouge visuellement. */
+.wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
+    font-family: "Futura PT", var(--f-heading), sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 27px;
+    color: #232F4B;
+    padding: 18px 10px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    position: relative;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur:hover,
+.wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur[aria-expanded="true"] {
+    color: var(--c-primary, #064E5A);
+}
+
+/* Le focus reste VISIBLE : c'est la seule indication de position pour qui navigue au clavier.
+   Ne jamais le retirer sur ce bouton, contrairement à la règle .user-space plus haut. */
+.wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur:focus-visible {
+    outline: 2px solid var(--c-primary, #064E5A);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.lv-mega-chevron {
+    font-size: 11px;
+    line-height: 1;
+    transition: transform .15s ease;
+}
+
+button[aria-expanded="true"] .lv-mega-chevron {
+    transform: rotate(180deg);
+}
+
+/* Sous 992 px, la barre passe en menu « hamburger » et c'est le .sub-menu qui prend le relais.
+   Le panneau large n'a donc rien à y faire : 780 px dans une fenêtre de 375 px déborde
+   horizontalement. Le !important est nécessaire parce que x-show pose un display en style INLINE,
+   et seule une règle !important d'une feuille peut le contredire. */
+@media (max-width: 991.98px) {
+    .wpo-site-header .has-mega-menu > [id^="lv-mega-"] {
+        display: none !important;
+    }
+}

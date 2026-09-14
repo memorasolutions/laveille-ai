@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.275.0] - 2026-09-14
+
+### Modifié
+- **Les méga-menus s'ouvrent désormais au CLIC, et tiennent dans la hauteur de l'écran**
+  (#2561 et #2562), demande du fondateur : « pour les écrans à faible résolution, elles dépassent
+  en bas » et « si j'ai le malheur que ma souris touche le menu à droite, je perds mon premier
+  méga-menu [...] les débutants ont l'impression que les menus disparaissent ».
+
+  **Les deux défauts n'étaient pas seulement liés, ils se commandaient l'un l'autre.** Mesuré au
+  navigateur avant correctif, sur une fenêtre de 1280x700 : le panneau « Outils » fait 586 px et
+  débordait de 34 px sous l'écran. Ce qui tombait hors de l'écran n'était pas du décor, c'était sa
+  barre « Voir tous les outils gratuits » - la seule sortie du panneau vers la page d'index. Et
+  ajouter un défilement interne sans régler la fermeture aurait été inutilisable : on ne fait pas
+  défiler un panneau qui se referme dès que la souris s'écarte.
+
+  **Ce qui change :**
+  - ouverture au clic, fermeture au clic extérieur ou par Échap ; plus aucun survol ;
+  - un seul panneau ouvert à la fois, via un événement partagé - les instances sont isolées, donc
+    sans lui deux panneaux pouvaient rester ouverts ensemble une fois passé au clic ;
+  - `max-height` en vh et défilement interne : le panneau tient dans l'écran (mesuré après :
+    22 px de marge au lieu de 34 px de débordement) et sa sortie redevient atteignable ;
+  - sous 992 px, le panneau large est neutralisé : 780 px dans une fenêtre de 375 px faisaient
+    défiler toute la page horizontalement. Le sous-menu du hamburger reprend la main.
+
+  **Deux défauts d'accessibilité corrigés au passage, que personne n'avait signalés :**
+  1. Le déclencheur était un `<a href="/outils">` portant `@click.prevent` : il se présentait
+     comme un lien, se comportait comme un bouton, et n'amenait nulle part. C'est maintenant un
+     vrai `<button>` (patron « disclosure » du W3C APG) avec `aria-expanded` et `aria-controls`.
+     Son style reproduit exactement le style CALCULÉ de l'ancien lien, relevé au navigateur, pour
+     que rien ne bouge à l'oeil.
+  2. Les panneaux portaient `role="menu"` et `role="menuitem"`, que le W3C APG réserve aux menus
+     d'APPLICATION : ils promettent au lecteur d'écran une navigation aux flèches, une fermeture
+     par Échap et un focus piégé, dont aucun n'était implémenté. On annonçait un contrat qu'on ne
+     tenait pas. Les rôles sont retirés, et Échap fonctionne désormais pour de vrai.
+
+  Le comportement est extrait UNE fois dans `public/js/mega-menu.js` au lieu d'être recopié sur
+  chaque menu. Il s'enregistre par `alpine:init`, seule voie possible ici : Alpine n'est pas chargé
+  par le site, il est embarqué par Livewire en bas de page. Un test verrouille cet ordre - c'est le
+  piège du ticket #2210, où un script chargé trop tard cascadait en ReferenceError silencieuse.
+
+### Corrigé
+- Le fichier du menu contenait `role="menuitem"` sur 23 liens de la zone active. Retirés.
+
+### Note technique
+- Les trois anciens méga-menus (Ressources, Jouer, Pages) enfermés dans `@if(false)` depuis le
+  ticket #200 n'ont volontairement PAS été touchés : ils ne sont jamais rendus. Ce code mort a
+  d'ailleurs induit une erreur de comptage pendant l'analyse - un `grep` y voyait six méga-menus
+  là où trois seulement sont vivants.
+
 ## [1.274.0] - 2026-09-14
 
 ### Ajouté

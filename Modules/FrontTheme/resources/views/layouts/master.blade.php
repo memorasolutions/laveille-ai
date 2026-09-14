@@ -363,6 +363,11 @@
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.15.8/dist/cdn.min.js" integrity="sha384-eA6+k1peuuIgxPHwWoQHx6OoDZ7hFJ+SKfMOhop5+zMV4SWR5OWBMatbIdoqA4lZ" crossorigin="anonymous"></script>
     @endif
     <script>document.querySelectorAll('img:not([loading])').forEach(function(img,i){if(i>0)img.loading='lazy'});</script>
+    {{-- Méga-menus au clic (tickets #2561/#2562) : le composant s'enregistre sur `alpine:init`,
+         il DOIT donc être chargé avant @livewireScripts, qui embarque Alpine et le démarre. C'est
+         exactement le piège du ticket #2210 sur l'écran objectif-vidéo : un script chargé après le
+         démarrage d'Alpine cascade en ReferenceError sans que rien ne le signale. --}}
+    <script defer src="{{ asset('js/mega-menu.js') }}?v={{ config('version.semver') }}"></script>
     @stack('scripts')
     {{-- #165 fix : Livewire scripts indispensables pour composants front (commentaires, etc.) --}}
     @livewireScripts
