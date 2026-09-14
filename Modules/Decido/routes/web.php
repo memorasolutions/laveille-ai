@@ -40,6 +40,12 @@ Route::middleware(DecidoUnderConstruction::class)->group(function () {
     // SANS carnet d'adresses - un simple entier facultatif (nombre de personnes attendues),
     // modifiable depuis la page de gestion. Aucune collecte de courriel.
     Route::post('/decido/{poll}/gerer/{adminToken}/attendus', [PollManageController::class, 'updateExpected'])->name('decido.expected');
+
+    // 2026-09-14 (signale par le fondateur) : la description n'etait saisissable qu'a la CREATION.
+    // Aucune route ne permettait de la corriger ensuite - ce n'etait pas un champ casse, la
+    // fonctionnalite n'existait pas. Meme garde que les autres ecritures de gestion
+    // (authorizeManage : proprietaire connecte OU jeton admin valide) et meme limite anti-abus.
+    Route::post('/decido/{poll}/gerer/{adminToken}/description', [PollManageController::class, 'updateDescription'])->name('decido.description');
     // LOT 5 (docs/specs/2026-08-16-decido-reste-a-faire.md) : interrupteur PAR SONDAGE du résumé
     // quotidien d'activité (decido:notify-poll-activity) - jamais un réglage global de compte.
     Route::post('/decido/{poll}/gerer/{adminToken}/notifications', [PollManageController::class, 'updateActivityNotifications'])->name('decido.notifications');

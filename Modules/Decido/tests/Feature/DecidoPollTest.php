@@ -2878,7 +2878,11 @@ test('"aucune date ne me convient" est distinct d\'une absence de réponse dans 
 
     $manageHtml = $this->get(route('decido.manage', ['poll' => $poll->public_id, 'adminToken' => 'jeton-declines']))->getContent();
     $this->assertStringContainsString('Denise', $manageHtml);
-    $this->assertStringContainsString('aucune date ne leur convenait', $manageHtml);
+    // 2026-09-14 : ce test crée un sondage CLASSIQUE et exigeait le mot « date », donc il
+    // VERROUILLAIT le défaut signalé par le fondateur (« Aucune de ces dates » sur un sondage
+    // qui n'a pas de dates). Le libellé suit désormais le type ; l'assertion suit le libellé.
+    // Ce que le test prouve n'a pas changé : un déclin reste DISTINCT d'une absence de réponse.
+    $this->assertStringContainsString('aucune réponse ne leur convenait', $manageHtml);
     $this->assertStringContainsString('distinct d', $manageHtml);
 });
 

@@ -248,7 +248,13 @@
                     <div class="alert alert-light border mt-3" x-data="{ openDeclines: false }">
                         <strong>{{ $declines->count() }}</strong>
                         {{ $declines->count() > 1 ? 'personnes ont indiqué' : 'personne a indiqué' }}
-                        qu'aucune date ne leur convenait
+                        {{-- Meme correction que le bouton du votant (vote.blade.php) : « date » n'a
+                             aucun sens sur un sondage classique. Ce second endroit avait ete manque
+                             au premier signalement - il n'a ete trouve que par un grep du module
+                             entier, pas en regardant l'ecran signale. --}}
+                        {{ $poll->type->value === 'date'
+                            ? "qu'aucune date ne leur convenait"
+                            : "qu'aucune réponse ne leur convenait" }}
                         <span class="ct-badge-status ct-badge-status-neutral ms-1">distinct d'une absence de réponse</span>.
                         <button type="button" class="ct-btn ct-btn-ghost ct-btn-sm ms-2"
                                 x-on:click="openDeclines = !openDeclines"
@@ -397,6 +403,29 @@
                      copier (aucune collecte, aucun envoi automatique - l'organisateur colle le
                      texte lui-même dans son propre outil de messagerie). Réservé à cette page de
                      gestion (organisateur) : jamais affiché sur public/vote.blade.php. --}}
+                {{-- 2026-09-14, signale par le fondateur : la description n'etait saisissable qu'a
+                     la CREATION, et le lien de gestion n'offrait aucun moyen de la corriger. Or
+                     c'est le texte que TOUS les votants lisent avant de repondre. Place avant la
+                     relance des non-repondants : on corrige le sondage avant de le rediffuser. --}}
+                <div class="mt-5 p-3 border rounded">
+                    <h3 class="h5 mb-2">Description du sondage</h3>
+                    <p class="text-muted small">Ce texte s'affiche aux participants, sous le titre. Laisse le champ vide pour ne rien afficher.</p>
+
+                    <form method="POST" action="{{ route('decido.description', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}">
+                        @csrf
+                        <div class="mb-2">
+                            <label for="description" class="small text-muted mb-1 d-block">Description (facultative, 5000 caractères maximum)</label>
+                            <textarea id="description" name="description" rows="3" maxlength="5000"
+                                      class="form-control form-control-sm"
+                                      placeholder="Ex. : on choisit le local après le vote.">{{ old('description', $poll->description) }}</textarea>
+                            @error('description')
+                                <div class="small mt-1" style="color: var(--sys-danger);">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <button type="submit" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">Enregistrer la description</button>
+                    </form>
+                </div>
+
                 <div class="mt-5 p-3 border rounded">
                     <h3 class="h5 mb-2">Relancer les non-répondants</h3>
                     <p class="text-muted small">Aucune adresse n'est collectée ici : copie ce message et envoie-le toi-même par le moyen de ton choix (courriel, texto, messagerie).</p>

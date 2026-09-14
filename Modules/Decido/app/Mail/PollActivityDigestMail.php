@@ -53,6 +53,11 @@ class PollActivityDigestMail extends Mailable
             ->markdown('decido::emails.activity-digest')
             ->with([
                 'poll_title' => $this->poll->title,
+                // Le libelle des declins suit le TYPE : « date » n'a aucun sens sur un sondage
+                // classique (signale par le fondateur le 2026-09-14). Le gabarit n'avait pas
+                // acces au type, d'ou cette variable dediee plutot qu'un $poll complet - on
+                // n'expose au courriel que ce dont il a besoin.
+                'is_date_poll' => $this->poll->type->value === 'date',
                 'creator_name' => $this->poll->creator?->name,
                 'new_voters' => $this->newVoters,
                 'new_declines' => $this->newDeclines,

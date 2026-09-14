@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.272.0] - 2026-09-14
+
+### Ajoute
+- **La description d'un sondage Décido peut enfin être saisie et corrigée depuis le lien de
+  gestion** (#2558), signale par le fondateur. Diagnostic : ce n'etait PAS un champ qui
+  n'enregistrait pas - **la fonctionnalite n'existait pas**. Le lien de gestion permettait de
+  fermer, prolonger, supprimer, exporter, changer l'echeance et le nombre d'attendus, mais AUCUNE
+  route ne touchait `description` apres la creation. Rien n'etait donc perdu en silence ; rien
+  n'etait rattrapable non plus, alors que c'est le texte que TOUS les votants lisent.
+  Route `decido.description`, methode `updateDescription()`, et un formulaire sur la page de
+  gestion - pour les DEUX types de sondage, date et classique, comme demande.
+  La borne de 5000 caracteres est REPRISE TELLE QUELLE de `store()` : la depasser y provoquait un
+  500 brut (SQLSTATE 22001 non intercepte), et une validation plus permissive ici aurait rouvert
+  exactement ce defaut par une autre porte.
+  9 tests neufs, dont la securite (jeton admin invalide -> 403) et le retour a NULL d'un champ vide.
+
+### Corrige
+- **« Aucune de ces dates ne me convient » s'affichait sur un sondage CLASSIQUE**, qui n'a pas de
+  dates (#2559), signale par le fondateur. Le libelle suit desormais le TYPE de sondage.
+  **Ce qui compte ici est l'ETENDUE** : le texte vivait a QUATRE endroits, et l'ecran signale n'en
+  etait qu'un. Les trois autres n'ont ete trouves que par un grep du MODULE ENTIER - le bouton du
+  votant, le message au votant qui revient, le resume de l'organisateur, et le courriel d'activite
+  (dont le gabarit n'avait meme pas acces au type : il a fallu le lui passer). Corriger l'endroit
+  signale seul aurait laisse trois mensonges en place.
+  La MECANIQUE, elle, est inchangee : `decline()` ne teste pas le type, et « aucune de ces
+  reponses » reste une reponse legitime sur un classique. C'est le texte qu'on corrige, jamais
+  l'option qu'on retire.
+  **Un test existant VERROUILLAIT le defaut** : il creait un sondage classique et exigeait le mot
+  « date ». Mis a jour - ce qu'il prouve n'a pas change (un declin reste DISTINCT d'une absence de
+  reponse), seul le libelle attendu a suivi.
+  5 tests neufs, un par endroit corrige plus le temoin sur sondage de date.
+
+### Note de methode
+- Une contre-epreuve a revele du **code mort** dans le correctif lui-meme : le `trim()` ajoute pour
+  ramener une description videe a NULL ne servait a rien, Laravel le faisant deja via les
+  middlewares `TrimStrings` puis `ConvertEmptyStringsToNull`. Retire. Le test qui garde ce
+  comportement est conserve : il protege le RESULTAT attendu, qui doit survivre a un changement de
+  middleware. Suite Decido complete : 153 tests, 601 assertions.
+
 ## [1.271.2] - 2026-09-13
 
 ### Corrige

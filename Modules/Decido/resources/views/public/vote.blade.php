@@ -110,7 +110,7 @@
                      étant juste et seul l'affichage étant faux. --}}
                 @if($voterToken && (! empty($existingVotes) || ($existingDecline ?? false)))
                     <div class="alert alert-info mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <span>@if(! empty($existingVotes))Tu as déjà voté sous ce lien - modifie ton choix ci-dessous si besoin.@else Tu as déjà indiqué qu'aucune date ne te convenait. Tu peux voter ci-dessous si un créneau finit par te convenir.@endif</span>
+                        <span>@if(! empty($existingVotes))Tu as déjà voté sous ce lien - modifie ton choix ci-dessous si besoin.@else Tu as déjà indiqué {{ $poll->type->value === 'date' ? "qu'aucune date ne te convenait" : "qu'aucune réponse ne te convenait" }}. Tu peux voter ci-dessous si {{ $poll->type->value === 'date' ? 'un créneau finit' : 'une option finit' }} par te convenir.@endif</span>
                         {{-- LOT 2 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 4) : geste
                              EXPLICITE et IRRÉVERSIBLE, distinct du simple "revoter" ci-dessus -
                              confirmation obligatoire via la modale du thème (x-core::confirm-modal,
@@ -469,12 +469,20 @@
                          ni exiger que les créneaux ci-dessus soient remplis. Représentation choisie
                          : table decido_poll_declines dédiée (état distinct), pas un "no" forcé sur
                          chaque créneau - voir le commentaire de sa migration pour la justification. --}}
+                    {{-- Le libelle suit le TYPE de sondage : « dates » n'a aucun sens sur un
+                         sondage classique, dont les options sont des reponses quelconques
+                         (signale par le fondateur le 2026-09-14). La MECANIQUE, elle, vaut pour
+                         les deux types - PublicPollController::decline() ne teste pas le type, et
+                         « aucune de ces reponses » reste une reponse legitime sur un classique.
+                         C'est donc le texte qu'on corrige, jamais l'option qu'on retire. --}}
                     <div class="mb-3">
                         <button type="submit"
                                 formaction="{{ route('decido.vote.decline', ['slug' => $poll->share_slug]) }}"
                                 formnovalidate
                                 class="ct-btn ct-btn-outline">
-                            Aucune de ces dates ne me convient
+                            {{ $poll->type->value === 'date'
+                                ? 'Aucune de ces dates ne me convient'
+                                : 'Aucune de ces réponses ne me convient' }}
                         </button>
                     </div>
 

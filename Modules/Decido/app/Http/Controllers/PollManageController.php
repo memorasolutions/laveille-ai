@@ -585,6 +585,47 @@ class PollManageController extends Controller
     }
 
     /**
+     * 2026-09-14, signale par le fondateur : la description n'etait modifiable qu'a la CREATION.
+     * Le lien de gestion permettait de fermer, prolonger, exporter, changer l'echeance et le
+     * nombre d'attendus - mais pas de corriger une coquille dans le texte que TOUS les votants
+     * lisent. La fonctionnalite n'existait pas, ce n'etait pas un champ qui n'enregistrait pas :
+     * rien n'etait donc perdu en silence, mais rien n'etait rattrapable non plus.
+     *
+     * La borne de 5000 caracteres est REPRISE TELLE QUELLE de store() - la depasser y provoquait
+     * un 500 brut (SQLSTATE 22001 non intercepte). Une validation plus permissive ici rouvrirait
+     * exactement ce defaut par une autre porte.
+     */
+    public function updateDescription(Request $request, string $poll, string $adminToken): RedirectResponse
+    {
+        $pollModel = Poll::findByShareIdentifier($poll);
+        if (! $pollModel) {
+            abort(404);
+        }
+
+        $this->authorizeManage($pollModel, $adminToken);
+
+        $validated = $request->validate([
+            'description' => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        // Une description videe volontairement redevient NULL, jamais une chaine vide : les vues
+        // testent l'absence avec @if($poll->description), et une chaine vide y passerait pour une
+        // valeur presente (un paragraphe vide s'afficherait aux votants).
+        // C'est LARAVEL qui l'assure, pas ce code : les middlewares TrimStrings puis
+        // ConvertEmptyStringsToNull transforment "   " en null avant meme la validation. Un trim()
+        // ajoute ici serait du code mort - verifie par contre-epreuve le 2026-09-14 : en le
+        // retirant, les 9 tests restent verts. Le test qui garde ce comportement est conserve : il
+        // protege le RESULTAT attendu, qui doit survivre a un changement de middleware.
+        $pollModel->description = $validated['description'] ?? null;
+        $pollModel->save();
+
+        return Redirect::route('decido.manage', [
+            'poll' => $pollModel->public_id,
+            'adminToken' => $adminToken,
+        ])->with('success', 'Description mise à jour.');
+    }
+
+    /**
      * LOT 5 (docs/specs/2026-08-16-decido-reste-a-faire.md) : interrupteur PAR SONDAGE (pas un
      * réglage global de compte) du résumé quotidien d'activité (decido:notify-poll-activity).
      * Un simple booléen - aucun seuil à configurer, voir NotifyPollActivityCommand pour la

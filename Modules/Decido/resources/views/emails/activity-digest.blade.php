@@ -10,7 +10,7 @@ Ton sondage **{{ $poll_title }}** a reçu de nouvelles réponses depuis ton dern
 - **{{ $new_voters }}** {{ $new_voters > 1 ? 'nouvelles réponses (ou réponses modifiées)' : 'nouvelle réponse (ou réponse modifiée)' }}
 @endif
 @if($new_declines > 0)
-- **{{ $new_declines }}** {{ $new_declines > 1 ? 'personnes ont indiqué' : 'personne a indiqué' }} qu'aucune date ne leur convenait
+- **{{ $new_declines }}** {{ $new_declines > 1 ? 'personnes ont indiqué' : 'personne a indiqué' }} {{ ($is_date_poll ?? true) ? "qu'aucune date ne leur convenait" : "qu'aucune réponse ne leur convenait" }}
 @endif
 @if($new_comments > 0)
 - **{{ $new_comments }}** {{ $new_comments > 1 ? 'nouveaux commentaires' : 'nouveau commentaire' }}
