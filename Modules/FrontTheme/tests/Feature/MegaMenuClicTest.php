@@ -132,3 +132,35 @@ it('neutralise le panneau large sous le point de rupture mobile', function () {
     expect($css)->toContain('@media (max-width: 991.98px)');
     expect($css)->toContain('.wpo-site-header .has-mega-menu > [id^="lv-mega-"]');
 });
+
+/**
+ * Le garde-fou qui MANQUAIT, et dont l'absence a coûté une régression visible en production
+ * (signalée par le fondateur avec capture : « les menus sont décalés et semblent ne pas avoir la
+ * même taille de police »).
+ *
+ * J'avais reproduit le style MESURÉ sur le lien que je remplaçais, et conclu que rien ne bougeait
+ * parce que la boîte faisait la même hauteur. Mais la mesure venait du site local : en production
+ * les liens voisins sont à 16px/24px/6px, pas 18px/27px/10px. Les boutons sortaient 3 px plus bas.
+ *
+ * Aucune mesure ISOLÉE ne pouvait révéler ça. Seule la COMPARAISON avec le voisin resté intact le
+ * pouvait. Ce test fige donc les quatre valeurs qui doivent rester identiques.
+ */
+it('donne aux boutons de méga-menu exactement la typographie des liens voisins', function () {
+    $css = file_get_contents(public_path('css/charte.css'));
+
+    $debut = strpos($css, 'button.lv-mega-declencheur {');
+    expect($debut)->not->toBeFalse('La règle du déclencheur a disparu de charte.css.');
+
+    $bloc = substr($css, $debut, 900);
+
+    // Les valeurs relevées en production sur « Accueil » et « Livres », qui sont restés des <a>.
+    expect($bloc)->toContain('font-size: 16px');
+    expect($bloc)->toContain('line-height: 24px');
+    expect($bloc)->toContain('padding: 18px 6px');
+    expect($bloc)->toContain('font-weight: 500');
+
+    // Les valeurs fautives de la première version ne doivent pas revenir.
+    expect($bloc)->not->toContain('font-size: 18px');
+    expect($bloc)->not->toContain('line-height: 27px');
+    expect($bloc)->not->toContain('padding: 18px 10px');
+});

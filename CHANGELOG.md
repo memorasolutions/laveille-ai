@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.278.1] - 2026-09-14
+
+### Corrigé
+- **Les trois boutons de méga-menu n'avaient pas la typographie de leurs voisins** (#2573),
+  signalé par le fondateur avec capture : « les menus sont décalés (pas centrés verticalement) et
+  semble ne pas avoir la meme taille de police ». Régression introduite en v1.275.0.
+
+  **Mesure comparative en production**, boutons et liens côte à côte dans la même page :
+
+  | | « Accueil », « Livres » (liens) | « Outils », « Annuaire », « Apprendre » (boutons) |
+  |---|---|---|
+  | taille | 16 px | **18 px** |
+  | hauteur de ligne | 24 px | **27 px** |
+  | padding | 18px 6px | **18px 10px** |
+  | bas de la boîte | 140 | **143** |
+
+  La graisse était identique (500) : l'écart venait de la TAILLE, et les 3 px de décalage vertical
+  en découlaient. Les valeurs sont désormais alignées sur celles des liens.
+
+  **La cause de l'erreur, qui vaut plus que le correctif** : en remplaçant les `<a>` par des
+  `<button>`, j'avais reproduit le style MESURÉ sur l'élément remplacé, et conclu que rien ne
+  bougeait puisque la boîte faisait la même hauteur. Mais cette mesure venait du site LOCAL, où la
+  taille diffère de la production. Aucune mesure ISOLÉE ne pouvait révéler l'écart : seule la
+  comparaison avec le voisin resté intact le pouvait.
+
+  Un test fige désormais les quatre valeurs et refuse le retour des anciennes.
+
 ## [1.278.0] - 2026-09-14
 
 ### Ajouté

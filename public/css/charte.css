@@ -1674,11 +1674,17 @@ article h3 {
    pour que rien ne bouge visuellement. */
 .wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
     font-family: "Futura PT", var(--f-heading), sans-serif;
-    font-size: 18px;
+    /* CES QUATRE VALEURS DOIVENT SUIVRE CELLES DES LIENS VOISINS (« Accueil », « Livres »),
+       relevées en PRODUCTION le 2026-09-14 : 16px / 500 / 24px / 18px 6px.
+       Une première version portait 18px / 27px / 18px 10px, mesurés en local : les boutons
+       sortaient alors 3 px plus bas et paraissaient d'une autre taille que leurs voisins.
+       La leçon : mesurer l'élément qu'on remplace ne suffit pas, il faut le COMPARER au
+       voisin resté intact - un écart d'alignement ne se voit sur aucune mesure isolée. */
+    font-size: 16px;
     font-weight: 500;
-    line-height: 27px;
+    line-height: 24px;
     color: #232F4B;
-    padding: 18px 10px;
+    padding: 18px 6px;
     margin: 0;
     display: flex;
     align-items: center;
