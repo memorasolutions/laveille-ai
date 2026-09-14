@@ -63,6 +63,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\LockScreenshotsCommand::class,
             \Modules\Directory\Console\ConvertPricesCadCommand::class,
             \Modules\Directory\Console\CheckLinksCommand::class,
+            \Modules\Directory\Console\ResolveProductHuntUrlsCommand::class,
             \Modules\Directory\Console\EnrichTutorialsCommand::class,
             \Modules\Directory\Console\EnrichTutorialsSonarCommand::class,
             \Modules\Directory\Console\EnrichPendingCommand::class,

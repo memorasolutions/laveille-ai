@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.277.0] - 2026-09-14
+
+### Ajouté
+- **Commande `directory:resolve-producthunt`** (#2540) : résout les URL de l'annuaire qui pointent
+  vers producthunt.com au lieu du site réel de l'outil. Mesuré en production : **260 fiches, dont
+  254 publiées, totalisant 3011 clics sortants** qui envoient le visiteur sur ProductHunt plutôt
+  que vers l'outil qu'il cherchait.
+
+  La méthode `resolveProductHuntUrl()` existait déjà dans `ToolDiscoveryService`, mais n'était
+  appelée que sur les NOUVEAUX outils découverts : elle n'avait jamais touché le passif. La
+  commande la réutilise telle quelle plutôt que de réécrire la résolution.
+
+  **Deux garde-fous qui décident de tout, et qui ne se devinent pas :**
+
+  1. **Étranglement obligatoire** entre deux appels réseau (`--pause`, 1500 ms par défaut).
+     ProductHunt a déjà banni cette IP par sur-sollicitation. La pause n'est pas une politesse,
+     c'est ce qui permet à la campagne d'aller au bout.
+  2. **Arrêt automatique après N échecs consécutifs** (`--max-echecs`, 5 par défaut), et la
+     commande sort alors en ÉCHEC pour qu'un cron le remarque. Une série d'échecs ne vient pas des
+     fiches, elle vient du jeton ou d'un bannissement : continuer ne ferait qu'aggraver les deux.
+
+  **Le code généré avait rendu ce second garde-fou INOPÉRANT**, et c'est le genre de défaut
+  invisible à la relecture : une résolution nulle était comptée comme « ignorée » et REMETTAIT le
+  compteur d'échecs à zéro. L'arrêt ne se serait donc jamais déclenché, et une campagne lancée
+  avec un jeton mort aurait martelé ProductHunt 260 fois d'affilée. Le test qui le verrouille
+  compte les appels réels : avec 6 fiches et un service qui échoue toujours, le service doit être
+  appelé 3 fois et non 6.
+
+  Deux autres décisions : une URL résolue qui contient ENCORE producthunt.com est traitée comme un
+  échec (un faux succès écraserait une adresse par son équivalent), et l'écriture passe par
+  `save()` et non par une requête directe - le modèle porte Spatie LogsActivity avec `url` dans
+  `logOnly`, donc chaque changement est historisé avec son ancienne valeur. C'est le seul moyen de
+  revenir en arrière sur 260 fiches, et un test le vérifie.
+
 ## [1.276.0] - 2026-09-14
 
 ### Ajouté
