@@ -76,6 +76,33 @@ class EntityDossierService
     }
 
     /**
+     * Les dossiers auxquels UNE fiche appartient - le maillage qui compte vraiment : 311 fiches
+     * qui pointent vers 41 dossiers, plutot que deux pages accessibles par le seul plan de site.
+     * Ne renvoie que les dossiers reellement servables, donc jamais un lien vers un 404.
+     *
+     * @return Collection<int, object>
+     */
+    public function dossiersPourArticle(int $articleId): Collection
+    {
+        $slugs = NewsArticleEntity::query()->where('news_article_id', $articleId)
+            ->pluck('entity_slug')->unique()->all();
+
+        if ($slugs === []) {
+            return collect();
+        }
+
+        return $this->requete()
+            ->whereIn('news_article_entities.entity_slug', $slugs)
+            ->orderByDesc(DB::raw('count(*)'))
+            ->limit(6)
+            ->get([
+                'news_article_entities.entity_slug',
+                'news_article_entities.entity_label',
+                DB::raw('count(*) as total'),
+            ]);
+    }
+
+    /**
      * Le socle commun : entités d'actualités publiées, non retirées, non exclues, au-dessus
      * du seuil.
      */

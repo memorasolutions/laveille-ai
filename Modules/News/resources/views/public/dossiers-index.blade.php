@@ -26,7 +26,7 @@
         @if($dossiers->isEmpty())
             <p>{{ __('Aucun dossier n\'est encore assez fourni pour être publié.') }}</p>
         @else
-        <div class="row">
+        <div class="row nw-dossiers-grid">
             @foreach($dossiers as $dossier)
             <div class="col-sm-6 col-md-4" style="margin-bottom: 1.25rem;">
                 <div class="nw-dossier-card">

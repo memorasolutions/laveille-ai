@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.281.0] - 2026-09-14
+
+### Ajouté
+- **Chaque fiche mène à ses dossiers** (#2572) : bloc « À suivre dans nos dossiers » sur la page
+  d'actualité, qui pointe vers les dossiers auxquels elle appartient. C'est CE lien qui porte le
+  maillage - **311 fiches vers 34 dossiers** - là où la version précédente n'offrait que deux
+  portes d'entrée. Le service ne renvoie que des dossiers réellement servables : jamais un lien
+  vers un 404.
+
+### Corrigé
+- **Les grilles de cartes débordaient horizontalement** hors du conteneur, sur toute page autre
+  que l'index des actualités. Le `.row` du thème ne revient pas à la ligne tout seul, et la règle
+  qui le corrigeait vivait dans `news::public.index` - donc absente partout ailleurs. Elle rejoint
+  `partials/article-card.blade.php`, avec le composant qu'elle sert. Défaut invisible dans le HTML
+  servi, trouvé **à la capture d'écran** : la page était juste, le rendu ne l'était pas.
+- **« de avril 2026 » devient « d'avril 2026 »** : trois mois de l'année commencent par une
+  voyelle (avril, août, octobre). La formule à trous produisait la faute une fois sur quatre,
+  sous les yeux de tous les lecteurs. L'élision est calculée dans le contrôleur, la vue reçoit
+  la période déjà formatée.
+
+### Vérification
+- 13 tests Pest verts, dont un qui verrouille l'élision et deux le lien depuis la fiche.
+- Rendu public relancé après déplacement de la règle de grille.
+
 ## [1.280.0] - 2026-09-14
 
 ### Ajouté

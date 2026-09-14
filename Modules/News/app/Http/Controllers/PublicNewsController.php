@@ -174,6 +174,12 @@ class PublicNewsController extends Controller
         // RAISON: connexes réellement pertinents sans modération.
         $relatedArticles = NewsArticle::relatedFor($article, 3);
 
-        return view('news::public.show', compact('article', 'previousArticle', 'nextArticle', 'relatedArticles'));
+        // ACTION : dossiers thematiques auxquels cette fiche appartient (2026-09-14, #2572).
+        // MCP: SELF (<5 lignes)
+        // RAISON: c'est CE lien qui porte le maillage - 311 fiches vers 41 dossiers. Sans lui,
+        // les pages de dossier ne seraient atteignables que par le plan de site.
+        $dossiers = app(\Modules\News\Services\EntityDossierService::class)->dossiersPourArticle($article->id);
+
+        return view('news::public.show', compact('article', 'previousArticle', 'nextArticle', 'relatedArticles', 'dossiers'));
     }
 }

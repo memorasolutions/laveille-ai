@@ -81,10 +81,27 @@ class EntityDossierController extends Controller
             'slug' => $slug,
             'articles' => $articles,
             'total' => $total,
-            // Aucune date inventée : si la borne manque, la vue n'affichera pas la période.
-            'premiereDate' => $bornes?->premiere ? Carbon::parse($bornes->premiere) : null,
-            'derniereDate' => $bornes?->derniere ? Carbon::parse($bornes->derniere) : null,
+            // Aucune date inventée : si une borne manque, la vue n'affiche pas la période.
+            'periode' => $this->periode($bornes),
             'entitesVoisines' => $entitesVoisines,
         ]);
+    }
+
+    /**
+     * « d'avril 2026 à septembre 2026 », jamais « de avril ». Trois mois de l'année commencent
+     * par une voyelle (avril, août, octobre) et exigent l'élision - la formule à trous la plus
+     * naturelle produit la faute une fois sur quatre, et elle est visible par tous les lecteurs.
+     */
+    private function periode(?object $bornes): ?string
+    {
+        if (! $bornes?->premiere || ! $bornes?->derniere) {
+            return null;
+        }
+
+        $debut = Carbon::parse($bornes->premiere)->translatedFormat('F Y');
+        $fin = Carbon::parse($bornes->derniere)->translatedFormat('F Y');
+        $liaison = preg_match('/^[aeiouyàâéèêîôûAEIOUY]/u', $debut) === 1 ? "d'" : 'de ';
+
+        return $liaison.$debut.' à '.$fin;
     }
 }

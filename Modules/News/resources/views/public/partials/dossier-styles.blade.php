@@ -17,6 +17,10 @@
 @once
 @push('styles')
 <style>
+    /* Le .row du theme ne revient PAS a la ligne tout seul : sans cette regle, les cartes
+       debordent horizontalement hors du conteneur (mesure en production le 2026-09-14, capture
+       a l'appui). Le meme correctif existe deja sur .nw-articles-grid dans l'index des actus. */
+    .nw-dossiers-grid.row { flex-wrap: wrap !important; }
     .nw-dossier-intro { color: #6b7280; margin-bottom: 1.5rem; font-size: 1rem; }
     .nw-dossier-card {
         height: 100%;

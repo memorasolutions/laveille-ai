@@ -905,6 +905,22 @@
                     </nav>
                     @endif
 
+                    {{-- Dossiers thématiques (2026-09-14, #2572) : les entités de cette fiche qui
+                         ont assez de matière pour un dossier. C'est CE lien qui porte le maillage -
+                         311 fiches vers 41 dossiers. Le service ne renvoie que des dossiers
+                         réellement servables, donc jamais un lien vers un 404. --}}
+                    @if(($dossiers ?? collect())->isNotEmpty())
+                    @include('news::public.partials.dossier-styles')
+                    <div class="nw-related">
+                        <h3>{{ __('À suivre dans nos dossiers') }}</h3>
+                        <div class="nw-dossier-voisins-liste">
+                            @foreach($dossiers as $dossier)
+                            <a href="{{ route('news.dossier', $dossier->entity_slug) }}" class="nw-dossier-lien">{{ __('Tout sur :entite', ['entite' => $dossier->entity_label]) }} ({{ $dossier->total }})</a>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
                     {{-- Articles connexes --}}
                     @if($relatedArticles->isNotEmpty())
                     <div class="nw-related">

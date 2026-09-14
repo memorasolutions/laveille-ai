@@ -18,6 +18,12 @@
 @once
 @push('styles')
 <style>
+    /* La grille qui porte ces cartes doit revenir a la ligne : le .row du theme ne le fait pas
+       tout seul. La regle vivait dans news::public.index, donc TOUTE autre vue qui affichait ces
+       cartes voyait sa grille deborder horizontalement - mesure le 2026-09-14 sur les pages de
+       dossier, capture a l'appui. Sa place est ici, avec le composant qu'elle sert. */
+    .nw-articles-grid.row { flex-wrap: wrap !important; }
+
     /* === nw-card – carte d'actualité (source de vérité, ne pas dupliquer) === */
     .nw-card {
         display: flex; flex-direction: column; height: 100%;

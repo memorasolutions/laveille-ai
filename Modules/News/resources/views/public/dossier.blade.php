@@ -1,7 +1,7 @@
 {{--
     Page de dossier thématique : toutes les actualités publiées qui portent sur une même entité.
 
-    Variables : $entite, $slug, $articles (paginator), $total, $premiereDate, $derniereDate,
+    Variables : $entite, $slug, $articles (paginator), $total, $periode,
                 $entitesVoisines.
 
     Le contrôleur garantit au moins 5 actualités avant de servir cette page - un dossier de deux
@@ -26,9 +26,10 @@
     <div class="container">
         <h1 style="font-family: var(--f-heading); margin-bottom: 0.25rem;">{{ __('Tout sur :entite', ['entite' => $entite]) }}</h1>
 
+        {{-- La période arrive déjà formatée du contrôleur, élision comprise (« d'avril », jamais
+             « de avril ») : trois mois commencent par une voyelle, la faute serait visible. --}}
         <p class="nw-dossier-intro">
-            {{ trans_choice(':count actualité publiée sur :entite|:count actualités publiées sur :entite', $total, ['count' => $total, 'entite' => $entite]) }}@if($premiereDate && $derniereDate),
-                {{ __('de :debut à :fin', ['debut' => $premiereDate->translatedFormat('F Y'), 'fin' => $derniereDate->translatedFormat('F Y')]) }}@endif.
+            {{ trans_choice(':count actualité publiée sur :entite|:count actualités publiées sur :entite', $total, ['count' => $total, 'entite' => $entite]) }}@if($periode), {{ $periode }}@endif.
         </p>
 
         <div class="row nw-articles-grid news-grid">
