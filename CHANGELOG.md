@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.279.0] - 2026-09-14
+
+### Ajouté
+- **Commande `news:backfill-entities`** (#2572) : extrait les entités nommées des fiches qui n'en
+  ont aucune. Le mécanisme de regroupement par entité existait déjà et fonctionnait, mais ne
+  couvrait que **311 fiches sur 5091** - et **aucune** des 1865 fiches faibles. Quatrième
+  occurrence du même motif dans la journée : le mécanisme existe, il n'a jamais touché le passif.
+
+  Détection par **liste blanche** d'entités connues (OpenAI, Anthropic, Google, Meta, Microsoft,
+  Apple, Amazon, Nvidia, Mistral, xAI, Perplexity, Hugging Face...), cherchées dans les titres.
+  Pas d'IA : on ne devine pas les entités, on cherche celles qu'on connaît.
+
+  **Deux pièges traités, tous deux mesurés et non théoriques :**
+
+  1. **La sous-chaîne.** Une analyse déléguée avait compté « Intel : 85 occurrences » avant de
+     comprendre que le mot vivait dans « intelligence ». « meta » se cache pareillement dans
+     « metadata ». Chaque variante exige donc une frontière de mot. Sans cela, le regroupement
+     serait faussé dès le départ - et invisible à la relecture. Un test vérifie qu'un titre
+     contenant « intelligence » et « metadata » ne déclenche rien.
+  2. **Le plafond qui ne plafonne pas.** Le code généré posait un `limit()` sur la requête, que
+     `chunkById` ignore puisqu'il repagine lui-même par identifiant. Avec `--limit=2` sur cinq
+     fiches, il en aurait traité cinq. Une option qui ment sur ce qu'elle fait est pire qu'une
+     option absente : le plafond est désormais appliqué dans la boucle, et un test le vérifie en
+     comptant les fiches réellement écrites.
+
+  Trois refus délibérés, chacun testé : ne jamais écraser les entités d'une fiche qui en a déjà
+  (une curation faite à la main vaut mieux qu'une détection automatique), ignorer les fiches
+  retirées, et ne rien écrire sans `--appliquer`.
+
 ## [1.278.1] - 2026-09-14
 
 ### Corrigé
