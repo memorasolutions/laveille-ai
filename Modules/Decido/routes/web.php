@@ -46,6 +46,7 @@ Route::middleware(DecidoUnderConstruction::class)->group(function () {
     // fonctionnalite n'existait pas. Meme garde que les autres ecritures de gestion
     // (authorizeManage : proprietaire connecte OU jeton admin valide) et meme limite anti-abus.
     Route::post('/decido/{poll}/gerer/{adminToken}/description', [PollManageController::class, 'updateDescription'])->name('decido.description');
+    Route::post('/decido/{poll}/gerer/{adminToken}/choix-aucune', [PollManageController::class, 'updateAllowDecline'])->name('decido.allow-decline');
     // LOT 5 (docs/specs/2026-08-16-decido-reste-a-faire.md) : interrupteur PAR SONDAGE du résumé
     // quotidien d'activité (decido:notify-poll-activity) - jamais un réglage global de compte.
     Route::post('/decido/{poll}/gerer/{adminToken}/notifications', [PollManageController::class, 'updateActivityNotifications'])->name('decido.notifications');

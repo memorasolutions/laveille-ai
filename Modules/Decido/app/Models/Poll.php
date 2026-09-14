@@ -43,6 +43,7 @@ class Poll extends Model
         'extension_count',
         'expected_participants',
         'activity_notifications_enabled',
+        'allow_decline',
         'activity_notified_at',
         'admin_token_hash',
         'custom_slug',
@@ -59,6 +60,7 @@ class Poll extends Model
         'extension_count' => 'integer',
         'expected_participants' => 'integer',
         'activity_notifications_enabled' => 'boolean',
+        'allow_decline' => 'boolean',
         'activity_notified_at' => 'datetime',
     ];
 

@@ -475,6 +475,7 @@
                          les deux types - PublicPollController::decline() ne teste pas le type, et
                          « aucune de ces reponses » reste une reponse legitime sur un classique.
                          C'est donc le texte qu'on corrige, jamais l'option qu'on retire. --}}
+                    @if($poll->allow_decline)
                     <div class="mb-3">
                         <button type="submit"
                                 formaction="{{ route('decido.vote.decline', ['slug' => $poll->share_slug]) }}"
@@ -485,6 +486,7 @@
                                 : 'Aucune de ces réponses ne me convient' }}
                         </button>
                     </div>
+                    @endif
 
                     <div class="d-grid">
                         <x-core::button type="submit" variant="primary">Envoyer mon vote</x-core::button>

@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.273.0] - 2026-09-14
+
+### Ajoute
+- **Le choix « aucune ne me convient » devient un REGLAGE de l'organisateur** (#2560), demande par
+  le fondateur. Une case a cocher, a la creation ET modifiable en cours de sondage depuis le lien
+  de gestion. Decoche, les participants doivent choisir parmi les options proposees.
+
+  **Trois decisions prises avant de coder, et qui ne se devinent pas en lisant le resultat :**
+
+  1. **Defaut ACTIVE, y compris retroactivement.** La colonne porte `default(true)`, donc tous les
+     sondages existants gardent la possibilite que leurs participants voyaient hier. Un sondage EN
+     COURS ne doit pas perdre une option en cours de vote : ce serait changer les regles pendant la
+     partie, et rendre incomprehensibles les declins deja enregistres.
+  2. **Le reglage gouverne ce qu'on PROPOSE, jamais ce qu'on a deja RECU.** Un declin enregistre
+     reste visible dans les resultats apres decochage - masquer une reponse reellement donnee
+     serait une perte de donnee et fausserait le total des participants. Un test le verrouille.
+  3. **Le refus vit COTE SERVEUR, pas dans la vue.** Cacher le bouton ne suffit pas : la route de
+     declin est publique, et une requete forgee - ou simplement un onglet reste ouvert avant que
+     l'organisateur ne decoche - passerait. `PublicPollController::decline()` repond 403.
+     **Contre-epreuve faite** : en retirant ce garde-fou, SEUL le test de contournement vire au
+     rouge, les neuf autres restent verts. Autrement dit, l'affichage seul laissait bien la porte
+     ouverte.
+
+  Detail d'implementation qui a son importance : une case NON cochee n'est pas transmise par le
+  navigateur. D'ou un champ cache `value="0"` devant chaque case, et une regle `nullable|boolean`
+  plutot que `required` - sinon decocher produirait une erreur de validation au lieu de l'effet
+  voulu. La case de creation vit dans le partial PARTAGE par les deux formulaires (date et
+  classique) : ecrite deux fois, elle aurait fini par diverger.
+
+  10 tests neufs. Suite Decido complete : 163 tests, 625 assertions.
+
 ## [1.272.0] - 2026-09-14
 
 ### Ajoute

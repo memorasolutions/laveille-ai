@@ -212,6 +212,14 @@ class PublicPollController extends Controller
             abort(404);
         }
 
+        // Reglage `allow_decline` (2026-09-14) : l'organisateur peut ne PAS proposer ce choix.
+        // Le refus est ICI, cote serveur, et pas seulement dans la vue qui cache le bouton : la
+        // route est publique, et une requete forgee - ou simplement un onglet reste ouvert avant
+        // que l'organisateur ne decoche - passerait autrement. Cacher n'est pas interdire.
+        if (! $poll->allow_decline) {
+            abort(403, 'Ce sondage ne propose pas ce choix.');
+        }
+
         $validated = $request->validate([
             'voter_pseudonym' => ['required', 'string', 'max:100'],
             // LOT 2, point 5 : même champ facultatif que vote() - un votant qui décline reste

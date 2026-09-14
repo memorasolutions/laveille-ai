@@ -424,6 +424,25 @@
                         </div>
                         <button type="submit" class="ct-btn ct-btn-outline ct-btn-sm" style="min-height:44px;">Enregistrer la description</button>
                     </form>
+
+                    {{-- Reglage demande par le fondateur (2026-09-14), modifiable EN COURS de
+                         sondage : l'organisateur peut retirer le choix « aucune ne me convient »
+                         apres coup. Les declins DEJA recus restent dans les resultats - ce reglage
+                         gouverne ce qu'on propose, jamais ce qu'on a deja recu. --}}
+                    <form method="POST" action="{{ route('decido.allow-decline', ['poll' => $poll->public_id, 'adminToken' => $adminToken]) }}" class="mt-3 pt-3 border-top">
+                        @csrf
+                        <input type="hidden" name="allow_decline" value="0">
+                        <div class="form-check">
+                            <input type="checkbox" id="allow_decline_manage" name="allow_decline" value="1"
+                                   class="form-check-input" {{ $poll->allow_decline ? 'checked' : '' }}
+                                   onchange="this.form.submit()">
+                            <label for="allow_decline_manage" class="form-check-label">
+                                Proposer le choix « {{ $poll->type->value === 'date' ? 'aucune de ces dates ne me convient' : 'aucune de ces réponses ne me convient' }} »
+                            </label>
+                        </div>
+                        <div class="form-text">Décoché, les participants doivent choisir parmi les options proposées. Les réponses déjà reçues restent dans les résultats.</div>
+                        <noscript><button type="submit" class="ct-btn ct-btn-outline ct-btn-sm mt-2" style="min-height:44px;">Enregistrer ce réglage</button></noscript>
+                    </form>
                 </div>
 
                 <div class="mt-5 p-3 border rounded">

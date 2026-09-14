@@ -103,6 +103,11 @@ class PollManageController extends Controller
             // légitime tout en restant très en-deçà de la limite de 65 535 octets même dans le pire
             // cas UTF-8 (4 octets/caractère système emoji = 20 000 octets max).
             'description' => ['nullable', 'string', 'max:5000'],
+            // Reglage demande par le fondateur (2026-09-14). Une case a cocher non cochee
+            // n'est PAS envoyee par le navigateur : la regle est donc `boolean` + `nullable`,
+            // jamais `required` - sinon decocher la case produirait une erreur de validation
+            // au lieu de l'effet voulu. L'absence vaut « decoche » (voir plus bas).
+            'allow_decline' => ['nullable', 'boolean'],
             'type' => ['required', 'in:date,classic'],
             // 'timezone' (règle Laravel) = round 18 (skill /100) : avant ce fix, seul 'string|max:60'
             // gardait ce champ - une chaîne arbitraire non-IANA ("Not/AZone", "'; DROP TABLE...", une
@@ -202,6 +207,8 @@ class PollManageController extends Controller
                 $poll = new Poll;
                 $poll->title = $validated['title'];
                 $poll->description = $validated['description'] ?? null;
+                // Une case non cochee n'arrive pas dans la requete : son absence vaut « non ».
+                $poll->allow_decline = (bool) ($validated['allow_decline'] ?? false);
                 $poll->type = $validated['type'];
                 $poll->vote_mode = $isDateType ? 'yes_no_maybe' : $validated['vote_mode'];
                 $poll->timezone = $validated['timezone'];
@@ -623,6 +630,45 @@ class PollManageController extends Controller
             'poll' => $pollModel->public_id,
             'adminToken' => $adminToken,
         ])->with('success', 'Description mise à jour.');
+    }
+
+    /**
+     * Reglage demande par le fondateur (2026-09-14) : proposer ou non le choix « aucune ne me
+     * convient ». Certains sondages ne veulent pas offrir cette echappatoire.
+     *
+     * DEUX POINTS QUI NE SE DEVINENT PAS :
+     *
+     * 1. Le reglage gouverne ce qu'on PROPOSE, jamais ce qu'on a deja RECU. Un declin enregistre
+     *    reste visible dans les resultats meme apres decochage - masquer une reponse reellement
+     *    donnee serait une perte de donnee, et rendrait le total des participants incoherent.
+     *
+     * 2. Le garde-fou vit COTE SERVEUR, pas dans la vue. Cacher le bouton ne suffit pas : la route
+     *    de declin est publique, et une requete forgee (ou un onglet reste ouvert avant le
+     *    decochage) passerait. Le refus est donc dans PublicPollController::decline().
+     */
+    public function updateAllowDecline(Request $request, string $poll, string $adminToken): RedirectResponse
+    {
+        $pollModel = Poll::findByShareIdentifier($poll);
+        if (! $pollModel) {
+            abort(404);
+        }
+
+        $this->authorizeManage($pollModel, $adminToken);
+
+        // Meme raison que dans store() : une case decochee n'est pas transmise par le navigateur.
+        $validated = $request->validate([
+            'allow_decline' => ['nullable', 'boolean'],
+        ]);
+
+        $pollModel->allow_decline = (bool) ($validated['allow_decline'] ?? false);
+        $pollModel->save();
+
+        return Redirect::route('decido.manage', [
+            'poll' => $pollModel->public_id,
+            'adminToken' => $adminToken,
+        ])->with('success', $pollModel->allow_decline
+            ? 'Le choix « aucune ne me convient » est proposé aux participants.'
+            : 'Le choix « aucune ne me convient » n\'est plus proposé. Les réponses déjà reçues restent dans les résultats.');
     }
 
     /**

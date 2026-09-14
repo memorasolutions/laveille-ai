@@ -14,6 +14,25 @@
     <textarea id="description" name="description" class="form-control" rows="3">{{ old('description') }}</textarea>
 </div>
 
+{{-- Reglage demande par le fondateur (2026-09-14) : proposer ou non le choix « aucune ne me
+     convient ». Place ici, dans le partial PARTAGE, il couvre d'un coup les deux formulaires de
+     creation (date et classique) - une case ecrite deux fois finirait par diverger.
+
+     Le champ cache qui precede n'est pas decoratif : une case NON cochee n'est pas transmise par
+     le navigateur. Sans lui, `old()` ne pourrait pas distinguer « decochee » de « premiere
+     ouverture du formulaire », et un echec de validation re-cocherait la case a tort. --}}
+<div class="mb-3">
+    <input type="hidden" name="allow_decline" value="0">
+    <div class="form-check">
+        <input type="checkbox" id="allow_decline" name="allow_decline" value="1"
+               class="form-check-input" {{ old('allow_decline', '1') == '1' ? 'checked' : '' }}>
+        <label for="allow_decline" class="form-check-label">
+            Proposer le choix « aucune ne me convient »
+        </label>
+    </div>
+    <div class="form-text">Décoché, les participants doivent choisir parmi les options proposées.</div>
+</div>
+
 {{-- LOT 1 (docs/specs/2026-08-16-decido-reste-a-faire.md, point 2) : échéance de réponse
      FACULTATIVE, partagée entre les 2 formulaires dédiés (même emplacement DRY que la
      description/le fuseau ci-dessus). Un sondage sans échéance continue de fonctionner
