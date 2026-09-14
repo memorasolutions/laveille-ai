@@ -35,9 +35,11 @@ class ResyncVideoTitlesCommand extends Command
         $disparues = 0;
         $ignorees = 0;
         $ecrites = 0;
+        $horsLangue = 0;
 
         $exemplesDisparues = [];
         $exemplesDivergentes = [];
+        $exemplesHorsLangue = [];
 
         $requete = ToolResource::query()
             ->whereNotNull('video_id')
@@ -88,6 +90,20 @@ class ResyncVideoTitlesCommand extends Command
 
                 $langueReelle = YouTubeService::detectLanguage($titreReel, $donnees['api_lang'] ?? null);
 
+                // La langue DÉCLARÉE par la vidéo, qui n'est ni fr ni en dans certains cas : une
+                // vidéo allemande (defaultLanguage « de-DE ») était publiée sous un titre anglais,
+                // mesurée le 2026-09-14. detectLanguage() ne connaît que fr et en, elle ne peut
+                // donc pas la signaler - ce compteur le fait, sans rien dépublier : ce que le site
+                // affiche est une décision éditoriale, pas une décision de commande.
+                $langueApi = strtolower((string) ($donnees['api_lang'] ?? ''));
+                if ($langueApi !== '' && ! str_starts_with($langueApi, 'fr') && ! str_starts_with($langueApi, 'en')) {
+                    $horsLangue++;
+
+                    if (count($exemplesHorsLangue) < 15) {
+                        $exemplesHorsLangue[] = "#{$ressource->id} [{$langueApi}] {$titreReel}";
+                    }
+                }
+
                 if ($titreReel === $ressource->title && $langueReelle === $ressource->language) {
                     continue;
                 }
@@ -112,8 +128,8 @@ class ResyncVideoTitlesCommand extends Command
         }
 
         $this->table(
-            ['Examinées', 'Divergentes', 'Disparues', 'Ignorées', 'Écrites'],
-            [[$examinees, $divergentes, $disparues, $ignorees, $ecrites]]
+            ['Examinées', 'Divergentes', 'Disparues', 'Hors fr/en', 'Ignorées', 'Écrites'],
+            [[$examinees, $divergentes, $disparues, $horsLangue, $ignorees, $ecrites]]
         );
 
         if ($exemplesDivergentes !== []) {
@@ -126,6 +142,13 @@ class ResyncVideoTitlesCommand extends Command
         if ($exemplesDisparues !== []) {
             $this->info('Exemples de vidéos absentes de la réponse YouTube (aucune touchée) :');
             foreach ($exemplesDisparues as $exemple) {
+                $this->line('  '.$exemple);
+            }
+        }
+
+        if ($exemplesHorsLangue !== []) {
+            $this->info('Vidéos dont la langue déclarée n\'est ni le français ni l\'anglais (aucune touchée) :');
+            foreach ($exemplesHorsLangue as $exemple) {
                 $this->line('  '.$exemple);
             }
         }

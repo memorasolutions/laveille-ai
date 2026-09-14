@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.282.1] - 2026-09-14
+
+### Corrigé
+- **`directory:resync-video-titles` signale désormais les vidéos ni françaises ni anglaises**
+  (#2555). La mesure en production a démenti une partie de mon hypothèse : une ressource intitulée
+  « FLUX AI: Install locally... » correspond en réalité à une vidéo ALLEMANDE
+  (`defaultLanguage: de-DE`, identique avec `hl=fr`, `hl=en` et `hl=de`). Le titre anglais stocké
+  était donc faux lui aussi, et resynchroniser révèle le problème au lieu de le cacher.
+
+  `detectLanguage()` ne connaît que le français et l'anglais : elle ne pouvait pas signaler ce cas.
+  Un compteur distinct le fait maintenant, avec exemples. **Aucune dépublication** : ce que le site
+  affiche est une décision éditoriale, pas une décision de commande.
+
 ## [1.282.0] - 2026-09-14
 
 ### Ajouté
