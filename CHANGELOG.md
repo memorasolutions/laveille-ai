@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.282.0] - 2026-09-14
+
+### Ajouté
+- **`directory:resync-video-titles`** (#2555) : resynchronise le titre et la langue des ressources
+  vidéo de l'annuaire depuis YouTube. Sans `--apply`, elle MESURE et n'écrit rien.
+
+  **Ce que la mesure a révélé, et qui n'était pas le défaut décrit au ticket** : 37 ressources
+  déclarées françaises affichaient un titre TRADUIT en anglais, sur un site québécois francophone.
+  Vérification faite contre l'API YouTube : elle renvoie bien « Les bases de Midjourney : Le Guide
+  de A à Z » là où la base stockait « The Basics of Midjourney: The A-Z Guide », avec
+  `defaultLanguage: fr` et le même résultat avec `hl=fr`, `hl=en` et sans `hl`. **La base mentait,
+  pas la source** - le ticket cherchait un problème de tri, c'était un problème de donnée.
+
+  La commande traite du même coup les trois étapes prévues au ticket : elle détecte les vidéos
+  devenues privées ou retirées (absentes de la réponse), elle recalcule la langue depuis le titre
+  réel, et elle corrige le titre affiché.
+
+  **Aucune suppression, aucune dépublication** : une vidéo absente de la réponse est SIGNALÉE,
+  jamais touchée. Elle peut être privée temporairement ou bloquée dans un pays.
+
+### Vérification
+- 5 tests Pest verts, dont un qui verrouille la réindexation par `video_id` : `getVideoDetails()`
+  renvoie une LISTE indexée par entier, et sans réindexation la commande aurait compté les 1855
+  ressources « disparues » en ayant l'air de fonctionner. **Contre-épreuve faite** : le `keyBy`
+  retiré, 2 tests tombent.
+- Non-régression des tests tutoriels de l'annuaire : 11 tests, 36 assertions.
+
 ## [1.281.0] - 2026-09-14
 
 ### Ajouté

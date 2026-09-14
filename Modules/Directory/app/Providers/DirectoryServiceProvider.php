@@ -65,6 +65,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\CheckLinksCommand::class,
             \Modules\Directory\Console\ResolveProductHuntUrlsCommand::class,
             \Modules\Directory\Console\EnrichTutorialsCommand::class,
+            \Modules\Directory\Console\ResyncVideoTitlesCommand::class,
             \Modules\Directory\Console\EnrichTutorialsSonarCommand::class,
             \Modules\Directory\Console\EnrichPendingCommand::class,
             \Modules\Directory\Console\EnrichMetadataCommand::class,
