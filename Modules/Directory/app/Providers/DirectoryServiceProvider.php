@@ -120,6 +120,12 @@ class DirectoryServiceProvider extends ServiceProvider
                 ->dailyAt('02:05')->timezone('America/Toronto')->withoutOverlapping()->runInBackground();
             $schedule->command('tools:audit-tutorials --fix --email=stephane@memora.ca')->dailyAt('06:00'); // alerte qualité quotidienne (langue FR/EN + pertinence) + auto-correction
             $schedule->command('resources:summarize-pending --batch=10')->dailyAt('05:30');
+            // Filet hebdomadaire (#2555, 2026-09-14) : la garde de langue d'EnrichTutorialsCommand
+            // empêche d'AJOUTER une vidéo étrangère, elle ne voit pas celles déjà en ligne ni les
+            // titres qu'un créateur modifie après coup. 25 appels d'API par passage, le dimanche
+            // à 03h15 Québec, hors de la fenêtre des autres tâches de l'annuaire.
+            $schedule->command('directory:resync-video-titles --apply --depublier-hors-langue')
+                ->weeklyOn(0, '03:15')->timezone('America/Toronto')->withoutOverlapping();
             $schedule->command('tools:discover-new')->dailyAt('04:00');
             $schedule->command('tools:reenrich-stale --batch=2 --months=3')->monthlyOn(1, '06:00');
             $schedule->command('tools:refresh-pricing --batch=5')->quarterly();

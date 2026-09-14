@@ -261,6 +261,26 @@ class YouTubeService
         return array_slice($scored, 0, 10);
     }
 
+    /**
+     * ACTION : la langue DÉCLARÉE par la vidéo est-elle acceptable pour un site francophone ?
+     * MCP: SELF (<5 lignes utiles)
+     * RAISON: mesuré le 2026-09-14 - 141 vidéos sur 1255 étaient déclarées en hindi, espagnol ou
+     * vietnamien, publiées sur laveille.ai. detectLanguage() ne connaît que fr et en : elle
+     * renvoie « en » pour du hindi, donc elle ne peut PAS servir de garde. Source unique de la
+     * règle, consommée par EnrichTutorialsCommand (garde en amont) et par
+     * ResyncVideoTitlesCommand (filet en aval) - deux copies finiraient par diverger, et une
+     * garde qui diverge de son filet laisse le passif se reconstituer.
+     *
+     * Une langue ABSENTE est acceptée : l'absence de déclaration n'est pas une preuve de langue
+     * étrangère, et refuser au doute écarterait des vidéos légitimes.
+     */
+    public static function languageIsAllowed(?string $apiLang): bool
+    {
+        $lang = strtolower(trim((string) $apiLang));
+
+        return $lang === '' || str_starts_with($lang, 'fr') || str_starts_with($lang, 'en');
+    }
+
     public static function detectLanguage(string $title, ?string $apiLang = null): string
     {
         // HAUTE PRÉCISION FR : un titre clairement français = vidéo française, même si

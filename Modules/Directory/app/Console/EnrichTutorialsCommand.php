@@ -107,6 +107,16 @@ class EnrichTutorialsCommand extends Command
                     continue;
                 }
 
+                // Garde de langue : sans elle, le flux nocturne repose chaque nuit des vidéos ni
+                // françaises ni anglaises, et le passif nettoyé le 2026-09-14 (141 vidéos) se
+                // reconstitue tout seul. La règle vit dans YouTubeService, jamais recopiée ici.
+                if (! \Modules\Directory\Services\YouTubeService::languageIsAllowed($tuto['api_lang'] ?? null)) {
+                    $this->line("  Langue écartée ({$tuto['api_lang']}) : {$videoId}");
+                    $totalSkipped++;
+
+                    continue;
+                }
+
                 if (ToolResource::where('video_id', $videoId)->exists()) {
                     $this->line("  Déjà existant : {$videoId}");
                     $totalSkipped++;

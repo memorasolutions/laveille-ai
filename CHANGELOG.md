@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.284.0] - 2026-09-14
+
+### Ajouté
+- **Garde de langue sur l'enrichissement nocturne** (#2555) : `tools:enrich-tutorials` refuse
+  désormais d'ajouter une vidéo dont la langue déclarée n'est ni le français ni l'anglais. Sans
+  elle, le flux de 05h00 reposait chaque nuit ce qui venait d'être nettoyé - **le passif se serait
+  reconstitué tout seul**.
+- **Filet hebdomadaire** : `directory:resync-video-titles --apply --depublier-hors-langue` le
+  dimanche à 03h15 Québec (07:15 UTC). La garde empêche d'AJOUTER, elle ne voit ni les vidéos déjà
+  en ligne, ni les titres qu'un créateur modifie après coup.
+- **`YouTubeService::languageIsAllowed()`** : la règle vit à UN seul endroit, consommée par la
+  garde en amont et par le filet en aval. Deux copies auraient divergé, et une garde qui diverge
+  de son filet laisse le passif revenir.
+
+  **Pourquoi une règle distincte de `detectLanguage()`** : celle-ci ne connaît que le français et
+  l'anglais, elle renvoie donc « en » pour du hindi. Elle ne pouvait pas servir de garde - c'est
+  précisément ce qui avait laissé passer les 141 vidéos. Un test verrouille ce point.
+
+### Résultats en production
+- 102 titres resynchronisés, dont les 37 titres français qui s'affichaient traduits en anglais.
+- 94 vidéos dépubliées (hindi, espagnol, vietnamien, allemand), identifiants consignés.
+- **1855 lignes intactes, aucune suppression.** 1687 ressources approuvées contre 1781 avant.
+- Vérifié à l'écran sur la fiche Perplexity : 12 tutoriels restants, tous français.
+
+### Vérification
+- 14 tests Pest verts (9 sur la commande, 5 sur la règle de langue).
+
 ## [1.283.0] - 2026-09-14
 
 ### Ajouté

@@ -99,7 +99,7 @@ class ResyncVideoTitlesCommand extends Command
                 // donc pas la signaler - ce compteur le fait, sans rien dépublier : ce que le site
                 // affiche est une décision éditoriale, pas une décision de commande.
                 $langueApi = strtolower((string) ($donnees['api_lang'] ?? ''));
-                if ($langueApi !== '' && ! str_starts_with($langueApi, 'fr') && ! str_starts_with($langueApi, 'en')) {
+                if (! YouTubeService::languageIsAllowed($langueApi)) {
                     $horsLangue++;
 
                     if (count($exemplesHorsLangue) < 15) {
