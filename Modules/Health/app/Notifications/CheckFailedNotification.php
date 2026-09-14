@@ -39,8 +39,20 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
     public function toMail(): MailMessage
     {
         $site = (string) (config('app.name') ?: config('app.url'));
-        $urgent = collect($this->results)->contains(fn ($result): bool => $result->status->equals(Status::failed()) || $result->status->equals(Status::crashed()));
-        $gravity = $urgent ? 'URGENT' : 'AVERTISSEMENT';
+        // TROIS etats, pas deux. La version precedente supposait que « pas en echec » valait
+        // « avertissement » - il existe un troisieme cas, `ok`, et il est arrive REELLEMENT : un
+        // controle vert a produit un courriel titre « approche d'une limite ». Une alerte qui
+        // annonce un probleme inexistant apprend au lecteur a ignorer toutes les suivantes.
+        $resultats = collect($this->results);
+        $urgent = $resultats->contains(fn ($result): bool => $result->status->equals(Status::failed()) || $result->status->equals(Status::crashed()));
+        $avertissement = $resultats->contains(fn ($result): bool => $result->status->equals(Status::warning()));
+        $toutVaBien = ! $urgent && ! $avertissement;
+
+        $gravity = match (true) {
+            $urgent => 'URGENT',
+            $avertissement => 'AVERTISSEMENT',
+            default => 'RETABLI',
+        };
 
         $mail = (new MailMessage)
             ->mailer('workspace')
@@ -49,10 +61,14 @@ class CheckFailedNotification extends \Spatie\Health\Notifications\CheckFailedNo
                 config('health.notifications.mail.from.name', config('mail.from.name'))
             )
             ->subject("[{$gravity}] Santé de {$site}")
-            ->line($urgent
-                ? 'Un contrôle de santé du site a échoué et demande une intervention rapide.'
-                : 'Un contrôle de santé du site approche d’une limite et doit être surveillé.')
-            ->line($this->phraseImpact($urgent))
+            ->line(match (true) {
+                $urgent => 'Un contrôle de santé du site a échoué et demande une intervention rapide.',
+                $avertissement => 'Un contrôle de santé du site approche d’une limite et doit être surveillé.',
+                default => 'Un contrôle de santé du site est revenu à la normale. Aucune action requise.',
+            })
+            ->line($toutVaBien
+                ? 'Ce message confirme un rétablissement : il n’y a rien à faire.'
+                : $this->phraseImpact($urgent))
             ->line('---')
             ->line('Détails techniques et marche à suivre :');
 

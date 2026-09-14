@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.275.1] - 2026-09-14
+
+### Corrigé
+- **L'alerte de santé annonçait un AVERTISSEMENT pour un contrôle au VERT** (#2566). Le fondateur a
+  reçu un courriel titré « Un contrôle de santé du site approche d'une limite et doit être
+  surveillé », dont le corps disait « API ProductHunt fonctionnelle ». L'alerte inventait un
+  problème inexistant, ce qui est pire que d'en exagérer un : elle apprend à ignorer les suivantes.
+
+  **Deux causes distinctes, corrigées toutes les deux.**
+
+  1. **Ce qui déclenchait l'envoi.** `RunHealthChecksCommand` de spatie/laravel-health décide
+     d'envoyer sur la PRÉSENCE d'un message de notification, jamais sur le statut, tant que
+     `health.notifications.only_on_failure` vaut false - ce qui est notre réglage. Le contrôle
+     faisait `$result->ok($message)` : un verdict vert portait donc un message, et postait un
+     courriel à chaque passage réussi. Il rend maintenant `ok()` sans message, le détail partant
+     dans `meta()` et dans le résumé court, qui ne déclenchent rien.
+  2. **Ce qui produisait le faux libellé.** La notification ne connaissait que deux états
+     (`urgent ? URGENT : AVERTISSEMENT`), en supposant que « pas en échec » valait
+     « avertissement ». Il en existe un troisième, `ok`. Trois cas désormais, dont un
+     « RÉTABLI » qui dit franchement « Aucune action requise ».
+
+  **La règle était déjà écrite dans le fichier d'à côté**, et c'est ce qui rend l'erreur instructive :
+  `OpenRouterCreditCheck` porte ce commentaire mot pour mot - « RunHealthChecksCommand filtre sur le
+  message, pas sur le statut ». Mesure des trois contrôles maison : OpcacheCheck rendait `ok()` sans
+  message 3 fois, OpenRouterCreditCheck 2 fois, et ProductHuntApiCheck était le SEUL à passer un
+  message. Les deux contrôles antérieurs suivaient la convention ; le plus récent s'en écartait.
+
+  **Le test ne vise donc pas que le fautif** : il balaie TOUS les contrôles de `Modules/Health/app/Checks/`
+  et refuse tout `->ok(` porteur d'un argument. Sans cela, le prochain contrôle écrit reproduirait
+  la même erreur - ce qui vient précisément d'arriver. Contre-épreuve faite : en réinjectant
+  `ok($message)`, deux tests virent au rouge, dont le balayage global.
+
 ## [1.275.0] - 2026-09-14
 
 ### Modifié

@@ -138,11 +138,22 @@ final class ProductHuntApiCheck extends Check
     {
         $result->meta(['cause' => $cause]);
 
+        // Un verdict VERT ne porte AUCUN message de notification, et c'est ce qui decide de tout :
+        // RunHealthChecksCommand filtre sur la PRESENCE d'un message, pas sur le statut, tant que
+        // `health.notifications.only_on_failure` reste a false. Poser un message ici envoyait donc
+        // un courriel a CHAQUE passage reussi - et ma notification, ne voyant aucun echec, le
+        // titrait « AVERTISSEMENT : approche d'une limite » pour annoncer que tout allait bien.
+        // La convention etait deja ecrite dans OpenRouterCreditCheck ; elle s'applique ici aussi.
+        // Le detail reste lisible par `meta()` et par le resume court, qui eux ne declenchent rien.
         $result = match ($statut) {
-            'ok' => $result->ok($message),
+            'ok' => $result->ok(),
             'warning' => $result->warning($message),
             default => $result->failed($message),
         };
+
+        if ($statut === 'ok') {
+            $result->meta(array_merge($result->meta, ['etat' => $message]));
+        }
 
         $result->shortSummary($resume);
 
