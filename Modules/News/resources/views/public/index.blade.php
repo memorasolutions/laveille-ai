@@ -94,6 +94,14 @@
             <p class="nw-page-intro">{{ __('Veille quotidienne - résumés structurés par intelligence artificielle') }}</p>
         @endif
 
+        {{-- Dossiers thématiques (2026-09-14) : sans ce lien, les pages de dossier seraient
+             orphelines - accessibles seulement par le plan de site, donc jamais par un lecteur. --}}
+        @if(Route::has('news.dossiers'))
+            <p style="margin: -0.75rem 0 1.25rem;">
+                <a href="{{ route('news.dossiers') }}">{{ __('Parcourir par dossier thématique') }}</a>
+            </p>
+        @endif
+
         {{-- Filtres --}}
         <div class="nw-filters">
             {{-- Recherche + tri --}}

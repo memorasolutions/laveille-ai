@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.280.0] - 2026-09-14
+
+### Ajouté
+- **Dossiers thématiques** (#2572, chantier AdSense) : `/actualites/dossiers` et
+  `/actualites/dossier/{slug}` réunissent les actualités qui portent sur une même entité. Les
+  entités étaient extraites depuis la veille (2117 rattachements, 311 fiches), mais **n'étaient
+  affichées à aucun visiteur** - cinquième occurrence du motif « le mécanisme existe, il n'a
+  jamais touché le passif ». Mesuré en production : **43 entités** atteignent le seuil.
+
+- **Seuil de 5 actualités, non négociable** : sous ce seuil, la page répond 404. Un dossier de deux
+  fiches EST la page mince que ce chantier cherche à supprimer - en publier remplacerait un
+  problème par le même problème, avec une URL indexable de plus.
+
+- **Un média n'est pas un sujet** : sur les 43 entités au-dessus du seuil, **8 étaient des médias**
+  (TechCrunch 21 fiches, The Verge 14, Wired 12, Reuters 7...). Un « dossier TechCrunch » aurait
+  réuni des actualités dont le seul point commun est le relayeur. Exclusion à deux étages -
+  liste éditoriale (`news.dossiers.medias_exclus`, 30 slugs) **et** nom des flux de `news_sources`,
+  parce que la détection dynamique seule n'attrapait que 2 des 8 (les flux ne portent pas le même
+  libellé que les entités).
+
+- **Dossiers voisins** en bas de page : les entités qui reviennent le plus souvent avec celle du
+  dossier. Sans elles, le lecteur venu d'un moteur trouve une impasse.
+
+- **Plan de site** : les dossiers y sont ajoutés, via le **même** `EntityDossierService` que le
+  contrôleur public. Recopier la règle l'aurait fait diverger, et le sitemap aurait fini par
+  annoncer à Google des pages en 404 - le défaut qui avait tué 244 redirections curatées (#2522).
+
+- **Lien de découverte** sur `/actualites` : sans lui, les dossiers n'étaient atteignables que par
+  le plan de site, donc par aucun lecteur.
+
+### Vérification
+- 10 tests Pest verts (seuil, fiches non publiées, fiches retirées, médias, flux, voisins, index).
+- Suite SEO complète relancée après modification du plan de site : 56 tests, 1028 assertions.
+
 ## [1.279.0] - 2026-09-14
 
 ### Ajouté

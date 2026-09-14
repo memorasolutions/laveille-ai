@@ -325,6 +325,23 @@ class SitemapController
             }
         }
 
+        // ACTION : dossiers thematiques (2026-09-14) - regroupement par entite nommee.
+        // MCP: SELF (<5 lignes utiles)
+        // RAISON: la liste vient de EntityDossierService, celui-la meme que le controleur public.
+        // Recopier la regle ici la ferait diverger, et le sitemap annoncerait des 404 a Google -
+        // le defaut qui a tue 244 redirections curatees (ticket #2522).
+        if (Route::has('news.dossiers') && class_exists(\Modules\News\Services\EntityDossierService::class)) {
+            $sitemap->add(Url::create(route('news.dossiers'))->setPriority(0.6)->setChangeFrequency('weekly'));
+
+            foreach (app(\Modules\News\Services\EntityDossierService::class)->dossiers() as $dossier) {
+                $sitemap->add(
+                    Url::create(route('news.dossier', $dossier->entity_slug))
+                        ->setPriority(0.5)
+                        ->setChangeFrequency('weekly')
+                );
+            }
+        }
+
         // Pages legales
         foreach (['legal.sales', 'legal.terms', 'legal.cookies', 'legal.privacy'] as $legalRoute) {
             if (Route::has($legalRoute)) {

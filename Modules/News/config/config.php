@@ -339,4 +339,34 @@ return [
         // (DRY porte sur la connaissance, pas sur la ressemblance de forme).
         'marqueurs_commerciaux_devises' => ['€', '$'],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dossiers thématiques (2026-09-14)
+    |--------------------------------------------------------------------------
+    | Un média n'est pas un sujet. Mesuré en production avant d'ouvrir les pages de dossier :
+    | sur les 43 entités qui atteignaient le seuil, 8 étaient des MÉDIAS (TechCrunch 21 fiches,
+    | The Verge 14, Wired 12, Reuters 7...). Un « dossier TechCrunch » aurait réuni 21 actualités
+    | dont le seul point commun est le relayeur - exactement la page creuse que ce chantier
+    | cherche à supprimer, avec en prime une URL indexable de plus.
+    |
+    | La détection dynamique (entité dont le slug est le nom d'un flux de news_sources) ne suffit
+    | pas : elle n'attrapait que 2 des 8, les flux ne portant pas le même libellé que les entités.
+    | Cette liste la COMPLÈTE, elle ne la remplace pas - le contrôleur applique les deux.
+    |
+    | Pour en ajouter un : le slug tel qu'il apparaît dans news_article_entities.entity_slug.
+    */
+    'dossiers' => [
+        'seuil_minimum' => 5,
+        'medias_exclus' => [
+            // Mesurés en production le 2026-09-14
+            'techcrunch', 'the-verge', 'wired', 'the-decoder', 'the-register',
+            'journal-du-net', 'lebigdata', 'reuters', 'the-information',
+            // Médias fréquents dans la veille, exclus par avance
+            'venturebeat', 'ars-technica', 'bloomberg', 'the-guardian', 'financial-times',
+            'business-insider', 'cnbc', 'axios', 'engadget', 'zdnet', 'numerama',
+            'siecle-digital', 'usine-digitale', 'frandroid', 'clubic', '01net',
+            'the-new-york-times', 'le-monde', 'les-echos', 'korben', 'developpez',
+        ],
+    ],
 ];

@@ -9,6 +9,7 @@ use Modules\News\Http\Controllers\Admin\ConcentreBuilderController;
 use Modules\News\Http\Controllers\Admin\NewsCompositionController;
 use Modules\News\Http\Controllers\Admin\VideoGoalBuilderController;
 use Modules\News\Http\Controllers\AdminNewsController;
+use Modules\News\Http\Controllers\EntityDossierController;
 use Modules\News\Http\Controllers\NewsSitemapController;
 use Modules\News\Http\Controllers\PublicNewsController;
 
@@ -24,6 +25,13 @@ Route::middleware('web')->group(function () {
     // nécessaire ici (préfixe différent), mais elle réutilise le même contrôleur et le même
     // rendu - elle ne fait qu'activer un filtre, jamais dupliquer l'index.
     Route::get('/verifications', [PublicNewsController::class, 'verifications'])->name('news.verifications')->middleware('cacheResponse:600');
+
+    // ── Dossiers thematiques (chantier AdSense, 2026-09-14) ──
+    // Regroupe les actualites qui partagent une entite nommee. Declarees AVANT /actualites/{slug}
+    // et /actualites/{id} : « dossiers » est un segment unique, la route slug l'avalerait et
+    // repondrait 301 vers /actualites - le meme defaut que les 244 redirections mortes du #2522.
+    Route::get('/actualites/dossiers', [EntityDossierController::class, 'index'])->name('news.dossiers')->middleware('cacheResponse:600');
+    Route::get('/actualites/dossier/{slug}', [EntityDossierController::class, 'show'])->where('slug', '[a-z0-9\-]+')->name('news.dossier')->middleware('cacheResponse:600');
 
     // Redirect 301 : anciennes URLs /actualites/{id} → /actualites/{slug}
     Route::get('/actualites/{id}', function (string $id) {
