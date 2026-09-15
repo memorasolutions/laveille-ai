@@ -122,6 +122,14 @@
             }
             /* S83 #224 : data-tooltip-pos=bottom géré désormais via JS (recalcul dynamique top + flip) */
             /* Mobile : tooltip plus compact + cliquable pour persister */
+            /* WCAG 2.2 - 1.4.13 « Dismissible » : l'attribut est posé par la touche Échap, pour
+               fermer l'infobulle SANS déplacer le pointeur ni le focus. Il est retiré dès que
+               l'utilisateur revient sur le lien, sinon l'infobulle resterait morte pour toujours. */
+            a.glossary-link[data-tt-dismissed]::after,
+            a.glossary-link[data-tt-dismissed]::before {
+                opacity: 0 !important;
+                visibility: hidden !important;
+            }
             @media (max-width: 640px) {
                 a.glossary-link::after {
                     max-width: 260px;
@@ -226,6 +234,30 @@
             window.addEventListener('resize', () => {
                 document.querySelectorAll('a.glossary-link[data-tt-bound]').forEach(positionTooltip);
             }, { passive: true });
+
+            // WCAG 2.2 - 1.4.13 « Dismissible » : Échap ferme l'infobulle visible.
+            document.addEventListener('keydown', function (event) {
+                if (event.key !== 'Escape') return;
+
+                const link = document.querySelector('a.glossary-link:hover, a.glossary-link:focus-visible');
+                if (!link) return;
+
+                // Ni preventDefault ni stopPropagation : le méga-menu écoute aussi Échap, et le
+                // priver de la touche casserait une fonction plus visible que celle qu'on corrige.
+                link.setAttribute('data-tt-dismissed', '1');
+            });
+
+            function reactiverInfobulle(event) {
+                // closest() et non matches() : le lien peut contenir une balise imbriquée, la cible
+                // serait alors l'enfant et le lien ne serait jamais réactivé.
+                const link = event.target instanceof Element ? event.target.closest('a.glossary-link') : null;
+                if (link) link.removeAttribute('data-tt-dismissed');
+            }
+
+            // Capture obligatoire : mouseenter et focus ne remontent pas, la délégation depuis
+            // document ne les verrait jamais en phase de bouillonnement.
+            document.addEventListener('mouseenter', reactiverInfobulle, true);
+            document.addEventListener('focus', reactiverInfobulle, true);
         })();
         </script>
         {{-- 2026-07-25 #1350 : Mode Glossaire (toggle actif/désactivé), persistant localStorage,

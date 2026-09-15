@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.285.0] - 2026-09-14
+
+### Ajouté
+- **Échap ferme l'infobulle de glossaire** (#2530) : critère WCAG 2.2 - 1.4.13 « Dismissible »,
+  de niveau AA, qui manquait. Une infobulle en CSS pur ne peut pas se fermer au clavier ; le
+  lecteur qui la trouvait gênante n'avait aucun moyen de l'écarter sans bouger la souris.
+
+  **Le Reverse-Glossaire n'était PAS à construire : il existe depuis mai 2026.** Le linkifier pose
+  déjà `data-tooltip` avec la définition sur chaque terme lié, rendue en CSS pur, avec
+  positionnement anti-débordement, délai de 200 ms, `:focus-visible` pour le clavier et respect de
+  `prefers-reduced-motion`. Sixième fois aujourd'hui que le mécanisme cherché était déjà là.
+
+  Deux points que le correctif traite explicitement : ni `preventDefault` ni `stopPropagation` sur
+  Échap, parce que le méga-menu écoute la même touche et le priver casserait une fonction plus
+  visible ; et `closest()` plutôt que `matches()` pour réactiver l'infobulle, sinon un terme
+  contenant une balise imbriquée resterait muet pour toujours.
+
+### Vérification
+- 76 tests du glossaire verts, 16 tests de rendu public verts.
+
 ## [1.284.0] - 2026-09-14
 
 ### Ajouté
