@@ -34,6 +34,20 @@ jamais toute seule**, même avec une date : elle attend qu'un humain l'approuve.
 défaut, c'est un garde-fou - mais il faut le DIRE à Stéphane, plutôt que de le laisser découvrir
 que rien n'est parti. Pour une publication qui doit partir seule, ce canal ne convient pas.
 
+### Une fois approuvée, elle part SEULE
+
+L'approbation du client est la seule étape humaine. Passé ce point, la publication part **toute
+seule à l'heure prévue**, sans aucun geste au moment de l'envoi. Conditions exactes mesurées :
+non refusée, date atteinte, approbation obtenue, statut `scheduled` ou `approved`.
+
+### Vérifier une capacité, jamais la déduire
+
+**Appelle `whoami` avant de promettre quoi que ce soit.** Il renvoie les capacités réelles sans
+exposer le secret. **Ne déduis JAMAIS une capacité du fait qu'une autre fonctionne** : lire ne dit
+rien sur le droit d'écrire. Et la vérification de capacité a lieu AVANT la simulation, donc un
+`dry_run` renvoie le même 403 - une simulation qui échoue ne prouve pas que le contenu est mauvais,
+seulement que le jeton ne porte pas le droit.
+
 ### Deux pièges de LECTURE, mesurés, qui induisent en erreur
 
 1. **Les suppressions douces rendent un enregistrement INVISIBLE alors qu'il existe.** Le
@@ -81,6 +95,20 @@ médias communs pour ce réseau, il ne s'y ajoute pas.
 cette API, pour aucune ressource** : ce n'est pas une permission mal réglée, c'est une absence
 d'endpoint. Impossible de casser un rattachement de page Facebook, même par erreur - ce qui
 compte, puisque toutes les pages clientes partent du compte personnel de Stéphane.
+
+### ⚠ EXCEPTION laveille.ai : PAS de premier commentaire sur LinkedIn
+
+La documentation générale du portail dit « LinkedIn : lien en premier commentaire ». **C'est la
+règle pour les pages CLIENTES, elle ne s'applique PAS à laveille.ai.**
+
+Décision de Stéphane du 2026-09-11, qui prime : sur laveille.ai, le lien court **et** le code QR
+vivent sur la **dernière diapositive du carrousel**. Il n'y a **AUCUN premier commentaire** sur
+LinkedIn. Motif mesuré : les hyperliens d'un PDF sont inertes dans la visionneuse LinkedIn, le code
+QR est donc le seul élément réellement actionnable, et le commentaire porteur d'un lien est mal
+classé jusqu'à 80 % du temps.
+
+Le texte doit en revanche DIRE où se trouve le lien (« sur la dernière diapositive »), sinon le
+lecteur ignore qu'il existe une sortie. C'est le seul panneau indicateur du dispositif.
 
 ### Rédaction : jamais les mêmes mots sur trois réseaux
 
