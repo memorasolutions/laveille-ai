@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.287.7] - 2026-09-15
+
+### Corrigé
+- **Le service worker servait des feuilles de style et des scripts périmés à tout visiteur déjà
+  venu sur le site** (#2590). C'est la cause racine de #2588, et elle dépasse largement le menu.
+
+  Le service worker se terminait par `setDefaultHandler(new NetworkFirst())`. Ce gestionnaire
+  captait donc **toute** requête sans route explicite - dont `/css/` et `/js/` - et les rangeait
+  dans son cache runtime, un cache **sans nom dédié et sans aucune expiration**. Mesuré en
+  production : ce cache contenait **quatre versions de `charte.css` en même temps**, dont une de
+  64 451 octets antérieure au correctif de typographie.
+
+  Conséquence : la page appliquait une feuille périmée alors que le serveur, lui, répondait
+  correctement. Trois voies indépendantes - `curl`, un `fetch` sans cache, et l'interception
+  réseau du navigateur - renvoyaient toutes le fichier à jour. Le défaut était entièrement côté
+  navigateur, invisible à tout contrôle serveur.
+
+  Deux correctifs de typographie de suite ont échoué pour cette raison (v1.287.3 puis v1.287.6) :
+  **le CSS était juste et bien déployé, il n'atteignait simplement pas le navigateur.**
+
+  Correctif en deux volets, parce que fermer la source ne vide pas le passif :
+  - `/css/` et `/js/` passent désormais en `NetworkOnly`, comme le faisaient déjà `/admin`,
+    `/livewire/` et les requêtes externes. Ces fichiers portent déjà un `?v=` dérivé de la version
+    et un `Cache-Control` de 30 jours : le cache HTTP du navigateur suffit, et la couche
+    applicative ne faisait que retenir des versions mortes.
+  - À l'activation, le service worker **purge les entrées `/css/` et `/js/` déjà stockées** chez
+    les visiteurs. Sans cette purge, elles n'auraient jamais expiré, faute d'expiration configurée.
+
+### Ce que ce défaut apprend
+Un correctif peut être **juste, testé, déployé et servi**, et ne toucher personne. Entre le serveur
+et l'écran, il y a une couche qui peut décider de servir autre chose. Les contrôles employés
+jusqu'ici - la règle est-elle dans le fichier, le fichier est-il servi - portaient tous sur le
+serveur, et aucun ne pouvait voir ce défaut.
+
+Le seul contrôle qui l'a attrapé : **lire la valeur calculée dans le navigateur**. C'est aussi
+celui qui, appliqué plus tôt, aurait évité deux livraisons pour rien.
+
+### Corrigé dans l'entrée 1.287.6 ci-dessous
+Elle affirmait « mesuré après correction : les cinq items en DM Sans ». **C'était faux** : la
+mesure en production montrait encore « Accueil » et « Livres » en Futura PT. La règle livrée était
+pourtant la bonne - c'est le service worker qui l'empêchait d'arriver.
+
 ## [1.287.6] - 2026-09-15
 
 ### Corrigé

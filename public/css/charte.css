@@ -1689,7 +1689,8 @@ article h3 {
    police ». claude.ai mesure que Futura PT n'habillait que 15 éléments sur environ 360 : un
    orphelin, pas une direction artistique.
 
-   La taille de 16 px ne bouge PAS : on ne change qu'une variable à la fois. */
+   La taille de 16 px ne bouge PAS : on ne change qu'une variable à la fois.
+
    CORRECTIF DU CORRECTIF (#2588, même jour) : sans `!important`, cette règle ne prenait QUE sur les
    <button>. Le thème impose « Futura PT » aux <a> de la barre par une règle plus spécifique, si bien
    que la v1.287.3 laissait « Accueil » et « Livres » en Futura PT pendant que les trois autres
@@ -1782,7 +1783,8 @@ button[aria-expanded="true"] .lv-mega-chevron {
 
    Les !important sont nécessaires pour la même raison que ceux de la règle ci-dessus : le thème
    pose `position: relative` sur les <li> de la barre avec une spécificité supérieure. Vérifié :
-   sans eux, la règle est ignorée et le <li> reste `relative`. */
+   sans eux, la règle est ignorée et le <li> reste `relative`.
+
    CORRIGÉ LE MÊME JOUR (#2589), APRÈS UNE RÉGRESSION QUE J'AVAIS LIVRÉE. Le premier correctif
    ancrait le panneau au .container avec `right: 0`. Le débordement disparaissait bien, mais le
    panneau se collait au bord droit du conteneur QUELLE QUE SOIT la position de son déclencheur :

@@ -29,6 +29,24 @@ precacheAndRoute(self.__WB_MANIFEST);
 // générique "POST -> background sync" plus bas, qui la mettait en file d'attente
 // pour rejeu automatique en cas d'échec réseau (jamais l'intention voulue pour
 // ces requêtes). On enregistre donc chaque exclusion pour GET et POST.
+// LES FEUILLES ET SCRIPTS DU SITE NE PASSENT PLUS PAR LE CACHE DU SERVICE WORKER (#2590).
+// Mesuré en production le 2026-09-15 : le cache runtime contenait QUATRE versions de
+// /css/charte.css en même temps, dont une d'avant le correctif. La page appliquait donc une
+// feuille périmée alors que le réseau servait la bonne - vérifié par trois voies indépendantes
+// (curl, fetch no-store, interception réseau) qui renvoyaient toutes le fichier à jour.
+//
+// C'est ce qui a fait échouer DEUX correctifs de typographie de suite (v1.287.3 et v1.287.6) :
+// le CSS était juste et bien déployé, il n'atteignait simplement pas le navigateur. Et rien ne
+// pouvait le révéler côté serveur, puisque le serveur, lui, répondait correctement.
+//
+// Ces fichiers portent déjà un cache-bust `?v=` dérivé de la version ET un `Cache-Control`
+// de 30 jours : le cache HTTP du navigateur assure la relecture hors ligne. Une couche de cache
+// applicative par-dessus n'ajoute donc rien - elle ne fait que retenir des versions mortes,
+// sans limite d'ancienneté et sans aucun signal. La règle vaut pour TOUT visiteur déjà venu,
+// pas seulement pour le menu qui a servi à découvrir le défaut.
+const isSiteStylesheetOrScript = ({ url }) =>
+    url.pathname.startsWith('/css/') || url.pathname.startsWith('/js/');
+
 const isAdminRequest = ({ url }) => url.pathname.startsWith('/admin');
 const isLivewireRequest = ({ url }) => url.pathname.startsWith('/livewire/');
 const isCrossOriginRequest = ({ url }) => url.origin !== self.location.origin;
@@ -37,6 +55,7 @@ for (const method of ['GET', 'POST']) {
     registerRoute(isAdminRequest, new NetworkOnly(), method);
     registerRoute(isLivewireRequest, new NetworkOnly(), method);
     registerRoute(isCrossOriginRequest, new NetworkOnly(), method);
+    registerRoute(isSiteStylesheetOrScript, new NetworkOnly(), method);
 }
 
 // --- Stratégies de cache runtime ---
@@ -133,6 +152,30 @@ self.addEventListener('notificationclick', (event) => {
             }
             return clients.openWindow(url);
         })
+    );
+});
+
+// PURGE DU PASSIF DÉJÀ STOCKÉ CHEZ LES VISITEURS (#2590).
+// Fermer la source ne vide pas ce qui est déjà en cache : sans cette purge, un visiteur déjà
+// venu garderait ses feuilles périmées jusqu'à ce qu'une expiration les retire - or le handler
+// par défaut n'en avait aucune, donc jamais. On retire uniquement les entrées /css/ et /js/ des
+// caches du service worker ; aucune autre entrée n'est touchée, et aucune donnée utilisateur ne
+// vit dans ces caches (ce sont des fichiers statiques publics, rechargés au prochain accès).
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        (async () => {
+            for (const nom of await caches.keys()) {
+                const cache = await caches.open(nom);
+
+                for (const requete of await cache.keys()) {
+                    const chemin = new URL(requete.url).pathname;
+
+                    if (chemin.startsWith('/css/') || chemin.startsWith('/js/')) {
+                        await cache.delete(requete);
+                    }
+                }
+            }
+        })()
     );
 });
 
