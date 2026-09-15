@@ -1853,3 +1853,15 @@ button[aria-expanded="true"] .lv-mega-chevron {
         box-shadow: inset 0 -3px 0 var(--c-primary, #064E5A) !important;
     }
 }
+
+/* CORRECTIF IMMÉDIAT (#2591) : le <li> doit cesser d'être le repère de positionnement.
+   Retirer `style="position:relative;"` du gabarit ne suffisait PAS - le thème pose la même
+   déclaration en feuille de style (`.wpo-site-header #navbar li { position: relative; }`), si bien
+   que `left:0;right:0` s'étendait sur la largeur du BOUTON : le panneau est tombé à 80 px de large,
+   mesuré en production juste après la livraison. Le repère redevient le .container, qui est déjà
+   en position relative, et le panneau retrouve la largeur du contenu de la page. */
+@media (min-width: 992px) {
+    .wpo-site-header .navigation .navbar-nav > li.has-mega-menu {
+        position: static !important;
+    }
+}
