@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.288.3] - 2026-09-15
+
+### Corrigé
+- **Au téléphone, trois entrées du menu sur cinq étaient illisibles** (#2592). Mesuré en production
+  à 390 px, tiroir ouvert : « Outils », « Annuaire » et « Apprendre » s'affichaient en `#232F4B`
+  sur le fond sombre `#30313C`, soit un contraste de **1,03:1**. Le minimum AA est 4,5:1 et la
+  charte du projet exige AAA. Leurs voisins « Accueil » et « Livres » étaient en blanc, lisibles.
+
+  La cause est une règle sans media query : `.lv-mega-declencheur { color: rgb(35,47,75); }` vise
+  la barre de bureau, où le fond est blanc, et s'appliquait aussi au tiroir mobile. Un `<a>`
+  héritait de la couleur du tiroir ; un `<button>` ne le fait pas.
+
+  Introduit par la v1.275.0, hier : le passage des méga-menus au clic a remplacé des `<a>` par des
+  `<button>`. Contraste après correction, vérifié avant livraison : **12,88:1, AAA**.
+
+### Le vrai coût, et il vaut d'être écrit
+J'ai passé la journée entière sur ces menus - cinq versions livrées - en mesurant à 1024, 1280 et
+1440 px. **Jamais au téléphone.** Un défaut d'accessibilité majeur est resté en production plus de
+vingt-quatre heures parce qu'aucun de mes contrôles ne descendait sous le point de rupture, alors
+que c'est précisément là que le composant change de comportement.
+
+C'est la même erreur que la veille, en miroir : j'avais alors mesuré la typographie à 1024 px, la
+seule largeur où ce défaut-là n'existait pas. **Un composant qui change sous media query doit être
+vérifié des deux côtés de son point de rupture, sans exception.**
+
 ## [1.288.2] - 2026-09-15
 
 ### Modifié

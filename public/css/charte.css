@@ -1865,3 +1865,29 @@ button[aria-expanded="true"] .lv-mega-chevron {
         position: static !important;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════
+   SECTION 24 - Menu du TÉLÉPHONE : les déclencheurs redeviennent lisibles (#2592)
+   ═══════════════════════════════════════════════════════════════════════════════════════════════
+
+   Mesuré en production à 390 px, tiroir ouvert : « Outils », « Annuaire » et « Apprendre »
+   s'affichaient en #232F4B sur le fond sombre #30313C du tiroir. Contraste **1,03:1** - le texte
+   était pratiquement invisible. Leurs voisins « Accueil » et « Livres », qui sont des <a>, étaient
+   en blanc et parfaitement lisibles. Trois entrées sur cinq, donc, illisibles au téléphone.
+
+   La cause est une règle sans media query : `.lv-mega-declencheur { color: rgb(35,47,75); }` vise
+   la barre de BUREAU, où le fond est blanc, mais s'applique aussi au tiroir mobile.
+
+   Introduit par la v1.275.0 du 2026-09-14, quand les méga-menus sont passés au clic et que des
+   <a> sont devenus des <button>. Un <a> héritait de la couleur du tiroir ; un <button> ne le fait
+   pas, puisque cette règle lui impose la sienne.
+
+   CE QUE ÇA APPREND, et c'est le vrai coût : j'ai passé la journée entière sur ces menus, à
+   mesurer à 1024, 1280 et 1440 px. Jamais au téléphone. Un défaut d'accessibilité majeur est resté
+   en production plus de 24 heures parce que mes contrôles ne descendaient jamais sous le point de
+   rupture. Vérifié avant livraison : 12,88:1, AAA. */
+@media (max-width: 991.98px) {
+    .wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
+        color: #fff !important;
+    }
+}
