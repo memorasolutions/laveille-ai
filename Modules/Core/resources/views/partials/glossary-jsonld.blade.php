@@ -254,10 +254,12 @@
                 if (link) link.removeAttribute('data-tt-dismissed');
             }
 
-            // Capture obligatoire : mouseenter et focus ne remontent pas, la délégation depuis
-            // document ne les verrait jamais en phase de bouillonnement.
-            document.addEventListener('mouseenter', reactiverInfobulle, true);
-            document.addEventListener('focus', reactiverInfobulle, true);
+            // mouseover et focusin, et NON mouseenter/focus : ces deux-là ne remontent pas, et la
+            // capture depuis document ne les a pas rattrapés non plus - mesuré en production le
+            // 2026-09-14, l'infobulle fermée par Échap ne revenait jamais. mouseover et focusin
+            // bouillonnent, ils sont faits pour la délégation.
+            document.addEventListener('mouseover', reactiverInfobulle);
+            document.addEventListener('focusin', reactiverInfobulle);
         })();
         </script>
         {{-- 2026-07-25 #1350 : Mode Glossaire (toggle actif/désactivé), persistant localStorage,

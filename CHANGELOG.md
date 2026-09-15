@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.285.1] - 2026-09-14
+
+### Corrigé
+- **L'infobulle fermée par Échap ne revenait jamais** (#2530). Mon correctif de v1.285.0 réactivait
+  l'infobulle sur `mouseenter` et `focus` en phase de capture. Mesuré en production : ces deux
+  événements ne remontent pas, et la capture depuis `document` ne les rattrape pas davantage -
+  l'attribut restait posé, l'infobulle était morte pour de bon sur ce terme.
+
+  Remplacés par `mouseover` et `focusin`, qui bouillonnent et sont faits pour la délégation.
+  Défaut invisible aux tests : il fallait fermer l'infobulle À L'ÉCRAN puis revenir dessus.
+
 ## [1.285.0] - 2026-09-14
 
 ### Ajouté
