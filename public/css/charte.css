@@ -1887,6 +1887,15 @@ button[aria-expanded="true"] .lv-mega-chevron {
    en production plus de 24 heures parce que mes contrôles ne descendaient jamais sous le point de
    rupture. Vérifié avant livraison : 12,88:1, AAA. */
 @media (max-width: 991.98px) {
+    .wpo-site-header .navigation .navbar-nav > li > a,
+    .wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
+        /* Même retrait à gauche pour les cinq : sans cela, les <a> (padding 10 px) s'alignaient
+           6 px plus à droite que les <button> (padding 6 px), et les entrées du tiroir formaient un
+           escalier. L'unification livrée plus tôt ne couvrait que le bureau. */
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
     .wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
         color: #fff !important;
     }
