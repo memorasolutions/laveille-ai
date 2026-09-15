@@ -48,9 +48,18 @@
         'ad_personalization': 'denied'
       });
       gtag('js', new Date());
+      {{-- 2026-09-15 (#2583) : marque le trafic de l'ÉQUIPE comme interne, mécanisme officiel de
+           Google Analytics (`traffic_type`), que le filtre de données « Internal Traffic » exclut
+           des rapports une fois passé de « test » à « actif » dans l'interface.
+
+           Motif mesuré ce jour-là : la page de liste des actualités affichait 99 sessions... pour
+           SIX personnes, dont une seule générant 17 sessions. Des décisions de produit ont été
+           prises sur ce bruit. Ceci en retire la part authentifiée ; le trafic de l'équipe NON
+           connectée demande en plus une règle par adresse IP, posée dans l'interface. --}}
       gtag('config', '{{ config('services.ga.measurement_id') }}', {
         'anonymize_ip': true,
-        'send_page_view': true
+        'send_page_view': true,
+        'traffic_type': '{{ auth()->check() && auth()->user()->hasRole(['admin', 'super_admin']) ? 'internal' : 'external' }}'
       });
       function updateGtagConsent(granted) {
         var status = granted ? 'granted' : 'denied';

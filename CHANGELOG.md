@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.287.1] - 2026-09-15
+
+### Corrigé
+- **Le trafic de l'équipe comptait comme de l'audience** (#2583). L'appel `gtag('config', ...)`
+  porte désormais le paramètre officiel `traffic_type`, mis à `internal` pour un utilisateur
+  connecté ayant le rôle `admin` ou `super_admin`, et à `external` pour tous les autres.
+
+  Mesure qui a déclenché le correctif : la page de liste des actualités affichait **99 sessions
+  pour SIX personnes réelles**, dont une seule qui en générait 17 à elle seule. Le constructeur de
+  prompts affichait 182 sessions pour 79 personnes. Des décisions de produit avaient été prises sur
+  ces chiffres.
+
+  **Ce correctif ne suffit pas seul** : il ne capte que la part AUTHENTIFIÉE du bruit. Le trafic de
+  l'équipe navigant déconnectée demande en plus une règle par adresse IP, à poser dans l'interface
+  d'administration de Google Analytics, et le filtre de données « Internal Traffic » doit y être
+  passé de « test » à « actif » pour que l'exclusion s'applique réellement aux rapports.
+
+### Tests
+Nouveau fichier `TraficInterneAnalyticsTest.php`, 4 tests dont deux gardes de frontière : un
+utilisateur connecté SANS rôle d'équipe reste compté comme externe (l'exclure serait pire que le
+défaut corrigé), et un contrôle négatif sans identifiant de mesure prouve que les autres tests ne
+passent pas sur un bloc toujours présent.
+
 ## [1.287.0] - 2026-09-15
 
 ### Ajouté
