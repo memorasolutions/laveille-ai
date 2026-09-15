@@ -1804,3 +1804,52 @@ button[aria-expanded="true"] .lv-mega-chevron {
         max-width: calc(100vw - 3rem);
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════
+   SECTION 23 - Barre de navigation : UN SEUL composant, et méga-menus pleine largeur (#2591)
+   ═══════════════════════════════════════════════════════════════════════════════════════════════
+
+   Stéphane, trois fois : « le menu est encore dégueulasse, pas très pro ». Les deux premières fois
+   j'ai corrigé un symptôme et déclaré réglé sur une MESURE (débordement nul, police unifiée), sans
+   jamais juger l'ASPECT. Panel de 4 oracles (Perplexity indisponible, son navigateur était occupé) :
+   ChatGPT, Gemini, claude.ai et DeepSeek placent tous en tête la même chose - l'incohérence de la
+   barre elle-même, visible AVANT même d'ouvrir un menu.
+
+   Mesuré à 1280 px, et c'est exactement ce que son oeil voyait depuis le début :
+       Accueil et Livres (<a>)                 18 px, padding 10 px, hauteur 63 px
+       Outils, Annuaire, Apprendre (<button>)  16 px, padding  6 px, hauteur 60 px
+   Deux tailles, deux paddings, deux hauteurs. Ma correction précédente n'avait unifié que la
+   POLICE, et je l'avais vérifiée à 1024 px - une largeur où la règle du thème ne s'applique pas,
+   donc où le défaut N'EXISTE PAS. J'ai mesuré là où il n'y avait rien à voir.
+
+   claude.ai a tiré le fil le plus fin : 60 px contre 63 px, c'est aussi une ligne de base brisée,
+   « exactement ce qu'un oeil non technique appelle décalé ». Le grief portait donc sur la barre
+   autant que sur les panneaux. */
+@media (min-width: 992px) {
+    .wpo-site-header .navigation .navbar-nav > li > a,
+    .wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
+        font-size: 16px !important;
+        line-height: 24px !important;
+        padding: 18px 12px !important;
+    }
+}
+
+/* Le panneau couvre toute la largeur du conteneur, et cesse d'être un problème d'alignement.
+   3 oracles sur 4 (ChatGPT, Gemini, claude.ai) : ancrer au CONTENEUR, pas au déclencheur. Un bloc
+   de 780 px qui se déplaçait selon la largeur de fenêtre « ressemble à un bogue ».
+
+   Ce choix supprime la contradiction qui a coûté quatre livraisons : un panneau large ne pouvait
+   pas être à la fois collé à son bouton et dans l'écran. Pleine largeur, il n'y a plus rien à
+   arbitrer - ni débordement, ni décalage, ni décalage calculé en JavaScript.
+
+   DeepSeek défendait seul l'ancrage au déclencheur. Son argument est retenu, et c'est la règle
+   ci-dessous : le lien visuel avec le bouton doit survivre. Il est maintenant porté par un état
+   actif franc sur le déclencheur ouvert, plutôt que par la position du panneau. */
+@media (min-width: 992px) {
+    .wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur[aria-expanded="true"] {
+        color: var(--c-primary, #064E5A) !important;
+        background: var(--c-primary-light, #F0FAFB) !important;
+        border-radius: 8px 8px 0 0 !important;
+        box-shadow: inset 0 -3px 0 var(--c-primary, #064E5A) !important;
+    }
+}

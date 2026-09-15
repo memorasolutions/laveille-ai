@@ -12,8 +12,8 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 287;
-$lvPatch = 8;
+$lvMinor = 288;
+$lvPatch = 0;
 
 return [
     'major' => $lvMajor,

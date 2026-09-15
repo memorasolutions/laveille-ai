@@ -65,16 +65,16 @@
                             <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>
 
                             {{-- 1. OUTILS — mega 4 groupes (Productivité / Création / Détente / Pratique) — #200 fusion ancien Jouer + outils gratuits --}}
-                            <li class="menu-item-has-children has-mega-menu" x-data="megaMenu('outils')" style="position:relative;">
+                            <li class="menu-item-has-children has-mega-menu" x-data="megaMenu('outils')">
                                 <button type="button" class="lv-mega-declencheur" x-ref="bouton" @click="toggle()" :aria-expanded="open" aria-controls="lv-mega-outils">{{ __('Outils') }}<span class="lv-mega-chevron" aria-hidden="true">&#9662;</span></button>
                                 <div x-show="open" x-ref="panneau" id="lv-mega-outils" x-cloak x-transition.opacity.duration.100ms
-                                    style="position:absolute;left:0;top:100%;width:780px;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:28px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
+                                    style="position:absolute;left:0;right:0;top:100%;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:28px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
                                     @click.outside="close()"
                                     aria-label="{{ __('Menu Outils') }}">
                                     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px;">
                                         {{-- Productivité --}}
                                         <div>
-                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">💡 {{ __('Productivité') }}</div>
+                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Productivité') }}</div>
                                             <a href="{{ url('/outils/brain-dump') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🧠</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Brain Dump 2026') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('10 min papier + IA = clarté') }}</div></div>
@@ -96,7 +96,7 @@
                                         </div>
                                         {{-- Création --}}
                                         <div>
-                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">🎨 {{ __('Création') }}</div>
+                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Création') }}</div>
                                             <a href="{{ url('/outils/mots-croises') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🔤</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Générateur de mots croisés') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Grilles personnalisées + PDF') }}</div></div>
@@ -114,7 +114,7 @@
                                         </div>
                                         {{-- Détente --}}
                                         <div>
-                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">🎲 {{ __('Détente') }}</div>
+                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Détente') }}</div>
                                             <a href="{{ url('/outils/sudoku') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🧩</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Sudoku quotidien') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Nouvelle grille chaque jour') }}</div></div>
@@ -130,7 +130,7 @@
                                         </div>
                                         {{-- Pratique --}}
                                         <div>
-                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">⚙️ {{ __('Pratique') }}</div>
+                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Pratique') }}</div>
                                             {{-- #v1.237.8 : deux outils fiscaux DISTINCTS (Tool#8 calculatrice-taxes, Tool#15 simulateur-fiscal) —
                                                  une seule entrée conflait les deux (libellé calculatrice, lien simulateur), laissant la
                                                  calculatrice sans entrée de menu propre. Voir docs/HISTORIQUE-VERSIONS.md. --}}
@@ -174,19 +174,19 @@
 
                             {{-- 2. ANNUAIRE — mega option b (fiches stars data-driven GA4) — #200 NEW top-level --}}
                             @if(Route::has('directory.index'))
-                            <li class="menu-item-has-children has-mega-menu" x-data="megaMenu('annuaire')" style="position:relative;">
+                            <li class="menu-item-has-children has-mega-menu" x-data="megaMenu('annuaire')">
                                 <button type="button" class="lv-mega-declencheur" x-ref="bouton" @click="toggle()" :aria-expanded="open" aria-controls="lv-mega-annuaire">{{ __('Annuaire') }}<span class="lv-mega-chevron" aria-hidden="true">&#9662;</span></button>
                                 <div x-show="open" x-ref="panneau" id="lv-mega-annuaire" x-cloak x-transition.opacity.duration.100ms
                                     {{-- 2026-09-15 (#2589) : left:0 comme ses deux voisins. Ce panneau portait `left:-150px`,
                                          un décalage saisi à la main pour le faire tenir à l'écran, qui le détachait
                                          visuellement de son déclencheur. Le recadrage automatique de mega-menu.js
                                          s'occupe désormais du débordement, sans jamais rompre cet ancrage. --}}
-                                    style="position:absolute;left:0;top:100%;width:560px;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:24px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
+                                    style="position:absolute;left:0;right:0;top:100%;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:24px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
                                     @click.outside="close()"
                                     aria-label="{{ __('Menu Annuaire') }}">
                                     <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px;">
                                         <div>
-                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">⭐ {{ __('Top consultés') }}</div>
+                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Top consultés') }}</div>
                                             @foreach($directoryStars as $star)
                                             <a href="{{ url('/annuaire/'.$star['slug']) }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🔧</span>
@@ -195,7 +195,7 @@
                                             @endforeach
                                         </div>
                                         <div>
-                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">🧭 {{ __('Navigation') }}</div>
+                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Navigation') }}</div>
                                             <a href="{{ route('directory.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">🔍</span>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Tous les outils') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ $directoryCount }} {{ __('avec avis + tutos') }}</div></div>
@@ -226,7 +226,7 @@
                             @endif
 
                             {{-- 3. APPRENDRE — mega Blog + Glossaire + Actualités + FAQ — #200 fusionne ancien Apprendre+Ressources --}}
-                            <li class="menu-item-has-children has-mega-menu" x-data="megaMenu('apprendre')" style="position:relative;">
+                            <li class="menu-item-has-children has-mega-menu" x-data="megaMenu('apprendre')">
                                 <button type="button" class="lv-mega-declencheur" x-ref="bouton" @click="toggle()" :aria-expanded="open" aria-controls="lv-mega-apprendre">{{ __('Apprendre') }}<span class="lv-mega-chevron" aria-hidden="true">&#9662;</span></button>
                                 <div x-show="open" x-ref="panneau" id="lv-mega-apprendre" x-cloak x-transition.opacity.duration.100ms
                                     {{-- 2026-09-15 (#2589) : left:0 comme ses deux voisins. Ce panneau portait `right:0`,
@@ -234,12 +234,12 @@
                                          gauche : à 1024 px il commençait à -48, soit hors écran. Les trois panneaux
                                          avaient TROIS stratégies différentes (left:0, left:-150px, right:0), chacune
                                          réglée à la main. C'est ce désalignement que Stéphane voyait. --}}
-                                    style="position:absolute;left:0;top:100%;width:640px;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:24px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
+                                    style="position:absolute;left:0;right:0;top:100%;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:24px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
                                     @click.outside="close()"
                                     aria-label="{{ __('Menu Apprendre') }}">
                                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                                         <div>
-                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">📚 {{ __('Contenu éditorial') }}</div>
+                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Contenu éditorial') }}</div>
                                             @if(Route::has('news.index'))
                                             <a href="{{ route('news.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">📰</span>
@@ -260,7 +260,7 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">📖 {{ __('Référence') }}</div>
+                                            <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Référence') }}</div>
                                             @if(Route::has('dictionary.index'))
                                             <a href="{{ route('dictionary.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
                                                 <span style="font-size:18px;line-height:1;">📚</span>
@@ -286,7 +286,7 @@
                                 <ul class="sub-menu">
                                     @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">📰 {{ __('Actualités') }}</a></li>@endif
                                     @if(Route::has('blog.index'))<li><a href="{{ route('blog.index') }}">✍️ {{ __('Blog') }}</a></li>@endif
-                                    @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire Techno') }}</a></li>@endif
+                                    @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire Techno') }}</a></li>@endif
                                     @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🔤 {{ __('Acronymes') }}</a></li>@endif
                                     @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">❓ {{ __('FAQ') }}</a></li>@endif
                                     @if(Route::has('shop.index') && ! config('shop.maintenance', false))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif
@@ -570,7 +570,7 @@
                                 @include('auth::components.user-menu-links', ['variant' => 'dropdown'])
                                 @can('view_admin_panel')
                                 <div style="border-top:1px solid #f3f4f6;margin-top:4px;padding-top:4px;">
-                                    <a href="{{ url('/admin') }}" target="_blank" style="display:block;padding:10px 16px;color:var(--c-dark);text-decoration:none!important;font-size:13px;font-weight:500;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">⚙️ {{ __('Administration') }}</a>
+                                    <a href="{{ url('/admin') }}" target="_blank" style="display:block;padding:10px 16px;color:var(--c-dark);text-decoration:none!important;font-size:13px;font-weight:500;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">{{ __('Administration') }}</a>
                                     @if(Route::has('admin.directory.moderation'))<a href="{{ route('admin.directory.moderation') }}" target="_blank" style="display:block;padding:10px 16px;color:var(--c-dark);text-decoration:none!important;font-size:13px;font-weight:500;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">📋 {{ __('Modération') }}</a>@endif
                                 </div>
                                 @endcan
@@ -648,7 +648,7 @@
                                             <ul>
                                                 @if(Route::has('news.index'))<li><a href="{{ route('news.index') }}">📰 {{ __('Actualités') }}</a></li>@endif
                                                 @if(Route::has('blog.index'))<li><a href="{{ route('blog.index') }}">✍️ {{ __('Blog') }}</a></li>@endif
-                                                @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">📚 {{ __('Glossaire Techno (:count)', ['count' => $dictionaryCount]) }}</a></li>@endif
+                                                @if(Route::has('dictionary.index'))<li><a href="{{ route('dictionary.index') }}">{{ __('Glossaire Techno (:count)', ['count' => $dictionaryCount]) }}</a></li>@endif
                                                 @if(Route::has('acronyms.index'))<li><a href="{{ route('acronyms.index') }}">🔤 {{ __('Acronymes') }}</a></li>@endif
                                                 @if(Route::has('faq.index'))<li><a href="{{ route('faq.index') }}">❓ {{ __('FAQ') }}</a></li>@endif
                                                 @if(Route::has('shop.index') && ! config('shop.maintenance', false))<li><a href="{{ route('shop.index') }}">🛍️ {{ __('Boutique') }}</a></li>@endif
@@ -659,7 +659,7 @@
                                         <div class="widget link-widget">
                                             <div class="widget-title"><h3>{{ __('Livres') }}</h3></div>
                                             <ul>
-                                                <li><a href="{{ route('books.index') }}">📖 {{ __('La bibliothèque') }}</a></li>
+                                                <li><a href="{{ route('books.index') }}">{{ __('La bibliothèque') }}</a></li>
                                             </ul>
                                         </div>
                                         @endif

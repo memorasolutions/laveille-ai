@@ -1,5 +1,58 @@
 # Changelog
 
+## [1.288.0] - 2026-09-15
+
+### Modifié
+- **La barre de navigation est enfin UN seul composant, et les méga-menus couvrent la largeur du
+  conteneur** (#2591). Stéphane a dit trois fois « le menu est encore dégueulasse, pas très pro ».
+  Les deux premières fois, j'ai corrigé un symptôme et déclaré réglé sur une MESURE, sans juger
+  l'aspect.
+
+  **Ce que l'oeil voyait et que mes mesures rataient**, relevé à 1280 px :
+
+  | | Taille | Padding | Hauteur |
+  |---|---|---|---|
+  | Accueil, Livres (`<a>`) | 18 px | 10 px | 63 px |
+  | Outils, Annuaire, Apprendre (`<button>`) | 16 px | 6 px | 60 px |
+
+  Deux tailles, deux paddings, deux hauteurs. Mon correctif précédent n'avait unifié que la POLICE,
+  et je l'avais vérifié **à 1024 px, une largeur où la règle du thème ne s'applique pas** : j'ai
+  mesuré là où le défaut n'existait pas, puis annoncé qu'il était réglé.
+
+  Les cinq items partagent désormais taille, interligne et padding. La ligne de base ne saute plus.
+
+- **Les trois panneaux couvrent toute la largeur du conteneur.** Cela supprime la contradiction qui
+  a coûté quatre livraisons : un panneau de 780 px ne pouvait pas être à la fois collé à son bouton
+  et tenir dans l'écran. En pleine largeur, il n'y a plus rien à arbitrer - ni débordement, ni
+  décalage, ni calcul JavaScript. Le lien visuel avec le déclencheur est porté par un **état actif
+  franc** sur le bouton ouvert (fond teinté et soulignement épais).
+
+- **Les émojis des huit titres de section sont retirés.** Leur rendu change d'un système à l'autre
+  et ils cohabitaient avec des pictogrammes carrés (« VS », « abc »), soit plusieurs familles
+  visuelles dans un même panneau.
+
+### Supprimé
+- Tout le mécanisme de recadrage de `public/js/mega-menu.js` : mesure de géométrie, relecture bornée
+  sur vingt frames, décalage calculé, écouteur de redimensionnement. Le fichier passe de 270 à 139
+  lignes. **Ce code fonctionnait** - il recréait simplement le défaut qu'on lui demandait de
+  corriger, en détachant le panneau de son bouton.
+
+### Ce que le panel a tranché
+Quatre oracles consultés : ChatGPT, Gemini, claude.ai et DeepSeek. **Perplexity est resté
+indisponible** (son navigateur était occupé par la page en cours d'inspection) - signalé plutôt
+qu'omis. Les quatre placent en tête la même chose : l'incohérence de la barre, visible avant même
+d'ouvrir un menu. Trois sur quatre tranchent pour l'ancrage au conteneur et pour le retrait des
+émojis.
+
+**DeepSeek était seul à défendre l'ancrage au déclencheur**, et son argument est retenu : le lien
+visuel avec le bouton doit survivre. Il ne passe simplement plus par la position du panneau. Son
+quatrième point, en revanche, était faux et a été vérifié contre le code : il affirmait qu'aucun
+état de survol n'existait, alors que les liens comme les boutons en ont un.
+
+**L'observation la plus fine vient de claude.ai** : 60 px contre 63 px, c'est une ligne de base
+brisée, « exactement ce qu'un oeil non technique appelle décalé ». Le grief portait donc sur la
+barre autant que sur les panneaux - ce qu'aucune de mes mesures n'avait envisagé.
+
 ## [1.287.8] - 2026-09-15
 
 ### Corrigé
