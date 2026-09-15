@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.289.0] - 2026-09-15
+
+### Ajouté
+- **Générateur de politique d'utilisation de l'IA**, à `/outils/politique-ia` (#2584). Dix questions,
+  un document de dix sections prêt à adapter, en texte ou en Markdown. C'est la seule survivante des
+  trois rounds du club des sages sur l'amélioration du site.
+
+  **Tout l'assemblage se fait dans le navigateur, et c'est le coeur de l'offre plutôt qu'un détail
+  technique.** Une PME qui nomme ses outils, ses fournisseurs et son responsable des renseignements
+  personnels décrit sa surface d'attaque : lui demander d'envoyer cela sur un serveur pour obtenir
+  un document sur la protection des données serait une contradiction. Aucune réponse n'est
+  transmise, aucune n'est stockée.
+
+  **Mesuré au navigateur avant livraison** : formulaire rempli, bouton « Générer » cliqué, document
+  de 4 906 caractères produit avec toutes les valeurs substituées et aucun crochet oublié - et
+  **zéro requête réseau** déclenchée par la génération. Un test le vérifie aussi côté code, parce
+  qu'une promesse pareille doit être tenue par un test et non par une intention.
+
+  **L'outil naît en construction, volontairement.** Le drapeau `is_under_construction` le rend
+  visible aux seuls administrateurs : le document sera lu par des PME qui prendront des décisions
+  d'organisation en s'y appuyant, et la conception exige qu'il soit relu avant d'être public. Le
+  rendre visible est donc un geste éditorial, pas une étape technique oubliée.
+
+### Les trois interdits, tenus et testés
+1. **Ne jamais laisser entendre que l'entreprise devient « conforme »** - le document est un point
+   de départ, et un test refuse les formulations de complaisance.
+2. **Ne jamais citer un numéro d'article de loi** - aucun n'est cité, et un test le vérifie sur le
+   gabarit. Une référence fabriquée dans un document juridique est pire que pas de référence.
+3. **Ne rien demander de personnel** - le formulaire ne réclame qu'un titre de fonction et une
+   adresse de signalement, qui ne quittent pas le navigateur.
+
+### Deux mesures à connaître avant d'y revenir
+- Le **cache de réponses** servait une version antérieure de la page : une modification du gabarit
+  restait invisible malgré `view:clear`. Il faut `responsecache:clear` pour voir ses changements sur
+  une page d'outil.
+- Le thème masque **toutes** les cases à cocher natives (`input[type="checkbox"] { display: none }`)
+  pour les remplacer par un décor posé sur le label. Ce décor n'existait pas ici, si bien que la
+  question 6 s'affichait sans case cliquable. Rétabli localement, sans toucher au thème.
+
+### Ce qui reste, et le seuil d'échec écrit d'avance
+Le contenu éditorial est en place. Restent la relecture du document par Stéphane, puis le retrait du
+drapeau de construction. Le test d'échec, fixé AVANT la construction : au 90e jour, moins de 300
+impressions dans Search Console ou moins de 25 politiques générées depuis la recherche organique
+signifie qu'on n'y ajoute plus rien. La mesure suppose le filtre de trafic interne actif (#2583),
+sans quoi le seuil de 25 serait ininterprétable.
+
 ## [1.288.3] - 2026-09-15
 
 ### Corrigé
