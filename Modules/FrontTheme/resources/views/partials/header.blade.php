@@ -177,7 +177,11 @@
                             <li class="menu-item-has-children has-mega-menu" x-data="megaMenu('annuaire')" style="position:relative;">
                                 <button type="button" class="lv-mega-declencheur" x-ref="bouton" @click="toggle()" :aria-expanded="open" aria-controls="lv-mega-annuaire">{{ __('Annuaire') }}<span class="lv-mega-chevron" aria-hidden="true">&#9662;</span></button>
                                 <div x-show="open" x-ref="panneau" id="lv-mega-annuaire" x-cloak x-transition.opacity.duration.100ms
-                                    style="position:absolute;left:-150px;top:100%;width:560px;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:24px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
+                                    {{-- 2026-09-15 (#2589) : left:0 comme ses deux voisins. Ce panneau portait `left:-150px`,
+                                         un décalage saisi à la main pour le faire tenir à l'écran, qui le détachait
+                                         visuellement de son déclencheur. Le recadrage automatique de mega-menu.js
+                                         s'occupe désormais du débordement, sans jamais rompre cet ancrage. --}}
+                                    style="position:absolute;left:0;top:100%;width:560px;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:24px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
                                     @click.outside="close()"
                                     aria-label="{{ __('Menu Annuaire') }}">
                                     <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px;">
@@ -225,7 +229,12 @@
                             <li class="menu-item-has-children has-mega-menu" x-data="megaMenu('apprendre')" style="position:relative;">
                                 <button type="button" class="lv-mega-declencheur" x-ref="bouton" @click="toggle()" :aria-expanded="open" aria-controls="lv-mega-apprendre">{{ __('Apprendre') }}<span class="lv-mega-chevron" aria-hidden="true">&#9662;</span></button>
                                 <div x-show="open" x-ref="panneau" id="lv-mega-apprendre" x-cloak x-transition.opacity.duration.100ms
-                                    style="position:absolute;right:0;top:100%;width:640px;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:24px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
+                                    {{-- 2026-09-15 (#2589) : left:0 comme ses deux voisins. Ce panneau portait `right:0`,
+                                         donc il se collait au bord droit de son déclencheur et s'étendait vers la
+                                         gauche : à 1024 px il commençait à -48, soit hors écran. Les trois panneaux
+                                         avaient TROIS stratégies différentes (left:0, left:-150px, right:0), chacune
+                                         réglée à la main. C'est ce désalignement que Stéphane voyait. --}}
+                                    style="position:absolute;left:0;top:100%;width:640px;background:#fff;border-radius:16px;box-shadow:0 12px 36px rgba(0,0,0,0.14);padding:24px;z-index:9999;border:1px solid #E5E7EB;max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;"
                                     @click.outside="close()"
                                     aria-label="{{ __('Menu Apprendre') }}">
                                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">

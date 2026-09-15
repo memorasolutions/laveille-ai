@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.287.5] - 2026-09-15
+
+### Corrigé
+- **Les trois panneaux de méga-menu ne s'ouvraient pas au même endroit** (#2589). Signalé par
+  Stéphane, capture annotée à l'appui : « Annuaire » à gauche, son panneau à droite.
+
+  **La cause n'était pas dans la feuille de style, mais dans le HTML** : les trois panneaux
+  portaient TROIS stratégies de positionnement différentes, saisies à la main dans leur attribut
+  `style` :
+
+  | Panneau | Avant | Largeur |
+  |---|---|---|
+  | Outils | `left: 0` | 780 px |
+  | Annuaire | **`left: -150px`** | 560 px |
+  | Apprendre | **`right: 0`** | 640 px |
+
+  Chacun avait été décalé séparément pour le faire tenir à l'écran. Aucune règle de feuille de style
+  ne pouvait les corriger : un style en ligne l'emporte. Les trois passent à `left: 0`.
+
+  **Mesuré après correction** : écart de 0 pixel entre le bord gauche de chaque panneau et celui de
+  son déclencheur, sur les trois menus.
+
+### Annulé
+Le correctif v1.287.2, qui ancrait le panneau au conteneur avec `right: 0`, est retiré. Il
+supprimait bien le débordement, mais collait le panneau au bord droit quelle que soit la position de
+son déclencheur : c'est lui qui a produit le désalignement signalé. Mes contrôles d'alors mesuraient
+le débordement et les liens coupés, jamais l'écart avec le déclencheur.
+
+### RESTE À FAIRE, et c'est écrit ici pour ne pas être oublié
+**Le débordement horizontal n'est PAS résolu.** À 1024 px, « Outils » sort de 86 px (6 liens coupés)
+et « Apprendre » de 103 px (2 liens). Une méthode `_recadrer()` est en place dans
+`public/js/mega-menu.js` et elle FONCTIONNE : appelée à la main dans la console, elle applique
+`translateX(-102px)` et ramène le débordement à zéro. Ce qui échoue est son DÉCLENCHEMENT
+automatique à l'ouverture du panneau, et cinq tentatives n'ont pas permis de trouver pourquoi. Le
+code reste en place, inoffensif, en attendant un diagnostic à froid.
+
 ## [1.287.3] - 2026-09-15
 
 ### Corrigé

@@ -1773,17 +1773,22 @@ button[aria-expanded="true"] .lv-mega-chevron {
    Les !important sont nécessaires pour la même raison que ceux de la règle ci-dessus : le thème
    pose `position: relative` sur les <li> de la barre avec une spécificité supérieure. Vérifié :
    sans eux, la règle est ignorée et le <li> reste `relative`. */
-@media (min-width: 992px) {
-    .wpo-site-header .navigation .navbar-nav > li.menu-item-has-children.has-mega-menu {
-        position: static !important;
-    }
+   CORRIGÉ LE MÊME JOUR (#2589), APRÈS UNE RÉGRESSION QUE J'AVAIS LIVRÉE. Le premier correctif
+   ancrait le panneau au .container avec `right: 0`. Le débordement disparaissait bien, mais le
+   panneau se collait au bord droit du conteneur QUELLE QUE SOIT la position de son déclencheur :
+   « Annuaire », à gauche, ouvrait un panneau à droite, sans aucun lien visuel avec son bouton.
+   Stéphane l'a vu immédiatement.
 
+   La leçon de vérification : mes contrôles mesuraient le débordement (zéro) et les liens coupés
+   (zéro). Ils étaient satisfaits par une solution qui déplaçait le panneau n'importe où. Il fallait
+   AUSSI mesurer l'écart entre le bord gauche du panneau et celui de son déclencheur.
+
+   Le CSS seul ne peut pas tenir les deux exigences, puisqu'il ignore la position de l'élément. Le
+   panneau reste donc ancré sous son déclencheur (les <li> portent `position:relative` en ligne), et
+   le seul débordement résiduel est corrigé à l'ouverture par un décalage calculé, dans
+   public/js/mega-menu.js. Ici ne reste que le filet de sécurité sur la largeur. */
+@media (min-width: 992px) {
     .wpo-site-header .navigation .navbar-nav > li.has-mega-menu > [id^="lv-mega-"] {
-        left: auto !important;
-        right: 0 !important;
-        width: auto !important;
-        /* Filet de sécurité : même si un panneau devenait plus large que le conteneur, il ne
-           dépasserait jamais la fenêtre. */
-        max-width: calc(100vw - 3rem) !important;
+        max-width: calc(100vw - 3rem);
     }
 }
