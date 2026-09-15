@@ -8,7 +8,11 @@ use Modules\Decido\Http\Controllers\PublicPollController;
 use Modules\Decido\Http\Middleware\DecidoUnderConstruction;
 
 Route::middleware(DecidoUnderConstruction::class)->group(function () {
-    Route::get('/decido', [PollManageController::class, 'index'])->middleware('auth')->name('decido.index');
+    // 2026-09-15 : /decido n'exige PLUS la connexion. Un visiteur non connecté reçoit la page de
+    // présentation publique (decido::public.presentation), un connecté son tableau de bord - le
+    // branchement vit dans PollManageController::index(). Avant ce jour, /decido répondait 302 vers
+    // /login et personne ne pouvait découvrir l'outil. La CRÉATION, elle, reste derrière 'auth'.
+    Route::get('/decido', [PollManageController::class, 'index'])->name('decido.index');
     Route::get('/decido/creer', [PollManageController::class, 'create'])->middleware('auth')->name('decido.create');
     // Option E (skill /100 hors gate, veille pp_search juillet 2026 validée Perplexity+Codex+Gemini) :
     // /decido/creer n'est plus qu'un choix rapide de type - chaque type a son propre formulaire

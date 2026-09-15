@@ -24,8 +24,16 @@ use Modules\Decido\Services\TimezoneListService;
 
 class PollManageController extends Controller
 {
+    // 2026-09-15 : /decido n'est plus derrière 'auth'. Un visiteur non connecté reçoit la page de
+    // présentation publique plutôt qu'une redirection muette vers /login, qui ne lui disait jamais
+    // à quoi sert l'outil. La CRÉATION reste protégée (route decido.create), et rien ne change pour
+    // un utilisateur connecté : il retrouve son tableau de bord à l'identique.
     public function index(): ViewContract
     {
+        if (! Auth::check()) {
+            return View::make('decido::public.presentation');
+        }
+
         $polls = Poll::where('creator_id', Auth::id())->latest()->get();
 
         return View::make('decido::manage.index', compact('polls'));

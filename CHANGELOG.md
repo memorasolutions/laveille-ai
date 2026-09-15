@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.287.0] - 2026-09-15
+
+### Ajouté
+- **Décido a enfin une page que l'on peut montrer** (#2586). `/decido` et `/decido/creer`
+  répondaient TOUS DEUX 302 vers `/login` : un visiteur ne découvrait jamais à quoi sert l'outil,
+  il recevait la friction du compte sans l'argumentaire qui la justifie. Un visiteur non connecté
+  reçoit désormais une vraie page de présentation ; un utilisateur connecté garde son tableau de
+  bord, inchangé.
+
+  Mesure qui a déclenché le correctif : le sondage partagé `/decido/74NXMLTfd7Yl` a fait
+  11 sessions pour **10 personnes dont 8 nouvelles** en 90 jours. Chaque sondage partagé est déjà
+  une page d'acquisition qui fonctionne ; la page d'entrée de l'outil, elle, était un mur.
+
+  La page est volontairement **indexable**, contrairement aux pages de vote qui restent `noindex`
+  parce qu'elles exposent pseudonymes et choix.
+
+### Inchangé, et c'est délibéré
+La **création** d'un sondage reste derrière la connexion. Trois motifs, chacun vérifié : la
+politique de rétention envoie un courriel à J-14 avant suppression et a besoin d'une adresse ; un
+sondage collecte des noms de participants, donc laveille.ai serait responsable du traitement sans
+savoir qui a collecté quoi ; et un faux sondage créé anonymement emprunterait la crédibilité du
+domaine. Le VOTE, lui, n'a jamais demandé de compte et n'en demande toujours pas.
+
+### Tests
+Nouveau fichier `DecidoPagePubliqueTest.php`, 6 tests, dont deux contrôles de frontière : le mode
+« en construction » prime toujours (503), et la page de vote reste `noindex`. Suite complète du
+module : **169 tests, 635 assertions, zéro régression**.
+
+Un des tests avait d'abord échoué à tort : il cherchait l'absence du mot « noindex » dans le HTML,
+alors qu'en environnement de test `config('app.noindex')` met TOUT le site en noindex. Le contrôle
+mesurait donc la configuration d'environnement, pas la page. Réécrit pour neutraliser ce réglage et
+vérifier la balise POSITIVE.
+
 ## [1.286.2] - 2026-09-15
 
 ### Ajouté
