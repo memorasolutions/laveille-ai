@@ -1004,11 +1004,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 <template x-for="f in [{v:'',l:'{{ __("Tous") }}'},{v:'youtube',l:'{{ __("YouTube") }}'},{v:'formation',l:'{{ __("Formation") }}'},{v:'article',l:'{{ __("Article") }}'},{v:'tutorial',l:'{{ __("Tutoriel") }}'},{v:'documentation',l:'{{ __("Doc") }}'}]">
                     <button @click="filterType = f.v" :style="'border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;' + (filterType === f.v ? 'background:var(--c-primary);color:#fff;' : 'background:var(--c-primary-light);color:var(--c-text-muted);')" x-text="f.l"></button>
                 </template>
+                {{-- Le sélecteur de langue n'a de sens que si la liste en contient plusieurs.
+                     Depuis le 2026-09-15, l'anglais n'est servi qu'en REPLI (voir
+                     ToolResource::frenchOnlyOrFallback) : sur un outil pourvu de tutoriels
+                     français, un bouton « EN » ne filtrerait plus rien et mentirait au lecteur. --}}
+                @if($resources->pluck('language')->filter()->unique()->count() > 1)
                 <span style="color:#e5e7eb;margin:0 4px;">|</span>
                 <span style="font-size:12px;font-weight:600;color:#6E7687;margin-right:4px;">{{ __('Langue') }} :</span>
                 <template x-for="f in [{v:'',l:'{{ __("Toutes") }}'},{v:'fr',l:'FR'},{v:'en',l:'EN'}]">
                     <button @click="filterLang = f.v" :style="'border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;' + (filterLang === f.v ? 'background:var(--c-primary);color:#fff;' : 'background:var(--c-primary-light);color:var(--c-text-muted);')" x-text="f.l"></button>
                 </template>
+                @endif
                 <span style="color:#e5e7eb;margin:0 4px;">|</span>
                 <span style="font-size:12px;font-weight:600;color:#6E7687;margin-right:4px;">{{ __('Niveau') }} :</span>
                 <template x-for="f in [{v:'',l:'{{ __("Tous") }}'},{v:'beginner',l:'🟢 {{ __("Débutant") }}'},{v:'intermediate',l:'🟡 {{ __("Intermédiaire") }}'},{v:'advanced',l:'🔴 {{ __("Avancé") }}'}]">

@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.286.0] - 2026-09-15
+
+### Modifié
+- **L'anglais devient un REPLI dans l'annuaire, plus un complément** (#2575, décision du fondateur).
+  Dès qu'un outil possède au moins un tutoriel français, lui seul est affiché. Quand il n'en a
+  aucun, l'anglais reste, parce que rien ne vaut moins pour le lecteur qu'un tutoriel en anglais.
+
+  **Mesuré en production avant livraison** : 149 outils ont au moins un tutoriel français, ce qui
+  masque 833 vidéos anglaises chez eux ; 43 outils n'en ont aucun et conservent leurs 215 vidéos
+  anglaises. **Aucun outil ne se retrouve sans tutoriel.** L'annuaire affiche 855 ressources au
+  lieu de 1688.
+
+  **Rien n'est supprimé ni dépublié** : les 1855 lignes restent intactes et approuvées. La règle
+  est un filtre d'affichage, réversible en retirant une ligne du contrôleur.
+
+- **Le sélecteur de langue FR/EN disparaît quand une seule langue est présente.** Ses boutons
+  étaient écrits en dur : sur un outil désormais entièrement francophone, le bouton « EN » ne
+  filtrait plus rien et mentait au lecteur.
+
+### Ce qui existait déjà et n'a pas été refait
+Le tri plaçant le français en tête (`FIELD(language, 'fr', 'en')`) et le filtre de langue côté
+client étaient en place depuis longtemps. Le tri ne suffisait pas : l'anglais restait affiché juste
+en dessous. **Septième fois de la journée que le mécanisme cherché existait déjà.**
+
+### Vérification
+- 5 tests Pest verts, dont le repli anglais, la réindexation des clés et l'absence de toute requête
+  en base (la méthode s'exécute sur chaque affichage de fiche).
+
 ## [1.285.1] - 2026-09-14
 
 ### Corrigé

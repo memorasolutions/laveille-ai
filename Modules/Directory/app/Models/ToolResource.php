@@ -23,6 +23,34 @@ class ToolResource extends Model
         'channel_url', 'is_approved',
     ];
 
+    /**
+     * ACTION: ne garder que les tutoriels francais quand cet outil en a au moins un.
+     * MCP: hermes → codex, nom corrige ici (« frenchFirst » laissait croire a un TRI).
+     * RAISON: decision du fondateur, 2026-09-15. Sur 1687 tutoriels approuves, 1047 etaient en
+     *         anglais, sur un site quebecois francophone. L'anglais devient un REPLI, pas un
+     *         complement : des qu'un tutoriel francais existe pour cet outil, lui seul est
+     *         montre ; quand il n'y en a aucun, l'anglais reste affiche, parce que rien vaut
+     *         moins pour le lecteur qu'un tutoriel en anglais.
+     *
+     * Aucune requete : la methode travaille uniquement sur la collection recue, deja triee par
+     * PublicDirectoryController (FIELD(language, 'fr', 'en')).
+     *
+     * @param  \Illuminate\Support\Collection<int, self>  $resources
+     * @return \Illuminate\Support\Collection<int, self>
+     */
+    public static function frenchOnlyOrFallback(\Illuminate\Support\Collection $resources): \Illuminate\Support\Collection
+    {
+        if ($resources->isEmpty()) {
+            return $resources;
+        }
+
+        // Comparaison stricte, jamais str_starts_with : la colonne contient exactement
+        // « fr » ou « en », mesure en production le 2026-09-14 apres resynchronisation.
+        $french = $resources->filter(static fn ($resource): bool => $resource->language === 'fr');
+
+        return $french->isNotEmpty() ? $french->values() : $resources;
+    }
+
     public static function detectLevel(string $title): string
     {
         $t = mb_strtolower($title);

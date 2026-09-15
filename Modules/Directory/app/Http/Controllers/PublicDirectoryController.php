@@ -237,6 +237,15 @@ class PublicDirectoryController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        // ACTION : l'anglais devient un REPLI, pas un complement (decision du fondateur,
+        // 2026-09-15). Le tri ci-dessus placait deja le francais en tete ; il ne suffisait pas,
+        // puisque l'anglais restait affiche juste en dessous. La regle vit dans le modele, jamais
+        // recopiee ici : elle sera consommee telle quelle le jour ou une autre surface affichera
+        // ces memes ressources.
+        // MCP: SELF (<5 lignes)
+        // RAISON: 1047 tutoriels anglais sur 1687, sur un site quebecois francophone.
+        $resources = \Modules\Directory\Models\ToolResource::frenchOnlyOrFallback($resources);
+
         $relatedCollections = collect();
         if (class_exists(\Modules\Directory\Models\ToolCollection::class)) {
             $relatedCollections = \Modules\Directory\Models\ToolCollection::public()
