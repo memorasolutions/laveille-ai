@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.287.8] - 2026-09-15
+
+### Corrigé
+- **Les méga-menus « Outils » et « Apprendre » sortaient de l'écran sur un portable** (#2589).
+  Le recadrage fonctionnait déjà : il était simplement effacé une fraction de seconde plus tard.
+
+  En journalisant la géométrie du panneau **image par image**, le mécanisme est apparu en clair :
+  le décalage `translateX(-140px)` était bel et bien posé, à la quatrième frame. Puis il
+  disparaissait. La raison est que `x-transition` d'Alpine écrit LUI AUSSI dans `style.transform`
+  (il y met `scale(1)`) et le remet à sa valeur de fin d'animation. **Deux mécanismes se
+  disputaient la même propriété**, et celui de la transition parlait en dernier.
+
+  Le décalage passe donc par `margin-left`, à laquelle la transition ne touche pas. Le conflit
+  disparaît par construction, au lieu d'être arbitré par un réglage de délai.
+
+  **Mesuré à 1024 px de large, avant livraison** : « Outils » débordait de 140 px et « Apprendre »
+  de 158 px, tous deux ramenés à **0**. « Annuaire », qui ne débordait pas, n'est pas touché. Aucun
+  des trois ne sort par la gauche, et chacun reste sous son déclencheur.
+
+### Deux pistes essayées et RÉFUTÉES par la mesure avant d'être livrées
+Elles sont écrites pour qu'on ne les réessaie pas :
+- **Attendre une frame de plus.** Le relevé montre que le débordement était déjà mesurable dès la
+  deuxième frame : le problème n'a jamais été le moment de la mesure.
+- **Un `ResizeObserver` sur le panneau.** Essayé, déclenché, et le débordement est resté à 140 px :
+  un observateur de taille voit la TAILLE, pas la POSITION, et la largeur était fixée par la
+  feuille de style dès le départ.
+
+C'est la deuxième fois aujourd'hui qu'un correctif paraissait inopérant alors qu'il fonctionnait :
+en v1.287.7 un cache le remplaçait, ici une transition l'effaçait. **Dans les deux cas, seule une
+mesure dans le navigateur, et non côté serveur, pouvait le montrer.**
+
 ## [1.287.7] - 2026-09-15
 
 ### Corrigé

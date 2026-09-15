@@ -100,6 +100,28 @@ document.addEventListener('alpine:init', () => {
                     this._recadrer();
                 });
 
+                // LA VRAIE CAUSE, TROUVÉE EN JOURNALISANT CHAQUE FRAME (#2589, 2026-09-15).
+                // Le recadrage FONCTIONNAIT : `translateX(-140px)` était bel et bien posé, à la
+                // quatrième frame. Puis il disparaissait. Le relevé image par image l'a montré
+                // sans ambiguïté - `x-transition` d'Alpine écrit LUI AUSSI dans `style.transform`
+                // (il y met `scale(1)`), et il le remet à sa valeur de fin de transition, ce qui
+                // effaçait notre décalage. Deux mécanismes se disputaient la même propriété.
+                //
+                // D'où le correctif : le décalage passe par `margin-left`, à laquelle la
+                // transition ne touche pas. Le conflit disparaît par construction, plutôt que
+                // d'être arbitré par un réglage de délai.
+                //
+                // Deux hypothèses ont été essayées et RÉFUTÉES par la mesure avant d'être
+                // livrées, elles sont notées pour qu'on ne les réessaie pas : attendre une frame
+                // de plus (le débordement était déjà visible dès la frame 2, ce n'était pas un
+                // problème de moment), et un `ResizeObserver` (il voit la taille, pas la position,
+                // et la largeur était fixée par la feuille de style dès le départ).
+                //
+                // La relecture bornée ci-dessous reste utile comme filet : le panneau est masqué
+                // par `display: none` pendant les deux premières frames, où il n'y a rien à
+                // mesurer. Elle s'arrête dès qu'un décalage est posé.
+                this._recadrerSurPlusieursFrames(revision, 20);
+
                 // La fenêtre peut changer de largeur pendant que le menu est ouvert.
                 window.removeEventListener('resize', this._surRedimensionnement);
                 this._surRedimensionnement = () => {
@@ -144,6 +166,30 @@ document.addEventListener('alpine:init', () => {
         },
 
         /**
+         * Relit la géométrie sur plusieurs frames, et s'arrête dès qu'un décalage est posé (#2589).
+         *
+         * Le panneau n'est pas à sa place définitive à la frame où il apparaît : mesurer une seule
+         * fois revient à parier sur un instant, et ce pari a été perdu deux fois (voir le détail
+         * dans `toggle()`). Bornée à `framesRestantes`, cette relecture ne peut pas s'emballer.
+         */
+        _recadrerSurPlusieursFrames(revision, framesRestantes) {
+            if (!this.open || revision !== this._revision || framesRestantes <= 0) {
+                return;
+            }
+
+            this._recadrer();
+
+            // Un décalage posé signifie que la géométrie était enfin lisible : plus rien à relire.
+            if (this.$refs.panneau?.style.marginLeft) {
+                return;
+            }
+
+            requestAnimationFrame(() => {
+                this._recadrerSurPlusieursFrames(revision, framesRestantes - 1);
+            });
+        },
+
+        /**
          * Ramène le panneau dans la fenêtre s'il en sort, du strict nécessaire (#2589).
          *
          * Deux gardes qui ne se devinent pas : on remet le décalage à zéro AVANT de mesurer, sinon
@@ -157,7 +203,7 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            panneau.style.transform = '';
+            panneau.style.marginLeft = '';
 
             // Sous 992 px, une règle de la feuille de style masque le panneau : rien à recadrer.
             if (window.innerWidth < 992) {
@@ -192,7 +238,7 @@ document.addEventListener('alpine:init', () => {
             const decalage = Math.min(debordement, Math.max(0, rect.left - MARGE));
 
             if (decalage > 0) {
-                panneau.style.transform = 'translateX(-' + Math.round(decalage) + 'px)';
+                panneau.style.marginLeft = '-' + Math.round(decalage) + 'px';
             }
         },
 
@@ -205,7 +251,7 @@ document.addEventListener('alpine:init', () => {
             this._surRedimensionnement = null;
 
             if (this.$refs.panneau) {
-                this.$refs.panneau.style.transform = '';
+                this.$refs.panneau.style.marginLeft = '';
             }
         },
 
