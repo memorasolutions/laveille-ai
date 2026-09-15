@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.287.2] - 2026-09-15
+
+### Corrigé
+- **Les trois méga-menus sortaient de l'écran sur un portable** (#2587). Signalé par Stéphane
+  (« le menu est encore dégueulasse, pas très pro »), puis mesuré en production.
+
+  Le panneau est ancré à `left: 0` du `<li>` de 60 px qui le porte, avec une largeur fixe et aucun
+  `max-width`. Le débordement était donc arithmétique : position du déclencheur + largeur du panneau.
+
+  | Écran | Outils | Annuaire | Apprendre |
+  |---|---|---|---|
+  | 1280 px | 11 px hors écran | 71 px | **153 px** |
+  | 1024 px | **138 px, 5 liens coupés** | pire | pire |
+
+  Il aurait fallu un écran de **1433 px** pour qu'« Apprendre » tienne. À 1024 px, les cinq liens de
+  la colonne de droite d'« Outils » étaient coupés net au bord de la fenêtre.
+
+  **Le trou était connu à moitié** : une règle masque déjà le panneau sous 992 px, et son commentaire
+  dit « 780 px dans une fenêtre de 375 px déborde horizontalement ». Le défaut avait donc été vu sur
+  téléphone et réglé là, sans voir qu'il persistait sur toute la bande 992 à 1430 px. Les trois
+  tickets précédents sur ces menus (#2561, #2562, #2573) portaient sur le débordement VERTICAL, le
+  survol contre le clic, et la typographie : aucun ne touchait l'horizontale.
+
+  Correctif : le panneau s'ancre désormais au `.container` plutôt qu'au `<li>`, et s'aligne sur la
+  marge droite du contenu. Vérifié sur les trois menus à 1024 et 1280 px : **zéro débordement, zéro
+  lien coupé**, et le panneau reste sous son déclencheur.
+
 ## [1.287.1] - 2026-09-15
 
 ### Corrigé

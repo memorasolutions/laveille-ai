@@ -1729,3 +1729,36 @@ button[aria-expanded="true"] .lv-mega-chevron {
         display: none !important;
     }
 }
+
+/* Le trou laissé par la règle ci-dessus, mesuré le 2026-09-15 (#2587).
+   Elle règle le cas du téléphone en masquant le panneau sous 992 px. Mais entre 992 px et environ
+   1430 px, le panneau large s'affiche, ancré à `left: 0` du <li> de 60 px qui le porte, avec une
+   largeur FIXE et aucun max-width. Le débordement est donc arithmétique : position du déclencheur
+   plus largeur du panneau.
+
+   Mesure en production, à 1280 px (la résolution de bureau la plus répandue) : les TROIS menus
+   sortaient de l'écran - Outils de 11 px, Annuaire de 71 px, Apprendre de 153 px. À 1024 px,
+   Outils débordait de 138 px et les CINQ liens de sa colonne de droite étaient coupés net au bord
+   de la fenêtre. Il aurait fallu un écran de 1433 px pour qu'Apprendre tienne.
+
+   Correctif : le panneau s'ancre au .container (déjà en position relative) plutôt qu'au <li>, et
+   s'aligne sur la marge droite du contenu de la page. Il reste donc toujours dans la fenêtre, quelle
+   que soit la position de son déclencheur.
+
+   Les !important sont nécessaires pour la même raison que ceux de la règle ci-dessus : le thème
+   pose `position: relative` sur les <li> de la barre avec une spécificité supérieure. Vérifié :
+   sans eux, la règle est ignorée et le <li> reste `relative`. */
+@media (min-width: 992px) {
+    .wpo-site-header .navigation .navbar-nav > li.menu-item-has-children.has-mega-menu {
+        position: static !important;
+    }
+
+    .wpo-site-header .navigation .navbar-nav > li.has-mega-menu > [id^="lv-mega-"] {
+        left: auto !important;
+        right: 0 !important;
+        width: auto !important;
+        /* Filet de sécurité : même si un panneau devenait plus large que le conteneur, il ne
+           dépasserait jamais la fenêtre. */
+        max-width: calc(100vw - 3rem) !important;
+    }
+}
