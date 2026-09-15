@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.286.2] - 2026-09-15
+
+### Ajouté
+- **`Disallow: /media/social/`** dans `public/robots.txt` (#2577). Les carrousels PDF servis aux
+  réseaux sociaux ne sont pas du contenu de site : un PDF indexé compterait comme une page de plus
+  au moment même où le site cherche à sortir du verdict « contenu à faible valeur informative ».
+
+  Le dossier ne liste pas son contenu (404 vérifié) et le PDF n'est lié depuis aucune page du site.
+
+### À noter pour plus tard
+`SeoService::generateRobotsTxt()` existe et produit un robots.txt DIFFÉRENT de celui réellement
+servi (`public/robots.txt`, statique). Deuxième mécanisme en double repéré ce mois-ci. Non corrigé
+ici : le fichier statique est la source servie, la méthode du service n'est appelée nulle part dans
+le rendu public. À trancher un jour, sans urgence.
+
 ## [1.286.1] - 2026-09-15
 
 ### Corrigé

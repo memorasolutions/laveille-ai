@@ -14,6 +14,8 @@ Disallow: /login
 Disallow: /dashboard
 Disallow: /s/
 Disallow: /api/
+# Medias de publication sociale (carrousels PDF) : servis aux reseaux, jamais du contenu de site.
+Disallow: /media/social/
 
 # ── Bots IA training (autorisés – pour intégration dans modèles futurs) ──
 User-agent: GPTBot
