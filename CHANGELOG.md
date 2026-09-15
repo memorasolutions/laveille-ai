@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.286.1] - 2026-09-15
+
+### Corrigé
+- **La fiche technique annonçait 12 tutoriels au-dessus d'un onglet qui en montrait 7** (#2575).
+  Le composant `tool-spec-table` refaisait sa propre requête et ignorait la règle du français.
+  Il reçoit désormais la collection déjà filtrée : une seule source de vérité, et une requête de
+  moins par fiche. Le paramètre reste facultatif, le composant garde son comptage autonome quand
+  une autre vue l'appelle sans collection.
+
+  Défaut invisible aux tests et au HTML pris isolément : il fallait voir les deux chiffres
+  CÔTE À CÔTE sur la capture d'écran.
+
 ## [1.286.0] - 2026-09-15
 
 ### Modifié

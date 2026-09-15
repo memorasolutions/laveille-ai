@@ -6,12 +6,13 @@
     une ligne n'apparaît que si la donnée existe et est signifiante. Si aucune ligne n'a de
     donnée, le composant ne rend RIEN (pas de table vide, pas de titre orphelin).
 
-    Usage : <x-directory::tool-spec-table :tool="$tool" />
+    Usage : <x-directory::tool-spec-table :tool="$tool" :resources="$resources" />
+    Le second paramètre est FACULTATIF : sans lui, le composant compte lui-même.
 
     ZÉRO fabrication : n'affiche QUE des champs réels. privacy_compliance/learning_curve/
     has_api_access sont exclus (0% remplis / défauts non fiables, spec 2026-08-20).
 --}}
-@props(['tool'])
+@props(['tool', 'resources' => null])
 
 @php
     $rows = [];
@@ -45,8 +46,14 @@
         ];
     }
 
-    // Signal social vérifiable, même compteur que Tool::generateSocialPosts() (~L443).
-    $tutoCount = (int) $tool->resources()->where('is_approved', true)->count();
+    // Ce compteur doit dire ce que le visiteur VOIT juste en dessous, pas ce que contient la base.
+    // Depuis le 2026-09-15 (#2575), l'anglais n'est servi qu'en repli : la page affichait donc
+    // « 12 tutoriels » au-dessus d'un onglet qui en montrait 7. Quand la vue appelante a déjà
+    // filtré sa collection, on la réutilise ; sinon on retombe sur le comptage complet, pour que
+    // le composant reste utilisable ailleurs sans rien casser.
+    $tutoCount = $resources !== null
+        ? $resources->count()
+        : (int) $tool->resources()->where('is_approved', true)->count();
     if ($tutoCount > 0) {
         $rows[] = ['label' => __('Tutoriels disponibles'), 'value' => (string) $tutoCount];
     }
