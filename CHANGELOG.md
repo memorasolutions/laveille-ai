@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.287.6] - 2026-09-15
+
+### Corrigé
+- **« Accueil » et « Livres » restaient en Futura PT pendant que les trois autres passaient en
+  DM Sans** (#2588). Correctif du correctif : la v1.287.3 avait AGGRAVÉ le défaut qu'elle visait.
+
+  Sans `!important`, la règle ne prenait que sur les `<button>` : le thème impose « Futura PT » aux
+  `<a>` de la barre par une règle plus spécifique. Résultat en production : **2 items en Futura PT,
+  3 en DM Sans**. Avant mon correctif, les cinq étaient au moins cohérents entre eux.
+
+  Stéphane l'a vu sur une capture rapprochée où « Accueil » et « Livres » sont visiblement plus gros
+  et plus gras. **Mesuré après correction** : les cinq items en DM Sans, 16 px, hauteur de texte
+  rendue 21 px, sans écart.
+
+### Le contrôle qui a manqué, et qui est la vraie leçon
+J'avais vérifié que la règle était PRÉSENTE dans la feuille servie (`grep` = 1 occurrence). Je
+n'avais pas vérifié la police **réellement calculée sur chacun des cinq items**. Une règle présente
+n'est pas une règle appliquée : c'est la troisième fois aujourd'hui que cette distinction fait la
+différence, après le `position: static` ignoré et le recadrage jamais déclenché.
+
 ## [1.287.5] - 2026-09-15
 
 ### Corrigé

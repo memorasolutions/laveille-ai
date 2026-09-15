@@ -1690,9 +1690,19 @@ article h3 {
    orphelin, pas une direction artistique.
 
    La taille de 16 px ne bouge PAS : on ne change qu'une variable à la fois. */
+   CORRECTIF DU CORRECTIF (#2588, même jour) : sans `!important`, cette règle ne prenait QUE sur les
+   <button>. Le thème impose « Futura PT » aux <a> de la barre par une règle plus spécifique, si bien
+   que la v1.287.3 laissait « Accueil » et « Livres » en Futura PT pendant que les trois autres
+   passaient en DM Sans. Elle a donc AGGRAVÉ le défaut signalé au lieu de le corriger : avant, les
+   cinq items étaient au moins cohérents entre eux.
+
+   Stéphane l'a vu sur une capture rapprochée de la barre, où « Accueil » et « Livres » sont
+   visiblement plus gros et plus gras que leurs voisins. La mesure le confirmait : 2 items en
+   Futura PT, 3 en DM Sans. Le contrôle qui a manqué la première fois : vérifier la police RÉELLEMENT
+   calculée sur CHACUN des cinq, et pas seulement que la règle était présente dans la feuille. */
 .wpo-site-header .navigation .navbar-nav > li > a,
 .wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
-    font-family: var(--f-body), system-ui, -apple-system, sans-serif;
+    font-family: var(--f-body), system-ui, -apple-system, sans-serif !important;
 }
 
 .wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
