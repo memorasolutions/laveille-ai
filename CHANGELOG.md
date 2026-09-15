@@ -1,5 +1,42 @@
 # Changelog
 
+## [1.287.3] - 2026-09-15
+
+### Corrigé
+- **La barre de navigation et son panneau parlaient deux langues typographiques** (#2588). Signalé
+  par Stéphane : « le texte des menus n'est pas de la même taille ».
+
+  Mesure en production : les 5 items de la barre étaient **identiques entre eux** (16 px, graisse
+  500, Futura PT). Le défaut n'était donc pas là. Il était dans le passage à **DM Sans 14 px** dès
+  l'ouverture du panneau : la police ET la taille changeaient dans le même menu.
+
+  **Pourquoi l'oeil voyait ce que les chiffres ne montraient pas**, explication de claude.ai :
+  Futura PT a un petit oeil, DM Sans un oeil large, donc 16 px et 14 px ne semblent pas dans le bon
+  rapport. L'observation de Stéphane était juste, ma première mesure trop étroite.
+
+  Le menu passe à `var(--f-body)` (DM Sans), comme le panneau. **La taille de 16 px ne bouge pas** :
+  un seul changement à la fois. La différence entre barre et panneau devient hiérarchique plutôt que
+  typographique.
+
+- **Dernière police codée en dur de la feuille de style, retirée.** Sur 38 déclarations, 37
+  passaient par une variable ; une seule recopiait « Futura PT », vestige du correctif #2573 qui
+  avait dupliqué la valeur au lieu de pointer la variable. Le rendu était bon par coïncidence : le
+  jour où la variable aurait changé, ce bouton serait resté seul en arrière.
+
+### Panel consulté
+5 oracles sur 5. **3 sur 4 pour retirer Futura PT** (Gemini, ChatGPT, claude.ai), DeepSeek seul pour
+la garder ; **2 sur 3 pour DM Sans** plutôt que Plus Jakarta Sans. claude.ai mesure que Futura PT
+n'habillait que 15 éléments sur environ 360 : « un orphelin, pas une direction artistique ».
+Perplexity, sans nommer de police : « un menu déroulant n'est pas une nouvelle zone éditoriale,
+c'est la continuité directe de la navigation ; même famille, et on différencie par la taille et le
+poids, jamais par la police ».
+
+### Écarté pour l'instant, avec son motif
+3 oracles sur 5 recommandent de remplacer les **emojis natifs** des panneaux par un jeu d'icônes SVG
+cohérent (Lucide est nommé deux fois), au motif que leur rendu change selon le système. Non fait
+ici : cela touche le champ `icon` de tous les outils en base, ce n'est plus une retouche de feuille
+de style. À trancher séparément.
+
 ## [1.287.2] - 2026-09-15
 
 ### Corrigé

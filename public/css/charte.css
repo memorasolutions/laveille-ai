@@ -1672,8 +1672,33 @@ article h3 {
    désormais un vrai <button> (patron « disclosure » du W3C APG). Les valeurs ci-dessous ne sont
    pas inventées : elles reproduisent le style CALCULÉ de l'ancien lien, mesuré au navigateur,
    pour que rien ne bouge visuellement. */
+/* 2026-09-15 (#2588) : la barre de navigation et le panneau qui s'en ouvre parlaient deux langues.
+   Mesure en production : les 5 items de la barre étaient en Futura PT 16 px, et le panneau en
+   DM Sans 14 px pour les noms d'outils, Plus Jakarta Sans 11 px pour les titres de section. La
+   police ET la taille changeaient dans le même menu.
+
+   Stéphane l'a signalé comme « le texte des menus n'est pas de la même taille ». Les chiffres, eux,
+   étaient cohérents entre les 5 items. L'explication vient de claude.ai et elle est mécanique :
+   Futura PT a un petit oeil et DM Sans un oeil large, donc 16 px et 14 px NE SEMBLENT PAS dans le
+   bon rapport. L'oeil avait raison, la mesure brute avait tort.
+
+   Panel de 5 oracles : 3 sur 4 pour retirer Futura PT (Gemini, ChatGPT, claude.ai), DeepSeek seul
+   pour la garder ; 2 sur 3 pour DM Sans plutôt que Plus Jakarta Sans. Perplexity, sans nommer de
+   police : « un menu déroulant n'est pas une nouvelle zone éditoriale, c'est la continuité directe
+   de la navigation - même famille, et on différencie par la taille et le poids, jamais par la
+   police ». claude.ai mesure que Futura PT n'habillait que 15 éléments sur environ 360 : un
+   orphelin, pas une direction artistique.
+
+   La taille de 16 px ne bouge PAS : on ne change qu'une variable à la fois. */
+.wpo-site-header .navigation .navbar-nav > li > a,
 .wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
-    font-family: "Futura PT", var(--f-heading), sans-serif;
+    font-family: var(--f-body), system-ui, -apple-system, sans-serif;
+}
+
+.wpo-site-header .navigation .navbar-nav > li > button.lv-mega-declencheur {
+    /* Plus de police codée en dur ici : c'était la SEULE des 38 déclarations de cette feuille à ne
+       pas passer par une variable, vestige du correctif #2573 qui avait recopié la valeur au lieu
+       de pointer la variable. La règle ci-dessus couvre désormais le bouton comme ses voisins. */
     /* CES QUATRE VALEURS DOIVENT SUIVRE CELLES DES LIENS VOISINS (« Accueil », « Livres »),
        relevées en PRODUCTION le 2026-09-14 : 16px / 500 / 24px / 18px 6px.
        Une première version portait 18px / 27px / 18px 10px, mesurés en local : les boutons
