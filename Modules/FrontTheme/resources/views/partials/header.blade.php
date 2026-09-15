@@ -76,20 +76,20 @@
                                         <div>
                                             <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Productivité') }}</div>
                                             <a href="{{ url('/outils/brain-dump') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🧠</span>
+                                                <i class="ti-light-bulb" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Brain Dump 2026') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('10 min papier + IA = clarté') }}</div></div>
                                             </a>
                                             <a href="{{ url('/outils/constructeur-prompts') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">✏️</span>
+                                                <i class="ti-pencil" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Constructeur de prompts') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __("Maîtrisez l'art du prompt IA") }}</div></div>
                                             </a>
                                             <a href="{{ url('/outils/anonymiseur') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🛡️</span>
+                                                <i class="ti-shield" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Anonymiseur') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Masque tes infos avant de les confier à une IA') }}</div></div>
                                             </a>
                                             @if(Route::has('directory.compare-by-ids'))
                                             <a href="{{ route('directory.compare-by-ids') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🆚</span>
+                                                <i class="ti-layout-column2" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __("Comparateur d'outils IA") }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Jusqu\'à 6 outils côte à côte') }}</div></div>
                                             </a>
                                             @endif
@@ -98,16 +98,16 @@
                                         <div>
                                             <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Création') }}</div>
                                             <a href="{{ url('/outils/mots-croises') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🔤</span>
+                                                <i class="ti-layout-grid3" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Générateur de mots croisés') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Grilles personnalisées + PDF') }}</div></div>
                                             </a>
                                             <a href="{{ url('/outils/code-qr') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">📱</span>
+                                                <i class="ti-mobile" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Générateur de code QR') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('QR personnalisable PNG/SVG') }}</div></div>
                                             </a>
                                             @if(Route::has('shorturl.create'))
                                             <a href="{{ route('shorturl.create') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🔗</span>
+                                                <i class="ti-link" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Raccourcir un lien') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('veille.la gratuit + QR') }}</div></div>
                                             </a>
                                             @endif
@@ -116,15 +116,15 @@
                                         <div>
                                             <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Détente') }}</div>
                                             <a href="{{ url('/outils/sudoku') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🧩</span>
+                                                <i class="ti-layout-grid3" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Sudoku quotidien') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Nouvelle grille chaque jour') }}</div></div>
                                             </a>
                                             <a href="{{ url('/outils/qt') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🧠</span>
+                                                <i class="ti-help" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('QT : Quotient Techno') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Teste ton quotient techno') }}</div></div>
                                             </a>
                                             <a href="{{ url('/jeumc') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🎯</span>
+                                                <i class="ti-target" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Grilles partagées') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Mots croisés à jouer en ligne') }}</div></div>
                                             </a>
                                         </div>
@@ -135,16 +135,16 @@
                                                  une seule entrée conflait les deux (libellé calculatrice, lien simulateur), laissant la
                                                  calculatrice sans entrée de menu propre. Voir docs/HISTORIQUE-VERSIONS.md. --}}
                                             <a href="{{ url('/outils/calculatrice-taxes') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">💰</span>
+                                                <i class="ti-money" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Calculatrice taxes QC') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('TPS et TVQ en un clic') }}</div></div>
                                             </a>
                                             <a href="{{ url('/outils/simulateur-fiscal') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">📊</span>
+                                                <i class="ti-bar-chart" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Simulateur fiscal Québec') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Impôts et graphiques') }}</div></div>
                                             </a>
                                             @if(Route::has('tools.quest.index') && config('tools.quest.enabled', false))
                                             <a href="{{ route('tools.quest.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🎮</span>
+                                                <i class="ti-game" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __("Quête narrative IA") }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __("Les Sentiers de l'IA") }}</div></div>
                                             </a>
                                             @endif
@@ -189,7 +189,7 @@
                                             <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Top consultés') }}</div>
                                             @foreach($directoryStars as $star)
                                             <a href="{{ url('/annuaire/'.$star['slug']) }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🔧</span>
+                                                <i class="ti-panel" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ $star['name'] }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ $star['desc'] }}</div></div>
                                             </a>
                                             @endforeach
@@ -197,18 +197,18 @@
                                         <div>
                                             <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Navigation') }}</div>
                                             <a href="{{ route('directory.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🔍</span>
+                                                <i class="ti-search" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Tous les outils') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ $directoryCount }} {{ __('avec avis + tutos') }}</div></div>
                                             </a>
                                             @if(Route::has('directory.leaderboard') && config('directory.leaderboard.enabled', false))
                                             <a href="{{ route('directory.leaderboard') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🏆</span>
+                                                <i class="ti-cup" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Classement') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Top contributeurs') }}</div></div>
                                             </a>
                                             @endif
                                             @if(Route::has('collections.index'))
                                             <a href="{{ route('collections.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">📁</span>
+                                                <i class="ti-folder" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Collections') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Listes communauté') }}</div></div>
                                             </a>
                                             @endif
@@ -242,19 +242,19 @@
                                             <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Contenu éditorial') }}</div>
                                             @if(Route::has('news.index'))
                                             <a href="{{ route('news.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">📰</span>
+                                                <i class="ti-announcement" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Actualités') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Veille IA et technologie') }}</div></div>
                                             </a>
                                             @endif
                                             @if(Route::has('blog.index'))
                                             <a href="{{ route('blog.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">✍️</span>
+                                                <i class="ti-write" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Blog') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Articles longs et guides') }}</div></div>
                                             </a>
                                             @endif
                                             @if(Route::has('faq.index'))
                                             <a href="{{ route('faq.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">❓</span>
+                                                <i class="ti-help" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('FAQ') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Questions fréquentes') }}</div></div>
                                             </a>
                                             @endif
@@ -263,19 +263,19 @@
                                             <div style="font-family:var(--f-heading,'Plus Jakarta Sans',sans-serif);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-muted,#6E7687);margin-bottom:10px;">{{ __('Référence') }}</div>
                                             @if(Route::has('dictionary.index'))
                                             <a href="{{ route('dictionary.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">📚</span>
+                                                <i class="ti-book" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Glossaire Techno') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ $dictionaryCount }} {{ __('termes et définitions') }}</div></div>
                                             </a>
                                             @endif
                                             @if(Route::has('acronyms.index'))
                                             <a href="{{ route('acronyms.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;margin-bottom:2px;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🔤</span>
+                                                <i class="ti-text" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Acronymes éducation') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ $acronymsCount }} {{ __('acronymes du Québec') }}</div></div>
                                             </a>
                                             @endif
                                             @if(Route::has('shop.index') && ! config('shop.maintenance', false))
                                             <a href="{{ route('shop.index') }}" style="display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none!important;color:inherit;" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
-                                                <span style="font-size:18px;line-height:1;">🛍️</span>
+                                                <i class="ti-shopping-cart" aria-hidden="true" style="font-size:16px;line-height:24px;width:20px;text-align:center;flex:0 0 20px;color:var(--c-primary,#064E5A);"></i>
                                                 <div><div style="font-weight:700;font-size:14px;color:var(--c-dark,#1A1D23);">{{ __('Boutique') }}</div><div style="font-size:12px;color:var(--c-text-muted,#6E7687);">{{ __('Merch IA et technologie') }}</div></div>
                                             </a>
                                             @endif

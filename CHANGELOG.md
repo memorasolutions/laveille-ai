@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.288.2] - 2026-09-15
+
+### Modifié
+- **Les 23 émojis des méga-menus deviennent une seule famille d'icônes** (#2591). C'était le dernier
+  point que les quatre oracles avaient relevé : cerveau rose, bouclier, « VS » orange, puzzle vert
+  et pictogrammes carrés cohabitaient dans un même panneau, soit plusieurs langages visuels à la
+  fois. Leur rendu change en plus d'un système d'exploitation à l'autre.
+
+  Choix retenu : **Themify Icons, que le thème charge déjà**. Une seule famille, monochrome, à la
+  couleur de la charte, même taille et même gouttière pour les 23 entrées. Aucun octet
+  supplémentaire, et rien à dessiner - ce qui valait mieux que 23 SVG recopiés dans le gabarit, en
+  pure duplication.
+
+  Les 23 émojis du bloc `@if(false)` sont laissés intacts : ce code n'est pas rendu.
+
+### Corrigé
+- **v1.288.1 : le panneau était tombé à 80 px de large**, mesuré en production juste après la
+  livraison de v1.288.0. Retirer `style="position:relative;"` des `<li>` ne suffisait pas : le thème
+  pose la même déclaration en feuille de style, si bien que `left:0;right:0` s'étendait sur la
+  largeur du bouton au lieu de celle du conteneur. Une régression que j'ai livrée, vue et corrigée
+  en quelques minutes parce que la vérification portait cette fois sur le rendu.
+
 ## [1.288.0] - 2026-09-15
 
 ### Modifié
