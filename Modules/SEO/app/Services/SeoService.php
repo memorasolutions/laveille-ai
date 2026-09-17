@@ -150,17 +150,17 @@ class SeoService
     /**
      * Sert le robots.txt du site.
      *
-     * Cette methode est une VOIE DE SECOURS, pas la source de verite : le serveur web sert
-     * public/robots.txt directement, sans jamais atteindre l'application. Elle ne s'execute donc
-     * que si ce fichier vient a disparaitre.
+     * Cette méthode est une VOIE DE SECOURS, pas la source de vérité : le serveur web sert
+     * public/robots.txt directement, sans jamais atteindre l'application. Elle ne s'exécute donc
+     * que si ce fichier vient a disparaître.
      *
-     * Elle LIT ce fichier plutot que de reecrire des regles en parallele. Une version anterieure
+     * Elle LIT ce fichier plutôt que de réécrire des règles en parallèle. Une version antérieure
      * en tenait sa propre copie, bien plus permissive : elle n'interdisait ni /decido/, ni /user,
-     * ni /dashboard, et ne connaissait aucun robot d'IA. Le jour ou elle se serait reveillee, la
-     * protection des sondages serait tombee sans qu'aucune alerte ne se declenche.
+     * ni /dashboard, et ne connaissait aucun robot d'IA. Le jour ou elle se serait réveillée, la
+     * protection des sondages serait tombée sans qu'aucune alerte ne se déclenche.
      *
-     * A defaut de fichier, le repli FERME plutot qu'il n'ouvre : mieux vaut un site temporairement
-     * invisible qu'un espace prive temporairement recoltable.
+     * A défaut de fichier, le repli FERME plutôt qu'il n'ouvre : mieux vaut un site temporairement
+     * invisible qu'un espace prive temporairement récoltable.
      */
     public function generateRobotsTxt(): string
     {

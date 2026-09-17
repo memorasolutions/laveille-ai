@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.289.2] - 2026-09-17
+
+### Corrigé
+- **Accents rétablis dans les commentaires livrés à la version précédente.** Le `robots.txt`
+  d'origine était accentué ; ma réécriture l'avait désaccentué, et les commentaires du service SEO
+  comme ceux du nouveau test l'étaient aussi. Règle 10 : les accents valent pour tout texte produit,
+  y compris un fichier technique. Quatrième fois que ce motif revient.
+
+  Le remplacement est borné aux lignes de COMMENTAIRE, jamais au code : `'regles'` est une clé de
+  tableau PHP et `/media/social/` un chemin d'URL. Les accentuer aurait cassé le test et le fichier.
+  Revérifié après coup : les cinq tests restent verts et les deux parseurs rendent le même verdict
+  sur les quatorze cas, les lignes de commentaire n'entrant pas dans l'analyse.
+
 ## [1.289.1] - 2026-09-17
 
 ### Corrigé

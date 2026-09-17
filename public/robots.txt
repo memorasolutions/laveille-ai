@@ -1,26 +1,26 @@
 # robots.txt - laveille.ai
 # SEO + GEO/AEO 2026 (Generative Engine Optimization)
-# Strategie : opt-in maximal pour les robots d'IA legitimes (entrainement, recherche,
-# agents) afin d'etre cite dans ChatGPT, Claude, Perplexity, Gemini, Copilot.
+# Stratégie : opt-in maximal pour les robots d'IA légitimes (entraînement, recherche,
+# agents) afin d'être cite dans ChatGPT, Claude, Perplexity, Gemini, Copilot.
 #
-# DEUX REGLES DE LECTURE A CONNAITRE AVANT DE MODIFIER CE FICHIER.
+# DEUX RÈGLES DE LECTURE A CONNAÎTRE AVANT DE MODIFIER CE FICHIER.
 #
-# 1. LES GROUPES N'HERITENT PAS. D'apres la RFC 9309 (section 2.2.1), un robot n'obeit
-#    qu'a UN SEUL groupe : le plus specifique qui le nomme. Un "Disallow" ecrit sous
-#    "User-agent: *" ne protege AUCUN robot qui possede son propre groupe. C'est
-#    pourquoi les memes interdictions sont repetees dans chaque groupe. Ne jamais les
-#    retirer de l'un d'eux en croyant qu'elles sont heritees d'ailleurs.
+# 1. LES GROUPES N'HÉRITENT PAS. D'après la RFC 9309 (section 2.2.1), un robot n'obéit
+#    qu'a UN SEUL groupe : le plus spécifique qui le nomme. Un "Disallow" écrit sous
+#    "User-agent: *" ne protège AUCUN robot qui possède son propre groupe. C'est
+#    pourquoi les mêmes interdictions sont répétées dans chaque groupe. Ne jamais les
+#    retirer de l'un d'eux en croyant qu'elles sont héritées d'ailleurs.
 #
-# 2. L'ORDRE DES LIGNES COMPTE. Deux conventions coexistent : "la premiere regle qui
-#    correspond gagne" (historique, encore appliquee par beaucoup de robots) et "la
-#    regle la plus specifique gagne" (RFC 9309, Google). L'ordre retenu ici - exception
-#    precise, puis interdictions, puis "Allow: /" en dernier - est le seul qui donne le
-#    meme resultat dans les deux. Remonter "Allow: /" en tete rouvrirait tout le site,
-#    en silence, pour les robots de la premiere famille.
+# 2. L'ORDRE DES LIGNES COMPTE. Deux conventions coexistent : "la première règle qui
+#    correspond gagne" (historique, encore appliquée par beaucoup de robots) et "la
+#    règle la plus spécifique gagne" (RFC 9309, Google). L'ordre retenu ici - exception
+#    précise, puis interdictions, puis "Allow: /" en dernier - est le seul qui donne le
+#    même résultat dans les deux. Remonter "Allow: /" en tête rouvrirait tout le site,
+#    en silence, pour les robots de la première famille.
 #
-# L'opt-in porte sur le contenu PUBLIC, jamais sur les espaces prives. Les pages
+# L'opt-in porte sur le contenu PUBLIC, jamais sur les espaces privés. Les pages
 # /decido/ portent en plus une balise "noindex" : celle-ci s'adresse aux moteurs de
-# recherche et ne lie pas la recolte d'entrainement. Les deux sont necessaires.
+# recherche et ne lie pas la récolte d'entraînement. Les deux sont nécessaires.
 #
 # Verrouille par Modules/Decido/tests/Feature/DecidoNonIndexableTest.php
 # Maintenu par MEMORA solutions (info@memora.ca).
@@ -29,7 +29,7 @@
 User-agent: *
 # L'annuaire en API est du contenu public, il ressort du /api/ interdit plus bas.
 Allow: /api/v1/directory/
-# sondages : pseudonymes et disponibilites, jamais du contenu public
+# sondages : pseudonymes et disponibilités, jamais du contenu public
 Disallow: /decido/
 Disallow: /admin
 Disallow: /user
@@ -37,12 +37,12 @@ Disallow: /login
 Disallow: /dashboard
 Disallow: /s/
 Disallow: /api/
-# carrousels PDF servis aux reseaux, jamais du contenu de site
+# carrousels PDF servis aux réseaux, jamais du contenu de site
 Disallow: /media/social/
 # Tout le reste est offert a la lecture.
 Allow: /
 
-# -- Robots d'IA, entrainement (autorises sur le contenu public) --
+# -- Robots d'IA, entraînement (autorisés sur le contenu public) --
 User-agent: GPTBot
 User-agent: ClaudeBot
 User-agent: anthropic-ai
@@ -54,7 +54,7 @@ User-agent: Diffbot
 User-agent: Meta-ExternalAgent
 # L'annuaire en API est du contenu public, il ressort du /api/ interdit plus bas.
 Allow: /api/v1/directory/
-# sondages : pseudonymes et disponibilites, jamais du contenu public
+# sondages : pseudonymes et disponibilités, jamais du contenu public
 Disallow: /decido/
 Disallow: /admin
 Disallow: /user
@@ -62,12 +62,12 @@ Disallow: /login
 Disallow: /dashboard
 Disallow: /s/
 Disallow: /api/
-# carrousels PDF servis aux reseaux, jamais du contenu de site
+# carrousels PDF servis aux réseaux, jamais du contenu de site
 Disallow: /media/social/
 # Tout le reste est offert a la lecture.
 Allow: /
 
-# -- Robots d'IA, recherche et agents (autorises sur le contenu public) --
+# -- Robots d'IA, recherche et agents (autorisés sur le contenu public) --
 User-agent: OAI-SearchBot
 User-agent: ChatGPT-User
 User-agent: Claude-SearchBot
@@ -77,7 +77,7 @@ User-agent: Perplexity-User
 User-agent: GeminiBot
 # L'annuaire en API est du contenu public, il ressort du /api/ interdit plus bas.
 Allow: /api/v1/directory/
-# sondages : pseudonymes et disponibilites, jamais du contenu public
+# sondages : pseudonymes et disponibilités, jamais du contenu public
 Disallow: /decido/
 Disallow: /admin
 Disallow: /user
@@ -85,18 +85,18 @@ Disallow: /login
 Disallow: /dashboard
 Disallow: /s/
 Disallow: /api/
-# carrousels PDF servis aux reseaux, jamais du contenu de site
+# carrousels PDF servis aux réseaux, jamais du contenu de site
 Disallow: /media/social/
 # Tout le reste est offert a la lecture.
 Allow: /
 
-# -- Robots SEO professionnels (autorises sur le contenu public) --
+# -- Robots SEO professionnels (autorisés sur le contenu public) --
 User-agent: Bingbot
 User-agent: DuckDuckBot
 User-agent: YandexBot
 # L'annuaire en API est du contenu public, il ressort du /api/ interdit plus bas.
 Allow: /api/v1/directory/
-# sondages : pseudonymes et disponibilites, jamais du contenu public
+# sondages : pseudonymes et disponibilités, jamais du contenu public
 Disallow: /decido/
 Disallow: /admin
 Disallow: /user
@@ -104,12 +104,12 @@ Disallow: /login
 Disallow: /dashboard
 Disallow: /s/
 Disallow: /api/
-# carrousels PDF servis aux reseaux, jamais du contenu de site
+# carrousels PDF servis aux réseaux, jamais du contenu de site
 Disallow: /media/social/
 # Tout le reste est offert a la lecture.
 Allow: /
 
-# -- Robots d'aspiration commerciale non desires --
+# -- Robots d'aspiration commerciale non désirés --
 User-agent: Bytespider
 User-agent: FacebookBot
 User-agent: ImagesiftBot
@@ -120,5 +120,5 @@ Disallow: /
 Sitemap: https://laveille.ai/sitemap.xml
 Sitemap: https://laveille.ai/news-sitemap.xml
 
-# -- Fichiers GEO/AEO (instructions pour les modeles de langue) --
+# -- Fichiers GEO/AEO (instructions pour les modèles de langue) --
 # llms.txt + llms-full.txt disponibles a la racine

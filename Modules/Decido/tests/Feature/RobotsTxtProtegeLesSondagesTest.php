@@ -5,26 +5,26 @@
  *
  * @project memora/laravel-saas-boilerplate
  *
- * Tests Pest - le fichier robots.txt tient les sondages hors de portee des robots, y compris
+ * Tests Pest - le fichier robots.txt tient les sondages hors de portée des robots, y compris
  * les robots d'IA.
  *
- * Demande du fondateur (2026-09-17) : « que les pages de decido ne soient JAMAIS indexees par
+ * Demande du fondateur (2026-09-17) : « que les pages de decido ne soient JAMAIS indexées par
  * les moteurs de recherche ou les IA ». Le mot « jamais » est une exigence permanente : elle
- * appelle un garde-fou, pas une verification ponctuelle. C'est le role de ce fichier.
+ * appelle un garde-fou, pas une vérification ponctuelle. C'est le rôle de ce fichier.
  *
- * Les pages de vote portent deja une balise « noindex », verrouillee par DecidoPagePubliqueTest.
+ * Les pages de vote portent déjà une balise « noindex », verrouillée par DecidoPagePubliqueTest.
  * Ces tests-ci couvrent ce que la balise ne couvre PAS : la balise s'adresse aux moteurs de
- * recherche et ne lie pas la recolte d'entrainement, qui obeit a robots.txt.
+ * recherche et ne lie pas la récolte d'entraînement, qui obéit a robots.txt.
  *
- * DEUX PIEGES DU FORMAT, qui sont la raison d'etre de ces tests :
- *  1. LES GROUPES N'HERITENT PAS (RFC 9309, section 2.2.1). Un robot n'obeit qu'a UN groupe, le
- *     plus specifique qui le nomme. Un « Disallow » pose sous « User-agent: * » ne protege AUCUN
- *     robot possedant son propre groupe. Mesure le 2026-09-17 : les 18 robots nommes du fichier
- *     n'avaient que « Allow: / » et etaient donc autorises sur /decido/, /admin et /dashboard.
- *  2. L'ORDRE COMPTE. Beaucoup de robots appliquent « la premiere regle qui correspond gagne ».
- *     Un « Allow: / » place AVANT les interdictions les annule toutes, en silence. Mesure le meme
- *     jour avec le parseur de la bibliotheque standard de Python sur le fichier de production :
- *     /admin, /user, /dashboard et /api/ ressortaient tous « autorises ».
+ * DEUX PIÈGES DU FORMAT, qui sont la raison d'être de ces tests :
+ *  1. LES GROUPES N'HÉRITENT PAS (RFC 9309, section 2.2.1). Un robot n'obéit qu'a UN groupe, le
+ *     plus spécifique qui le nomme. Un « Disallow » pose sous « User-agent: * » ne protège AUCUN
+ *     robot possédant son propre groupe. Mesuré le 2026-09-17 : les 18 robots nommés du fichier
+ *     n'avaient que « Allow: / » et étaient donc autorisés sur /decido/, /admin et /dashboard.
+ *  2. L'ORDRE COMPTE. Beaucoup de robots appliquent « la première règle qui correspond gagne ».
+ *     Un « Allow: / » place AVANT les interdictions les annule toutes, en silence. Mesuré le même
+ *     jour avec le parseur de la bibliothèque standard de Python sur le fichier de production :
+ *     /admin, /user, /dashboard et /api/ ressortaient tous « autorisés ».
  */
 
 declare(strict_types=1);
@@ -34,10 +34,10 @@ uses(Tests\TestCase::class);
 /**
  * Analyse robots.txt en groupes.
  *
- * Des lignes « User-agent: » consecutives ouvrent un meme groupe ; les regles qui suivent lui
- * appartiennent ; un « User-agent: » qui arrive APRES au moins une regle ouvre un groupe neuf.
+ * Des lignes « User-agent: » consécutives ouvrent un même groupe ; les règles qui suivent lui
+ * appartiennent ; un « User-agent: » qui arrive APRÈS au moins une règle ouvre un groupe neuf.
  *
- * @return array<int, array{agents: list<string>, regles: list<string>}>
+ * @return array<int, array{agents: list<string>, règles: list<string>}>
  */
 function robotsGroupes(): array
 {
@@ -72,7 +72,7 @@ function robotsGroupes(): array
 }
 
 /**
- * Les lignes utiles du fichier : ni vides, ni commentaires, deja rognees.
+ * Les lignes utiles du fichier : ni vides, ni commentaires, déjà rognées.
  *
  * @return list<string>
  */
@@ -87,9 +87,9 @@ function robotsLignes(): array
 }
 
 /**
- * Les groupes qui ouvrent le site, c'est-a-dire ceux ou une interdiction manquante se paie.
+ * Les groupes qui ouvrent le site, c'est-à-dire ceux ou une interdiction manquante se paie.
  *
- * @return array<int, array{agents: list<string>, regles: list<string>}>
+ * @return array<int, array{agents: list<string>, règles: list<string>}>
  */
 function robotsGroupesOuverts(): array
 {
@@ -100,11 +100,11 @@ function robotsGroupesOuverts(): array
 }
 
 test('chaque groupe qui ouvre le site interdit aussi les sondages', function (): void {
-    // LE test de ce fichier. S'il tombe, un robot autorise sur tout le site peut recolter
+    // LE test de ce fichier. S'il tombe, un robot autorise sur tout le site peut récolter
     // /decido/{slug} : le titre du sondage, les pseudonymes des participants et leurs
-    // disponibilites. Une fois absorbe dans un corpus d'entrainement, ce contenu ne se retire
+    // disponibilités. Une fois absorbe dans un corpus d'entraînement, ce contenu ne se retire
     // plus. Poser l'interdiction uniquement sous « User-agent: * » ne suffit pas : les groupes
-    // n'heritent de rien.
+    // n'héritent de rien.
     $fautifs = [];
 
     foreach (robotsGroupesOuverts() as $groupe) {
@@ -114,12 +114,12 @@ test('chaque groupe qui ouvre le site interdit aussi les sondages', function ():
     }
 
     $this->assertEmpty($fautifs, 'Ces robots sont autorises sur tout le site sans interdiction '
-        .'de /decido/, donc libres de recolter les sondages : '.implode(', ', $fautifs));
+        .'de /decido/, donc libres de récolter les sondages : '.implode(', ', $fautifs));
 });
 
 test('les robots d IA nommes sont tous couverts', function (): void {
-    // Controle nominatif, volontairement redondant avec le precedent : il resiste au cas ou
-    // quelqu'un retirerait le « Allow: / » d'un groupe d'IA, ce qui le ferait sortir du controle
+    // Contrôle nominatif, volontairement redondant avec le précédent : il résiste au cas ou
+    // quelqu'un retirerait le « Allow: / » d'un groupe d'IA, ce qui le ferait sortir du contrôle
     // ci-dessus tout en le laissant sans interdiction explicite. La liste est celle des robots
     // que le site accueille sciemment sur son contenu public.
     $attendus = [
@@ -142,10 +142,10 @@ test('les robots d IA nommes sont tous couverts', function (): void {
         .implode(', ', $manquants));
 });
 
-test('Allow: / est toujours la derniere regle de son groupe', function (): void {
-    // Piege silencieux. Beaucoup de robots appliquent « la premiere regle qui correspond gagne ».
-    // Remonter « Allow: / » en tete d'un groupe annule TOUTES les interdictions qui suivent, sans
-    // qu'aucun autre test ne s'en apercoive : le fichier contiendrait toujours les bonnes lignes.
+test('Allow: / est toujours la dernière règle de son groupe', function (): void {
+    // Piège silencieux. Beaucoup de robots appliquent « la première règle qui correspond gagne ».
+    // Remonter « Allow: / » en tête d'un groupe annule TOUTES les interdictions qui suivent, sans
+    // qu'aucun autre test ne s'en aperçoive : le fichier contiendrait toujours les bonnes lignes.
     // Seule leur POSITION trahirait la panne.
     foreach (robotsGroupes() as $groupe) {
         $position = array_search('Allow: /', $groupe['regles'], true);
@@ -157,17 +157,17 @@ test('Allow: / est toujours la derniere regle de son groupe', function (): void 
         $this->assertSame(
             count($groupe['regles']) - 1,
             $position,
-            'Dans le groupe '.implode(', ', $groupe['agents']).', « Allow: / » precede des '
+            'Dans le groupe '.implode(', ', $groupe['agents']).', « Allow: / » précède des '
             .'interdictions : tout robot lisant dans l\'ordre les ignorera.'
         );
     }
 });
 
 test('les espaces prives sont interdits dans chaque groupe ouvert', function (): void {
-    // Meme mecanique que le premier test, elargie aux autres espaces qui ne sont pas du contenu
-    // public. Ils etaient interdits sous « User-agent: * » seulement, donc ouverts aux 18 robots
-    // nommes. S'il tombe, ce sont les espaces d'administration et les comptes qui redeviennent
-    // recoltables.
+    // Même mécanique que le premier test, élargie aux autres espaces qui ne sont pas du contenu
+    // public. Ils étaient interdits sous « User-agent: * » seulement, donc ouverts aux 18 robots
+    // nommés. S'il tombe, ce sont les espaces d'administration et les comptes qui redeviennent
+    // récoltables.
     $attendues = [
         'Disallow: /admin', 'Disallow: /user', 'Disallow: /login', 'Disallow: /dashboard',
         'Disallow: /s/', 'Disallow: /api/', 'Disallow: /media/social/',
@@ -182,13 +182,13 @@ test('les espaces prives sont interdits dans chaque groupe ouvert', function ():
 });
 
 test('les pages d acquisition restent ouvertes', function (): void {
-    // Controle de FRONTIERE, celui qui empeche la correction de trop mordre. /decido (la page de
-    // presentation) et /outils/decido (dans le plan de site) sont des pages d'acquisition : elles
-    // doivent rester trouvables. Seul le motif avec barre finale les preserve.
+    // Contrôle de FRONTIÈRE, celui qui empêche la correction de trop mordre. /decido (la page de
+    // présentation) et /outils/decido (dans le plan de site) sont des pages d'acquisition : elles
+    // doivent rester trouvables. Seul le motif avec barre finale les préserve.
     //
-    // On compare des LIGNES ENTIERES, jamais des sous-chaines : « Disallow: /decido » est contenu
-    // dans « Disallow: /decido/ », donc un controle par sous-chaine serait rouge sur un fichier
-    // parfaitement correct. Ce defaut a reellement ete ecrit avant d'etre intercepte.
+    // On compare des LIGNES ENTIÈRES, jamais des sous-chaînes : « Disallow: /decido » est contenu
+    // dans « Disallow: /decido/ », donc un contrôle par sous-chaîne serait rouge sur un fichier
+    // parfaitement correct. Ce défaut a réellement été écrit avant d'être intercepte.
     $lignes = robotsLignes();
 
     expect($lignes)->not->toContain('Disallow: /decido')
