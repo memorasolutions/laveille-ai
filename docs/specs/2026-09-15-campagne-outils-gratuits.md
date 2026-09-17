@@ -54,11 +54,15 @@ cohérentes** :
 
 | Dans le texte d'origine | Après anonymisation |
 |---|---|
-| Marie Tremblay | Claire Fortin |
-| 418 555-0142 | 247 555-2403 |
-| marie.tremblay@exemple.ca | claire.fortin@example.net |
-| 250 rue des Érables | 900 boulevard René-Lévesque |
-| 000-000-000 | 995-530-402 |
+| Marie Tremblay | Nathalie Gagnon |
+| 418 555-0142 | 775 555-5807 |
+| marie.tremblay@exemple.ca | nathalie.gagnon@example.net |
+| 250 rue des Érables | 882 boulevard Saint-Joseph |
+| 000-000-000 | 247-086-807 |
+
+> Sortie RÉELLE relevée en production le 2026-09-17. Les valeurs changent à chaque passage : ce
+> sont des substitutions tirées au sort, pas une table fixe. La capture de l'annonce montre
+> exactement ces valeurs.
 
 C'est nettement plus malin qu'un marqueur : **l'IA continue de comprendre ce qu'elle lit**, donc sa
 réponse reste utilisable. Puis l'étape 2 de l'outil remet les vraies valeurs dans la réponse.
@@ -73,9 +77,9 @@ passe dans ton navigateur » sans mentir.
 > L'anonymiseur de laveille.ai ne colle pas d'étiquettes [NOM] dans ton texte. Il remplace tes
 > vraies données par des fausses, mais cohérentes.
 >
-> Marie Tremblay devient Claire Fortin. Le numéro reste un 418. L'adresse devient une autre vraie
-> rue de Québec. L'IA continue donc de comprendre ce qu'elle lit, et sa réponse reste utilisable,
-> ce qui n'arrive pas quand on remplace tout par des crochets.
+> Marie Tremblay devient Nathalie Gagnon. Le numéro reste un numéro de téléphone, l'adresse reste
+> une adresse de Québec, le courriel reste un courriel. L'IA continue donc de comprendre ce qu'elle
+> lit, et sa réponse reste utilisable, ce qui n'arrive pas quand on remplace tout par des crochets.
 >
 > Ensuite tu recolles la réponse de l'IA dans l'outil, et il y remet tes vraies informations.
 >
@@ -88,8 +92,8 @@ passe dans ton navigateur » sans mentir.
 > Tu veux faire résumer un dossier par une IA, sans lui donner le nom de ton client.
 >
 > L'anonymiseur de laveille.ai remplace les vraies données par des fausses cohérentes : Marie
-> Tremblay devient Claire Fortin, l'adresse devient une autre vraie rue de Québec. L'IA comprend
-> encore le texte, donc sa réponse reste utile.
+> Tremblay devient Nathalie Gagnon, l'adresse devient une autre adresse de Québec, le numéro reste
+> un numéro. L'IA comprend encore le texte, donc sa réponse reste utile.
 >
 > Ensuite, tu recolles sa réponse et l'outil y remet tes vraies infos.
 >
@@ -97,9 +101,15 @@ passe dans ton navigateur » sans mentir.
 
 ### Le visuel
 
-Capture faite en production, comparaison côte à côte « Votre texte » / « Texte anonymisé », les
-valeurs substituées surlignées des deux côtés. C'est la capture la plus parlante possible : elle
-montre le mécanisme en une seconde, sans légende.
+**PRÊTE** : `docs/campagne-outils-gratuits/01-anonymiseur-comparaison.png` (1440 px, 65 Ko).
+
+Capture faite en production le 2026-09-17, comparaison côte à côte « Votre texte » / « Texte
+anonymisé », les valeurs substituées surlignées des deux côtés. Elle montre le mécanisme en une
+seconde, sans légende.
+
+**La promesse du texte est re-prouvée le jour même** : pendant l'anonymisation, l'interception
+réseau n'a enregistré **aucune requête**. On peut écrire « tout se passe dans ton navigateur » sans
+mentir. La page l'affiche d'ailleurs elle-même : « 100 % local - traitement dans votre navigateur ».
 
 **Données de l'exemple entièrement fictives** : le numéro est en 555, réservé à la fiction, et le
 numéro de dossier est 000-000-000. Aucune donnée réelle n'a servi à la démonstration.
