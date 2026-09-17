@@ -22,7 +22,8 @@
 # /decido/ portent en plus une balise "noindex" : celle-ci s'adresse aux moteurs de
 # recherche et ne lie pas la récolte d'entraînement. Les deux sont nécessaires.
 #
-# Verrouille par Modules/Decido/tests/Feature/DecidoNonIndexableTest.php
+# Verrouillé par Modules/Decido/tests/Feature/RobotsTxtProtegeLesSondagesTest.php
+# (le « noindex » des pages de vote est verrouillé, lui, par DecidoPagePubliqueTest.php)
 # Maintenu par MEMORA solutions (info@memora.ca).
 
 # -- Moteurs de recherche classiques --

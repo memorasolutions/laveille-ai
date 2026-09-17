@@ -37,7 +37,7 @@ uses(Tests\TestCase::class);
  * Des lignes « User-agent: » consécutives ouvrent un même groupe ; les règles qui suivent lui
  * appartiennent ; un « User-agent: » qui arrive APRÈS au moins une règle ouvre un groupe neuf.
  *
- * @return array<int, array{agents: list<string>, règles: list<string>}>
+ * @return array<int, array{agents: list<string>, regles: list<string>}>
  */
 function robotsGroupes(): array
 {
@@ -87,19 +87,30 @@ function robotsLignes(): array
 }
 
 /**
- * Les groupes qui ouvrent le site, c'est-à-dire ceux ou une interdiction manquante se paie.
+ * Les groupes où une interdiction manquante se paie : tous ceux qui ne ferment pas tout.
  *
- * @return array<int, array{agents: list<string>, règles: list<string>}>
+ * LA BORNE A ÉTÉ ÉLARGIE le 2026-09-17, après qu'une passe adversariale l'a percée. La première
+ * version ne retenait que les groupes portant « Allow: / ». Le contre-exemple, reproduit avant
+ * correction : ajouter un groupe « User-agent: Amazonbot » suivi du seul « Disallow: /admin »
+ * laissait ce robot LIBRE sur /decido/, sans qu'aucun des cinq tests ne s'en aperçoive. Le
+ * groupe n'ouvrait pas le site au sens littéral, donc il sortait du contrôle.
+ *
+ * La bonne question n'est pas « ce groupe ouvre-t-il tout ? » mais « ce groupe laisse-t-il
+ * quelque chose d'accessible ? ». Seule une fermeture totale (« Disallow: / ») dispense des
+ * interdictions ciblées ; tout le reste doit les porter, y compris un groupe futur que
+ * personne n'a encore écrit.
+ *
+ * @return array<int, array{agents: list<string>, regles: list<string>}>
  */
-function robotsGroupesOuverts(): array
+function robotsGroupesNonFermes(): array
 {
     return array_values(array_filter(
         robotsGroupes(),
-        static fn (array $groupe): bool => in_array('Allow: /', $groupe['regles'], true)
+        static fn (array $groupe): bool => ! in_array('Disallow: /', $groupe['regles'], true)
     ));
 }
 
-test('chaque groupe qui ouvre le site interdit aussi les sondages', function (): void {
+test('chaque groupe qui ne ferme pas tout interdit les sondages', function (): void {
     // LE test de ce fichier. S'il tombe, un robot autorise sur tout le site peut récolter
     // /decido/{slug} : le titre du sondage, les pseudonymes des participants et leurs
     // disponibilités. Une fois absorbe dans un corpus d'entraînement, ce contenu ne se retire
@@ -107,14 +118,14 @@ test('chaque groupe qui ouvre le site interdit aussi les sondages', function ():
     // n'héritent de rien.
     $fautifs = [];
 
-    foreach (robotsGroupesOuverts() as $groupe) {
+    foreach (robotsGroupesNonFermes() as $groupe) {
         if (! in_array('Disallow: /decido/', $groupe['regles'], true)) {
             $fautifs = [...$fautifs, ...$groupe['agents']];
         }
     }
 
-    $this->assertEmpty($fautifs, 'Ces robots sont autorises sur tout le site sans interdiction '
-        .'de /decido/, donc libres de récolter les sondages : '.implode(', ', $fautifs));
+    $this->assertEmpty($fautifs, 'Ces robots peuvent atteindre les sondages, faute d\'interdiction de /decido/ '
+        .'dans leur propre groupe : '.implode(', ', $fautifs));
 });
 
 test('les robots d IA nommes sont tous couverts', function (): void {
@@ -163,7 +174,7 @@ test('Allow: / est toujours la dernière règle de son groupe', function (): voi
     }
 });
 
-test('les espaces prives sont interdits dans chaque groupe ouvert', function (): void {
+test('les espaces privés sont interdits dans chaque groupe qui ne ferme pas tout', function (): void {
     // Même mécanique que le premier test, élargie aux autres espaces qui ne sont pas du contenu
     // public. Ils étaient interdits sous « User-agent: * » seulement, donc ouverts aux 18 robots
     // nommés. S'il tombe, ce sont les espaces d'administration et les comptes qui redeviennent
@@ -173,11 +184,11 @@ test('les espaces prives sont interdits dans chaque groupe ouvert', function ():
         'Disallow: /s/', 'Disallow: /api/', 'Disallow: /media/social/',
     ];
 
-    foreach (robotsGroupesOuverts() as $groupe) {
+    foreach (robotsGroupesNonFermes() as $groupe) {
         $manquantes = array_values(array_diff($attendues, $groupe['regles']));
 
         $this->assertEmpty($manquantes, 'Le groupe '.implode(', ', $groupe['agents'])
-            .' ouvre le site sans interdire : '.implode(', ', $manquantes));
+            .' laisse le site accessible sans interdire : '.implode(', ', $manquantes));
     }
 });
 

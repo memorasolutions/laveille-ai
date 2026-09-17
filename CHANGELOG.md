@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.289.3] - 2026-09-17
+
+### Corrigé
+- **Le garde-fou posé en 1.289.1 avait lui-même un trou, trouvé par une passe adversariale.**
+  Les tests ne contrôlaient que les groupes portant « Allow: / ». Contre-exemple reproduit avant
+  correction : ajouter au fichier un groupe « User-agent: Amazonbot » suivi du seul
+  « Disallow: /admin » laissait ce robot LIBRE sur `/decido/`, et les cinq tests restaient verts.
+
+  La bonne borne n'est pas « ce groupe ouvre-t-il tout ? » mais « ce groupe laisse-t-il quelque
+  chose d'accessible ? ». Seule une fermeture totale (« Disallow: / ») dispense des interdictions
+  ciblées. Les deux tests concernés suivent désormais cette borne, ce qui couvre aussi les groupes
+  qu'on n'a pas encore écrits. Revérifié : le contre-exemple fait maintenant rougir deux tests, en
+  nommant le robot fautif.
+
+- **Référence morte dans `robots.txt`** : le fichier citait un `DecidoNonIndexableTest.php` qui
+  n'a jamais existé, nom écrit avant que le test soit baptisé. Il pointe maintenant vers
+  `RobotsTxtProtegeLesSondagesTest.php`, et signale que le « noindex » des pages de vote est
+  verrouillé ailleurs, par `DecidoPagePubliqueTest.php`.
+
+- **Deux annotations PHPDoc** avaient été accentuées à tort en 1.289.2 : elles décrivent la clé de
+  tableau `regles`, qui ne porte pas d'accent. Sans effet à l'exécution, faux pour un analyseur
+  statique.
+
+### Mesuré, sans changement
+- **Un robot absent du fichier n'est pas un robot libre.** AI2Bot, Amazonbot, YouBot et tout robot
+  non listé tombent dans le groupe « User-agent: * », qui porte toutes les interdictions : ils sont
+  déjà bloqués sur `/decido/`. Les nommer relèverait de la stratégie de citation, pas de la
+  confidentialité. Rien n'est donc ajouté à la liste sur ce motif.
+- **Les liens courts de sondage vivent sous `/s/`, pas sous `/decido/`.** Ils sont couverts, mais
+  par une règle distincte, elle aussi répétée dans chaque groupe. Deux motifs font le travail, pas
+  un seul : le dire évite de croire qu'un seul suffit.
+
 ## [1.289.2] - 2026-09-17
 
 ### Corrigé
