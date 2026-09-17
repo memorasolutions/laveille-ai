@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.289.4] - 2026-09-17
+
+### Ajouté
+- **Sixième garde-fou sur le robots.txt : aucun robot ne peut être nommé dans deux groupes.**
+  Cloudflare propose une option « refuser l'entraînement des IA sans sortir de l'index Google ».
+  Elle ne remplace pas le fichier servi : elle le PRÉFIXE. Trois formes de préfixe ont été
+  simulées contre deux parseurs aux conventions opposées.
+
+  Un second groupe « User-agent: * » ajouté en tête ne casse RIEN : les deux parseurs continuent
+  de bloquer `/decido/`. Ce n'était donc pas le danger, contrairement à ce qui avait été supposé
+  au départ.
+
+  **Le danger réel est un groupe qui NOMME un robot, inséré avant le nôtre.** Mesuré : un
+  « User-agent: GPTBot / Allow: / » placé en tête fait passer ce robot de « bloqué » à
+  « AUTORISÉ » sur un sondage, pour tout lecteur appliquant « le premier groupe qui correspond
+  gagne ». Le robot prend le groupe du préfixe et ne voit jamais le nôtre.
+
+  Le test attrape la trace de cette situation dans le fichier versionné. Contrôle négatif fait :
+  sur un fichier préfixé d'un groupe GPTBot permissif, trois tests rougissent et le nouveau nomme
+  le robot fautif.
+
+  **Sa limite est écrite dans le test lui-même** : il ne voit pas une injection faite à la volée
+  par un intermédiaire, qui laisserait le dépôt intact. Un garde-fou dont on ignore la portée est
+  pire qu'aucun garde-fou.
+
 ## [1.289.3] - 2026-09-17
 
 ### Corrigé

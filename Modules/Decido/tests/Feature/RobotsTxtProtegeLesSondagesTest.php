@@ -207,3 +207,40 @@ test('les pages d acquisition restent ouvertes', function (): void {
         ->and($lignes)->not->toContain('Disallow: /outils/decido')
         ->and($lignes)->toContain('Allow: /api/v1/directory/');
 });
+
+test('aucun robot n est nomme dans deux groupes differents', function (): void {
+    // MESURÉ le 2026-09-17, en simulant ce que Cloudflare ferait s'il activait son bloc géré.
+    // Son option « refuser l'entraînement des IA sans sortir de l'index » ne remplace pas le
+    // fichier : elle le PRÉFIXE. Trois formes de préfixe ont été essayées contre deux parseurs.
+    //
+    // Un second groupe « User-agent: * » ajouté en tête ne casse RIEN : les deux parseurs
+    // continuent de bloquer /decido/. Ce n'était donc pas le danger, contrairement à ce qui
+    // avait d'abord été supposé.
+    //
+    // LE DANGER RÉEL est un groupe qui NOMME un robot, inséré avant le nôtre. Mesuré : un
+    // « User-agent: GPTBot / Allow: / » placé en tête fait passer ce robot de « bloqué » à
+    // « AUTORISÉ » sur un sondage, pour tout lecteur appliquant « le premier groupe gagne ».
+    // Le robot prend le groupe du préfixe et ne voit jamais le nôtre.
+    //
+    // Ce test attrape la trace de cette situation dans le fichier versionné : un même robot
+    // nommé deux fois. Il ne voit PAS une injection faite à la volée par un intermédiaire,
+    // qui laisserait le dépôt intact - cette limite est réelle et assumée, elle est écrite
+    // dans le fichier lui-même pour que personne ne s'y fie à tort.
+    $vus = [];
+    $doubles = [];
+
+    foreach (robotsGroupes() as $groupe) {
+        foreach ($groupe['agents'] as $agent) {
+            $cle = mb_strtolower($agent);
+            if (isset($vus[$cle])) {
+                $doubles[] = $agent;
+            }
+            $vus[$cle] = true;
+        }
+    }
+
+    $this->assertEmpty($doubles, 'Ces robots sont nommés dans plus d\'un groupe : '
+        .implode(', ', array_unique($doubles)).'. Le premier rencontré gagne chez une partie '
+        .'des robots, donc le second est mort - et si le premier est permissif, la protection '
+        .'des sondages tombe en silence.');
+});
