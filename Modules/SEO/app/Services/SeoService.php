@@ -147,13 +147,33 @@ class SeoService
         return $this;
     }
 
+    /**
+     * Sert le robots.txt du site.
+     *
+     * Cette methode est une VOIE DE SECOURS, pas la source de verite : le serveur web sert
+     * public/robots.txt directement, sans jamais atteindre l'application. Elle ne s'execute donc
+     * que si ce fichier vient a disparaitre.
+     *
+     * Elle LIT ce fichier plutot que de reecrire des regles en parallele. Une version anterieure
+     * en tenait sa propre copie, bien plus permissive : elle n'interdisait ni /decido/, ni /user,
+     * ni /dashboard, et ne connaissait aucun robot d'IA. Le jour ou elle se serait reveillee, la
+     * protection des sondages serait tombee sans qu'aucune alerte ne se declenche.
+     *
+     * A defaut de fichier, le repli FERME plutot qu'il n'ouvre : mieux vaut un site temporairement
+     * invisible qu'un espace prive temporairement recoltable.
+     */
     public function generateRobotsTxt(): string
     {
+        $fichier = public_path('robots.txt');
+
+        if (is_readable($fichier)) {
+            return (string) file_get_contents($fichier);
+        }
+
         return implode("\n", [
+            '# Repli : public/robots.txt est introuvable. On ferme, on n\'ouvre pas.',
             'User-agent: *',
-            'Allow: /',
-            'Disallow: /admin/',
-            'Disallow: /api/',
+            'Disallow: /',
             '',
             'Sitemap: '.url('/sitemap.xml'),
         ]);

@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.289.1] - 2026-09-17
+
+### Corrigé
+- **Les sondages Décido étaient accessibles aux robots d'IA, et le trou dépassait Décido** (#2596).
+  Demande du fondateur : « que les pages de decido ne soient jamais indexées par les moteurs de
+  recherche ou les IA ». Le volet moteurs de recherche était déjà tenu par la balise « noindex » ;
+  le volet IA ne l'était pas.
+
+  **Deux défauts distincts, tous deux mesurés avant correction.**
+
+  Le premier : `robots.txt` n'hérite pas. D'après la RFC 9309 (section 2.2.1), un robot n'obéit
+  qu'à UN seul groupe, le plus spécifique qui le nomme. Les huit interdictions posées sous
+  « User-agent: * » ne protégeaient donc aucun des 18 robots qui possèdent leur propre groupe.
+  GPTBot, ClaudeBot, CCBot, Google-Extended, Meta-ExternalAgent, PerplexityBot, ChatGPT-User et
+  Claude-User portaient chacun deux lignes : « Allow: / », rien d'autre. Ils étaient libres non
+  seulement sur `/decido/`, mais aussi sur `/admin`, `/user`, `/login`, `/dashboard`, `/s/`,
+  `/api/` et `/media/social/`.
+
+  Le second, trouvé en contrôlant le correctif plutôt qu'en le relisant : « Allow: / » était écrit
+  AVANT les interdictions. Beaucoup de robots appliquent « la première règle qui correspond
+  gagne » : pour ceux-là, la permission générale annulait tout ce qui suivait. Le parseur de la
+  bibliothèque standard de Python, lancé sur le fichier réellement servi en production, rendait
+  `/admin`, `/user`, `/dashboard` et `/api/` tous « autorisés ». Ce défaut-là préexistait et ne
+  concernait pas que les robots d'IA.
+
+  Le fichier est réécrit : interdictions répétées dans chaque groupe (le format n'a pas
+  d'inclusion), exception précise en tête, permission générale en dernier. Vérifié par deux
+  parseurs aux conventions opposées : 33 cas sur 33 pour la convention historique, 19 sur 19 pour
+  la convention Google. Les pages d'acquisition restent ouvertes : `/decido` et `/outils/decido`
+  ne sont pas touchés, seul le motif avec barre finale l'est.
+
+- **La voie de secours du robots.txt ne peut plus être plus permissive que le vrai fichier.**
+  `SeoService::generateRobotsTxt()` tenait sa propre copie des règles, bien plus courte : ni
+  `/decido/`, ni `/user`, ni `/dashboard`, et aucun robot d'IA connu. Cette méthode est morte
+  aujourd'hui, le serveur web servant `public/robots.txt` sans jamais atteindre l'application.
+  Le jour où elle se serait réveillée, la protection serait tombée sans alerte. Elle lit désormais
+  le fichier, et à défaut ferme le site au lieu de l'ouvrir.
+
+### Ajouté
+- **Garde-fou permanent** : `Modules/Decido/tests/Feature/RobotsTxtProtegeLesSondagesTest.php`,
+  cinq tests qui verrouillent l'interdiction dans chaque groupe, la couverture nominative des
+  16 robots d'IA, la position de « Allow: / » en fin de groupe, et la frontière qui garde les
+  pages d'acquisition ouvertes. Le mot « jamais » de la demande est une exigence permanente :
+  elle appelle un test, pas une vérification ponctuelle. Contrôle négatif effectué : remis sur
+  le fichier d'origine, quatre de ces cinq tests deviennent rouges en nommant les 16 robots.
+
 ## [1.289.0] - 2026-09-15
 
 ### Ajouté
