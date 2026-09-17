@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.289.5] - 2026-09-17
+
+### Corrigé
+- **Élagage du passif « faible valeur » AdSense : 109 fiches retirées (410, réversible), pas
+  596 de plus.** Le diagnostic du refus AdSense (19 avril) tenait le ratio mince/riche du
+  plan de site pour responsable : 1312 fiches, 73 % antérieures à août 2026. L'hypothèse à
+  vérifier était que ce passif ne rapporte rien en recherche.
+
+  Croisement avec Search Console (90 jours, dimension page, filtre `/actualites/`) : sur 1033
+  fiches antérieures à août 2026 encore indexées (`seo_status = index`), **924 (89 %) ont reçu
+  au moins une impression** - contredisant la mesure à 28 jours qui n'en trouvait que 22 sur
+  tout le site. Seules **109 fiches ont zéro impression sur 90 jours** : ce sont elles, et
+  elles seules, qui ont été retirées via `news:retire` (mécanisme existant, `retired_at`,
+  aucune donnée supprimée).
+
+  Nouvelle commande `news:list-retire-candidates` (LECTURE SEULE, aucune écriture) : liste
+  id/slug/pub_date/seo_status des fiches publiées non retirées avant une date donnée -
+  nécessaire pour construire le fichier `--ids-file` de `news:retire` sur des faits plutôt
+  qu'à l'aveugle. N'ajoute aucun mécanisme de retrait parallèle.
+
+  Preuve : dry-run confirmé (109), retrait exécuté, backup horodaté écrit avant écriture
+  (`news-retire-backup-20260917-195116.json`), 3 fiches retirées vérifiées 410, une fiche
+  protégée par du trafic réel vérifiée 200, plan de site passé de 1312 à 1202 URLs
+  `/actualites/`. Exécuté en production via un runner PHP jetable (jeton, borné aux
+  commandes `news:*`, neutralisé et vérifié 404 immédiatement après usage).
+
 ## [1.289.4] - 2026-09-17
 
 ### Ajouté

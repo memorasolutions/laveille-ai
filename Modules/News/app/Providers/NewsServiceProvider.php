@@ -98,6 +98,10 @@ class NewsServiceProvider extends ServiceProvider
             // Chantier AdSense « faible valeur » (2026-08-18) - retrait SEO-sûr et réversible
             // d'un lot de fiches (410 Gone), voir docblock de la classe.
             \Modules\News\Console\RetireArticlesCommand::class,
+            // Chantier retrait AdSense « faible valeur » (2026-09-17) - identification des
+            // candidats (lecture seule), voir docblock de la classe. Alimente --ids-file
+            // ci-dessus, jamais un mécanisme de retrait parallèle.
+            \Modules\News\Console\ListRetireCandidatesCommand::class,
             // Fenêtre glissante des brouillons bruts (design doc SPEC-PRUNE-DRAFTS, 2026-08-20) -
             // purge sûre et réversible du backlog /admin/news/composition, voir docblock.
             \Modules\News\Console\PruneDraftsCommand::class,
