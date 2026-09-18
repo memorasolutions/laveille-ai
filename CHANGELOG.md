@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.289.9] - 2026-09-18
+
+### Corrigé
+- **L'alias « Hermes » nu posait des liens trompeurs, retiré quelques minutes après sa mise en
+  ligne.** Le défaut a été mesuré en production juste après le déploiement de 1.289.8, pas
+  supposé : sur `/annuaire/hermes-desktop`, cinq occurrences de « Hermes » étaient soulignées vers
+  `/glossaire/hermes` en laissant « Desktop » en texte nu juste après. Le lecteur voyait
+  « Hermes Desktop » dont seule la première moitié était cliquable, et atterrissait sur une fiche
+  générale plutôt que de rester sur la fiche du produit. Même défaut, une fois, sur l'actualité
+  consacrée à Hermes Desktop.
+
+  **C'est le défaut de frontière que le skill décrit sous le nom « GPT-4o mini », mais par un
+  chemin qu'il n'avait pas prévu, et c'est la leçon à retenir.** Le skill affirme que le tri par
+  longueur décroissante protège les formes composées dès qu'elles sont déclarées. « Hermes
+  Desktop » EST bien déclaré, sur la fiche d'annuaire, et le lien fonctionne correctement partout
+  ailleurs - la preuve figure dans la même mesure. Mais **sur sa propre page, une fiche ne
+  s'auto-lie pas** : la forme longue cesse d'être un candidat actif à cet endroit précis, le tri
+  par longueur n'a plus rien à départager, et la forme courte gagne par défaut. La protection par
+  longueur ne vaut que là où la forme longue est candidate.
+
+  Trois options pesées. Déclarer aussi « Hermes Desktop » en alias du glossaire aurait été PIRE :
+  la forme longue aurait alors gagné partout et détourné vers le glossaire les liens qui vont
+  aujourd'hui correctement vers la fiche produit. Poser une garde générique dans le linkifier est
+  écarté par le skill lui-même, qui demande de trancher famille par famille (« Claude Pro » est un
+  niveau d'offre, « GPT-4o mini » un modèle distinct) - c'est un chantier en soi. Le retrait de
+  l'alias nu a donc été retenu.
+
+  Compté page par page sur les six pages du corpus qui citent Hermes, **le retrait ne fait perdre
+  aucun lien utile** : « Hermes Agent » reste lié partout où il apparaît, et les seules occurrences
+  de « Hermes » nu étaient précisément les six liens trompeurs. Six liens faux supprimés, zéro lien
+  juste perdu. Un lien faux coûte plus cher qu'un lien absent, parce qu'il trompe au lieu de
+  manquer.
+
 ## [1.289.8] - 2026-09-18
 
 ### Ajouté
