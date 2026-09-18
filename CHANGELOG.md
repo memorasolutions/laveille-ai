@@ -1,5 +1,56 @@
 # Changelog
 
+## [1.289.7] - 2026-09-18
+
+### Ajouté
+- **Terme « mainframe » au glossaire**, avec un angle que les définitions courantes n'ont pas :
+  les deux chiffres les plus cités au sujet des ordinateurs centraux ne sont pas des mesures.
+
+  « 87 % des transactions par carte » vient d'un communiqué d'IBM de 2017, dont la formulation
+  d'origine dit « supported by IBM Z systems », c'est-à-dire prises en charge par, ce qui est
+  beaucoup plus large que « traitées par ». La reprise courante laisse tomber la nuance. IBM
+  lui-même écrit « environ 90 % » dans son rapport annuel de 2019 : le chiffre bouge sans
+  qu'aucune méthode publiée ne permette de savoir pourquoi. « 220 milliards de lignes de COBOL »
+  est surtout attribué à une dépêche de Reuters de 2017, sans méthode de comptage publiée, et la
+  fourchette défendable va de 220 à plus de 800 milliards. Aucun recensement mondial indépendant
+  et auditable n'existe pour l'un ni pour l'autre : la fiche le dit, au lieu de recopier les
+  chiffres comme s'ils étaient établis.
+
+- **Un fait du brief de rédaction a été démenti par la vérification, et l'exemple a changé à cause
+  de cela.** L'exemple retenu au départ était la migration ratée de TSB en avril 2018, censée
+  illustrer « le risque de sortir d'un mainframe ». Vérification faite dans la notification finale
+  de la FCA du 19 décembre 2022 : elle ne qualifie jamais de mainframe la plateforme quittée, elle
+  la nomme seulement « the LBG IT Platform », sans architecture, sans fournisseur, sans système
+  d'exploitation. L'exemple aurait donc prêté au terme un cas qui ne le concerne peut-être pas.
+  Il a été remplacé par un fait audité par une institution indépendante : le rapport GAO-16-468,
+  qui écrit que le fichier maître des contribuables du fisc américain est en langage d'assemblage
+  et tourne sur un mainframe IBM. Le contraste sert l'angle : les chiffres solides viennent des
+  audits publics, pas des communiqués de fournisseurs.
+
+### Vérifié
+- **Anti-doublon par famille de motifs, pas par un seul mot** : dix familles passées sur les 549
+  slugs du plan de site de production (mainframe, ordinateur central, grand système, z/OS, COBOL,
+  serveur central, calculateur, patrimonial, AS-400, traitement par lots). Neuf à zéro. La
+  dixième a ramené le slug `batch`, qui a été ouvert et lu : il parle du lot d'exemples
+  d'entraînement d'un modèle, pas du traitement par lots d'un ordinateur central. Homonyme total,
+  faux positif écarté.
+- **Aucun terme parent n'existe au glossaire** : ni centre de données, ni serveur, ni base de
+  données, ni haute disponibilité, ni virtualisation. `cloud-computing` existe, mais c'est un
+  voisin et non un parent. `broader_slugs` reste donc vide plutôt que de fabriquer une relation
+  fausse.
+- **Alias comptés dans le corpus publié avant d'être déclarés** : « mainframe » 5 occurrences et
+  « mainframes » 1, donc déclarés ; « ordinateur central », « ordinateurs centraux » et « grand
+  système » à zéro, donc non déclarés. Un alias qui ne correspond à rien est du bruit, pas une
+  précaution.
+- **Les trois adresses de sources vérifiées par requête réelle.** Les deux d'IBM répondent 200.
+  gao.gov renvoie 403 à un client en ligne de commande : c'est un mur anti-robot et non une page
+  absente, la page a donc été ouverte au navigateur, qui a servi le titre exact attendu.
+- **Typographie OQLF contrôlée sur les 22 champs de contenu réellement stockés**, et non sur le
+  fichier source : zéro défaut. Trois contrôles successifs avaient d'abord donné de faux
+  positifs, parce qu'ils cherchaient un caractère invisible écrit littéralement dans le motif.
+  Réécrits par point de code, avec deux témoins qui prouvent que le contrôle voit bien quelque
+  chose.
+
 ## [1.289.6] - 2026-09-18
 
 ### Corrigé
