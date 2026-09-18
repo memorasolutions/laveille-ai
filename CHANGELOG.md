@@ -1,5 +1,42 @@
 # Changelog
 
+## [1.289.10] - 2026-09-18
+
+### Corrigé
+- **Le fil d'Ariane de la page des dossiers thématiques ne ramenait pas aux actualités**
+  (signalement du fondateur). Mesuré avant de toucher à quoi que ce soit : le fil affichait
+  « Accueil › Dossiers thématiques », avec un seul lien, celui de l'accueil. Et **aucun lien vers
+  `/actualites` n'existait nulle part dans la page** - un lecteur arrivé là par un moteur n'avait
+  aucun chemin de retour vers le fil d'actualité.
+
+  **Le défaut était double, et la seconde moitié ne se voit pas à l'écran** : le balisage machine
+  `BreadcrumbList` ne déclarait qu'UN seul élément, « Accueil ». Ni « Actualités », ni « Dossiers
+  thématiques ». C'est ce que lisent Google et les moteurs de réponse pour reconstruire la
+  hiérarchie du site.
+
+  **Un seul changement corrige les deux**, parce que le composant partagé
+  `fronttheme::partials.breadcrumb` alimente le HTML rendu ET le JSON-LD depuis la même variable
+  `breadcrumbItems`. Sans elle, il ne produit qu'un `<span>` sans lien : c'était exactement le cas
+  des deux vues de dossiers, qui ne passaient que `breadcrumbTitle`.
+
+  Le patron existait déjà dans le module, sur la fiche d'actualité (`show.blade.php`) : il a été
+  suivi plutôt que réinventé. Trois modifications, toutes minimales :
+  - `breadcrumb.blade.php` : « Dossiers thématiques » rejoint la table des étapes liables, avec
+    `route('news.dossiers')` sous garde `Route::has()` comme toutes les autres ;
+  - `dossiers-index.blade.php` : fil « Accueil › Actualités › Dossiers thématiques » ;
+  - `dossier.blade.php` : fil « Accueil › Actualités › Dossiers thématiques › Tout sur X », la page
+    d'un dossier ayant **le même défaut**, mesuré lui aussi avant correction. La corriger seule
+    aurait laissé le lecteur d'une page de dossier sans retour.
+
+  `breadcrumbTitle` est conservé dans les deux vues : le grand titre de la zone ne bouge pas. Le
+  patron de `show.blade.php` le vide, mais c'est un choix propre aux fiches d'actualité, et le
+  reproduire ici aurait changé l'apparence des pages sans que ce soit demandé.
+
+  Prouvé en local sur la page liste : rendu « Accueil › Actualités › Dossiers thématiques » avec
+  « Actualités » pointant vers `/actualites`, et `BreadcrumbList` passé de 1 à 3 éléments. La page
+  d'un dossier individuel n'a pas pu être prouvée en local, la base locale ne contenant aucun
+  dossier : elle est vérifiée en production.
+
 ## [1.289.9] - 2026-09-18
 
 ### Corrigé

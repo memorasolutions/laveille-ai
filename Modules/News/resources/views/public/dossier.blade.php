@@ -16,7 +16,10 @@
 @section('meta_description', __(':total actualités sur :entite, réunies en un seul dossier : ce qui a été annoncé, ce qui a changé, et dans quel ordre.', ['total' => $total, 'entite' => $entite]))
 
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Tout sur :entite', ['entite' => $entite])])
+    @include('fronttheme::partials.breadcrumb', [
+        'breadcrumbTitle' => __('Tout sur :entite', ['entite' => $entite]),
+        'breadcrumbItems' => [__('Actualités'), __('Dossiers thématiques'), __('Tout sur :entite', ['entite' => $entite])],
+    ])
 @endsection
 
 @include('news::public.partials.dossier-styles')

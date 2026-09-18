@@ -24,6 +24,7 @@
                                             __('Répertoire') => Route::has('directory.index') ? route('directory.index') : null,
                                             __('Glossaire') => Route::has('dictionary.index') ? route('dictionary.index') : null,
                                             __('Actualités') => Route::has('news.index') ? route('news.index') : null,
+                                            __('Dossiers thématiques') => Route::has('news.dossiers') ? route('news.dossiers') : null,
                                             __('Livres') => Route::has('books.index') ? route('books.index') : null,
                                             __('Boutique') => Route::has('shop.index') ? route('shop.index') : null,
                                             __("L'IA pour les PME") => Route::has('pillar.ia-pme') ? route('pillar.ia-pme') : null,

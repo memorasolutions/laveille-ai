@@ -12,7 +12,10 @@
 @section('meta_description', __('Chaque dossier réunit les actualités qui portent sur une même entreprise ou un même produit, de la première annonce à la plus récente.'))
 
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Dossiers thématiques')])
+    @include('fronttheme::partials.breadcrumb', [
+        'breadcrumbTitle' => __('Dossiers thématiques'),
+        'breadcrumbItems' => [__('Actualités'), __('Dossiers thématiques')],
+    ])
 @endsection
 
 @include('news::public.partials.dossier-styles')
