@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.289.11] - 2026-09-18
+
+### Corrigé
+- **Les cinq liens « Hermes » qui coupaient « Hermes Desktop » sont enfin traités à la bonne
+  cause, et le correctif de 1.289.9 visait à côté.** Il faut le dire clairement : le retrait de
+  l'alias « Hermes » ne pouvait RIEN changer, parce que le lien ne venait pas d'un alias. Le
+  linkifier auto-lie le **NOM** du terme (`GlossaryLinkifier`, sélection de `name` puis
+  construction de l'entrée), et le nom de la fiche est précisément « Hermes ». L'alias retiré était
+  un doublon du nom : son retrait reste un nettoyage utile, mais il était sans effet sur le défaut.
+
+  **Ce qui a permis de trancher, c'est d'avoir cessé de spéculer sur le cache.** Trois mesures ont
+  écarté les trois hypothèses successives : `alternateName` servi valait bien `["Hermes Agent"]`
+  seul, donc la base était corrigée ; `cf-cache-status: DYNAMIC` sans en-tête `Age`, donc aucun
+  cache HTTP ; et surtout le défaut était présent sur **trois pages distinctes**, pas seulement
+  celle de la fiche d'annuaire - ce qu'un cache de page n'explique pas. Soixante-dix minutes
+  d'attente auront au moins servi à démontrer que le TTL n'était pas en cause.
+
+  Le mécanisme prévu pour ce cas existait déjà et avait servi au ticket #2241 pour « Haiku OS » :
+  `TOOL_SUFFIX_COMPOUND_EXCLUSIONS`, qui pose un lookahead négatif sur un suffixe précis. Le terme
+  employé seul continue de lier, seule la forme composée est écartée. Entrée ajoutée :
+  `'hermes' => ['desktop']`.
+
+  **La clé de cache du dictionnaire est bumpée de v28 à v29, et ce n'est pas optionnel** :
+  l'historique de `CACHE_KEY` documente neuf fois le même piège - sans bump, une entrée chaude
+  continue de servir des entrées dépourvues du nouveau champ jusqu'à expiration du TTL, et le faux
+  lien survit au déploiement.
+
 ## [1.289.10] - 2026-09-18
 
 ### Corrigé
