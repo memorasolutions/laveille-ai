@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.289.6] - 2026-09-18
+
+### Corrigé
+- **Constructeur de prompts : la dernière phrase du prompt ("Produis maintenant : ...") ne
+  coupe plus la demande en plein milieu.** Signalement du fondateur : certains champs
+  semblaient tronqués et la fin du prompt paraissait bizarre.
+
+  Reproduit au navigateur (Playwright, texte repère de 200 mots dans le champ Tâche) : la
+  demande complète était bien intacte dans le bloc "Ta tâche :", mais l'ancrage final la
+  reprenait tronquée à 80 caractères avec une ellipse dès qu'elle dépassait ce seuil - une
+  phrase quasi systématique en usage réel, pas seulement sur un cas extrême. Cette dernière
+  phrase, celle que le modèle suit le plus fidèlement, se terminait donc sur un fragment coupé
+  en plein mot de phrase, donnant l'impression d'un texte perdu alors qu'aucune donnée ne
+  l'était.
+
+  Correctif : au-delà de 80 caractères, l'ancrage renvoie désormais à "la demande ci-dessus"
+  (repli déjà existant pour le cas sans verbe/objet) plutôt que d'afficher un fragment tronqué.
+  Sous le seuil, le rappel littéral verbe + objet est inchangé. Fonction `truncateAtWord()`
+  retirée (devenue morte). Tests `tests/js/constructeur-prompts-gabarits-v2.test.cjs` (section
+  3/3c) mis à jour pour figer le nouveau comportement ; 36/36 fichiers de tests du constructeur
+  toujours au vert.
+
 ## [1.289.5] - 2026-09-17
 
 ### Corrigé

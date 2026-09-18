@@ -1592,20 +1592,24 @@ document.addEventListener('alpine:init', function() {
                 // Phrase de clôture actionnable (audit UX 2026-08-05) : sans elle, le prompt
                 // s'arrêtait net après la checklist qualité, ambigu pour certains modèles.
                 // G10 (gabarits v2, tâche 1653, panel multi-IA 2026-08-07) : ancrage final qui
-                // redit le livrable attendu (verbe + objet tronqué à ~80 caractères, coupé au
-                // dernier mot entier), pour qu'un modèle ne perde pas le fil sur un prompt long.
+                // redit le livrable attendu (verbe + objet), pour qu'un modèle ne perde pas le
+                // fil sur un prompt long.
+                // Correctif 2026-09-18 (signalement fondateur : « certains champs semblent
+                // tronqués », mesuré au navigateur) : au-delà de 80 caractères, la reprise
+                // littérale se coupait en PLEIN MILIEU de la demande et se terminait par une
+                // ellipse « … » - alors que la demande complète, elle, reste toujours intacte
+                // plus haut dans le bloc "Ta tâche :". Rien n'était réellement perdu, mais cette
+                // dernière phrase du prompt (celle que le modèle suit le plus fidèlement) donnait
+                // l'apparence d'un texte coupé/cassé. Au-delà du seuil, on renvoie donc à la
+                // demande déjà énoncée plutôt que d'en montrer un fragment tronqué - jamais
+                // d'ellipse dans l'ancrage final.
                 // VERROU anti-contradiction : si constraintAskIfUnclear est actif, l'ancrage ne peut
                 // pas dire "produis maintenant" sans condition - il devient conditionnel à la clarté.
                 if (segs.length > 0) {
                     startSection();
-                    var truncateAtWord = function (text, maxLen) {
-                        if (!text || text.length <= maxLen) return text;
-                        var cut = text.slice(0, maxLen);
-                        var lastSpace = cut.lastIndexOf(' ');
-                        return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + '…';
-                    };
                     var livrableVerb = actionVerb ? (actionVerb.charAt(0).toLowerCase() + actionVerb.slice(1)) : '';
-                    var livrableObject = this.taskObject ? truncateAtWord(this._taskWithoutLeadingVerb(actionVerb, this.taskObject), 80) : '';
+                    var rawLivrableObject = this.taskObject ? this._taskWithoutLeadingVerb(actionVerb, this.taskObject) : '';
+                    var livrableObject = (rawLivrableObject && rawLivrableObject.length <= 80) ? rawLivrableObject : '';
                     var hasLivrable = !!(livrableVerb && livrableObject);
                     // Correctif 2026-08-12 (signalement fondateur) : en mode DEUX ÉTAPES, l'ancrage
                     // ne reprenait que l'étape 1 (livrableVerb/livrableObject sont bâtis sur le seul
@@ -1626,11 +1630,12 @@ document.addEventListener('alpine:init', function() {
                     } else {
                         tool('la demande ci-dessus');
                     }
-                    // Correctif 2026-08-28 (défaut mesuré au navigateur) : truncateAtWord()
-                    // ci-dessus termine déjà l'objet tronqué par une ellipse « … ». Ajouter
-                    // systématiquement un point après collait « …. », qu'aucune règle typographique
-                    // française n'admet. On ne pose donc le point (ou la clause "Sinon...") qu'une
-                    // seule fois, jamais en doublon d'une ellipse déjà présente en fin de texte.
+                    // Correctif 2026-08-28 (défaut mesuré au navigateur), toujours valide après le
+                    // correctif du 2026-09-18 ci-dessus : si la demande TAPÉE PAR LA PERSONNE se
+                    // termine elle-même par une ellipse « … », ajouter systématiquement un point
+                    // après collerait « …. », qu'aucune règle typographique française n'admet. On
+                    // ne pose donc le point (ou la clause "Sinon...") qu'une seule fois, jamais en
+                    // doublon d'une ellipse déjà présente en fin de texte.
                     var endsWithEllipsis = hasLivrable && !twoStepTask && /…$/.test(livrableObject);
                     if (this.constraintAskIfUnclear) {
                         tool((endsWithEllipsis ? ' ' : '. ') + 'Sinon, pose d\'abord tes questions de clarification, groupées en un seul message.');

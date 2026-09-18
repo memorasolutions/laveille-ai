@@ -4,7 +4,8 @@
 // de fichier de test dédié existant :
 //   1. VERROU chaîne de pensée (G6e/G9b) : les 2 réglages actifs -> une seule instruction émise.
 //   2. Clôture conditionnelle selon constraintAskIfUnclear (G10).
-//   3. Ancrage final avec rappel du livrable, tronqué à ~80 caractères (G10).
+//   3. Ancrage final avec rappel du livrable ; repli sur "la demande ci-dessus" au-delà de
+//      80 caractères, jamais de fragment tronqué (G10, révisé 2026-09-18).
 //   4. Critères de réussite (G7), remplaçant l'ancienne checklist "Avant de finaliser".
 //   5. Longueur désambiguïsée quand la deuxième tâche est active (G5).
 // Le contexte balisé """ (G3) est couvert par tests/js/constructeur-prompts-contextinfo.test.cjs
@@ -89,39 +90,34 @@ function baseComponent() {
     assert(!prompt.includes('Produis maintenant : '), 'la forme inconditionnelle "Produis maintenant : " n\'apparaît plus telle quelle');
 }
 
-// --- 3. Ancrage avec livrable tronqué à ~80 caractères, coupé au dernier mot entier. ---
+// --- 3. Ancrage : au-delà de 80 caractères, repli sur "la demande ci-dessus" (jamais d'ellipse).
+// Correctif 2026-09-18 (signalement fondateur « certains champs semblent tronqués », mesuré au
+// navigateur avec un texte repère de 200 mots) : l'ancienne troncature littérale à 80 caractères
+// coupait la reprise en plein milieu de la demande et se terminait par une ellipse, donnant
+// l'apparence d'un texte perdu alors que la demande complète reste toujours intacte dans le bloc
+// "Ta tâche :". L'ancrage final ne montre donc plus jamais un fragment coupé. ---
 {
     const c = baseComponent();
     // Ce texte NE commence PAS par le verbe "Rédige" -> _taskWithoutLeadingVerb() le renvoie
-    // intact (141 caractères), ce qui force la troncature à s'exercer réellement.
+    // intact (141 caractères), au-delà du seuil de 80 caractères.
     c.taskObject = 'rédiger un courriel de bienvenue très détaillé pour accueillir chaleureusement chaque nouvel employé de notre entreprise dès son premier jour';
     const prompt = c.prompt;
-    // Valeur calculée indépendamment (règle : coupe à 80 caractères, recule jusqu'au dernier
-    // espace, ajoute une ellipse - jamais de coupe en plein mot ni d'espace traînant).
-    const expectedObject = 'rédiger un courriel de bienvenue très détaillé pour accueillir chaleureusement…';
-    assert(expectedObject.length - 1 <= 80, 'sanity du calcul attendu : 80 caractères avant l\'ellipse');
-    // Correctif 2026-08-28 (défaut mesuré au navigateur) : truncateAtWord() ajoute déjà l'ellipse
-    // « … » - un point ajouté juste après produisait « …. », qu'aucune règle typographique
-    // française n'admet. L'ancrage se termine donc SUR l'ellipse, sans point redondant.
-    assert(prompt.includes('Produis maintenant : rédige ' + expectedObject), 'le livrable tronqué correspond exactement au calcul attendu (verbe en minuscule + objet coupé au dernier mot entier + ellipse)');
-    assert(!prompt.includes('….'), 'aucun point n\'est collé après l\'ellipse de troncature (jamais de "….")');
-    assert(prompt.trimEnd().endsWith('…'), 'le prompt se termine sur l\'ellipse elle-même, pas sur un point ajouté après coup');
-    // La tâche complète (non tronquée) reste présente dans le bloc "Ta tâche :" - seule la
-    // reprise de clôture est raccourcie, jamais la demande d'origine.
+    assert(prompt.includes('Produis maintenant : la demande ci-dessus.'), 'au-delà de 80 caractères, l\'ancrage renvoie à "la demande ci-dessus" plutôt qu\'un fragment tronqué');
+    assert(!prompt.includes('…'), 'aucune ellipse dans le prompt : plus aucune reprise n\'est coupée en plein milieu');
+    // La tâche complète (non tronquée) reste présente dans le bloc "Ta tâche :" - c'est elle qui
+    // porte la demande intégrale, l'ancrage ne fait qu'y renvoyer.
     assert(prompt.includes('Ta tâche : Rédige ' + c.taskObject + '.'), 'le bloc "Ta tâche :" garde la demande complète, non tronquée');
-    assert(!prompt.slice(prompt.lastIndexOf('Produis maintenant : ')).includes('chaleureusement chaque'), 'la clôture elle-même ne contient pas le texte situé après la coupe');
 }
 
-// --- 3c. Même troncature, mais avec constraintAskIfUnclear actif : la clause "Sinon..." doit
-// suivre l'ellipse sans point collé devant (défaut 2026-08-28, mesuré au navigateur). ---
+// --- 3c. Même demande longue (> 80 caractères), mais avec constraintAskIfUnclear actif : le
+// repli "la demande ci-dessus" garde une ponctuation normale, jamais d'ellipse (2026-09-18). ---
 {
     const c = baseComponent();
     c.taskObject = 'rédiger un courriel de bienvenue très détaillé pour accueillir chaleureusement chaque nouvel employé de notre entreprise dès son premier jour';
     c.constraintAskIfUnclear = true;
     const prompt = c.prompt;
-    const expectedObject = 'rédiger un courriel de bienvenue très détaillé pour accueillir chaleureusement…';
-    assert(prompt.includes(expectedObject + ' Sinon, pose d\'abord tes questions de clarification'), 'avec askIfUnclear, la clause "Sinon..." suit l\'ellipse avec un simple espace, jamais un point collé');
-    assert(!prompt.includes('….'), 'aucun point n\'est collé après l\'ellipse même quand la clarification conditionnelle est active');
+    assert(prompt.includes('Si tout est clair, produis maintenant : la demande ci-dessus. Sinon, pose d\'abord tes questions de clarification'), 'avec askIfUnclear et une demande longue, repli sur "la demande ci-dessus." suivi normalement de la clause "Sinon..."');
+    assert(!prompt.includes('…'), 'aucune ellipse, même quand la clarification conditionnelle est active');
 }
 
 // --- 3b. Repli "la demande ci-dessus" quand aucun verbe/objet n'est disponible pour le livrable. ---
