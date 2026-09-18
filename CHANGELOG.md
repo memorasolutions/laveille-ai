@@ -1,5 +1,57 @@
 # Changelog
 
+## [1.289.8] - 2026-09-18
+
+### Ajouté
+- **Terme « Hermes » au glossaire.** L'ambiguïté du nom était la première chose à lever, et elle ne
+  s'est pas résolue comme prévu : le corpus a montré que le site publie déjà trois actualités sur
+  « Hermes Agent » de Nous Research, et que l'annuaire porte trois fiches voisines. La demande
+  portait donc bien sur Hermes de Nous Research, et non sur l'outil interne homonyme de MEMORA, qui
+  n'aurait rien à faire dans un glossaire public.
+
+  L'angle retenu corrige le défaut le plus répandu sur ce sujet : chez Nous Research, « Hermes »
+  désigne DEUX choses distinctes, une famille de modèles de langage post-entraînés et un agent
+  logiciel. Et le point contre-intuitif, celui qui rend la fiche utile : l'agent n'est pas lié aux
+  modèles. Sa documentation officielle prévoit qu'on lui branche le fournisseur de son choix, donc
+  on peut faire tourner Hermes Agent sans jamais appeler un modèle Hermes.
+
+- **Contrôle typographique OQLF versionné** (`Modules/Dictionary/tests/tools/controle-typographie-oqlf.py`).
+  Il remplace le `grep` improvisé que le skill donnait jusqu'ici, pour une raison mesurée : dans
+  une seule séance, TROIS contrôles écrits à la volée ont rendu un verdict faux, toujours pour le
+  même motif - l'espace insécable était écrit LITTÉRALEMENT dans le motif de recherche. Un
+  caractère invisible ne se relit pas, et n'importe quelle étape intermédiaire peut en substituer
+  un autre sans laisser de trace. Le script écrit chaque caractère invisible par son point de
+  code, porte sur les champs réellement stockés plutôt que sur le fichier source de la migration,
+  et affiche deux témoins dont on attend une valeur non nulle : un contrôle qui ne sait annoncer
+  que zéro ne prouve rien.
+
+### Vérifié
+- **Anti-doublon par famille de motifs** sur les 550 slugs du glossaire de production (hermes,
+  nous-research, openhermes, poids-ouverts, llama, mistral, affinage, appel d'outil) : zéro fiche
+  de glossaire sur Hermes. Les trois entrées « hermes » trouvées sont dans l'ANNUAIRE, qui
+  répertorie des outils et non des notions ; elles ont été ouvertes et lues une par une, et aucune
+  ne définit le terme. L'une d'elles, MaxHermes, est de MiniMax et n'a aucun rapport.
+- **Une divergence d'oracle tranchée par la source primaire** : la recherche donnait la sortie de
+  Hermes 4.3 au « 30 novembre 2025 selon l'annonce, 3 décembre selon le registre ». La page de
+  l'annonce porte elle-même `datePublished 2025-12-01` et `dateModified 2025-12-03`. Aucune des
+  deux dates avancées n'était exacte, et la fiche ne cite donc aucune date de sortie : elle n'en a
+  pas besoin, et une date fausse dans un glossaire survit des années.
+- **Six défauts corrigés dans la rédaction déléguée**, dont trois surgénéralisations du même genre
+  (le contexte de 512K, la base Seed-OSS-36B-Base et la tenue en mémoire vidéo étaient attribués à
+  toute la famille alors qu'ils sont propres à la version 4.3), une réponse qui induisait en erreur
+  par omission sur la gratuité, et une définition INVENTÉE de l'« alignement neutre » que la source
+  ne donne nulle part.
+- **Faits écartés faute de vérification à la source**, malgré leur présence dans nos propres
+  actualités : le nombre de modèles accessibles via le Nous Portal, le coût de 10 à 20 centimes par
+  million de jetons, les numéros de version de l'agent et la date de son lancement. Un relais n'est
+  pas une source primaire.
+- **Alias comptés avant d'être déclarés** : « Hermes » 17 occurrences et « Hermes Agent » 5 sont
+  déclarés ; « Hermes Desktop » est écarté parce que l'annuaire porte déjà cette fiche et capte
+  correctement la forme longue, « Nous Research » parce que c'est l'éditeur et non le terme, et
+  « Hermes 4 » et « Hermes 3 » parce qu'ils sont à zéro occurrence.
+- `down()` testé par un vrai rollback : le terme est supprimé et les `narrower_slugs` des parents
+  sont nettoyés. 111 tests du module Dictionary verts, 321 assertions.
+
 ## [1.289.7] - 2026-09-18
 
 ### Ajouté
