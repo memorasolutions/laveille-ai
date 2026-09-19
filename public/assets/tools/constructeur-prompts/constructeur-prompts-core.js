@@ -154,6 +154,16 @@ document.addEventListener('alpine:init', function() {
             // bas) pour quiconque ne touchait jamais à l'écran 4 - l'outil créait lui-même le
             // problème qu'il signalait ensuite. Valeurs parmi les options existantes (formats/
             // lengths/tones ci-dessus), toujours modifiables, rien n'est retiré.
+            // RÉVERTI le 2026-09-19 (vague 1, défaut 2/4) : `length`/`tone` restent vides.
+            // Round 3 du club des sages avait déjà prédit la faille, mesurée en prod le jour
+            // même - les menus « Longueur précise »/« Ton général souhaité » affichaient
+            // « -- Aucune -- »/« -- Aucun -- » alors que get prompt()/promptSummary()
+            // injectaient quand même "Modéré (300-500 mots)"/"Professionnel" (défaut posé ici),
+            // sans qu'aucune saisie n'ait eu lieu : l'utilisateur croyait ne rien imposer et
+            // imposait pourtant une contrainte. « formatsSelected » n'a PAS le même défaut : sa
+            // valeur par défaut est un CHIP VISIBLE dès l'ouverture (jamais masquée derrière un
+            // menu qui prétend « Aucune »), donc transparente au sens de la même règle - elle
+            // reste inchangée à dessein.
             // LOT 1 (2026-08-06, verdict Codex) : le format de sortie est désormais une
             // multi-sélection de cartes (max 3, JSON/Mermaid exclusifs entre eux et avec le
             // reste - voir isFormatDisabled()/handleFormatChange() plus bas) au lieu d'un
@@ -172,8 +182,8 @@ document.addEventListener('alpine:init', function() {
             _formatStructureValues: ['Liste à puces', 'Paragraphes détaillés', 'Tableau structuré', 'Plan hiérarchisé', 'Étapes numérotées'],
             _formatDeliverableValues: ['Questionnaire / QCM avec corrigé', 'Grille d\'évaluation (rubrique)', 'Fiche pratique (1 page)', 'Modèle réutilisable (gabarit)', 'FAQ structurée'],
             _formatExclusiveValues: ['Format JSON', 'Diagramme Mermaid'],
-            length: 'Modéré (300-500 mots)',
-            tone: 'Professionnel',
+            length: '',
+            tone: '',
             language: 'fr',
             constraintAntiAI: true,
             constraintTypo: false,
@@ -305,10 +315,17 @@ document.addEventListener('alpine:init', function() {
             // d'affichage, aucun impact sur le prompt généré).
             previewOpen: false,
             checksOpen: false,
-            // Correctif #4 (2026-08-05) : étape 4 (Options avancées) est toujours optionnelle, donc
-            // "complète" seulement une fois visitée au moins une fois (voir stepComplete() et
-            // nextStep()/goToStep() plus bas qui arment ce drapeau).
-            step4Visited: false,
+            // Correctif #4 (2026-08-05) : étape 4 (Options avancées) est toujours optionnelle.
+            // CORRIGÉ le 2026-09-19 (vague 1, défaut 1 - « la complétude est en cascade ») :
+            // l'ancien drapeau s'armait au simple fait de NAVIGUER vers l'étape 4 (nextStep()/
+            // goToStep()/openDiagnosticSection()/_applyStepFromHash() la marquaient "visitée" =
+            // "complétée" avant même qu'un seul champ n'y soit touché) - mesuré en prod : finir
+            // l'étape 3 puis cliquer Suivant marquait l'étape 4 complétée instantanément, alors
+            // qu'elle n'avait jamais été ouverte. Renommé step4Touched : ne s'arme plus QUE par
+            // une vraie modification d'un champ de l'étape 4 (voir les @change/@input délégués
+            // sur le conteneur de l'étape 4 dans le Blade, qui appellent markStep4Touched()).
+            // Naviguer vers l'étape 4 sans rien y changer ne l'arme plus.
+            step4Touched: false,
             showValidation: false,
             saveName: '',
             saving: false,
@@ -1000,7 +1017,9 @@ document.addEventListener('alpine:init', function() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 var parts = [];
                 if (this.verbText) parts.push((i18n.fragVerb || 'verbe ') + '« ' + this.verbText + ' »');
-                if (this.formatText) parts.push((i18n.fragFormat || 'format ') + this.formatText.toLowerCase());
+                // Même garde qu'à promptSummary (défaut 3, 2026-09-19) : le défaut honnête de
+                // formatsSelected ne doit pas, seul, faire apparaître cette ligne.
+                if (this.formatText && (this.verbText || this.taskObject)) parts.push((i18n.fragFormat || 'format ') + this.formatText.toLowerCase());
                 if (this.length) parts.push((i18n.fragLength || 'longueur ') + this.length.toLowerCase());
                 if (!parts.length) return '';
                 return (i18n.addedPrefix || 'Sera inclus dans ton prompt : ') + parts.join(', ') + '.';
@@ -1027,7 +1046,10 @@ document.addEventListener('alpine:init', function() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 var parts = [];
                 if (this.constraintTypo && this._stylistRulesApply) parts.push(i18n.fragTypo || 'typographie française stricte');
-                if (this.constraintAntiAI && this._stylistRulesApply) parts.push(i18n.fragAntiAI || 'écriture naturelle anti-IA');
+                // constraintAntiAI démarre coché (défaut honnête, case visible) - même garde que
+                // formatText ci-dessus (défaut 3, 2026-09-19) : ce défaut seul ne doit pas produire
+                // cette ligne tant qu'aucun contenu réel (rôle ou tâche) n'existe encore.
+                if (this.constraintAntiAI && this._stylistRulesApply && (this.personaText || this.taskObject)) parts.push(i18n.fragAntiAI || 'écriture naturelle anti-IA');
                 if (this.constraintChainOfThought) parts.push(i18n.fragCot || 'raisonnement affiché');
                 if (this.constraintAskIfUnclear) parts.push(i18n.fragAsk || 'questions de clarification si besoin');
                 if (this.constraintCanvas) parts.push((i18n.fragCanvas || 'document modifiable') + ' (' + this.canvasAI + ')');
@@ -1190,7 +1212,13 @@ document.addEventListener('alpine:init', function() {
                 }
                 if (this.audienceText) parts.push((i18nSummary.summaryAudience || 'Le résultat sera adapté pour : ') + this.audienceText + '.');
                 if (this.tone) parts.push((i18nSummary.summaryTone || 'Ton : ') + this.tone + '.');
-                if (this.formatText) parts.push((i18nSummary.summaryFormat || 'Présenté sous forme de : ') + this.formatText.toLowerCase() + '.');
+                // formatsSelected porte un défaut honnête (chip visible dès l'ouverture, jamais
+                // masqué derrière un "-- Aucune --" comme length/tone) : le garder tel quel reste
+                // volontaire (voir commentaire à sa déclaration). Mais un défaut d'outil ne doit
+                // toujours pas, à lui seul, produire un aperçu quand RIEN d'autre n'a été saisi
+                // (défaut 3, 2026-09-19) - la ligne format n'apparaît donc qu'une fois qu'il existe
+                // déjà un vrai contenu (rôle ou tâche) auquel elle peut se rattacher.
+                if (this.formatText && (this.personaText || this.taskObject)) parts.push((i18nSummary.summaryFormat || 'Présenté sous forme de : ') + this.formatText.toLowerCase() + '.');
                 if (this.length) parts.push((i18nSummary.summaryLength || 'Longueur visée : ') + this.length.toLowerCase() + '.');
                 if (!parts.length) return '';
                 return parts.join(' ');
@@ -1212,6 +1240,15 @@ document.addEventListener('alpine:init', function() {
             // assembleur - voir get promptSegments() et get promptFilled() plus bas.
             _buildPromptSegments: function (secure) {
                 var self = this;
+                // Garde-fou (2026-09-19, défaut 3 - « 832 caractères générés sans aucune saisie »).
+                // Mesuré en prod : sans AUCUN champ rempli, ce générateur produisait quand même
+                // 832 caractères se terminant par « Produis maintenant : la demande ci-dessus » -
+                // les défauts de l'outil (formatsSelected, constraintAntiAI...) suffisaient à eux
+                // seuls à remplir `segs`, et l'ancien test `if (segs.length > 0)` plus bas prenait
+                // ça pour un vrai contenu à conclure. Sans tâche, il n'existe justement PAS de
+                // « demande ci-dessus » à produire : aucune saisie du taskObject = aucun prompt,
+                // point final, quels que soient les autres réglages déjà cochés/choisis par défaut.
+                if (!this.taskObject) return [];
                 var segs = [];
                 var firstSection = true;
                 // Un seul délimiteur pour tout le prompt (pas un par bloc) - même motif partout,
@@ -2216,7 +2253,9 @@ document.addEventListener('alpine:init', function() {
             openDiagnosticSection: function(key) {
                 var targetStep = key === 'audience' ? 3 : 4;
                 if (this.step !== targetStep) this.step = targetStep;
-                if (targetStep === 4) this.step4Visited = true;
+                // 2026-09-19 (défaut 1) : sauter ici ne touche aucun champ - ne marque plus
+                // step4Touched. Seule une vraie modification de champ (voir @change/@input
+                // délégués sur l'étape 4, Blade) arme la complétude de l'étape 4.
                 var targetId = key === 'audience' ? 'cpAudienceBlock' : ('cpSection' + key.charAt(0).toUpperCase() + key.slice(1));
                 this.$nextTick(function() {
                     var el = document.getElementById(targetId);
@@ -2297,7 +2336,7 @@ document.addEventListener('alpine:init', function() {
                 if (this.step === 2 && (!hasVerb || !this.taskObject)) { this.showValidation = true; return; }
                 this.showValidation = false;
                 if (this.step === 2) this._autoDetectProfile();
-                if (this.step < 4) { this.step++; if (this.step === 4) this.step4Visited = true; }
+                if (this.step < 4) { this.step++; this._focusStepHeading(); }
             },
             canGoToStep: function(s) {
                 var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
@@ -2308,10 +2347,25 @@ document.addEventListener('alpine:init', function() {
                 return true;
             },
             goToStep: function(s) {
-                if (this.canGoToStep(s)) { this.showValidation = false; this.step = s; if (s === 4) this.step4Visited = true; }
+                if (this.canGoToStep(s)) { this.showValidation = false; this.step = s; this._focusStepHeading(); }
                 else { this.showValidation = true; }
             },
-            prevStep: function() { if (this.step > 1) this.step--; },
+            prevStep: function() { if (this.step > 1) { this.step--; this._focusStepHeading(); } },
+
+            // Accessibilité (2026-09-19, défaut 3/5 - « le focus ne se déplace pas entre les
+            // étapes ») : après Suivant/Précédent/clic sur le stepper/restauration du hash, le
+            // focus clavier restait sur le bouton cliqué - un lecteur d'écran n'apprenait jamais
+            // que l'écran avait changé. Chaque titre d'étape (h2, id="cpStepHeadingN",
+            // tabindex="-1" dans le Blade) reçoit maintenant le focus programmatique dès que
+            // l'étape affichée change, quel que soit le chemin de navigation (bouton, stepper,
+            // hash) - un seul point d'entrée, DRY.
+            _focusStepHeading: function() {
+                var self = this;
+                this.$nextTick(function() {
+                    var el = document.getElementById('cpStepHeading' + self.step);
+                    if (el && typeof el.focus === 'function') el.focus();
+                });
+            },
 
             // Tâche #1699 (2026-08-09) : au chargement, restaure l'étape du hash (#etape-2 à 4)
             // seulement si les prérequis des étapes précédentes sont remplis - jamais de saut
@@ -2336,24 +2390,64 @@ document.addEventListener('alpine:init', function() {
                     if (this.canGoToStep(n)) {
                         this.step = n;
                         this._hashStepApplied = true;
-                        if (n === 4) {
-                            this.step4Visited = true;
-                        }
+                        // 2026-09-19 (défaut 1) : reprendre à une étape via l'URL ne touche
+                        // aucun champ - ne marque plus step4Touched (voir plus bas).
                     }
                 }
             },
-            // Correctif #4 (2026-08-05, indicateur de complétion par étape) : 1=Persona (rôle choisi),
-            // 2=Tâche (verbe + description remplis), 3=Audience (optionnelle - complète dès qu'une
-            // audience est choisie), 4=Options avancées (tout optionnel - complète dès la 1re visite,
-            // voir step4Visited armé par nextStep()/goToStep() ci-dessus). Affiché en coche ✓ dans le
-            // cercle du stepper (voir .ct-stepper__btn--done, Blade).
-            stepComplete: function(n) {
+            // Une vraie modification d'un champ de l'étape 4 (Options avancées) - jamais la
+            // simple navigation - arme la complétude de cette étape. Appelée par les @change/
+            // @input délégués sur le conteneur de l'étape 4 (Blade, bulles depuis tout select/
+            // input/textarea/checkbox descendant : aucun champ individuel à instrumenter un par
+            // un). Round 3 (2026-09-19) : « une valeur par défaut posée par l'outil ne compte
+            // pas comme une saisie » - c'est précisément ce que corrige ce mécanisme.
+            markStep4Touched: function() {
+                this.step4Touched = true;
+            },
+            // Trois états (2026-09-19, défaut 1 - « les étapes mentent ») : vide / partiel /
+            // complete, jamais un simple booléen qui retombe sur "complétée" par défaut. Une
+            // étape n'est "complete" que si AU MOINS UN de ses champs porte une valeur SAISIE
+            // par la personne - une valeur posée par l'outil (défaut intelligent, gabarit...) ne
+            // compte pas. "partiel" signale un début de saisie réel (ex. bascule "Personnalisé"
+            // choisie sans texte encore tapé, ou un seul des deux champs requis de l'étape 2).
+            stepState: function(n) {
                 var hasVerb = this.verbType === 'custom' ? !!this.verbCustom : !!this.verb;
-                if (n === 1) return !!this.personaText;
-                if (n === 2) return hasVerb && !!this.taskObject;
-                if (n === 3) return !!this.audienceText;
-                if (n === 4) return !!this.step4Visited;
-                return false;
+                if (n === 1) {
+                    if (this.personaText) return 'complete';
+                    if (this.personaType === 'custom') return 'partiel';
+                    return 'vide';
+                }
+                if (n === 2) {
+                    if (hasVerb && this.taskObject) return 'complete';
+                    if (hasVerb || this.taskObject) return 'partiel';
+                    return 'vide';
+                }
+                if (n === 3) {
+                    if (this.audienceText) return 'complete';
+                    if (this.audienceType === 'custom') return 'partiel';
+                    return 'vide';
+                }
+                if (n === 4) {
+                    // Toujours optionnelle : rien à "commencer" sans que ce soit déjà, par
+                    // définition, une saisie suffisante - donc jamais d'état "partiel" ici.
+                    return this.step4Touched ? 'complete' : 'vide';
+                }
+                return 'vide';
+            },
+            // Libellé humain de l'état, toujours rendu (jamais seulement à l'état "complétée")
+            // pour rester lisible à l'oeil ET au lecteur d'écran SANS dépendre de la couleur
+            // (WCAG 1.4.1) - voir aria-label du bouton d'étape, Blade.
+            stepStateLabel: function(n) {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                var state = this.stepState(n);
+                if (state === 'complete') return i18n.stepComplete || 'complétée';
+                if (state === 'partiel') return i18n.stepPartial || 'en cours';
+                return i18n.stepEmpty || 'à faire';
+            },
+            // Conservé pour compatibilité (tests/appelants existants) : "complétée" reste
+            // exactement stepState(n) === 'complete'.
+            stepComplete: function(n) {
+                return this.stepState(n) === 'complete';
             },
 
             copy: function() {

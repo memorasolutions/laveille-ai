@@ -1,5 +1,73 @@
 # Changelog
 
+## [1.290.0] - 2026-09-19
+
+### Ajouté
+- **Mode maintenance par outil (503 + `Retry-After`)**, pour fermer UN outil précis au public
+  pendant qu'on le retravaille, sans jamais mettre le site entier hors service. `php artisan down`
+  n'est pas une option ici : il met TOUT en 503, et c'est la répétition de ces fenêtres qui a coûté
+  deux mois de trafic de recherche en juillet 2026. Troisième valeur de `construction_mode`, au
+  comportement délibérément différent des deux modes historiques (200 + noindex) : **c'est
+  précisément l'ABSENCE de noindex qui distingue ce mode**, le 503 avec `Retry-After` étant le seul
+  signal correct pour une page déjà classée qu'on veut garder. Le propriétaire conserve un accès
+  complet (administrateur connecté, ou jeton d'aperçu en URL posant un cookie de 30 jours, jeton en
+  réglages et jamais en dur), avec un bandeau qui lui rappelle que la page est fermée au public.
+  Bascule sans déploiement : `php artisan tools:maintenance {slug} --on|--off`.
+  Aucune migration : le mécanisme existait depuis juillet 2026, il a été étendu, pas réécrit.
+  `SkipAuthenticatedCacheProfile` a dû être étendu au passage, sinon la première visite du
+  propriétaire par le jeton aurait figé la page réelle dans le cache serveur et l'aurait servie à
+  tous les visiteurs suivants - la maintenance aurait été contournée pour tout le monde, en silence.
+
+### Corrigé
+- **Constructeur de prompts : l'outil mentait sur son propre état.** Les 4 étapes s'affichaient
+  « complétée » alors que les 19 champs étaient vides, et la complétude se propageait EN CASCADE -
+  finir l'étape 3 marquait instantanément l'étape 4, jamais ouverte. Cause : le drapeau était armé
+  par la simple NAVIGATION, pas par une saisie. Désormais trois états (vide, en cours, complétée),
+  calculés sur le contenu réel des champs et lisibles sans la couleur.
+- **Constructeur de prompts : les menus laissés sur « Aucune » injectaient quand même une valeur.**
+  L'écran affichait « -- Aucune -- » pendant que le résumé annonçait « longueur modéré (300-500
+  mots) » et « ton professionnel » : la personne croyait ne rien imposer et imposait pourtant une
+  contrainte au modèle. Règle appliquée partout dans le générateur : une valeur absente n'injecte
+  RIEN, jamais de texte de remplissage - une contrainte fausse dégrade la réponse davantage qu'une
+  contrainte absente. Deux fuites du même genre ont été trouvées au passage sur les retours affichés.
+- **Constructeur de prompts : 832 caractères produits sans aucune saisie**, se terminant par la
+  phrase absurde « Produis maintenant : la demande ci-dessus ». Sans tâche, il n'y a plus de prompt
+  du tout. Les destinations restent inactives tant qu'aucun prompt réel n'existe, mais l'explication
+  de ce à quoi sert le résultat, elle, reste visible en tout temps.
+- **Constructeur de prompts : jargon et accessibilité.** « Prédéfini » devient « Dans une liste » ;
+  « zero-shot » et « few-shot », affichés sans explication, deviennent « Réponse directe » et « Avec
+  des exemples ». Libellés visibles reliés aux champs personnalisés, cibles tactiles portées à 44 px,
+  focus déplacé vers le titre de l'étape après « Suivant » (un lecteur d'écran n'apprenait jamais que
+  l'écran avait changé), piège de focus corrigé à la fermeture de la modale, et onglets du sélecteur
+  d'étape enfin nommés sur téléphone, où ils n'étaient que des chiffres nus.
+- **Glossaire : `og:image:height` annonçait 630 pour des images qui font 1200x669.** Le layout
+  partagé par plus de cent vues déclarait cette hauteur en dur. Elle est désormais paramétrable par
+  page, avec 630 conservé par défaut pour tout le reste du site ; non-régression vérifiée sur une
+  actualité réelle et verrouillée par test.
+- **Glossaire : le repli JPEG des images n'en était pas un.** Comme l'image est toujours stockée en
+  `.webp` et que le test d'existence réussissait sur ce chemin, la source et le repli portaient la
+  MÊME adresse : un navigateur sans WebP n'affichait rien, alors que le `.jpg` existait sur le disque
+  depuis des mois. Corrigé sur la fiche ET sur les vignettes de la page liste, qui portaient le même
+  défaut copié.
+- **Glossaire : typographie québécoise fautive à quatre endroits**, dont trois dans le texte de
+  partage sérialisé en JSON - donc invisibles à un contrôle qui ne regarde que les libellés affichés,
+  alors que c'est exactement ce que lisent les moteurs de recherche et de réponse.
+- **Auto-liens : trois défauts de frontière, dont deux étaient des erreurs de DONNÉES et non de
+  code.** « Google DeepMind » pointait vers la fiche Google sur dix pages et vers la bonne fiche sur
+  cinq autres : les deux fiches déclaraient le même alias, à égalité parfaite de longueur, de
+  stratégie et d'origine, si bien que l'issue dépendait de l'ordre du contenu de chaque page. Alias
+  dupliqué retiré de la fiche Google. « gouvernance » mordait dans « gouvernance des données » faute
+  que la forme longue soit déclarée : elle l'est désormais - on déclare la forme longue, on ne pose
+  pas de garde.
+- **Outils de contrôle : deux entrées de la table d'exclusion des auto-liens n'étaient verrouillées
+  par rien.** Les neutraliser ne faisait rougir aucun test, parce que le test recopiait leur valeur
+  en dur au lieu de lire la constante ; l'une d'elles n'avait même aucun test. Les deux sont alignées
+  sur le bon patron, et un test fige désormais un hash des tables sensibles au cache pour rappeler le
+  bump de clé à la prochaine modification - une règle documentée neuf fois sans qu'aucun mécanisme ne
+  la fasse respecter. Le contrôle typographique versionné, lui, signalait à tort le tiret
+  demi-cadratin, pourtant autorisé par la charte : motif restreint au seul cadratin, avec un témoin
+  qui vérifie cette distinction à chaque exécution.
+
 ## [1.289.12] - 2026-09-19
 
 ### Corrigé

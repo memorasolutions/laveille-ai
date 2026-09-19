@@ -53,6 +53,12 @@ function assert(cond, label) { if (cond) { pass++; console.log('  ✅ ' + label)
     //     ne doit JAMAIS laisser une valeur canvasFormat périmée fuiter dans le prompt final ---
     {
         const pb = loadPromptBuilder();
+        // 2026-09-19 (vague 1, défaut 3) : _buildPromptSegments() exige désormais un taskObject
+        // réel pour produire quoi que ce soit (sinon aucune saisie = aucun prompt, y compris les
+        // défauts de l'outil comme formatsSelected/constraintAntiAI) - sans lui, pb.prompt serait
+        // vide et les assertions ci-dessous sur son contenu (SVG/Canvas de ChatGPT) ne testeraient
+        // plus rien. Le mécanisme round 55 lui-même (canvasFormat) reste inchangé.
+        pb.taskObject = 'une tâche de test';
         pb.destination = 'claude';
         pb.formatMode = 'preset';
         pb.canvasFormat = 'SVG';
@@ -69,6 +75,7 @@ function assert(cond, label) { if (cond) { pass++; console.log('  ✅ ' + label)
     // --- Test 2 (non-régression) : re-choisir la MÊME destination ne doit PAS effacer le format ---
     {
         const pb = loadPromptBuilder();
+        pb.taskObject = 'une tâche de test'; // voir commentaire 2026-09-19 au test 1 ci-dessus
         pb.destination = 'claude';
         pb.formatMode = 'preset';
         pb.canvasFormat = 'Mermaid';

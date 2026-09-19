@@ -107,3 +107,7 @@ logo-white-canvas.txt
 # Ce sont des DONNEES generees, pas des sources : elles se recreent, et les versionner les
 # ferait partir en production a chaque deploiement.
 /public/news-screenshots/
+
+# Cache de compilation Python (outils de contrôle versionnés du dépôt)
+__pycache__/
+*.pyc

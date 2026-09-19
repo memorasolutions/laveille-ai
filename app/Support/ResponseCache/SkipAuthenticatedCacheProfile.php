@@ -22,6 +22,21 @@ class SkipAuthenticatedCacheProfile extends CacheAllSuccessfulGetRequests
             return false;
         }
 
+        // Même garde-fou que ci-dessus, pour le contournement "aperçu" du mode maintenance d'un
+        // outil (Modules\Tools\Models\Tool::MAINTENANCE_PREVIEW_*, 2026-09-19) : un visiteur NON
+        // connecté (superadmin en aperçu mobile) qui présente le paramètre ou le cookie d'aperçu
+        // recevrait sinon la page RÉELLE de l'outil, et cette réponse serait mise en cache par
+        // Spatie ResponseCache (cacheResponse:600 sur /outils/{slug}) puis reservie telle quelle à
+        // TOUS les visiteurs suivants - contournant entièrement la maintenance publique.
+        if (class_exists(\Modules\Tools\Models\Tool::class)) {
+            $previewQuery = \Modules\Tools\Models\Tool::MAINTENANCE_PREVIEW_QUERY;
+            $previewCookie = \Modules\Tools\Models\Tool::MAINTENANCE_PREVIEW_COOKIE;
+
+            if ($request->query($previewQuery) !== null || $request->cookie($previewCookie) !== null) {
+                return false;
+            }
+        }
+
         return parent::shouldCacheRequest($request);
     }
 }

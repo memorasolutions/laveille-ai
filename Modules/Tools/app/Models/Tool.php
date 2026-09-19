@@ -21,6 +21,21 @@ class Tool extends Model
     use Shareable;
     use TracksEditorialModification;
 
+    // Mode "maintenance" (2026-09-19) : 3e valeur de construction_mode, distincte de
+    // construction/revision (200 + noindex, page qui ne sera jamais indexée) - un outil DÉJÀ
+    // public qu'on ferme TEMPORAIREMENT (503 + Retry-After, JAMAIS de noindex, cf. commande
+    // tools:maintenance). Le propriétaire garde 2 voies : superadmin connecté, ou ce jeton
+    // d'aperçu (réglage settings, jamais en dur) posé en cookie de longue durée via l'URL.
+    public const MAINTENANCE_PREVIEW_QUERY = 'apercu';
+
+    public const MAINTENANCE_PREVIEW_COOKIE = 'lv_tools_apercu';
+
+    public const MAINTENANCE_PREVIEW_TOKEN_SETTING = 'tools.maintenance_preview_token';
+
+    public const MAINTENANCE_RETRY_AFTER_SETTING = 'tools.maintenance_retry_after_seconds';
+
+    public const MAINTENANCE_RETRY_AFTER_DEFAULT_SECONDS = 7200;
+
     // ACTION : contenu réellement éditorial de l'outil (voir Modules\Core\Traits\
     // TracksEditorialModification) - exclut is_active/is_under_construction/construction_mode/
     // sort_order/views_count, qui décrivent un ÉTAT opérationnel, pas le contenu affiché.
@@ -175,6 +190,82 @@ class Tool extends Model
 
         $tool = $tool ?? static::where('slug', $slug)->first();
 
-        return ! $tool || ! $tool->is_under_construction;
+        if (! $tool || ! $tool->is_under_construction) {
+            return true;
+        }
+
+        // Round "maintenance" (2026-09-19) : le contournement par jeton d'aperçu ne concerne QUE
+        // ce mode - condition testée EN PREMIER pour ne déclencher aucune requête/lecture settings
+        // supplémentaire sur les modes historiques construction/revision (round 33, 2026-07-27,
+        // avait déjà mesuré et figé le nombre de requêtes de cette méthode par un test dédié).
+        if ($tool->construction_mode === 'maintenance' && self::hasValidMaintenancePreviewBypass()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Contournement "aperçu propriétaire" du mode maintenance : un paramètre d'URL valide
+     * (?apercu=...) pose un cookie de contournement de 30 jours (pour un accès mobile sans
+     * connexion), puis ce même cookie suffit sur les visites suivantes. Le jeton attendu vit en
+     * table settings (jamais en dur dans le code, règle CLAUDE.md) - régénérable sans
+     * déploiement via `tools:maintenance {slug} --on`.
+     */
+    private static function hasValidMaintenancePreviewBypass(): bool
+    {
+        if (! class_exists(\Modules\Settings\Facades\Settings::class)) {
+            return false;
+        }
+
+        $token = \Modules\Settings\Facades\Settings::get(self::MAINTENANCE_PREVIEW_TOKEN_SETTING);
+
+        if (! is_string($token) || $token === '') {
+            return false;
+        }
+
+        $request = request();
+
+        if (! $request) {
+            return false;
+        }
+
+        $paramToken = (string) $request->query(self::MAINTENANCE_PREVIEW_QUERY, '');
+
+        if ($paramToken !== '' && hash_equals($token, $paramToken)) {
+            \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::make(
+                self::MAINTENANCE_PREVIEW_COOKIE,
+                $token,
+                60 * 24 * 30, // 30 jours, comme le cookie quest_email déjà en place (QuestController)
+                '/',
+                null,
+                true,
+                true,
+                false,
+                'lax'
+            ));
+
+            return true;
+        }
+
+        $cookieToken = (string) $request->cookie(self::MAINTENANCE_PREVIEW_COOKIE, '');
+
+        return $cookieToken !== '' && hash_equals($token, $cookieToken);
+    }
+
+    /**
+     * Valeur du Retry-After (secondes) servi avec le 503 en mode maintenance - réglage settings,
+     * ajustable sans déploiement ; valeur de repli si le réglage n'existe pas encore.
+     */
+    public static function maintenanceRetryAfterSeconds(): int
+    {
+        if (! class_exists(\Modules\Settings\Facades\Settings::class)) {
+            return self::MAINTENANCE_RETRY_AFTER_DEFAULT_SECONDS;
+        }
+
+        return (int) \Modules\Settings\Facades\Settings::get(
+            self::MAINTENANCE_RETRY_AFTER_SETTING,
+            self::MAINTENANCE_RETRY_AFTER_DEFAULT_SECONDS
+        );
     }
 }

@@ -64,3 +64,30 @@ if (! function_exists('dictionary_hero_image_webp_url')) {
         return null;
     }
 }
+
+if (! function_exists('dictionary_hero_image_jpg_url')) {
+    /**
+     * Retourne l'URL du .jpg seulement s'il existe sur disque, sinon null.
+     *
+     * 2026-09-19 : toutes les migrations du module écrivent hero_image DÉJÀ en .webp (jamais
+     * l'original) - dictionary_hero_image_url($heroImage, false) renvoyait donc ce MÊME .webp
+     * (le seul fichier que sa chaîne de repli voit à ce chemin), laissant le <picture> de la
+     * fiche sans repli JPEG réel malgré les paires {slug}.webp + {slug}.jpg présentes sur le
+     * disque (public/images/glossaire/). Cette fonction dérive explicitement le .jpg, symétrique
+     * à dictionary_hero_image_webp_url() ci-dessus.
+     */
+    function dictionary_hero_image_jpg_url(?string $heroImage): ?string
+    {
+        if (! $heroImage) {
+            return null;
+        }
+
+        $jpgPath = preg_replace('/\.[^.]*$/', '.jpg', $heroImage);
+
+        if (is_string($jpgPath) && file_exists(public_path($jpgPath))) {
+            return asset($jpgPath);
+        }
+
+        return null;
+    }
+}

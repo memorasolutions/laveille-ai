@@ -120,15 +120,23 @@ function baseComponent() {
     assert(!prompt.includes('…'), 'aucune ellipse, même quand la clarification conditionnelle est active');
 }
 
-// --- 3b. Repli "la demande ci-dessus" quand aucun verbe/objet n'est disponible pour le livrable. ---
+// --- 3b. RÉVISÉ le 2026-09-19 (vague 1, storage/app/constructeur-audit/brief-vague-1.md,
+// défaut 3 - « 832 caractères générés sans aucune saisie »). Ce test verrouillait jusqu'ici le
+// COMPORTEMENT MESURÉ COMME UN DÉFAUT le jour même : un rôle seul (SANS tâche) produisait déjà
+// "Produis maintenant : la demande ci-dessus." - exactement le repli que le brief interdit
+// désormais comme ancrage final ("ne doit JAMAIS servir d'ancrage final - corrige-le à la
+// source"). _buildPromptSegments() exige maintenant un taskObject réel avant de produire quoi
+// que ce soit : sans lui, il n'existe justement PAS de "demande ci-dessus" à produire. ---
 {
     const c = loadPromptBuilder();
     c.personaType = 'custom';
     c.personaCustom = 'expert en pédagogie';
-    // Ni verbe ni taskObject renseignés : isValid() serait faux, mais promptSegments() peut
-    // encore produire un segment (rôle seul) -> la clôture doit se replier proprement.
+    // Ni verbe ni taskObject renseignés : isValid() est faux ET promptSegments() ne produit plus
+    // RIEN (avant ce correctif, un segment "rôle seul" suffisait à déclencher la clôture -
+    // exactement le défaut mesuré : un repli qui n'a plus rien à conclure).
     const prompt = c.prompt;
-    assert(prompt.includes('Produis maintenant : la demande ci-dessus.'), 'repli sur "la demande ci-dessus" quand le livrable ne peut pas être dérivé');
+    assert(prompt === '', 'sans taskObject, un rôle seul ne produit plus AUCUN prompt (l\'ancien repli "la demande ci-dessus" sur du vide a disparu)');
+    assert(!prompt.includes('Produis maintenant'), 'non-régression du correctif : aucune clôture ne peut plus apparaître sans tâche réelle');
 }
 
 // --- 4. Critères de réussite (G7), remplace "Avant de finaliser, vérifie que". ---

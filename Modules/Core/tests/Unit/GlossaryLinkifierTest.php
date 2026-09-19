@@ -689,13 +689,20 @@ it('n applique la garde suffixe a aucun outil absent de TOOL_SUFFIX_RISK_NAMES, 
  * le PREMIER alias de sa fiche, donc c'est l'entree alias qui posait le lien. Cette
  * moitie-la se prouve en production, pas ici : la construction du cache lit la base, et
  * la base locale ne porte pas ce terme. Meme famille d'angle mort que #2137.
+ *
+ * 2026-09-19 (ticket #2635, MESURE) : ce test lisait `'exclude_suffix' => ['os']` ECRIT
+ * EN DUR dans sa propre donnee, jamais `GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['haiku']`
+ * - preuve directe : neutraliser l'entree 'haiku' => ['os'] de la table ne faisait rougir
+ * AUCUN test (62 passed, 104 assertions, mesure en direct). Le test prouvait donc que le
+ * MECANISME aval marche, jamais que la TABLE contient reellement l'entree. Aligne ici sur
+ * le patron « Hermes Desktop » juste en dessous, qui lit deja la constante.
  */
 it('un terme de glossaire ne lie pas quand le mot suivant figure dans son exclude_suffix', function () {
     [$dom, $root] = glxDomFromHtml('<p>Haiku OS, le systeme libre heritier de BeOS, publie sa beta 6.</p>');
 
     $terme = [['name' => 'Haiku', 'slug' => 'haiku', 'definition' => 'Test',
                'type' => 'glossary', 'url' => '/glossaire/haiku', 'match_strategy' => 'loose',
-               'exclude_suffix' => ['os']]];
+               'exclude_suffix' => GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['haiku'] ?? []]];
 
     $liens = glxWalk($dom, $root, $terme, false, 10);
 
@@ -710,7 +717,7 @@ it('le meme terme lie normalement quand le suffixe exclu est absent', function (
 
     $terme = [['name' => 'Haiku', 'slug' => 'haiku', 'definition' => 'Test',
                'type' => 'glossary', 'url' => '/glossaire/haiku', 'match_strategy' => 'loose',
-               'exclude_suffix' => ['os']]];
+               'exclude_suffix' => GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['haiku'] ?? []]];
 
     $liens = glxWalk($dom, $root, $terme, false, 10);
 
@@ -759,6 +766,45 @@ it('le terme Hermes lie normalement quand il est employe seul, sans Desktop apre
     $liens = glxWalk($dom, $root, $terme, false, 10);
 
     expect($liens)->toBe(1, 'Hors du compose « Hermes Desktop », le terme doit continuer de lier.');
+});
+
+/**
+ * 2026-09-03 (ticket #2202) - « l'Atlas danois » designait l'atlas MYCOLOGIQUE du Danemark,
+ * jamais l'outil « Atlas » de l'annuaire - voir le docblock de TOOL_SUFFIX_COMPOUND_EXCLUSIONS.
+ *
+ * 2026-09-19 (ticket #2635, MESURE) : cette entree 'atlas' => ['danois', 'danoise'] existe dans
+ * la table depuis le 2026-09-03 (bump CACHE_KEY v22 a l'epoque) mais n'etait verrouillee par
+ * AUCUN test - un grep sur « atlas » dans ce fichier ne renvoyait rien avant ce couple. Ecrit
+ * ici sur le meme patron que « Hermes Desktop » juste au-dessus : lit `exclude_suffix`
+ * DIRECTEMENT depuis GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['atlas'], jamais recopie
+ * en dur - si l'entree disparait un jour de la table, ce test doit rougir plutot que de
+ * continuer a passer sur une valeur figee qui n'aurait plus rien a voir avec le code reel.
+ */
+it('un terme de glossaire ne lie pas Atlas quand il est suivi de danois/danoise (exclude_suffix)', function () {
+    [$dom, $root] = glxDomFromHtml('<p>L atlas danois recense les champignons observes cette saison.</p>');
+
+    $terme = [['name' => 'Atlas', 'slug' => 'atlas', 'definition' => 'Test',
+               'type' => 'glossary', 'url' => '/glossaire/atlas', 'match_strategy' => 'loose',
+               'exclude_suffix' => GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['atlas'] ?? []]];
+
+    $liens = glxWalk($dom, $root, $terme, false, 10);
+
+    expect($liens)->toBe(0, '« Atlas danois » est un recueil mycologique, jamais l outil de l annuaire.');
+    expect(str_contains($dom->saveHTML(), '/glossaire/atlas'))->toBeFalse();
+});
+
+it('le terme Atlas lie normalement quand il n est pas suivi de danois/danoise', function () {
+    // Contre-epreuve indispensable : sans elle, un exclude_suffix trop large passerait pour un
+    // succes alors qu il aurait simplement tout tue.
+    [$dom, $root] = glxDomFromHtml('<p>Atlas permet de naviguer sur le web de facon autonome.</p>');
+
+    $terme = [['name' => 'Atlas', 'slug' => 'atlas', 'definition' => 'Test',
+               'type' => 'glossary', 'url' => '/glossaire/atlas', 'match_strategy' => 'loose',
+               'exclude_suffix' => GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['atlas'] ?? []]];
+
+    $liens = glxWalk($dom, $root, $terme, false, 10);
+
+    expect($liens)->toBe(1, 'Hors du compose « Atlas danois »/« Atlas danoise », le terme doit continuer de lier.');
 });
 
 /**
@@ -824,4 +870,166 @@ it('JUMEAU INDISPENSABLE : Astra employé seul continue de lier vers Project Ast
 
     expect($liens)->toBe(1, 'Sans qualifiant OpenAI, Astra doit continuer de lier - sinon la garde est trop large et tue aussi les liens vrais.');
     expect(str_contains($dom->saveHTML(), '/annuaire/astra'))->toBeTrue();
+});
+
+/**
+ * 2026-09-19 (ticket #2612, CAUSE ÉTABLIE PAR MESURE en production, pas supposée) - « Google
+ * DeepMind » liait vers /glossaire/google sur 10 pages, vers /glossaire/deepmind (correct) sur
+ * 5 autres. AUCUNE des deux pistes de départ n'était la bonne : une fiche « Google DeepMind »
+ * n'existe pas séparément, et ce n'est PAS la mécanique de self-linking « Hermes Desktop »
+ * (skip_slug ne s'applique qu'à la page du terme lui-même, jamais aux ~10/15 pages concernées,
+ * qui sont des actualités/fiches tierces sans rapport avec google/deepmind).
+ *
+ * LA VRAIE CAUSE, mesurée en rejouant loadTerms() + linkify() en production le 2026-09-19 :
+ * « Google DeepMind » était déclaré comme ALIAS CURÉ sur DEUX fiches à la fois - /glossaire/google
+ * ET /glossaire/deepmind. Même longueur, même stratégie (loose), même origin_rank
+ * (ORIGIN_CURATED_ALIAS) : les TROIS critères de tri de loadTerms() sont à égalité, donc l'ordre
+ * entre les deux entrées est fixé par la stabilité du tri PHP (position d'insertion), pas par un
+ * choix éditorial. matchInText() essaie les candidats dans CET ordre et s'arrête au premier dont
+ * le budget (`$seen[slug] < maxOcc`) n'est pas épuisé - donc :
+ *   - si aucune AUTRE mention de Google (« Google », « Alphabet », « Google LLC »...) n'a encore
+ *     consommé le budget du slug 'google' quand le texte « Google DeepMind » est atteint, c'est
+ *     l'entrée google qui gagne (mesuré : Test A ci-dessous) → lien FAUX vers /glossaire/google ;
+ *   - si une mention Google plus tôt SUR LA MÊME PAGE a déjà consommé ce budget, l'entrée google
+ *     est sautée et l'entrée deepmind (même chaîne, même longueur) prend le relais par élimination
+ *     (mesuré : Test B ci-dessous) → lien CORRECT vers /glossaire/deepmind.
+ * Ce mécanisme, dépendant de l'ordre du contenu de CHAQUE page, explique exactement le partage
+ * 10 fautives / 5 correctes sans qu'aucune des deux pistes de départ n'ait eu besoin d'être vraie.
+ *
+ * PRÉCISION IMPORTANTE (établie en reproduisant le Test B localement, la 1ère tentative avec
+ * les deux mentions dans UNE SEULE phrase donnait encore le mauvais résultat) : la priorité par
+ * candidat, PAS par position, s'applique à TOUTE LA PORTÉE D'UN MÊME NOEUD TEXTE. Dans
+ * « Google a acquis DeepMind... Google DeepMind dirige... », « Google DeepMind » (plus long)
+ * est essayé AVANT le « Google » isolé pourtant plus tôt dans la chaîne - il gagne donc même là,
+ * car matchInText() cherche le meilleur candidat n'importe où dans le texte, jamais le premier
+ * par position. L'élimination par budget épuisé n'opère qu'ENTRE DEUX NOEUDS TEXTE DISTINCTS
+ * traités l'un après l'autre par walkAndReplace() (deux paragraphes, deux appels @glossarize()
+ * successifs...) - exactement la structure d'une page réelle (hook, key_points, why_important
+ * sont des appels séparés qui partagent le même $seen). Le Test B ci-dessous reproduit donc deux
+ * paragraphes distincts, pas une seule phrase.
+ *
+ * CORRECTIF RÉEL (hors de ce fichier) : retrait de l'alias dupliqué « Google DeepMind » de la
+ * fiche GOOGLE en production (il reste, légitime, sur la fiche DeepMind qui documente l'entité).
+ * Ce n'est PAS un bug du linkifier - le tri et le repli par élimination fonctionnent comme conçu -
+ * c'est une donnée dupliquée entre deux fiches. Les deux tests ci-dessous ne verrouillent donc pas
+ * un correctif de CE fichier, mais CARACTÉRISENT le mécanisme exact découvert, en synthétique et
+ * sans base de données, pour qu'une future collision du même genre (le même alias déclaré sur deux
+ * fiches) soit reconnue immédiatement plutôt que réinvestiguée depuis zéro.
+ */
+function glxTermesGoogleDeepMindDupliques(): array
+{
+    return glxSortWithOrigin([
+        ['name' => 'Google DeepMind', 'slug' => 'google', 'definition' => 'Test', 'type' => 'glossary',
+         'url' => '/glossaire/google', 'match_strategy' => 'loose', 'origin_rank' => GlossaryLinkifier::ORIGIN_CURATED_ALIAS],
+        ['name' => 'Google DeepMind', 'slug' => 'deepmind', 'definition' => 'Test', 'type' => 'glossary',
+         'url' => '/glossaire/deepmind', 'match_strategy' => 'loose', 'origin_rank' => GlossaryLinkifier::ORIGIN_CURATED_ALIAS],
+    ]);
+}
+
+it('CARACTÉRISE #2612 : un alias dupliqué sur deux fiches à égalité totale part sur la première déclarée (Test A production)', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Google DeepMind a dévoilé un nouveau modèle de recherche.</p>');
+
+    $liens = glxWalk($dom, $root, glxTermesGoogleDeepMindDupliques(), false, 1);
+
+    expect($liens)->toBe(1)
+        ->and($dom->saveHTML($root))->toContain('/glossaire/google')
+        ->and($dom->saveHTML($root))->not->toContain('/glossaire/deepmind');
+});
+
+it('CARACTÉRISE #2612 : une mention Google antérieure DANS UN AUTRE NOEUD épuise son budget et fait gagner DeepMind par élimination (Test B production)', function () {
+    // Deux paragraphes = deux noeuds texte distincts, exactement comme les appels @glossarize()
+    // successifs d'une page réelle (hook, key_points, why_important...) qui partagent le même
+    // $seen. Le 1er paragraphe consomme le budget du slug 'google' AVANT que le 2e, plus loin
+    // dans le DOM, n'atteigne « Google DeepMind ».
+    [$dom, $root] = glxDomFromHtml('<p>Google est une entreprise fondée en 1998.</p><p>Google DeepMind dirige la recherche IA du groupe.</p>');
+
+    $terme = [
+        ['name' => 'Google', 'slug' => 'google', 'definition' => 'Test', 'type' => 'glossary',
+         'url' => '/glossaire/google', 'match_strategy' => 'loose', 'origin_rank' => GlossaryLinkifier::ORIGIN_PRIMARY],
+        ...glxTermesGoogleDeepMindDupliques(),
+    ];
+    $terme = glxSortWithOrigin($terme);
+
+    $liens = glxWalk($dom, $root, $terme, false, 1);
+
+    $html = $dom->saveHTML($root);
+    expect($liens)->toBe(2, 'Une seule mention par slug (max_occ=1, comme sur les pages actualités).')
+        ->and(substr_count($html, 'href="/glossaire/google"'))->toBe(1, 'La mention "Google" isolée du 1er paragraphe consomme le seul lien google disponible.')
+        ->and(substr_count($html, 'href="/glossaire/deepmind"'))->toBe(1, 'Le budget google étant épuisé, "Google DeepMind" du 2e paragraphe retombe sur deepmind par élimination.');
+});
+
+/**
+ * 2026-09-19 (ticket #2616, CAUSE ÉTABLIE PAR MESURE en production) - « gouvernance » captait
+ * l'intérieur de « gouvernance des données ». Vérifié en production : AUCUNE fiche ni alias
+ * « gouvernance des données » n'existait - seule la forme courte « gouvernance » (alias de
+ * /glossaire/gouvernance-ia) était déclarée. Le tri par longueur DESC de loadTerms() aurait fait
+ * gagner la forme longue si elle avait été candidate ; elle ne l'était simplement pas.
+ * Doctrine du fichier confirmée : « correspondance la plus longue en premier, avec un
+ * dictionnaire canonique COMPLET » - le correctif est de DÉCLARER la forme longue (fait en
+ * production, alias ajouté à /glossaire/gouvernance-ia, la fiche traite déjà des facettes
+ * voisines « gouvernance algorithmique »/« gouvernance des modèles » de la même façon), jamais
+ * de poser une garde de suffixe. Ce test caractérise, en synthétique, que le mécanisme de tri
+ * par longueur fonctionne bien dès que la forme longue existe comme candidate - la seule chose
+ * qui manquait en production était la donnée, pas le code.
+ */
+it('CARACTÉRISE #2616 : sans la forme longue déclarée, la forme courte capte à l intérieur de l expression', function () {
+    [$dom, $root] = glxDomFromHtml('<p>La gouvernance des données est un enjeu stratégique.</p>');
+
+    $terme = [['name' => 'gouvernance', 'slug' => 'gouvernance-ia', 'definition' => 'Test',
+               'type' => 'glossary', 'url' => '/glossaire/gouvernance-ia', 'match_strategy' => 'loose',
+               'origin_rank' => GlossaryLinkifier::ORIGIN_CURATED_ALIAS]];
+
+    $liens = glxWalk($dom, $root, $terme, false, 10);
+
+    // Sans forme longue déclarée, seul « gouvernance » est capté - c'est le défaut mesuré.
+    expect($liens)->toBe(1)
+        ->and($dom->saveHTML($root))->toContain('>gouvernance</a> des données');
+});
+
+it('CARACTÉRISE #2616 : une fois la forme longue déclarée comme candidate, elle gagne et couvre toute l expression', function () {
+    [$dom, $root] = glxDomFromHtml('<p>La gouvernance des données est un enjeu stratégique.</p>');
+
+    $terme = glxSortWithOrigin([
+        ['name' => 'gouvernance', 'slug' => 'gouvernance-ia', 'definition' => 'Test',
+         'type' => 'glossary', 'url' => '/glossaire/gouvernance-ia', 'match_strategy' => 'loose',
+         'origin_rank' => GlossaryLinkifier::ORIGIN_CURATED_ALIAS],
+        ['name' => 'gouvernance des données', 'slug' => 'gouvernance-ia', 'definition' => 'Test',
+         'type' => 'glossary', 'url' => '/glossaire/gouvernance-ia', 'match_strategy' => 'loose',
+         'origin_rank' => GlossaryLinkifier::ORIGIN_CURATED_ALIAS],
+    ]);
+
+    $liens = glxWalk($dom, $root, $terme, false, 10);
+
+    // La forme longue déclarée doit gagner et couvrir toute l'expression, pas seulement « gouvernance ».
+    expect($liens)->toBe(1)
+        ->and($dom->saveHTML($root))->toContain('>gouvernance des données</a>');
+});
+
+/**
+ * 2026-09-19 (ticket #2635, rappel écrit 9 fois dans l'historique de CACHE_KEY mais jamais
+ * couvert par un test) - « Tout ajout à TOOL_SUFFIX_COMPOUND_EXCLUSIONS EXIGE un bump de
+ * CACHE_KEY dans le même service. Sans ce bump, le correctif existe dans le code et n'arrive
+ * JAMAIS au visiteur, parce que l'ancienne liste de termes reste en cache. »
+ *
+ * Un test ne peut pas vérifier qu'un humain a bien pensé à bumper CACHE_KEY - mais il peut
+ * agir comme un FIL-PIÈGE (tripwire) : ce hash fige le contenu des tables sensibles au cache
+ * (celles lues par loadTerms() à CHAQUE construction du cache) pour la valeur ACTUELLE de
+ * CACHE_KEY. Toute modification future d'une de ces tables (ajout/retrait d'une exclusion,
+ * d'un alias jamais-auto...) fait rougir ce test - le message rappelle alors explicitement
+ * de bumper CACHE_KEY (voir son docblock) ET de recalculer le hash dans LE MÊME commit.
+ * Un hash qui ne bouge jamais ne protège rien ; un hash qui bouge sans que CACHE_KEY bouge
+ * avec lui est le symptôme exact de l'incident que cette règle existe pour prévenir.
+ */
+it('exige un hash à jour pour les tables sensibles au cache - rappel du bump CACHE_KEY (ticket #2635)', function () {
+    $snapshot = json_encode([
+        GlossaryLinkifier::TOOL_COMPOUND_EXCLUSIONS,
+        GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS,
+        GlossaryLinkifier::TOOL_PREFIX_PATTERN_EXCLUSIONS,
+        GlossaryLinkifier::ALIAS_NEVER_AUTO,
+    ]);
+
+    expect(GlossaryLinkifier::CACHE_KEY)
+        ->toBe('glossary.terms.v29.', 'CACHE_KEY a changé - si c\'est volontaire (ajout à une table sensible au cache), recalcule aussi le hash juste en dessous dans LE MÊME commit.')
+        ->and(md5($snapshot))
+        ->toBe('8b747d76d9e019ad51e39e92ae4f7011', 'Une table sensible au cache (TOOL_COMPOUND_EXCLUSIONS, TOOL_SUFFIX_COMPOUND_EXCLUSIONS, TOOL_PREFIX_PATTERN_EXCLUSIONS ou ALIAS_NEVER_AUTO) a changé SANS bump de CACHE_KEY (ou le hash n\'a pas été mis à jour avec le bump) - voir le docblock de CACHE_KEY : sans ce bump, le correctif reste en cache et n\'arrive jamais au visiteur.');
 });

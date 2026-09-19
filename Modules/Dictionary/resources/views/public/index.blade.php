@@ -40,7 +40,11 @@
             'firstLetter' => strtoupper(\Illuminate\Support\Str::substr($term->name, 0, 1)),
             // 2026-08-31 (#2092) : accès brut au slug traduisible protégé par getPublicUrl().
             'url' => $term->getPublicUrl(),
-            'heroImage' => dictionary_hero_image_url($term->hero_image, false),
+            // 2026-09-19 (#2633) : hero_image est TOUJOURS stocké en .webp (jamais l'original) -
+            // dictionary_hero_image_url($term->hero_image, false) renvoyait donc ce MÊME .webp,
+            // identique à heroImageWebp juste en dessous, laissant les vignettes de cette liste
+            // sans vrai repli JPEG (même défaut que la fiche, corrigé dans show.blade.php).
+            'heroImage' => dictionary_hero_image_jpg_url($term->hero_image) ?? dictionary_hero_image_url($term->hero_image, false),
             'heroImageWebp' => dictionary_hero_image_webp_url($term->hero_image),
             // Standard « visionneur de BD » : true si public/bd/{slug}/manifest.json existe.
             'hasBd' => \Modules\Dictionary\Support\ComicLibrary::hasComic($term->slug),

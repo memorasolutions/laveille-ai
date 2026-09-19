@@ -24,6 +24,17 @@ Troisieme lecon : un controle qui ne sait annoncer que zero ne prouve rien. Les 
 sortie affichent une mesure dont on attend une valeur non nulle ; si un temoin tombe a zero, c'est
 le controle qu'il faut soupconner, pas le texte.
 
+Quatrieme lecon (2026-09-19, mesure en session sur les vues du glossaire) : le motif du tiret
+cadratin signalait AUSSI le tiret demi-cadratin, que la regle du projet AUTORISE explicitement
+comme remplacement du cadratin interdit (CLAUDE.md regle 10 : le cadratin est interdit, il faut
+le remplacer par un trait d'union ou un demi-cadratin). Un controle qui crie au loup sur du texte
+conforme finit par etre ignore, et c'est comme ca qu'une vraie faute passe. Motif restreint au
+SEUL cadratin, ecrit par POINT DE CODE (EM_DASH = U+2014 ci-dessous) - jamais tape litteralement :
+deux tirets qui different d'un seul pixel a l'ecran ne se relisent pas de maniere fiable, meme
+constat que pour l'insecable plus haut. Un AUTOTEST verifie cette discrimination a CHAQUE
+execution (voir _autotest_tiret_cadratin) : c'est le temoin de cette quatrieme lecon, independant
+du contenu de la fiche passee en argument.
+
 Norme appliquee : Office quebecois de la langue francaise. Elle DIFFERE de l'usage francais sur un
 point decisif - au Quebec, AUCUNE espace devant ; ! ? Appliquer le reflexe francais est une faute.
 """
@@ -33,16 +44,34 @@ import sys
 
 NBSP = " "
 
+# Cadratin (interdit, CLAUDE.md regle 10) et demi-cadratin (AUTORISE - remplacement
+# recommande du cadratin), tous deux ecrits par POINT DE CODE pour ne jamais les confondre
+# a la relecture (2026-09-19 : le motif precedent [—–] signalait aussi le demi-cadratin
+# pourtant autorise - meme categorie de piege que l'insecable tape en clair plus haut).
+EM_DASH = "—"  # tiret cadratin - SEUL interdit
+EN_DASH = "–"  # tiret demi-cadratin - AUTORISE, jamais signale ici
+
 CONTROLES = (
     ("espace ordinaire avant ':'", "(?<! ) :"),
     ("espace avant ; ! ?",         "[\\s ]+[;!?]"),
-    ("tiret cadratin",             "[—–]"),
+    ("tiret cadratin",             EM_DASH),
     ("entite &nbsp;",              "&nbsp;"),
     ("% sans insecable",           "(?<! )%"),
     ("$ sans insecable",           "(?<! )\\$"),
     ("guillemet ouvrant nu",       "«(?! )"),
     ("guillemet fermant nu",       "(?<! )»"),
 )
+
+
+def _autotest_tiret_cadratin() -> bool:
+    """Temoin du controle "tiret cadratin" (INDEPENDANT du contenu de la fiche passee en
+    argument) : verifie que le motif signale bien le cadratin interdit et JAMAIS le
+    demi-cadratin autorise. Retourne True si la discrimination est correcte, False si c'est
+    le controle lui-meme qu'il faut soupconner."""
+    motif = dict(CONTROLES)["tiret cadratin"]
+    cadratin_signale = bool(re.search(motif, f"avant{EM_DASH}apres"))
+    demi_cadratin_epargne = not re.search(motif, f"avant{EN_DASH}apres")
+    return cadratin_signale and demi_cadratin_epargne
 
 
 def champs_de(fiche: dict) -> dict:
@@ -59,6 +88,11 @@ def champs_de(fiche: dict) -> dict:
 def main() -> int:
     if len(sys.argv) < 2:
         print("usage : controle-typographie-oqlf.py <fiche.json>", file=sys.stderr)
+        return 2
+
+    if not _autotest_tiret_cadratin():
+        print("ATTENTION : le controle \"tiret cadratin\" ne discrimine plus le cadratin (interdit)"
+              " du demi-cadratin (autorise). Soupconner le controle avant le texte.", file=sys.stderr)
         return 2
 
     with open(sys.argv[1], encoding="utf-8") as fichier:

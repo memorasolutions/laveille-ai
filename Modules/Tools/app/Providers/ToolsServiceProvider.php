@@ -47,6 +47,7 @@ class ToolsServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\Tools\Console\CheckFiscalRatesCommand::class,
+            \Modules\Tools\Console\ToolMaintenanceCommand::class,
         ]);
     }
 

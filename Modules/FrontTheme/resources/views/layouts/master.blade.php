@@ -112,7 +112,12 @@
     @hasSection('og_image')
         <meta property="og:image" content="@yield('og_image')">
         <meta property="og:image:width" content="1200">
-        <meta property="og:image:height" content="630">
+        {{-- 2026-09-19 : hauteur PARAMÉTRABLE par page (repli 630, format actualités/blog/annuaire
+             partagé par ce layout unique) - le glossaire sert des images 1200x669 et déclare
+             @section('og_image_height', 669), jamais 630 en dur ici, sinon toutes les autres
+             pages qui étendent ce même layout (actualités, blog, annuaire, acronymes...) se
+             retrouveraient avec une hauteur fausse. --}}
+        <meta property="og:image:height" content="@yield('og_image_height', '630')">
         <meta name="twitter:image" content="@yield('og_image')">
     @else
         <meta property="og:image" content="{{ asset('images/og-image.png') }}">

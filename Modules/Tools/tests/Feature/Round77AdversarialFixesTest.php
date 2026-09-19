@@ -124,9 +124,13 @@ it('injects helps/techniqueHints/diagnostic i18n translated into window.promptBu
     $html = $this->actingAs($user)->withSession(['locale' => 'en'])->get('/outils/constructeur-prompts')->assertOk()->getContent();
 
     expect($html)->toContain('Assigning a role to the AI shapes the tone');
-    // LOT 3 (2026-08-06) : nouvelle formulation « (Méthode : zero-shot) ... » - voir le test
-    // précédent pour le contexte du remplacement des 5 anciennes clés techniqueHints.
-    expect($html)->toContain('(Method: zero-shot) The AI responds directly, without examples or intermediate steps.');
+    // LOT 3 (2026-08-06) : formulation « (Method: zero-shot) ... » - RÉVISÉE le 2026-09-19
+    // (vague 1, défaut 3/5, brief-vague-1.md) : mesuré au parcours humain, "zero-shot" restait un
+    // mot anglais non expliqué même accompagné de sa phrase descriptive - remplacé par les mêmes
+    // mots que le libellé principal du sélecteur (voir constructeur-prompts.blade.php,
+    // $pbTechniqueHints). La clé FR/EN "(Méthode : zero-shot)..." reste dans fr.json/en.json
+    // (orpheline, plus aucun __() ne l'appelle) plutôt que supprimée - même politique que LOT 3.
+    expect($html)->toContain('(Direct answer) The AI responds directly, without examples or intermediate steps.');
     expect($html)->toContain('diagnosticFormat');
     expect($html)->toContain("You haven't specified the expected response format (short text, list, table...) or its length.");
     expect($html)->not->toContain("Donner un rôle à l'IA oriente");

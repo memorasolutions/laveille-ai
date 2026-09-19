@@ -17,7 +17,7 @@
             <div class="col-lg-10 col-12">
                 <div class="card shadow-sm tool-fullscreen-target" style="border-radius: var(--r-base);">
                     {{-- Écouteur ajouté car la modale #resetConfirmModal vit hors du scope Alpine (elle est placée après </section>, comme les autres modales Bootstrap de cette page) --}}
-                    <div class="card-body p-4 p-md-5" x-data="promptBuilder()" x-init="init()" @keydown.escape.window="closeIconPicker()" @cp-reset-confirmed.window="resetAll()">
+                    <div id="cpWizard" class="card-body p-4 p-md-5" x-data="promptBuilder()" x-init="init()" @keydown.escape.window="closeIconPicker()" @cp-reset-confirmed.window="resetAll()">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h1 style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark); margin: 0;">{{ $tool->name }}</h1>
@@ -207,7 +207,12 @@
                         .ct-block__field:last-child{margin-bottom:0;}
                         .ct-chip-row{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem;}
                         .ct-chip{display:inline-flex;align-items:center;gap:4px;border:2px solid var(--c-primary);border-radius:9999px;background:var(--c-primary);color:#fff;padding:0.25rem 0.5rem 0.25rem 0.75rem;font-size:0.8rem;font-weight:500;}
-                        .ct-chip__x{background:transparent;border:0;color:inherit;font-size:1rem;line-height:1;cursor:pointer;min-width:24px;min-height:24px;padding:0;}
+                        {{-- Cible tactile 44px (2026-09-19, défaut 3/5, WCAG 2.2 AAA - seuil du projet) :
+                             mesurée à 24×24px en production, sous le seuil tactile déjà établi ailleurs
+                             dans cette page (ex. cpZoneInput, même motif/même justification). display:
+                             inline-flex + centrage : sans lui, le "×" se retrouverait décentré dans la
+                             boîte agrandie (mesuré sur .ct-help-btn, même correctif déjà en service). --}}
+                        .ct-chip__x{display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;color:inherit;font-size:1rem;line-height:1;cursor:pointer;min-width:44px;min-height:44px;padding:0;}
                         .ct-chip__x:focus-visible{outline:2px solid #fff;outline-offset:1px;border-radius:50%;}
                         {{-- Compaction étape 4 (tâche 1701, verdict boucle 3 rounds 2026-08-09 : réduire les
                              vides, jamais cacher) : les cases à cocher passent en 2 colonnes sur ordinateur,
@@ -240,7 +245,13 @@
                              sombre - invisible sur ce fond clair (1,11:1), d'où l'override ciblé. --}}
                         .ct-chip--missing{background:#FEF3C7;border-color:#5b4a1f;color:#5b4a1f;}
                         .ct-chip--missing .ct-chip__x:focus-visible,.ct-chip--missing .ct-chip__label:focus-visible{outline-color:#5b4a1f;}
-                        .ct-chip__label{background:transparent;border:0;color:inherit;font:inherit;font-weight:500;cursor:pointer;padding:0;min-height:24px;}
+                        .ct-chip__label{display:inline-flex;align-items:center;background:transparent;border:0;color:inherit;font:inherit;font-weight:500;cursor:pointer;padding:0;min-height:44px;}
+                        {{-- Cible tactile 44px (2026-09-19, défaut 3/5) : les <select> et champs "Autre"
+                             (.form-control/.form-control-sm) de cet outil mesuraient entre 26 et 36px de
+                             haut en production - même seuil, même motif déjà appliqué à cpZoneInput plus
+                             haut dans ce fichier. Scopé à #cpWizard (racine Alpine de cette page) : ne
+                             touche JAMAIS le style Bootstrap global ni les autres pages du site. --}}
+                        #cpWizard select.form-control,#cpWizard select.form-control-sm,#cpWizard input.form-control-sm[type="text"]{min-height:44px;}
                         .ct-chip__label:focus-visible{outline:2px solid #fff;outline-offset:1px;border-radius:4px;}
                         .ct-chip__input{background:#fff;border:1px solid var(--c-primary);border-radius:6px;color:var(--c-dark);font-size:0.8rem;padding:2px 6px;min-width:90px;max-width:180px;min-height:24px;}
                         .ct-chip__badge{font-size:0.7rem;opacity:0.9;white-space:nowrap;}
@@ -275,12 +286,21 @@
                         .ct-stepper__item:not(:last-child)::after{content:'';position:absolute;top:17px;left:calc(50% + 21px);right:calc(-50% + 21px);height:2px;background:var(--sys-border-default,#D1D5DB);z-index:0;}
                         .ct-stepper__item--done:not(:last-child)::after{background:var(--sys-status-success-text,#054F3A);}
                         .ct-stepper__btn{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:44px;min-width:44px;padding:2px 6px;border:0;background:transparent;cursor:pointer;color:var(--c-text-secondary);width:100%;border-radius:8px;}
-                        .ct-stepper__circle{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:34px;height:34px;border-radius:50%;border:2px solid var(--sys-border-default,#D1D5DB);background:#fff;color:var(--c-text-secondary);font-weight:700;font-size:0.85rem;line-height:1;transition:background .15s ease,border-color .15s ease,color .15s ease;}
+                        .ct-stepper__circle{position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;width:34px;height:34px;border-radius:50%;border:2px solid var(--sys-border-default,#D1D5DB);background:#fff;color:var(--c-text-secondary);font-weight:700;font-size:0.85rem;line-height:1;transition:background .15s ease,border-color .15s ease,color .15s ease;}
                         .ct-stepper__label{font-size:0.72rem;font-weight:600;max-width:92px;text-align:center;line-height:1.2;}
                         .ct-stepper__btn--on .ct-stepper__circle{background:var(--c-primary);border-color:var(--c-primary);color:#fff;}
                         .ct-stepper__btn--on .ct-stepper__label{color:var(--c-primary);font-weight:800;}
                         .ct-stepper__btn--done .ct-stepper__circle{background:var(--sys-status-success-bg,#D1FAE5);border-color:var(--sys-status-success-text,#054F3A);color:var(--sys-status-success-text,#054F3A);}
                         .ct-stepper__btn--on.ct-stepper__btn--done .ct-stepper__circle{background:var(--c-primary);border-color:var(--c-primary);color:#fff;}
+                        {{-- État "en cours" (2026-09-19, défaut 1, 3e état) : jetons --sys-status-warning-*
+                             déjà en service ailleurs sur ce site (ex. Modules/Academy) - AAA mesuré
+                             8,18:1 (texte/fond) et 9,37:1 (bordure/blanc), jamais < 7:1. Le badge ::after
+                             est un repère de FORME (pastille), pas seulement de couleur (WCAG 1.4.1) :
+                             une personne qui ne distingue pas teal/ambre voit quand même un point présent
+                             ou absent sur le cercle. --}}
+                        .ct-stepper__btn--partial .ct-stepper__circle{background:var(--sys-status-warning-bg,#FFEDD5);border-color:var(--sys-status-warning-text,#7C2D12);color:var(--sys-status-warning-text,#7C2D12);}
+                        .ct-stepper__btn--partial .ct-stepper__circle::after{content:'';position:absolute;top:-2px;right:-2px;width:9px;height:9px;border-radius:50%;background:var(--sys-status-warning-text,#7C2D12);border:2px solid #fff;}
+                        .ct-stepper__btn--on.ct-stepper__btn--partial .ct-stepper__circle{background:var(--c-primary);border-color:var(--c-primary);color:#fff;}
                         .ct-stepper__btn:hover .ct-stepper__circle{border-color:var(--c-primary);}
                         .ct-stepper__btn:focus-visible{outline:2px solid var(--c-primary);outline-offset:2px;}
                         @media (max-width:520px){
@@ -290,6 +310,11 @@
                         @media (prefers-reduced-motion:reduce){
                             .ct-stepper__circle{transition:none;}
                         }
+                        {{-- Cible de _focusStepHeading() (2026-09-19, défaut 3/5) : tabindex="-1" rend le
+                             titre focusable par script sans l'ajouter à l'ordre de tabulation normal - le
+                             contour de focus visible reste nécessaire pour les personnes qui gardent le
+                             clavier après un "Suivant" (WCAG 2.4.7), même provoqué par script. --}}
+                        .ct-step-heading:focus-visible,.ct-step-heading:focus{outline:2px solid var(--c-primary);outline-offset:4px;border-radius:2px;}
 
                         {{-- #3 allègement charge cognitive : disclosures repliées par défaut pour l'aperçu
                              et les vérifications, section actions/"Ouvrir dans" regroupée et atténuée tant
@@ -369,16 +394,26 @@
 
                         {{-- Indicateur d'étapes, cliquable (retour à une étape déjà validée). Stepper
                              visuel 2026 (correctif #2, 2026-08-05) : cercles numérotés + connecteur +
-                             coche de complétion (correctif #4, via stepComplete()). Mécanisme de
-                             navigation inchangé (goToStep/canGoToStep), role="tablist"/role="tab"
-                             conservés tels quels (test PrompteurToolTest.php). --}}
+                             coche de complétion. Mécanisme de navigation inchangé (goToStep/
+                             canGoToStep), role="tablist"/role="tab" conservés tels quels (test
+                             PrompteurToolTest.php).
+                             Trois états (2026-09-19, défaut 1) : vide / partiel / complete, via
+                             stepState() - remplace l'ancien booléen stepComplete() qui ne
+                             distinguait pas "jamais ouverte" de "en cours". Lisible SANS la
+                             couleur (WCAG 1.4.1) : le glyphe change (chiffre / point / ✓) ET
+                             l'aria-label du bouton porte TOUJOURS le nom de l'étape + son état -
+                             sur mobile, où .ct-stepper__label passe en display:none pour toutes
+                             les étapes sauf l'active (voir CSS plus bas), c'était le SEUL nom
+                             accessible du bouton qui disparaissait : un lecteur d'écran annonçait
+                             "onglet, non sélectionné" sans aucun nom. L'aria-label sur le bouton
+                             prime toujours sur son contenu visuel, donc reste correct aussi en
+                             desktop. --}}
                         <div class="ct-stepper mb-3" role="tablist" aria-label="{{ __('Étapes du constructeur') }}">
                             <template x-for="(s, sIdx) in [[1,'{{ __('Persona') }}'],[2,'{{ __('Tâche') }}'],[3,'{{ __('Audience') }}'],[4,'{{ __('Options') }}']]" :key="s[0]">
-                                <div class="ct-stepper__item" :class="{ 'ct-stepper__item--done': stepComplete(s[0]) }">
-                                    <button type="button" class="ct-stepper__btn" :class="{ 'ct-stepper__btn--on': step === s[0], 'ct-stepper__btn--done': stepComplete(s[0]) }" @click="goToStep(s[0])" role="tab" :aria-selected="(step === s[0]).toString()" :aria-current="step === s[0] ? 'step' : null">
-                                        <span class="ct-stepper__circle" aria-hidden="true" x-text="stepComplete(s[0]) ? '✓' : s[0]"></span>
+                                <div class="ct-stepper__item" :class="{ 'ct-stepper__item--done': stepState(s[0]) === 'complete' }">
+                                    <button type="button" class="ct-stepper__btn" :class="{ 'ct-stepper__btn--on': step === s[0], 'ct-stepper__btn--done': stepState(s[0]) === 'complete', 'ct-stepper__btn--partial': stepState(s[0]) === 'partiel' }" @click="goToStep(s[0])" role="tab" :aria-selected="(step === s[0]).toString()" :aria-current="step === s[0] ? 'step' : null" :aria-label="s[1] + ' - ' + stepStateLabel(s[0])">
+                                        <span class="ct-stepper__circle" aria-hidden="true" x-text="stepState(s[0]) === 'complete' ? '✓' : s[0]"></span>
                                         <span class="ct-stepper__label" x-text="s[1]"></span>
-                                        <span class="visually-hidden" x-show="stepComplete(s[0])">{{ __('complétée') }}</span>
                                     </button>
                                 </div>
                             </template>
@@ -442,7 +477,12 @@
                         {{-- Étape 1 : Persona --}}
                         <div x-show="step === 1" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Quel rôle l\'IA doit-elle jouer ?') }}</h2>
+                                {{-- tabindex="-1" + id ciblé par _focusStepHeading() (2026-09-19, défaut 3/5) :
+                                     après "Suivant"/"Précédent"/un clic sur le stepper, le focus se déplace
+                                     ici plutôt que de rester sur le bouton cliqué - un lecteur d'écran
+                                     annonce ainsi le nouveau titre d'étape. Non atteignable au Tab normal
+                                     (ce n'est pas son rôle), seulement via ce focus programmatique. --}}
+                                <h2 id="cpStepHeading1" tabindex="-1" class="ct-step-heading" style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Quel rôle l\'IA doit-elle jouer ?') }}</h2>
                                 <x-tools::help-btn toggle="showHelp.persona" style="margin-left:4px;" />
                             </div>
                             <div x-show="showHelp.persona" x-transition class="alert alert-info small mb-3 p-2" style="font-size: 0.8rem;" x-text="helps.persona"></div>
@@ -450,7 +490,7 @@
                                 <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Rôle de l\'IA') }} <span style="color: #991B1B;">*</span></label>
                                 <div class="d-flex gap-3 mb-2">
                                     <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
-                                        <input type="radio" name="personaType" value="preset" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
+                                        <input type="radio" name="personaType" value="preset" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Dans une liste') }}
                                     </label>
                                     <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
                                         <input type="radio" name="personaType" value="custom" x-model="personaType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
@@ -464,14 +504,19 @@
                                         </template>
                                     </select>
                                 </div>
-                                <input type="text" id="cpPersonaCustom" class="form-control" x-show="personaType === 'custom'" x-model="personaCustom" :aria-required="personaType === 'custom'" autocomplete="off" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}" aria-label="{{ __('Rôle personnalisé') }}">
+                                {{-- Libellé visible ajouté le 2026-09-19 (défaut 3/5) : ce champ ne
+                                     portait qu'un placeholder (disparaît dès la saisie) + un aria-label
+                                     invisible - mesuré au parcours humain comme "le champ sans libellé".
+                                     for/id remplace l'aria-label, qui devient redondant. --}}
+                                <label class="form-label fw-medium mb-1" for="cpPersonaCustom" x-show="personaType === 'custom'" style="font-size: 0.8rem;">{{ __('Rôle personnalisé') }}</label>
+                                <input type="text" id="cpPersonaCustom" class="form-control" x-show="personaType === 'custom'" x-model="personaCustom" :aria-required="personaType === 'custom'" autocomplete="off" placeholder="{{ __('Ex: un expert en cybersécurité spécialisé en PME québécoises') }}">
                             </div>
                         </div>
 
                         {{-- Étape 2 : Tâche (verbe d'action + description) --}}
                         <div x-show="step === 2" x-transition>
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Que voulez-vous demander à l\'IA ?') }}</h2>
+                                <h2 id="cpStepHeading2" tabindex="-1" class="ct-step-heading" style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0;">{{ __('Que voulez-vous demander à l\'IA ?') }}</h2>
                             </div>
                             <div class="ct-block__field mb-3" :style="secondTaskEnabled ? 'border: 1px solid var(--c-primary); border-radius: 10px; padding: 10px;' : ''">
                                 <template x-if="secondTaskEnabled">
@@ -480,7 +525,7 @@
                                 <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Verbe d\'action') }} <span style="color: #991B1B;">*</span></label>
                                 <div class="d-flex gap-3 mb-2">
                                     <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
-                                        <input type="radio" name="verbType" value="preset" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
+                                        <input type="radio" name="verbType" value="preset" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Dans une liste') }}
                                     </label>
                                     <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
                                         <input type="radio" name="verbType" value="custom" x-model="verbType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
@@ -492,7 +537,8 @@
                                         <option :value="v" x-text="v"></option>
                                     </template>
                                 </select>
-                                <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" autocomplete="off" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé') }}">
+                                <label class="form-label fw-medium mb-1" for="cpVerbCustom" x-show="verbType === 'custom'" style="font-size: 0.8rem;">{{ __('Verbe personnalisé') }}</label>
+                                <input type="text" id="cpVerbCustom" class="form-control" x-show="verbType === 'custom'" x-model="verbCustom" autocomplete="off" :aria-required="verbType === 'custom'" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}">
                             </div>
 
                             {{-- Deuxième tâche optionnelle (2026-08-04, club des sages 5/5 unanime) :
@@ -513,7 +559,7 @@
                                     <label class="form-label fw-medium mb-1" style="font-size: 0.85rem;">{{ __('Verbe d\'action de la deuxième tâche') }}</label>
                                     <div class="d-flex gap-3 mb-2">
                                         <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
-                                            <input type="radio" name="verbType2" value="preset" x-model="verbType2" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfini') }}
+                                            <input type="radio" name="verbType2" value="preset" x-model="verbType2" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Dans une liste') }}
                                         </label>
                                         <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; min-height: 44px; padding: 4px 6px;">
                                             <input type="radio" name="verbType2" value="custom" x-model="verbType2" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisé') }}
@@ -525,7 +571,8 @@
                                             <option :value="v" x-text="v"></option>
                                         </template>
                                     </select>
-                                    <input type="text" id="cpVerbCustom2" class="form-control" x-show="verbType2 === 'custom'" x-model="verbCustom2" autocomplete="off" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}" aria-label="{{ __('Verbe personnalisé de la deuxième tâche') }}">
+                                    <label class="form-label fw-medium mb-1" for="cpVerbCustom2" x-show="verbType2 === 'custom'" style="font-size: 0.8rem;">{{ __('Verbe personnalisé de la deuxième tâche') }}</label>
+                                    <input type="text" id="cpVerbCustom2" class="form-control" x-show="verbType2 === 'custom'" x-model="verbCustom2" autocomplete="off" placeholder="{{ __('Ex: Reformule, Synthétise, Décortique...') }}">
                                     <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 6px;">
                                         <button type="button" @click="swapTaskOrder()" style="display: inline-flex; align-items: center; min-height: 44px; padding: 4px 6px; border: 0; background: transparent; color: var(--c-primary); font-size: 0.8rem; font-weight: 600; cursor: pointer;">
                                             {{ __('⇅ Inverser l\'ordre') }}
@@ -745,10 +792,10 @@
 
                         {{-- Étape 3 : Audience (optionnelle) --}}
                         <div id="cpAudienceBlock" x-show="step === 3" x-transition>
-                            <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0 0 0.75rem;">{{ __('Qui va lire ça ?') }}</h2>
+                            <h2 id="cpStepHeading3" tabindex="-1" class="ct-step-heading" style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0 0 0.75rem;">{{ __('Qui va lire ça ?') }}</h2>
                             <div class="d-flex gap-3 mb-2" role="radiogroup" aria-label="{{ __('Mode de sélection de l\'audience') }}">
                                 <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
-                                    <input type="radio" name="audienceType" value="preset" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Prédéfinie') }}
+                                    <input type="radio" name="audienceType" value="preset" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Dans une liste') }}
                                 </label>
                                 <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; min-height: 44px; padding: 4px 6px;">
                                     <input type="radio" name="audienceType" value="custom" x-model="audienceType" style="width:24px;height:24px;accent-color:var(--c-primary);margin:0;flex-shrink:0;cursor:pointer;"> {{ __('Personnalisée') }}
@@ -771,7 +818,8 @@
                                 </div>
                             </div>
                             <div class="ct-block__field" x-show="audienceType === 'custom'">
-                                <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" autocomplete="off" placeholder="{{ __('Ex : mes élèves de 5e année, leurs parents') }}" aria-label="{{ __('Audience personnalisée') }}" aria-describedby="cpAudienceCustomHelp">
+                                <label class="form-label fw-medium mb-1" for="cpAudienceCustom" style="font-size: 0.8rem;">{{ __('Audience personnalisée') }}</label>
+                                <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" autocomplete="off" placeholder="{{ __('Ex : mes élèves de 5e année, leurs parents') }}" aria-describedby="cpAudienceCustomHelp">
                                 <small id="cpAudienceCustomHelp" style="display:block; margin-top:4px; color:var(--c-muted, #5a6b6f); font-size:0.8rem;">{{ __('Tu peux nommer plusieurs lecteurs, séparés par des virgules.') }}</small>
                             </div>
                         </div>
@@ -784,8 +832,13 @@
                              imiter ? » remonte pour rejoindre le bloc Format/Longueur sous « Apparence
                              de la réponse » (aucun test n'assertait l'ordre de ces blocs - vérifié par
                              grep avant ce changement). --}}
-                        <div x-show="step === 4" x-transition>
-                            <h2 style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0 0 0.75rem;">{{ __('Options avancées') }}</h2>
+                        {{-- @change/@input délégués (2026-09-19, défaut 1) : bulles depuis TOUT select/
+                             input/textarea/checkbox descendant de ce conteneur - aucun champ individuel de
+                             l'étape 4 à instrumenter un par un (DRY). N'arme markStep4Touched() que sur une
+                             vraie interaction utilisateur avec un champ, jamais sur la simple navigation
+                             vers cette étape (voir step4Touched, constructeur-prompts-core.js). --}}
+                        <div x-show="step === 4" x-transition @change="markStep4Touched()" @input="markStep4Touched()">
+                            <h2 id="cpStepHeading4" tabindex="-1" class="ct-step-heading" style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark); font-size: 1.1rem; margin: 0 0 0.75rem;">{{ __('Options avancées') }}</h2>
 
                             <fieldset class="ct-group">
                                 <legend class="ct-group__legend">{{ __('Apparence de la réponse') }}</legend>
@@ -1240,7 +1293,7 @@
                             <button class="ct-btn ct-btn-outline" @click="toggleMetaPrompt()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')"
                                     :aria-expanded="metaPromptShown.toString()" aria-controls="cpMetaPromptPanel">✨ {{ __('Améliorer avec mon IA') }}</button>
                             <button class="ct-btn ct-btn-outline" @click="exportPrompt()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="'min-height:44px;' + (!isValid ? 'opacity:0.5;cursor:not-allowed;' : '')">{{ __('Exporter .txt') }}</button>
-                            <button type="button" class="ct-btn ct-btn-outline-danger" @click="jQuery('#resetConfirmModal').modal('show')" style="min-height:44px;">{{ __('🔄 Recommencer') }}</button>
+                            <button type="button" id="cpResetTriggerBtn" class="ct-btn ct-btn-outline-danger" @click="jQuery('#resetConfirmModal').modal('show')" style="min-height:44px;">{{ __('🔄 Recommencer') }}</button>
                         </div>
                         <template x-if="metaPromptShown && isValid">
                             <div id="cpMetaPromptPanel" class="mb-3 p-3 rounded" style="border: 1.5px solid var(--c-primary); border-radius: var(--r-base); background:#fff;" aria-live="polite">
@@ -1454,6 +1507,29 @@
         </div>
     </div>
 </div>
+{{-- Focus de la modale « Tout recommencer ? » (2026-09-19, défaut 3/5) : bug confirmé par Chrome
+     lui-même en console (2 occurrences) - "Blocked aria-hidden on an element because its
+     descendant retained focus". Bootstrap pose aria-hidden="true" sur #resetConfirmModal dès le
+     DÉBUT de la fermeture (hide.bs.modal), qu'elle vienne du bouton "Fermer"/"Annuler"/"Oui, tout
+     effacer" OU de la touche Échap/clic sur le fond - or le bouton qui vient d'être cliqué (ou la
+     modale elle-même sous Échap) garde le focus à ce moment précis, devenant un descendant
+     focalisé d'un conteneur aria-hidden, ce que l'ARIA interdit. Un seul écouteur centralisé (pas
+     un onclick par bouton) couvre les QUATRE chemins de fermeture à la fois. Le focus revient
+     ensuite sur le bouton "Recommencer" qui a ouvert la modale - jamais laissé à <body> - une fois
+     la modale réellement masquée (hidden.bs.modal), conformément au renvoi de focus attendu après
+     fermeture d'une boîte de dialogue. --}}
+<script>
+window.addEventListener('load', function () {
+    jQuery('#resetConfirmModal').on('hide.bs.modal', function () {
+        if (document.activeElement && this.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+    }).on('hidden.bs.modal', function () {
+        var trigger = document.getElementById('cpResetTriggerBtn');
+        if (trigger) trigger.focus();
+    });
+});
+</script>
 
 @php
     // Modale pédagogique #techniquesHelpModal (signalement fondateur, 2026-08-11 ; restructurée en
@@ -1834,11 +1910,19 @@ $pbHelps = [
 // affiché en petit gris SOUS le sélecteur (voir techniqueHints dans le Blade, ~471) - jamais dans
 // le libellé principal de l'<option> elle-même (un <select> natif ne permet pas de styliser une
 // partie du texte d'une option, d'où ce choix d'emplacement).
+// Jargon corrigé le 2026-09-19 (vague 1, défaut 3/5) : mesuré au parcours humain, « (Méthode :
+// zero-shot) » s'affichait sans jamais être expliqué - le mot anglais lui-même n'a aucun sens
+// pour le public visé, même accompagné de la phrase qui décrit son EFFET juste après. Remplacé
+// par les mêmes mots que le libellé principal du sélecteur ($defaultTechniques plus bas, ex.
+// « Réponse directe (par défaut) », « Avec des exemples ») - jamais un jargon de remplacement.
+// « chaîne de pensée »/« décomposition guidée »/« reformulation »/« auto-vérification »/
+// « variantes comparées » restent inchangés : ce sont déjà des mots du français courant, pas
+// des sigles anglais non traduits.
 $pbTechniqueHints = [
-    'zero-shot' => __("(Méthode : zero-shot) L'IA répond directement, sans exemple ni étape intermédiaire."),
+    'zero-shot' => __("(Réponse directe) L'IA répond directement, sans exemple ni étape intermédiaire."),
     'zero-shot-cot' => __("(Méthode : chaîne de pensée) L'IA réfléchit en interne avant de répondre, sans montrer ce raisonnement."),
-    'few-shot' => __("(Méthode : few-shot) Vous donnez 2-3 exemples du résultat attendu pour guider l'IA."),
-    'few-shot-cot' => __("(Méthode : few-shot + chaîne de pensée) Exemples fournis, puis raisonnement détaillé appliqué au même modèle."),
+    'few-shot' => __("(Avec des exemples) Vous donnez 2-3 exemples du résultat attendu pour guider l'IA."),
+    'few-shot-cot' => __("(Avec des exemples et chaîne de pensée) Exemples fournis, puis raisonnement détaillé appliqué au même modèle."),
     'iterative' => __("(Méthode : décomposition guidée) L'IA avance étape par étape et attend votre accord avant de continuer."),
     'reformulation' => __("(Méthode : reformulation) L'IA reformule d'abord ta demande dans ses mots, puis répond."),
     'auto-verification' => __("(Méthode : auto-vérification) L'IA relit sa réponse, corrige ses erreurs et ses oublis avant de te la livrer."),
@@ -2004,6 +2088,10 @@ window.promptBuilderConfig = {
         summaryTone: @json(__('Ton : ')),
         summaryFormat: @json(__('Présenté sous forme de : ')),
         summaryLength: @json(__('Longueur visée : ')),
+        // Trois états du stepper (2026-09-19, défaut 1) - voir stepStateLabel() dans le JS.
+        stepComplete: @json(__('complétée')),
+        stepPartial: @json(__('en cours')),
+        stepEmpty: @json(__('à faire')),
         // Enrichissement 2026-07-31 : sélecteur d'icônes classé + recherche (accès à plus d'icônes,
         // bien classifiées, recherche par mot-clé français).
         iconSearchEmpty: @json(__('Aucune icône ne correspond à cette recherche.')),

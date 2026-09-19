@@ -18,6 +18,11 @@
          (jamais updated_at, réécrit par une simple consultation) - un cache-buster doit changer
          quand le CONTENU change, jamais quand quelqu'un regarde la page. --}}
     @section('og_image', asset($_ogImagePath).'?v='.($term->editorialModifiedAt()?->timestamp ?? '0'))
+    {{-- 2026-09-19 : les images du glossaire font 1200x669 (format DISTINCT des actualités en
+         1200x630) - le layout partagé fronttheme::layouts.master expose @yield('og_image_height',
+         630) précisément pour ce cas, jamais 669 en dur dans le layout lui-même (il sert aussi
+         les actualités). --}}
+    @section('og_image_height', 669)
 @endif
 
 @php
@@ -37,9 +42,9 @@
     $_shareDirectUrl = $term->getPublicUrl();
     $_shareIndexUrl = route('dictionary.index');
     $_shareUtmUrl = $_shareDirectUrl . '?utm_source=share_dictionary&utm_medium=clipboard';
-    $_shareAnalogyPart = $_shareAnalogy ? "\n🧠 En termes simples : " . mb_strimwidth($_shareAnalogy, 0, 150, '…') : '';
-    $_shareDidYouKnowPart = $_shareDidYouKnow ? "\n💡 Le saviez-vous : " . mb_strimwidth($_shareDidYouKnow, 0, 150, '…') : '';
-    $_shareText = "🔍 {$_shareKind} : {$_shareTermTitle}\n\n{$_shareSummary}{$_shareAnalogyPart}{$_shareDidYouKnowPart}\n\n🔗 {$_shareUtmUrl}\n\n#IA #Glossaire #LaVeille\n\nVia laveille.ai";
+    $_shareAnalogyPart = $_shareAnalogy ? "\n🧠 En termes simples\u{00A0}: " . mb_strimwidth($_shareAnalogy, 0, 150, '…') : '';
+    $_shareDidYouKnowPart = $_shareDidYouKnow ? "\n💡 Le saviez-vous\u{00A0}: " . mb_strimwidth($_shareDidYouKnow, 0, 150, '…') : '';
+    $_shareText = "🔍 {$_shareKind}\u{00A0}: {$_shareTermTitle}\n\n{$_shareSummary}{$_shareAnalogyPart}{$_shareDidYouKnowPart}\n\n🔗 {$_shareUtmUrl}\n\n#IA #Glossaire #LaVeille\n\nVia laveille.ai";
 @endphp
 @section('share_text', $_shareText)
 
@@ -230,10 +235,16 @@
             <div class="col-xs-12">
                 <article class="gl-main-card">
 
-                    {{-- Hero image --}}
+                    {{-- Hero image ; 2026-09-19 : hero_image est TOUJOURS stocké en .webp (jamais
+                         l'original) - dictionary_hero_image_url($term->hero_image, false) renvoyait
+                         donc ce MÊME .webp, laissant le <picture> sans vrai repli JPEG malgré les
+                         paires {slug}.webp + {slug}.jpg présentes sur le disque. Le repli dérive
+                         explicitement le .jpg (dictionary_hero_image_jpg_url), avec l'ancien appel
+                         gardé en dernier recours si jamais le .jpg n'existe pas. --}}
                     @php
                         $_heroWebp = dictionary_hero_image_url($term->hero_image, true);
-                        $_heroFallback = dictionary_hero_image_url($term->hero_image, false);
+                        $_heroFallback = dictionary_hero_image_jpg_url($term->hero_image)
+                            ?? dictionary_hero_image_url($term->hero_image, false);
                     @endphp
                     @if($_heroFallback)
                         <div class="gl-hero-image">
@@ -291,7 +302,7 @@
                     @endphp
                     @if(! empty($_variants))
                         <p style="text-align: center; color: #6B7280; font-size: 0.95rem; font-style: italic; margin: 4px 0 12px; letter-spacing: 0.02em;">
-                            <span style="font-weight: 500; font-style: normal; color: #9CA3AF;">{{ __('Aussi appelé') }} :</span>
+                            <span style="font-weight: 500; font-style: normal; color: #9CA3AF;">{{ __('Aussi appelé') }} :</span>
                             {{ implode(' · ', $_variants) }}
                         </p>
                     @endif
@@ -417,7 +428,7 @@
                         @if($term->did_you_know)
                             <div class="gl-section gl-bento-full">
                                 <div class="gl-section-box gl-box-fact">
-                                    <h2 class="gl-section-title">💡 {{ __('Le saviez-vous ?') }}</h2>
+                                    <h2 class="gl-section-title">💡 {{ __('Le saviez-vous?') }}</h2>
                                     <p>{!! $_glossarizeFr($term->did_you_know) !!}</p>
                                 </div>
                             </div>

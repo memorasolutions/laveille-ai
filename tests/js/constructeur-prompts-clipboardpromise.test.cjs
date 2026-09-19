@@ -57,7 +57,13 @@ function loadPromptBuilder(clipboardWriteTextImpl) {
     const component = factory();
     component.$nextTick = function (cb) { cb(); };
     component.customCardsLoaded = true;
-    component.prompt = 'Contenu de test';
+    // `prompt` est un getter (dérivé de taskObject/personaText/...) - l'affecter directement
+    // n'a jamais réellement rien fait (no-op silencieux hors mode strict). 2026-09-19 (vague 1,
+    // défaut 3) : _buildPromptSegments() exige désormais un taskObject réel pour produire quoi
+    // que ce soit (sinon aucune saisie = aucun prompt) - openIn()/copy() no-opent maintenant sur
+    // un prompt vide (garde `if (!payload) return;`), donc un taskObject réel est nécessaire ici
+    // pour exercer la logique de gestion de Promise que ce fichier teste.
+    component.taskObject = 'Contenu de test';
     return { component, toastCalls, openCalls };
 }
 

@@ -1,21 +1,84 @@
 @extends('fronttheme::layouts.master')
 
-@section('title', $tool->construction_mode === 'revision'
-    ? __(':name fait peau neuve · La veille de Stef', ['name' => $tool->name])
-    : __(':name : en construction · La veille de Stef', ['name' => $tool->name]))
-@section('meta_description', $tool->construction_mode === 'revision'
-    ? __(':name est temporairement hors ligne le temps d\'une mise à jour importante. Vos prompts sauvegardés sont intacts.', ['name' => $tool->name])
-    : __(':name est en construction. Nous travaillons activement à son lancement public sur laveille.ai.', ['name' => $tool->name]))
+@php
+    $ucMode = $tool->construction_mode ?? 'construction';
+    $ucTitle = match ($ucMode) {
+        'maintenance' => __(':name : outil en cours d\'amélioration · La veille de Stef', ['name' => $tool->name]),
+        'revision' => __(':name fait peau neuve · La veille de Stef', ['name' => $tool->name]),
+        default => __(':name : en construction · La veille de Stef', ['name' => $tool->name]),
+    };
+    $ucMeta = match ($ucMode) {
+        'maintenance' => __(':name est en pause le temps d\'une mise à jour. De retour très bientôt.', ['name' => $tool->name]),
+        'revision' => __(':name est temporairement hors ligne le temps d\'une mise à jour importante. Vos prompts sauvegardés sont intacts.', ['name' => $tool->name]),
+        default => __(':name est en construction. Nous travaillons activement à son lancement public sur laveille.ai.', ['name' => $tool->name]),
+    };
+@endphp
+@section('title', $ucTitle)
+@section('meta_description', $ucMeta)
 
 {{-- Round 136 (2026-07-30, passe adversariale) : cette page répond 200 OK alors que l'outil est
      inaccessible au public. Sans cette section, le layout retombe sur « index, follow » et les
      moteurs indexent une page que personne ne peut utiliser. Les deux autres modules qui gatent un
      outil (Decido, Books) posent déjà cette section : c'est le patron du projet, ce module l'avait
-     simplement manqué. Vaut pour les DEUX modes - construction comme révision. --}}
+     simplement manqué. Vaut pour les 2 modes historiques - construction comme révision.
+
+     Mode "maintenance" (2026-09-19) EXCLU de ce noindex : cette page répond ici 503 + Retry-After
+     (PublicToolController::show()), pas 200. Combiner noindex à un 503 ferait sortir de l'index
+     une page déjà classée qu'on veut garder - le 503 + Retry-After EST le signal correct, il se
+     suffit à lui-même (recommandation Google sur les indisponibilités temporaires).
+
+     ⚠️ Ce @unless NE SUFFIT PAS À LUI SEUL - mesuré en direct le 2026-09-19 sur la page réellement
+     servie (coordinateur) : le layout partagé (fronttheme::layouts.master) pose SA PROPRE balise
+     <meta name="robots" content="noindex, nofollow"> dès que config('app.noindex') est vrai
+     (drapeau SITE ENTIER, ex. APP_NOINDEX=true en local), et cette branche est vérifiée AVANT
+     page_noindex - elle gagne toujours, quel que soit cet @unless. La garantie réelle pour le
+     mode maintenance vit donc dans PublicToolController::show() (strip/remplacement de toute
+     balise noindex sur la réponse 503, quelle qu'en soit la source), pas ici. Ce @unless reste
+     néanmoins correct et utile : il évite de poser une 2e couche de noindex inutile. --}}
+@unless($ucMode === 'maintenance')
 @section('page_noindex', true)
+@endunless
 
 @section('content')
-@if($tool->construction_mode === 'revision')
+@if($ucMode === 'maintenance')
+<section class="lv-under-construction" aria-labelledby="uc-title">
+    <div class="lv-uc__card" role="region" aria-label="{{ __('Outil en cours d\'amélioration') }}">
+        <div class="lv-uc__mascot">
+            <x-tools::octopus variant="sleeping" size="160" />
+        </div>
+
+        <p class="lv-uc__badge">
+            <span aria-hidden="true">🔧</span>
+            <span>{{ __('Mise à jour en cours') }}</span>
+        </p>
+
+        <h1 id="uc-title" class="lv-uc__title">{{ __('Le :name est en pause pour une mise à jour', ['name' => $tool->name]) }}</h1>
+
+        <p class="lv-uc__lead">
+            {{ __("Nous améliorons cet outil en ce moment même. Il revient très bientôt - en attendant, découvre nos autres outils gratuits.") }}
+        </p>
+
+        @if(($suggestions ?? collect())->isNotEmpty())
+        <div class="lv-uc__suggestions" aria-label="{{ __('Autres outils à essayer') }}">
+            @foreach($suggestions as $suggestion)
+            <a href="{{ route('tools.show', $suggestion->slug) }}" class="lv-uc__suggestion-chip">
+                <span aria-hidden="true">{{ $suggestion->icon ?: '🛠️' }}</span>
+                <span>{{ $suggestion->name }}</span>
+            </a>
+            @endforeach
+        </div>
+        @endif
+
+        <div class="lv-uc__actions">
+            <a href="{{ route('tools.index') }}"
+               class="lv-uc__btn lv-uc__btn--primary"
+               aria-label="{{ __('Voir tous les outils disponibles') }}">
+                {{ __('Voir tous les outils') }}
+            </a>
+        </div>
+    </div>
+</section>
+@elseif($ucMode === 'revision')
 <section class="lv-under-construction lv-under-construction--revision" aria-labelledby="uc-title">
     <div class="lv-uc__card" role="region" aria-label="{{ __('Outil temporairement hors ligne pour mise à jour') }}">
         <div class="lv-uc__mascot">
@@ -244,5 +307,31 @@
     line-height: 1.5;
 }
 .lv-uc__reassurance-icon { flex-shrink: 0; font-size: 1.25rem; line-height: 1; }
+
+/* Mode "maintenance" (2026-09-19) : suggestions vers d'autres outils actifs, pour que le
+   visiteur ne reparte pas les mains vides. Réutilise la palette --uc-* par défaut (DRY). */
+.lv-uc__suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 0 0 2rem;
+}
+.lv-uc__suggestion-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    min-height: 44px;
+    border-radius: 999px;
+    background: #E6F7F5;
+    border: 1px solid var(--uc-border);
+    color: var(--uc-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+.lv-uc__suggestion-chip:hover { background: #D5F0EC; }
+.lv-uc__suggestion-chip:focus-visible { outline: 3px solid var(--uc-accent); outline-offset: 2px; }
 </style>
 @endsection
