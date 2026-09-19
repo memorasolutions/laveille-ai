@@ -42,14 +42,21 @@ final class TurnstileVerificationService
                 ]));
 
             if (! $response->successful()) {
-                Log::channel('daily')->warning('turnstile.verify.http_error', ['status' => $response->status()]);
+                // Indisponibilité du service (Cloudflare en panne, HTTP en erreur), PAS un jeton
+                // rejeté : on laisse passer plutôt que de bloquer un visiteur légitime pour une
+                // panne qui n'est pas la sienne. Ne PAS transformer ce true en false : ce serait
+                // réintroduire le fail-closed déjà identifié comme le défaut (un anti-spam qui
+                // empêche de vendre quand il tombe coûte plus cher que le spam qu'il arrête).
+                Log::channel('daily')->warning('turnstile.verify.http_error_laisse_passer', ['status' => $response->status()]);
 
-                return false;
+                return true;
             }
 
             $data = $response->json();
 
             if (($data['success'] ?? false) !== true) {
+                // Ici Cloudflare A répondu et REFUSE explicitement le jeton : c'est la seule
+                // situation où verify() doit retourner false.
                 Log::channel('daily')->info('turnstile.verify.failed', ['errors' => $data['error-codes'] ?? []]);
 
                 return false;
@@ -57,9 +64,12 @@ final class TurnstileVerificationService
 
             return true;
         } catch (\Throwable $e) {
-            Log::channel('daily')->error('turnstile.verify.exception', ['error' => $e->getMessage()]);
+            // Même logique que le bloc HTTP ci-dessus : timeout ou exception réseau = on n'a pas
+            // pu vérifier, ce n'est pas un refus. Laisser passer plutôt que de casser une
+            // inscription ou une soumission pour un problème réseau chez nous ou chez Cloudflare.
+            Log::channel('daily')->warning('turnstile.verify.exception_laisse_passer', ['error' => $e->getMessage()]);
 
-            return false;
+            return true;
         }
     }
 
