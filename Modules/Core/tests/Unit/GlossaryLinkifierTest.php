@@ -718,6 +718,50 @@ it('le meme terme lie normalement quand le suffixe exclu est absent', function (
 });
 
 /**
+ * 2026-09-18 (fiche de glossaire « Hermes », mesure en production) - meme mecanique que
+ * « Haiku OS » juste au-dessus : « Hermes Desktop » est une fiche de l ANNUAIRE (l application
+ * de bureau de Nous Research) ; /glossaire/hermes documente la NOTION. Sur la page de la fiche
+ * d annuaire elle-meme, une fiche ne s auto-lie pas, donc la forme longue « Hermes Desktop »
+ * cesse d etre candidate et le nom court « Hermes » gagnait par defaut - cinq liens trompeurs
+ * mesures en production coupaient « Desktop » en texte nu juste apres le lien. La migration
+ * 2026_09_18_160000_retire_alias_hermes_nu (retrait d un alias homonyme du NOM) n avait rien pu
+ * changer a ce defaut : voir le docblock de cette migration, corrige le meme jour.
+ *
+ * A la difference du couple « Haiku OS » juste au-dessus, ce couple lit `exclude_suffix`
+ * DIRECTEMENT depuis GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['hermes'] plutot que de
+ * le recopier en dur dans le fixture de test : si l entree 'hermes' => ['desktop'] disparait un
+ * jour de la constante, ce test doit rougir plutot que de continuer a passer sur une valeur
+ * figee qui n aurait plus rien a voir avec le code reel.
+ */
+it('un terme de glossaire ne lie pas Hermes quand il est suivi de Desktop (exclude_suffix)', function () {
+    [$dom, $root] = glxDomFromHtml('<p>Hermes Desktop, l application de bureau de Nous Research, a recu une mise a jour.</p>');
+
+    $terme = [['name' => 'Hermes', 'slug' => 'hermes', 'definition' => 'Test',
+               'type' => 'glossary', 'url' => '/glossaire/hermes', 'match_strategy' => 'loose',
+               'exclude_suffix' => GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['hermes'] ?? []]];
+
+    $liens = glxWalk($dom, $root, $terme, false, 10);
+
+    expect($liens)->toBe(0, '« Hermes Desktop » est la fiche d annuaire de l application, jamais la notion du glossaire.');
+    expect(str_contains($dom->saveHTML(), '/glossaire/hermes'))->toBeFalse();
+});
+
+it('le terme Hermes lie normalement quand il est employe seul, sans Desktop apres', function () {
+    // Contre-epreuve indispensable : sans elle, un exclude_suffix trop large passerait
+    // pour un succes alors qu il aurait simplement tout tue - le lien utile vers /glossaire/hermes
+    // doit survivre partout ou "Desktop" ne suit pas immediatement.
+    [$dom, $root] = glxDomFromHtml('<p>Hermes est le nom de plusieurs projets d IA, dont un agent et une application.</p>');
+
+    $terme = [['name' => 'Hermes', 'slug' => 'hermes', 'definition' => 'Test',
+               'type' => 'glossary', 'url' => '/glossaire/hermes', 'match_strategy' => 'loose',
+               'exclude_suffix' => GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['hermes'] ?? []]];
+
+    $liens = glxWalk($dom, $root, $terme, false, 10);
+
+    expect($liens)->toBe(1, 'Hors du compose « Hermes Desktop », le terme doit continuer de lier.');
+});
+
+/**
  * 2026-09-06 (ticket Astra) - GlossaryLinkifier::TOOL_PREFIX_PATTERN_EXCLUSIONS.
  *
  * Le lien /annuaire/astra (Project Astra, l'assistant de Google DeepMind) était posé sur

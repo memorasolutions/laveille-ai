@@ -11,6 +11,25 @@ use Modules\Dictionary\Models\Term;
  *
  * @project laveille.ai
  *
+ * ⚠ CORRECTION APPORTEE LE MEME JOUR (2026-09-18), A LIRE AVANT LE RESTE DE CE DOCBLOCK :
+ * L EXPLICATION CAUSALE CI-DESSOUS EST FAUSSE, DEMONTREE PAR LE COMMIT SUIVANT (695f319be). Le
+ * linkifier auto-lie le NOM du terme de glossaire, jamais ses alias - et le nom de la fiche est
+ * « Hermes ». Retirer un alias homonyme du nom ne pouvait donc RIEN changer au defaut mesure sur
+ * /annuaire/hermes-desktop : le lien partait du champ `name`, jamais de la liste `aliases`. Le
+ * CHANGELOG a ete corrige des cette decouverte ; ce docblock, lui, ne l avait pas encore ete.
+ *
+ * CE QUE CETTE MIGRATION FAIT REELLEMENT : un nettoyage NEUTRE, sans effet sur le linkifier ni
+ * sur aucun lien affiche. Elle retire un alias devenu redondant avec le nom du terme (« Hermes »
+ * figurait a la fois comme `name` et comme entree de `aliases`) ; l alias « Hermes Agent », lui,
+ * reste utile et est conserve.
+ *
+ * LE VRAI CORRECTIF du defaut mesure (les cinq liens « Hermes » coupant « Desktop » en texte nu)
+ * est GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['hermes'] => ['desktop'], livre en
+ * v1.289.11 (Modules/Core/app/Services/GlossaryLinkifier.php) : sur sa PROPRE page, une fiche
+ * d annuaire ne s auto-lie pas, donc la forme longue « Hermes Desktop » cesse d etre candidate a
+ * cet endroit precis et le nom court gagnait par defaut - c est ce mecanisme-la, et non le
+ * retrait d alias documente plus bas, qui ecarte le faux lien.
+ *
  * Retrait de l alias « Hermes » NU sur la fiche de glossaire hermes, livree quelques minutes plus
  * tot en v1.289.8. L alias « Hermes Agent » est conserve.
  *

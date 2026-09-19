@@ -1,5 +1,49 @@
 # Changelog
 
+## [1.289.12] - 2026-09-19
+
+### Corrigé
+- **Trois trous relevés par un audit, aucun défaut fonctionnel - rien n'était cassé, mais rien ne
+  verrouillait non plus.** Les trois correctifs de 1.289.10 et 1.289.11 fonctionnent bien en
+  production ; ce train ferme ce qui les rendait fragiles à une régression silencieuse.
+
+  **1. Aucun test ne protégeait `TOOL_SUFFIX_COMPOUND_EXCLUSIONS['hermes']`.** Les deux entrées
+  précédentes de cette table (« Atlas danois », « Haiku OS ») avaient chacune leur test dédié ;
+  l'entrée « Hermes » => `['desktop']`, ajoutée la veille en 1.289.11, n'en avait aucun. Ajouté
+  dans `Modules/Core/tests/Unit/GlossaryLinkifierTest.php`, sur le patron exact des tests « Haiku
+  OS » : un test prouve que « Hermes Desktop » ne lie plus vers `/glossaire/hermes`, un second
+  (contre-épreuve indispensable) prouve que « Hermes » employé seul continue de lier. À la
+  différence du patron copié, ces deux tests lisent `exclude_suffix` **directement** depuis
+  `GlossaryLinkifier::TOOL_SUFFIX_COMPOUND_EXCLUSIONS['hermes']` plutôt que de recopier la valeur
+  en dur dans le montage du test - **vérifié en commentant temporairement l'entrée de la
+  constante** : le premier test rougit alors (`Failed asserting that 1 is identical to 0`), preuve
+  que le test verrouille bien le correctif réel et non une fixture isolée qui aurait pu passer même
+  sans lui.
+
+  **2. Le fil d'Ariane des dossiers thématiques (livré en 1.289.10) n'avait aucun test**, ni sur le
+  rendu visuel ni sur le JSON-LD `BreadcrumbList`. Ajoutés dans
+  `Modules/News/tests/Feature/EntityDossierTest.php` : sur `/actualites/dossiers`, le fil rend
+  Accueil > Actualités > Dossiers thématiques avec « Actualités » qui pointe vers `news.index`, et
+  le `BreadcrumbList` porte exactement 3 éléments ; sur `/actualites/dossier/{entité}`, le fil
+  porte 4 niveaux avec deux liens de retour (Actualités et Dossiers thématiques), et le
+  `BreadcrumbList` porte exactement 4 éléments avec les bonnes URLs sur chaque maillon
+  intermédiaire.
+
+  **3. Le docblock de la migration `2026_09_18_160000_retire_alias_hermes_nu` affirmait encore une
+  cause démentie**, et il ment de façon permanente tant que personne ne le relit : il attribuait au
+  retrait d'un alias homonyme la correction des cinq liens coupant « Hermes Desktop ». Le commit
+  suivant (`695f319be`) a démontré que c'était faux - le linkifier auto-lie le **nom** du terme,
+  jamais ses alias, et le nom de la fiche est déjà « Hermes ». Le CHANGELOG avait été corrigé au
+  moment de la découverte (voir l'entrée 1.289.11 ci-dessous) ; le docblock, lui, ne l'avait
+  jamais été. Une note a été ajoutée en tête du docblock : ce que la migration fait réellement (un
+  nettoyage neutre, sans effet sur le linkifier), que l'explication causale d'origine était
+  fausse, et que le vrai correctif est `TOOL_SUFFIX_COMPOUND_EXCLUSIONS['hermes']` en v1.289.11.
+  Le code exécutable de la migration n'a pas été touché, seulement son commentaire.
+
+  Suites de tests confirmées vertes après ajout : `GlossaryLinkifierTest` (62 tests, +2), suite
+  complète `Modules/News/tests`, suite complète `Modules/Dictionary/tests` (111 tests, 321
+  assertions, inchangé).
+
 ## [1.289.11] - 2026-09-18
 
 ### Corrigé

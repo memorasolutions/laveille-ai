@@ -199,3 +199,116 @@ it('élide la période quand le mois commence par une voyelle', function () {
     $this->get(route('news.dossier', 'openai'))->assertStatus(200)
         ->assertSee('avril 2026')->assertDontSee('de avril 2026');
 });
+
+// ── Fil d'Ariane et BreadcrumbList JSON-LD (aucun des 13 tests ci-dessus ne les couvrait) ──
+//
+// Ce que ces tests protègent : le fil d'Ariane visuel (nav Modules/FrontTheme partials/breadcrumb)
+// et le JSON-LD BreadcrumbList qui l'accompagne (Modules/SEO JsonLdService::breadcrumbs) sont
+// deux rendus distincts du même $breadcrumbItems déclaré dans dossiers-index.blade.php et
+// dossier.blade.php. Rien ne garantissait qu'ils restent synchronisés ni que les liens de retour
+// pointent vers les bonnes routes - une régression sur l'un des deux passerait inaperçue tant
+// qu'elle ne casse ni le statut HTTP ni le texte affiché en page, ce qu'aucun des 13 tests plus
+// haut ne contrôle.
+
+/**
+ * Extrait tous les blocs <script type="application/ld+json">...</script> d'un HTML rendu et
+ * les json_decode() en tableaux associatifs. Même mécanique que MachineMarkupEscapingTest
+ * (Modules/News), préfixée "dossier" plutôt que "mme" pour ne jamais redéclarer une fonction
+ * globale du même nom entre deux fichiers de test chargés dans la même exécution Pest.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function dossierJsonLdBlocks(string $html): array
+{
+    preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $html, $matches);
+    $blocks = [];
+    foreach ($matches[1] as $raw) {
+        $decoded = json_decode($raw, true);
+        expect(json_last_error())->toBe(JSON_ERROR_NONE, 'JSON-LD invalide : '.json_last_error_msg()." - fragment : {$raw}");
+        $blocks[] = $decoded;
+    }
+
+    return $blocks;
+}
+
+// Retrouve, parmi une liste de schémas JSON-LD, le premier dont '@type' correspond.
+function dossierFindSchema(array $blocks, string $type): ?array
+{
+    foreach ($blocks as $block) {
+        $candidates = array_is_list($block) ? $block : [$block];
+        foreach ($candidates as $schema) {
+            if (($schema['@type'] ?? null) === $type) {
+                return $schema;
+            }
+        }
+    }
+
+    return null;
+}
+
+// Extrait le seul <nav aria-label="..."> de la page (le fil d'Ariane visuel), pour contrôler
+// ses liens sans dépendre du reste du gabarit qui répète parfois les mêmes mots ailleurs.
+function dossierBreadcrumbNav(string $html): string
+{
+    preg_match('#<nav aria-label="[^"]*">(.*?)</nav>#s', $html, $m);
+    expect($m)->toHaveCount(2, 'Aucun <nav> de fil d\'Ariane trouvé dans le HTML rendu');
+
+    return $m[1];
+}
+
+it("le fil d'Ariane de l'index des dossiers rend Accueil > Actualités > Dossiers thématiques, avec un BreadcrumbList JSON-LD à 3 éléments", function () {
+    dossierLot(5, 'openai', 'OpenAI');
+
+    $response = $this->get(route('news.dossiers'));
+    $response->assertStatus(200);
+    $html = $response->getContent();
+
+    $nav = dossierBreadcrumbNav($html);
+
+    // Accueil et Actualités sont des liens de retour ; Dossiers thématiques est le maillon
+    // courant, donc un <span>, jamais un lien vers lui-même.
+    expect($nav)->toContain('href="'.route('home').'"');
+    expect($nav)->toContain('href="'.route('news.index').'"');
+    expect($nav)->toContain('>'.__('Actualités').'</a>');
+    expect($nav)->toContain('<span>'.__('Dossiers thématiques').'</span>');
+
+    $blocks = dossierJsonLdBlocks($html);
+    $breadcrumb = dossierFindSchema($blocks, 'BreadcrumbList');
+    expect($breadcrumb)->not->toBeNull('Aucun schéma BreadcrumbList trouvé dans le JSON-LD rendu');
+
+    $items = $breadcrumb['itemListElement'];
+    expect($items)->toHaveCount(3, "L'index des dossiers doit porter Accueil + Actualités + Dossiers thématiques, jamais plus ni moins.");
+    expect(array_column($items, 'name'))->toBe([__('Accueil'), __('Actualités'), __('Dossiers thématiques')]);
+    expect($items[1]['item'])->toBe(route('news.index'));
+});
+
+it("le fil d'Ariane d'un dossier rend 4 niveaux avec deux liens de retour (Actualités et Dossiers thématiques), et un BreadcrumbList JSON-LD à 4 éléments", function () {
+    dossierLot(5, 'openai', 'OpenAI');
+
+    $response = $this->get(route('news.dossier', 'openai'));
+    $response->assertStatus(200);
+    $html = $response->getContent();
+
+    $nav = dossierBreadcrumbNav($html);
+
+    // Trois liens de retour visuels : Accueil, Actualités, Dossiers thématiques. Seul le
+    // dernier maillon (le dossier courant) reste un <span> non cliquable.
+    expect($nav)->toContain('href="'.route('home').'"');
+    expect($nav)->toContain('href="'.route('news.index').'"');
+    expect($nav)->toContain('href="'.route('news.dossiers').'"');
+    expect($nav)->toContain('>'.__('Actualités').'</a>');
+    expect($nav)->toContain('>'.__('Dossiers thématiques').'</a>');
+    expect($nav)->toContain('<span>'.__('Tout sur :entite', ['entite' => 'OpenAI']).'</span>');
+
+    $blocks = dossierJsonLdBlocks($html);
+    $breadcrumb = dossierFindSchema($blocks, 'BreadcrumbList');
+    expect($breadcrumb)->not->toBeNull('Aucun schéma BreadcrumbList trouvé dans le JSON-LD rendu');
+
+    $items = $breadcrumb['itemListElement'];
+    expect($items)->toHaveCount(4, "La page de dossier doit porter Accueil + Actualités + Dossiers thématiques + le dossier courant, jamais plus ni moins.");
+    expect(array_column($items, 'name'))->toBe([
+        __('Accueil'), __('Actualités'), __('Dossiers thématiques'), __('Tout sur :entite', ['entite' => 'OpenAI']),
+    ]);
+    expect($items[1]['item'])->toBe(route('news.index'));
+    expect($items[2]['item'])->toBe(route('news.dossiers'));
+});
