@@ -1924,3 +1924,10 @@ button[aria-expanded="true"] .lv-mega-chevron {
         color: #fff !important;
     }
 }
+
+/* Visionneuse d'image unique du site (articles + captures de l'annuaire).
+   Le display vit ICI et non en style en ligne : x-show, lorsqu'il montre un
+   element, remet son style.display a vide - il effacerait donc un display:flex
+   pose en ligne, et l'image se retrouverait collee en haut a gauche au lieu
+   d'etre centree. Mesure le 2026-09-20 apres correction du defaut precedent. */
+.lv-visionneuse { display: flex; }

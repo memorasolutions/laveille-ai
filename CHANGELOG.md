@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.291.2] - 2026-09-20
+
+### Corrigé
+- **L'image ouverte en plein écran était collée en haut à gauche au lieu d'être centrée.** Suite
+  directe du correctif précédent : `x-show`, lorsqu'il MONTRE un élément, remet son `style.display`
+  à vide - il effaçait donc le `display:flex` que 1.291.1 avait posé en style en ligne, et les
+  règles de centrage `align-items`/`justify-content` ne s'appliquaient plus. Le display vit
+  désormais dans une classe CSS (`.lv-visionneuse`), que `x-show` ne peut pas effacer.
+
 ## [1.291.1] - 2026-09-20
 
 ### Corrigé

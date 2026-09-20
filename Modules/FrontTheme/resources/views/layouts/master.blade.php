@@ -550,7 +550,8 @@
               position:fixed, inset:0 et son fond, et s'affichait en bloc invisible dans le flux.
               Mesuré le 2026-09-20 avec témoin sur une page d'annuaire, sans le pont d'article :
               le style passait de « display: none; » à vide. Elle n'a jamais pu s'afficher. --}}
-         style="display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:99998;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;">
+         class="lv-visionneuse"
+         style="position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:99998;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;">
         <button @click="open = false" style="position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:32px;cursor:pointer;z-index:1;line-height:1;">&times;</button>
         <img :src="src" :alt="alt" @click.stop style="max-width:95%;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 0 40px rgba(0,0,0,0.5);cursor:default;">
     </div>
