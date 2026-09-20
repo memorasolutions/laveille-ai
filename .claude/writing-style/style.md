@@ -64,6 +64,17 @@ type: style-de-projet
   fond » jusqu'à 1 800-2 200 mots justifiée par la densité de données
   (plusieurs tableaux, plusieurs critères) - la densité prime toujours sur le
   volume, ne pas délayer pour atteindre un compte de mots.
+- **Plafond de DÉCOUPAGE (ajouté le 2026-09-20, et c'est la règle qui manquait)** : au-delà de
+  **2 400 mots** de corps, un article ne se resserre plus, il se **DÉCOUPE en série**. La cible
+  ci-dessus disait quoi viser; rien ne disait quand ARRÊTER d'écrire un seul texte. C'est ce trou
+  qui a laissé le dossier « IA et emplois 2030 » atteindre 10 558 mots, soit sept fois la cible
+  haute, sans qu'aucun garde-fou ne se déclenche.
+  **Et le découpage ne coûte rien en substance, c'est mesuré** : ce même dossier, redécoupé en
+  trois parties de 2 151, 2 297 et 2 294 mots, n'a perdu AUCUN chiffre, AUCUNE citation et AUCUNE
+  source - vérifié par comparaison automatique avant et après. La série est donc le format normal
+  d'un sujet dense, jamais un pis-aller. Chaque partie porte sa propre question, sa propre réponse
+  en tête, ses propres sources, et se lit sans avoir lu les autres.
+
 - **Structure préférée** : answer-first stricte.
   1. H1 formulé comme la question que poserait le lecteur à une IA (ex.
      « Quel est le meilleur LLM de codage en 2026 ? »).
