@@ -5,7 +5,16 @@
         <div class="row">
             <div class="col-12">
                 <div class="wpo-breadcumb-wrap">
-                    <h2>{{ $breadcrumbTitle ?? '' }}</h2>
+                    @php
+                        // Taille du titre adaptee a sa LONGUEUR (mesure du 2026-09-20).
+                        // mb_strlen et non strlen : strlen compte les octets, un titre
+                        // accentue franchirait les seuils trop tot.
+                        $lvTitre = (string) ($breadcrumbTitle ?? '');
+                        $lvLong = mb_strlen($lvTitre, 'UTF-8');
+                        $lvClasse = $lvLong > 100 ? ' class="lv-titre-tres-long"'
+                                  : ($lvLong > 70 ? ' class="lv-titre-long"' : '');
+                    @endphp
+                    <h2{!! $lvClasse !!}>{{ $lvTitre }}</h2>
                     <nav aria-label="{{ __('Fil d\'Ariane') }}">
                     <ul>
                         <li><a href="{{ route('home') }}">{{ __('Accueil') }}</a></li>

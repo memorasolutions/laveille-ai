@@ -491,6 +491,31 @@ a:hover { color: var(--c-primary); }
 .wpo-breadcumb-area .wpo-breadcumb-wrap h2 {
     font-family: var(--f-heading);
     font-weight: 800;
+
+    /* Titre de banniere : taille FLUIDE et adaptee a la LONGUEUR du titre.
+       Corrige deux defauts mesures le 2026-09-20 :
+       (a) le theme passait brutalement de 60px a 30px sous 767px, sans rien entre les deux ;
+       (b) aucune adaptation a la longueur - un titre de 118 caracteres occupait 4 lignes
+           en pleine taille, sa premiere ligne frolant le bandeau superieur.
+       Les bornes sont en rem pour que le zoom et la taille de police du navigateur
+       restent respectes (un clamp en vw seul casse l'accessibilite a 200 %). */
+    font-size: clamp(2rem, 1.9rem + 2.3vw, 3.75rem);
+    line-height: 1.1;
+    text-wrap: balance;      /* ignore par les navigateurs qui ne le connaissent pas */
+    overflow-wrap: break-word;
+}
+
+/* Les deux paliers sont poses en Blade a partir de mb_strlen du titre.
+   mb_strlen et non strlen : strlen compte les OCTETS, et un titre accentue
+   franchirait le seuil trop tot. */
+.wpo-breadcumb-area .wpo-breadcumb-wrap h2.lv-titre-long {
+    font-size: clamp(1.75rem, 1.4rem + 1.9vw, 2.75rem);
+    line-height: 1.14;
+}
+
+.wpo-breadcumb-area .wpo-breadcumb-wrap h2.lv-titre-tres-long {
+    font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2.25rem);
+    line-height: 1.18;
 }
 
 .wpo-breadcumb-area .wpo-breadcumb-wrap ul li a:hover {

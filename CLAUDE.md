@@ -71,28 +71,59 @@ LinkedIn ne publie pas plusieurs images séparées **parce que LinkedIn lui-mêm
 son carrousel EST un PDF. Depuis le 2026-09-15, un média marqué pour un réseau **REMPLACE** les
 médias communs pour ce réseau, il ne s'y ajoute pas.
 
-> ⛔ **MESURE DU 2026-09-19 QUI DÉMENT LE PARAGRAPHE CI-DESSUS SUR UN POINT PRÉCIS :
-> `media_urls` REFUSE un PDF.** Publication 295, média 373, URL
-> `https://laveille.ai/carrousels/plan-de-cours.pdf` servie en HTTP 200,
-> `content-type: application/pdf`, 144 351 octets, aucune redirection. Le portail a répondu
-> `download_error: "not_an_image"` et n'a rien téléchargé (`downloaded_at` resté nul).
+> ✅ **CORRIGÉ CÔTÉ PORTAIL LE 2026-09-20 (version 1.37.0, en production depuis 00h20 Québec,
+> 04:20 UTC). `media_urls` accepte désormais un PDF.** Le blocage mesuré la veille est levé.
 >
-> **La nuance qui évite de surcorriger, et il faut la tenir** : ceci ne prouve PAS que le portail
-> est incapable de publier un carrousel. `publishWithDocument()` existe bel et bien dans son code.
-> Ce qui est mesuré, c'est que **la voie d'INGESTION par `media_urls` valide le fichier comme une
-> image et rejette tout le reste**. Publier un document et en télécharger un sont deux capacités
-> distinctes ; la seconde est fermée, la première n'a pas été testée par ce canal.
+> **La cause réelle était PIRE que ce que j'avais diagnostiqué**, et c'est la partie à retenir.
+> J'avais conclu « la validation refuse le PDF ». En réalité, à l'attache du média et AVANT même
+> d'avoir vu le fichier, le portail écrivait EN DUR dans sa base que tout média déposé par
+> `media_urls` était un JPEG (`type = 'image'`, `mime_type = 'image/jpeg'`, dans
+> `PublicationCreationService::attachExternalMedia`). Le `download_error: "not_an_image"` que
+> j'avais mesuré n'était que la CONSÉQUENCE : le téléchargeur constatait la contradiction entre
+> l'étiquette écrite d'avance et le fichier réel.
 >
-> **Historique de cette question, qui a basculé trois fois** : « le portail ne dépose pas de PDF »
+> **Pourquoi assouplir le seul contrôle n'aurait rien réglé** : `isPdf()` teste
+> `mime_type === 'application/pdf'`. Le PDF serait donc parti vers LinkedIn étiqueté comme une
+> image, et aurait échoué plus loin, d'une façon bien plus difficile à diagnostiquer. Corriger le
+> symptôme aurait déplacé la panne au lieu de la fermer.
+>
+> **Ce qui tranche maintenant : le CONTENU téléchargé.** Signature binaire `%PDF-` pour un
+> document, décodage réel pour une image. Ni l'extension de l'URL ni l'en-tête `Content-Type` ne
+> sont crus, parce que les deux peuvent mentir.
+>
+> ⚠️ **CE QUI N'EST PAS ENCORE PROUVÉ, et à ne pas lire entre les lignes** : le téléversement vers
+> LinkedIn lui-même n'a JAMAIS été exercé en conditions réelles, puisque aucun fichier n'arrivait
+> jusque-là. Ce qui est corrigé et prouvé, c'est l'INGESTION. Un échec survenant APRÈS le
+> téléchargement serait une information neuve, pas une régression.
+>
+> **Ce qu'il faut vérifier après chaque dépôt de document**, et pas seulement « est-ce que ça
+> passe » : relire avec `get_social_publication` une à deux minutes après (le téléchargement est
+> mis en file, l'ouvrier tourne chaque minute) et contrôler que `type` vaut `"document"` et non
+> `"image"`, que `downloaded_at` est non nul, et que `download_error` est nul. Un `type` resté à
+> `"image"` avec un `downloaded_at` rempli serait un défaut DIFFÉRENT, à signaler tel quel.
+>
+> **Limite du portail, qui n'est pas celle de LinkedIn** : les documents sont plafonnés à 20 Mo,
+> alors que LinkedIn accepte 100 Mo. Choix assumé, parce que le portail tourne sur un serveur
+> partagé avec une cinquantaine de sites clients et qu'il STOCKE le fichier avant de le publier,
+> jusqu'à cinq médias par publication. Un dépassement renvoie `document_too_large`, code distinct
+> de `not_an_image` : le message dit donc lequel des deux problèmes on a.
+>
+> **Vocabulaire, parce que la documentation de LinkedIn induit en erreur** : ce que tout le monde
+> appelle un carrousel dans un fil organique est un DOCUMENT feuilletable. Chez LinkedIn, le mot
+> « carousel » désigne autre chose, réservé aux publications commanditées, et la Posts API ne le
+> propose pas en organique. Formats acceptés pour un document : PDF, PPT, PPTX, DOC, DOCX, jusqu'à
+> 300 pages ; le portail n'accepte que le PDF pour l'instant.
+>
+> **Voie de rechange qui a toujours fonctionné** : le téléversement d'un PDF depuis l'écran admin
+> du portail pose correctement le type `document`, parce qu'il lit le vrai type MIME du fichier.
+> Ce n'est pas un contournement, c'est le chemin des humains.
+>
+> **Historique de cette question, qui a basculé QUATRE fois** : « le portail ne dépose pas de PDF »
 > (2026-09-13), puis « FAUX, il le fait, vérifié dans le code » (2026-09-14, conclusion tirée de la
-> LECTURE du code), puis la mesure ci-dessus (2026-09-19, tirée d'un APPEL RÉEL). Lire le code dit
-> ce qu'il PEUT faire ; l'appeler dit ce qu'il FAIT. Quand les deux divergent, c'est l'appel qui
-> tranche.
->
-> **Conséquence pratique** : pour un carrousel LinkedIn de laveille.ai, la voie du portail est
-> fermée tant que ce refus n'est pas levé. Le choix se fait alors entre publier à la main le jour
-> dit (mode direct du skill `/publier`) et publier par le portail sans carrousel — ce qui oblige à
-> réécrire le texte, puisqu'il ne peut plus renvoyer à « la dernière diapositive ».
+> LECTURE du code), puis « il refuse, mesuré par un appel réel » (2026-09-19), puis « corrigé, et
+> la cause n'était pas celle qu'on croyait » (2026-09-20). **Lire le code dit ce qu'il PEUT faire ;
+> l'appeler dit ce qu'il FAIT.** Quand les deux divergent, c'est l'appel qui tranche - et quand
+> l'appel échoue, la cause peut encore être ailleurs que là où l'erreur s'affiche.
 
 ### Paramètres qui coûtent cher quand on les rate
 

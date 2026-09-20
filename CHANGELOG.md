@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.290.2] - 2026-09-20
+
+### Corrigé
+- **Le titre d'une bannière ne tenait plus compte de sa propre longueur.** Signalé par le fondateur
+  sur un titre de 118 caractères : il occupait quatre lignes en pleine taille, sa première ligne
+  frôlant le bandeau de catégorie au-dessus. Le thème imposait 60 px avec un interligne de 1,0 -
+  très serré pour un titre multiligne - puis chutait brutalement à 30 px sous 767 px, sans rien
+  entre les deux, et sans jamais regarder la longueur du texte. La taille est désormais FLUIDE
+  (`clamp()` en rem, pour que le zoom du navigateur reste respecté) et deux paliers se déclenchent
+  au-delà de 70 et de 100 caractères, posés en Blade avec `mb_strlen` - et non `strlen`, qui compte
+  les octets et ferait basculer un titre accentué trop tôt. Mesuré au navigateur avant
+  déploiement : sur un écran de 1200 px, le titre de 118 caractères passe de 240 px à 80 px de
+  hauteur, soit quatre lignes réduites à deux ; sur un téléphone de 390 px, de 210 px à 106 px. Un
+  titre court n'est pas rapetissé pour autant (56 px au lieu de 60 sur 1200 px) et gagne même en
+  lisibilité sur téléphone. Le correctif vit dans `charte.css`, la surcharge du projet, et non dans
+  le thème tiers ; il profite aux 153 vues qui incluent ce même partiel.
+
 ## [1.290.1] - 2026-09-20
 
 ### Corrigé
