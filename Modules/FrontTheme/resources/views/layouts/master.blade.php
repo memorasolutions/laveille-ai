@@ -424,6 +424,10 @@
     <script src="/js/newsletter-scroll-trigger.js?v={{ filemtime(public_path('js/newsletter-scroll-trigger.js')) }}" defer></script>
     @endif
     <script src="/js/ga4-events.js" defer></script>
+    {{-- Pont vers la visionneuse UNIQUE ci-dessous : les figures d'articles portent
+         data-lv-zoom et ne peuvent pas déclencher Alpine elles-mêmes (HTML stocké en base,
+         directives retirées au rendu). Aucune seconde visionneuse n'est construite. --}}
+    <script src="/js/lv-zoom.js?v={{ filemtime(public_path('js/lv-zoom.js')) }}" defer></script>
 
     {{-- Floating share bar (sidebar desktop + bottom bar mobile) — masqué sur pages protégées --}}
     {{-- Round 25 (skill /100) : 'decido/*/gerer*' ajouté à l'exclusion - $shareUrl (juste en dessous)
@@ -516,7 +520,11 @@
     .share-li{background:#0A66C2!important;color:#fff!important;}
     .share-msg{background:#0099FF!important;color:#fff!important;}
     .share-copy{background:#fff!important;color:#374151!important;}
-    @media(max-width:991px){
+    {{-- Seuil 1280px et non 991px : MESURÉ le 2026-09-20 sur un article réel, la barre
+         latérale (12px à 52px) recouvrait le texte de 18px à une fenêtre de 1200px, parce que
+         le contenu y commence à 34px. Le chevauchement disparaît vers 1252px; 1280 laisse
+         22px de marge libre. En dessous, la barre du bas prend le relais et ne masque rien. --}}
+    @media(max-width:1279px){
         .share-sidebar{display:none!important;}
         .share-bottom{display:flex!important;position:fixed!important;bottom:0;left:0;right:0;z-index:999;background:#fff!important;border-top:1px solid #e5e7eb!important;padding:8px 0!important;justify-content:center!important;gap:16px;box-shadow:0 -2px 8px rgba(0,0,0,0.08)!important;}
         .share-bottom .share-btn{width:44px;height:44px;}
@@ -527,8 +535,11 @@
     {{-- Barre incitation création compte membre (module activable, apparaît après consent cookies) --}}
     <x-core::guest-cta-bar />
 
-    {{-- Lightbox image réutilisable --}}
+    {{-- Lightbox image réutilisable : SEULE visionneuse du site (annuaire + figures
+         d'articles, ces dernières via le pont data-lv-zoom chargé plus haut).
+         x-effect : verrou de défilement, sinon la page glisse derrière l'image ouverte. --}}
     <div x-data="{ open: false, src: '', alt: '' }"
+         x-effect="document.body.style.overflow = open ? 'hidden' : ''"
          @lightbox.window="open = true; src = $event.detail.src; alt = $event.detail.alt || ''"
          x-show="open" x-cloak
          @click="open = false"

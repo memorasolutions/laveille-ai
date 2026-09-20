@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.291.0] - 2026-09-20
+
+### Ajouté
+- **Les images d'un article s'ouvrent maintenant DANS le site, plus dans un nouvel onglet.**
+  Une figure d'article porte `data-lv-zoom`; un pont de 55 lignes (`public/js/lv-zoom.js`)
+  intercepte le clic et adresse la figure à la visionneuse qui existait DÉJÀ dans le thème, celle
+  que l'annuaire utilise depuis toujours. Le lecteur ne quitte plus la page. Le `href` n'est jamais
+  retiré : sans JavaScript, le lien reste un lien ordinaire.
+- **Quatre graphiques dans la série « IA et emplois 2030 »** (tableaux HTML accessibles, styles en
+  ligne, aucune bibliothèque) : deux à barres divergentes autour d'un axe zéro central pour des
+  valeurs de signes opposés, deux à barres alignées pour des valeurs de même signe.
+
+### Corrigé
+- **La barre de partage latérale recouvrait le texte** sur toute fenêtre de moins de ~1250 px.
+  Mesuré sur un article réel : la barre occupe 12 px à 52 px, le contenu commençait à 34 px à une
+  fenêtre de 1200 px, soit 18 px de recouvrement. Le seuil de bascule vers la barre du bas passe de
+  991 px à 1279 px, ce qui laisse 22 px de marge libre. Aucun contenu n'est plus masqué.
+- **Le titre d'un tableau s'affichait SOUS le tableau.** Le thème déclare `caption-side: bottom`,
+  et un style en ligne ne protège que les propriétés qu'il déclare : le titre de chaque graphique
+  arrivait après les barres, collé à la légende. Tous les `<caption>` posés dans un corps d'article
+  déclarent désormais `caption-side:top`.
+- **La page défilait derrière une image ouverte en plein écran.** Verrou de défilement ajouté à la
+  visionneuse commune, donc valable aussi pour l'annuaire.
+
+### Retiré
+- **Une seconde visionneuse d'image, écrite puis supprimée avant d'atteindre la production.**
+  204 lignes de JavaScript et 119 lignes de CSS qui refaisaient ce que le thème savait déjà faire.
+  Le site n'a qu'UN mécanisme de visionneuse, et c'est celui du layout.
+
 ## [1.290.2] - 2026-09-20
 
 ### Corrigé
