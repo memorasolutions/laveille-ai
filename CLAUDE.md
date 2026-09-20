@@ -71,6 +71,29 @@ LinkedIn ne publie pas plusieurs images séparées **parce que LinkedIn lui-mêm
 son carrousel EST un PDF. Depuis le 2026-09-15, un média marqué pour un réseau **REMPLACE** les
 médias communs pour ce réseau, il ne s'y ajoute pas.
 
+> ⛔ **MESURE DU 2026-09-19 QUI DÉMENT LE PARAGRAPHE CI-DESSUS SUR UN POINT PRÉCIS :
+> `media_urls` REFUSE un PDF.** Publication 295, média 373, URL
+> `https://laveille.ai/carrousels/plan-de-cours.pdf` servie en HTTP 200,
+> `content-type: application/pdf`, 144 351 octets, aucune redirection. Le portail a répondu
+> `download_error: "not_an_image"` et n'a rien téléchargé (`downloaded_at` resté nul).
+>
+> **La nuance qui évite de surcorriger, et il faut la tenir** : ceci ne prouve PAS que le portail
+> est incapable de publier un carrousel. `publishWithDocument()` existe bel et bien dans son code.
+> Ce qui est mesuré, c'est que **la voie d'INGESTION par `media_urls` valide le fichier comme une
+> image et rejette tout le reste**. Publier un document et en télécharger un sont deux capacités
+> distinctes ; la seconde est fermée, la première n'a pas été testée par ce canal.
+>
+> **Historique de cette question, qui a basculé trois fois** : « le portail ne dépose pas de PDF »
+> (2026-09-13), puis « FAUX, il le fait, vérifié dans le code » (2026-09-14, conclusion tirée de la
+> LECTURE du code), puis la mesure ci-dessus (2026-09-19, tirée d'un APPEL RÉEL). Lire le code dit
+> ce qu'il PEUT faire ; l'appeler dit ce qu'il FAIT. Quand les deux divergent, c'est l'appel qui
+> tranche.
+>
+> **Conséquence pratique** : pour un carrousel LinkedIn de laveille.ai, la voie du portail est
+> fermée tant que ce refus n'est pas levé. Le choix se fait alors entre publier à la main le jour
+> dit (mode direct du skill `/publier`) et publier par le portail sans carrousel — ce qui oblige à
+> réécrire le texte, puisqu'il ne peut plus renvoyer à « la dernière diapositive ».
+
 ### Paramètres qui coûtent cher quand on les rate
 
 - **`scheduled_at` doit porter le décalage horaire** : `2026-10-12T09:00:00-04:00`. Le portail

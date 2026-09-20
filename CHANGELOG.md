@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.290.1] - 2026-09-20
+
+### Corrigé
+- **La section « Sources » d'un article disparaissait en APERÇU, alors qu'elle s'affiche
+  correctement sur l'article publié.** Un article portait ses onze références complètes, avec leurs
+  DOI, et le relecteur n'en voyait aucune. La cause n'était pas dans le texte mais dans le gabarit :
+  en aperçu, `AeoHelper::chunkContent()` ne s'exécute pas, le premier remplacement ne trouve donc
+  aucune `<section class="aeo-section">`, et la branche de repli injectait un `</div>` ORPHELIN
+  juste avant le titre. `GlossaryLinkifier::linkify()` reparse ce HTML avec DOMDocument quelques
+  lignes plus bas : face à cette balise non appariée, le parseur referme son conteneur et abandonne
+  tout ce qui suit. Le titre et tout ce qui le suit sont désormais entourés d'un
+  `<div class="sources-section">` correctement FERMÉ.
+  Le commentaire du code décrivait déjà ce mécanisme exact, mais pour le cas publié, corrigé le
+  2026-05-25 : ce correctif-là avait traité une moitié du problème et laissé l'autre.
+  Vérifié sur les articles existants avant d'élargir l'enveloppe jusqu'à la fin du contenu : la
+  section Sources y est toujours la dernière, rien n'est donc coupé.
+  Test de non-régression ajouté, qui cherche le CONTENU des références (nom d'auteur et DOI) et non
+  la seule balise de titre - un `<h2>Sources</h2>` présent ne prouve pas qu'il y ait une référence
+  dessous, ce qui était précisément le cas ici.
+- **Une panne de Cloudflare ne bloque plus les inscriptions ni les soumissions.** La vérification
+  Turnstile traitait de la même façon « jeton refusé » et « je n'ai pas pu vérifier ». Un incident
+  chez le fournisseur aurait donc fermé le formulaire à tous les visiteurs légitimes. L'échec de
+  vérification laisse désormais passer, et il est journalisé pour rester visible.
+
+### Documentation
+- `CLAUDE.md` : le portail REFUSE un carrousel PDF déposé par `media_urls` (`not_an_image`), mesuré
+  sur une URL servie en 200 avec le bon type MIME. La note antérieure, tirée d'une lecture du code,
+  affirmait le contraire. Nuance conservée : `publishWithDocument()` existe bien, c'est la voie
+  d'INGESTION qui valide le fichier comme une image. Lire le code dit ce qu'il PEUT faire, l'appeler
+  dit ce qu'il FAIT.
+
 ## [1.290.0] - 2026-09-19
 
 ### Ajouté

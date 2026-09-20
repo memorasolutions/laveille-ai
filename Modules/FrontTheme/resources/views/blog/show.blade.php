@@ -222,10 +222,20 @@
                                     $lvSourcesCount
                                 );
                                 // Cas preview (chunkContent non exécuté) : encadrement par div dédié.
+                                // 2026-09-20 : l'ancien remplacement injectait un </div> ORPHELIN avant le titre
+                                // (aucun <div> ouvrant ne l'attend dans $articleContent brut, puisque chunkContent
+                                // n'a pas tourné en aperçu). GlossaryLinkifier::linkify() reparse ce HTML avec
+                                // DOMDocument juste après : face à ce </div> non apparié, le parseur referme son
+                                // wrapper interne et ABANDONNE tout ce qui suit, donc toute la section Sources
+                                // disparaissait silencieusement en aperçu. Correctif : le titre ET tout ce qui le
+                                // suit jusqu'à la fin du contenu sont désormais entourés d'un
+                                // <div class="sources-section"> correctement FERMÉ (HTML équilibré). Sources est
+                                // toujours la dernière section d'un article (vérifié sur les articles existants),
+                                // donc envelopper jusqu'à la fin ne coupe rien d'autre.
                                 if ($lvSourcesCount === 0) {
                                     $articleContent = preg_replace(
-                                        '/(<(?:h[2-4])[^>]*>' . $lvSourcesHead . '<\/(?:h[2-4])>)/i',
-                                        '</div><div class="sources-section">$1',
+                                        '/(<(?:h[2-4])[^>]*>' . $lvSourcesHead . '<\/(?:h[2-4])>)(.*)$/is',
+                                        '<div class="sources-section">$1$2</div>',
                                         $articleContent,
                                         1
                                     );
