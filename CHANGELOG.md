@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.291.1] - 2026-09-20
+
+### Corrigé
+- **La visionneuse d'image du site ne s'affichait pas, et ce défaut la précédait de loin.** Découvert
+  en vérifiant la livraison 1.291.0 : le clic transmettait bien l'image, le défilement se verrouillait,
+  mais rien n'apparaissait. Cause mesurée avec témoin sur une page d'annuaire, donc SANS le pont des
+  articles : `:style="open ? 'display:flex' : ''"` REMPLACE l'attribut style au complet - Alpine
+  écrase, il ne fusionne pas. À l'ouverture, la visionneuse perdait donc `position:fixed`, `inset:0`,
+  son fond noir et son plan de superposition, et s'affichait en bloc ordinaire invisible dans le flux.
+  Le style observé passait de « display: none; » à vide. `display:flex` vit désormais dans le style en
+  ligne et `x-show` gère seul l'ouverture. Corrige aussi les captures d'écran de l'annuaire, qui
+  utilisent la même visionneuse et souffraient du même défaut sans que personne l'ait signalé.
+
 ## [1.291.0] - 2026-09-20
 
 ### Ajouté
