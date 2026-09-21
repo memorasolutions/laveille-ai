@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.293.1] - 2026-09-21
+
+### Retiré
+- Les boutons d'abonnement par catégorie (icône de cloche) disparaissent de la page des
+  actualités et de celle du blogue, ainsi que la ligne « Cliquez la cloche d'une catégorie pour
+  recevoir ses nouveautés par courriel ». Ils n'étaient visibles que des visiteurs connectés et
+  n'apportaient rien au parcours.
+- Le CSS devenu orphelin (`.nw-follow-btn`, `.nw-follow-legend`) part avec eux, dans les deux
+  gabarits, plutôt que de rester en place sans rien styler.
+
+### Conservé volontairement
+- Le mécanisme d'abonnement lui-même reste entier : route, contrôleur, table et abonnés existants
+  ne sont pas touchés. Seul l'affichage est retiré, ce qui rend le retour arrière immédiat.
+
 ## [1.293.0] - 2026-09-21
 
 ### Ajouté
