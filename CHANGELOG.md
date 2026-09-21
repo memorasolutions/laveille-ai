@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.293.2] - 2026-09-21
+
+### Corrigé
+- **La sonde du test des méga-menus visait le mauvais bloc CSS depuis le 15 septembre.** Elle
+  repérait la règle par `strpos` puis lisait une fenêtre de 900 octets; le correctif v1.287.3
+  avait inséré en amont une règle groupée qui ne porte que la police, si bien que la sonde
+  s'arrêtait dessus et n'atteignait plus `font-size`. Le test rougissait donc en accusant un CSS
+  qui, lui, n'avait pas bougé - la production servait bien les quatre valeurs verrouillées.
+  La sonde collecte désormais TOUS les blocs racine du sélecteur, de l'accolade ouvrante à la
+  fermante, sans aucune taille arbitraire. Mesure après correctif : 2 occurrences racine
+  détectées sur 4 au total, les deux autres vivant dans des blocs `@media` et restant écartées.
+
 ## [1.293.1] - 2026-09-21
 
 ### Retiré
