@@ -1421,7 +1421,17 @@ class GlossaryLinkifier
         // Skip zones interdites. button/select/option/textarea : 2026-07-03 - un lien injecté dans le
         // texte d'un <button> (ex. "Générer mon prompt optimisé") intercepte le clic et navigue vers le
         // glossaire au lieu de soumettre le formulaire (incident générateur de prompt interactif article 16).
-        $skipTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'code', 'pre', 'abbr', 'blockquote', 'dfn', 'label', 'script', 'style', 'kbd', 'samp', 'var', 'button', 'select', 'option', 'textarea'];
+        //
+        // summary : 2026-09-21, MÊME DÉFAUT QUE button, signalé par le fondateur sur la série « IA et
+        // emplois 2030 ». Dans <summary>Voir le prompt utilisé</summary>, le mot « prompt » devenait un
+        // lien de glossaire ; le cliquer ouvrait la fiche AU LIEU de déplier l'accordéon qui contient
+        // justement le prompt. Un <summary> n'est pas du texte courant, c'est LE contrôle qui ouvre son
+        // <details> : y injecter un lien crée deux cibles concurrentes, et la plus petite - le mot
+        // souligné - est précisément celle que l'oeil vise. Imbriquer un lien dans un élément interactif
+        // est aussi un motif que les lecteurs d'écran annoncent mal.
+        // Le <details> lui-même n'est PAS exclu, volontairement : son CONTENU est du texte courant, où
+        // l'auto-lien garde toute sa valeur. Seul le libellé cliquable est protégé.
+        $skipTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'code', 'pre', 'abbr', 'blockquote', 'dfn', 'label', 'script', 'style', 'kbd', 'samp', 'var', 'button', 'select', 'option', 'textarea', 'summary'];
         if ($node->nodeType === XML_ELEMENT_NODE) {
             $tag = strtolower($node->nodeName);
             // 2026-07-25 #1350 : perSection=true -> un <h2> marque le début d'une nouvelle section,

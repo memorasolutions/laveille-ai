@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.292.2] - 2026-09-21
+
+### Corrigé
+- **Le libellé d'un accordéon cesse de voler le clic qui devait l'ouvrir.** Dans
+  « Voir le prompt utilisé », l'auto-lieur transformait le mot « prompt » en lien de
+  glossaire : le cliquer ouvrait la fiche AU LIEU de déplier l'accordéon qui contient
+  justement le prompt. `<summary>` rejoint donc `<button>` dans les zones où aucun lien n'est
+  posé. C'est la même cause qu'en juillet 2026 sur le générateur de prompts, et le commentaire
+  du code le disait déjà : un élément dont la seule fonction est d'être cliqué ne doit pas
+  contenir une seconde cible, plus petite, qui attire l'oeil. Le CONTENU du `<details>` reste
+  lié, lui : c'est du texte courant. Trois tests verrouillent les deux côtés de la frontière,
+  et deux d'entre eux échouent si le correctif est retiré.
+
+### Modifié
+- **Les illustrations des parties 2 et 3 de la série « IA et emplois 2030 » adoptent enfin
+  le standard de la partie 1.** Elles avaient été produites en 3D isométrique, d'après le profil
+  de rédaction écrit; la partie 1, elle, utilise la caricature PHOTORÉALISTE, proportions
+  exagérées, palette teal et beige-crème avec un seul accent rouge-orange. Le texte écrit et la
+  pratique se contredisaient, et je n'avais pas ouvert la partie 1 avant de générer. Les deux
+  illustrations sont refaites dans la bonne famille visuelle, en paire pleine (1540x860) et
+  vignette (760x424) comme les autres de la série.
+- **Chaque illustration cite désormais sa source et publie son prompt.** Le crédit
+  « Illustration générée par IA (Gemini) » remplace une attribution maison inexacte, et un
+  bloc dépliable donne le prompt INTÉGRAL qui a produit l'image : un lecteur peut vérifier ce
+  qui a été demandé au modèle, et le refaire. Contrôle en aveugle par deux oracles multimodaux
+  de familles différentes avant publication.
+
 ## [1.292.1] - 2026-09-21
 
 ### Corrigé
