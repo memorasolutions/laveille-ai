@@ -148,10 +148,28 @@ it('neutralise le panneau large sous le point de rupture mobile', function () {
 it('donne aux boutons de méga-menu exactement la typographie des liens voisins', function () {
     $css = file_get_contents(public_path('css/charte.css'));
 
-    $debut = strpos($css, 'button.lv-mega-declencheur {');
-    expect($debut)->not->toBeFalse('La règle du déclencheur a disparu de charte.css.');
+    // Le repérage ne vise PLUS la première occurrence dans une fenêtre de 900 octets : ce
+    // mécanisme s'est cassé le 2026-09-15, quand le correctif v1.287.3 a ajouté une règle
+    // groupée « > li > a, > li > button.lv-mega-declencheur » AVANT la vraie règle. strpos()
+    // s'arrêtait alors sur une règle qui ne porte que la police, et la fenêtre n'atteignait
+    // plus font-size. Le CSS n'avait pas régressé - seule la sonde du test était fautive.
+    // On collecte donc TOUS les blocs racine du sélecteur (l'ancre ^ écarte les copies
+    // indentées des @media), du « { » jusqu'à sa « } ».
+    preg_match_all(
+        '/^\.wpo-site-header \.navigation \.navbar-nav > li > button\.lv-mega-declencheur \{/m',
+        $css,
+        $occurrences,
+        PREG_OFFSET_CAPTURE
+    );
+    expect($occurrences[0])->not->toBeEmpty('La règle du déclencheur a disparu de charte.css.');
 
-    $bloc = substr($css, $debut, 900);
+    $bloc = '';
+    foreach ($occurrences[0] as [$selecteur, $position]) {
+        $ouvrante = $position + strlen($selecteur) - 1;
+        $fermante = strpos($css, '}', $ouvrante + 1);
+        expect($fermante)->not->toBeFalse('Bloc du déclencheur jamais refermé dans charte.css.');
+        $bloc .= substr($css, $ouvrante, $fermante - $ouvrante + 1)."\n";
+    }
 
     // Les valeurs relevées en production sur « Accueil » et « Livres », qui sont restés des <a>.
     expect($bloc)->toContain('font-size: 16px');
