@@ -1,15 +1,14 @@
 {
-  "_editor-7gWdh7uk.js": {
-    "file": "assets/editor-7gWdh7uk.js",
+  "_editor-BBcvAuwR.js": {
+    "file": "assets/editor-BBcvAuwR.js",
     "name": "editor",
     "imports": [
-      "_vendor-BPma8vfX.js"
+      "_vendor-Cw8bVgnb.js"
     ]
   },
-  "_vendor-BPma8vfX.js": {
-    "file": "assets/vendor-BPma8vfX.js",
-    "name": "vendor",
-    "isDynamicEntry": true
+  "_vendor-Cw8bVgnb.js": {
+    "file": "assets/vendor-Cw8bVgnb.js",
+    "name": "vendor"
   },
   "node_modules/@fontsource/roboto/files/roboto-cyrillic-300-normal.woff": {
     "file": "assets/roboto-cyrillic-300-normal-DEFNdjk5.woff",
@@ -381,13 +380,13 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BtFqsZ-o.js",
+    "file": "assets/app-vIHfRMpl.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "_vendor-BPma8vfX.js",
-      "_editor-7gWdh7uk.js",
+      "_vendor-Cw8bVgnb.js",
+      "_editor-BBcvAuwR.js",
       "resources/js/pwa.js"
     ]
   },
@@ -404,22 +403,19 @@
     "isEntry": true
   },
   "resources/js/pwa.js": {
-    "file": "assets/pwa-lg-d6ETn.js",
+    "file": "assets/pwa-DsJVpJ27.js",
     "name": "pwa",
     "src": "resources/js/pwa.js",
-    "isEntry": true,
-    "dynamicImports": [
-      "_vendor-BPma8vfX.js"
-    ]
+    "isEntry": true
   },
   "resources/js/tiptap-frontend.js": {
-    "file": "assets/tiptap-frontend-DM2uY1c2.js",
+    "file": "assets/tiptap-frontend-hlrUcuC6.js",
     "name": "tiptap-frontend",
     "src": "resources/js/tiptap-frontend.js",
     "isEntry": true,
     "imports": [
-      "_editor-7gWdh7uk.js",
-      "_vendor-BPma8vfX.js"
+      "_editor-BBcvAuwR.js",
+      "_vendor-Cw8bVgnb.js"
     ]
   },
   "resources/sass/nobleui/app.scss": {

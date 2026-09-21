@@ -121,10 +121,26 @@ if (! function_exists('lv_typo_fr_apply_rules')) {
 
         $nbsp = "\u{00A0}";
 
-        // 1) Avant ponctuation double FR : ? ! : ; »
+        // 1a) Norme de l'Office québécois de la langue française : une espace INSÉCABLE avant
+        //     « : » et « » », en absorbant l'espace ordinaire, insécable ou fine déjà présente.
         $text = preg_replace(
-            '/(\S)[ \x{00A0}]?([?!:;»])/u',
+            '/(\S)[ \x{00A0}\x{202F}]*([:»])/u',
             '$1' . $nbsp . '$2',
+            $text
+        ) ?? $text;
+
+        // 1b) Norme québécoise, et c'est là qu'elle DIFFÈRE de l'usage français : AUCUNE espace
+        //     avant « ; », « ! » et « ? ». L'usage de France en met une, et l'appliquer par
+        //     réflexe est la faute. Cette règle retire donc toute espace ordinaire, insécable
+        //     (U+00A0) ou fine (U+202F) qui précéderait ces trois signes.
+        //     Corrigé le 2026-09-21 : la règle unique précédente AJOUTAIT une insécable devant
+        //     les cinq signes, ce qui fabriquait la faute au lieu de la corriger. Aucun contenu
+        //     servi n'en portait la trace (mesuré à zéro sur l'accueil, les actualités, le blogue
+        //     et le glossaire) parce que `typo:apply-fr` n'est pas planifiée - c'était une bombe
+        //     dormante, pas un incendie.
+        $text = preg_replace(
+            '/[ \x{00A0}\x{202F}]+([;!?])/u',
+            '$1',
             $text
         ) ?? $text;
 

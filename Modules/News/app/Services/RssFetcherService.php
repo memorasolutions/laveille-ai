@@ -66,7 +66,20 @@ class RssFetcherService
                     continue;
                 }
 
-                $itemTitle = $item->get_title() ?? 'Sans titre';
+                // ACTION : normalisation typographique du titre AU MOMENT DE L'ÉCRITURE.
+                // MCP: SELF (<5 lignes utiles)
+                // RAISON: un audit a mesuré 4 438 écarts à la norme de l'OQLF en base, dont
+                // 4 406 - soit 99,3 % - dans des titres de médias FRANÇAIS récoltés par ce
+                // service. Ils portent l'espace avant « ; ! ? » de l'usage de France, que la
+                // norme québécoise interdit. Corriger la base une seule fois ne servirait à
+                // rien : chaque collecte en réinjecterait. C'est donc la porte d'écriture
+                // qu'il fallait corriger, pas le passif. Un titre est une citation, mais
+                // l'espacement en est la MISE EN FORME, pas le contenu - le site applique sa
+                // propre norme typographique à tout ce qu'il affiche, exactement comme il le
+                // fait déjà pour les citations en langue étrangère (règle du skill /article).
+                // lv_typo_fr() protège les URL et les entités HTML, et elle est idempotente :
+                // aucun risque sur un titre déjà conforme.
+                $itemTitle = lv_typo_fr($item->get_title() ?? 'Sans titre');
                 $itemFullUrl = $item->get_permalink() ?? $source->url;
                 // ACTION : normalisation défensive du lien extrait - certains flux RSS source
                 // servent déjà un <link> sur-échappé (ex. « &amp;amp; » au lieu de « &amp; »,

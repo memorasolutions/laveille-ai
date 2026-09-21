@@ -4,7 +4,7 @@
   "author": "MEMORA solutions <info@memora.ca> (https://memora.solutions)",
   "type": "module",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && cp resources/build-static/htaccess-build.conf public/build/.htaccess",
     "dev": "vite",
     "test:js": "fails=''; for f in tests/js/*.test.cjs; do echo \"== $f\"; node \"$f\" || fails=\"$fails $f\"; done; if [ -n \"$fails\" ]; then echo \"ÉCHECS JS :$fails\"; exit 1; fi; echo 'Tous les tests JS sont verts'"
   },

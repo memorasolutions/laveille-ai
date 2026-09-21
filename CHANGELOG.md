@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.293.3] - 2026-09-21
+
+### Corrigé
+- **Le service worker n'avait JAMAIS été neutralisé, et c'est la cause commune de deux défauts
+  déjà traités séparément.** `resources/js/pwa.js` le ré-enregistrait à chaque page, y compris
+  après le correctif v1.287.7 qui croyait l'avoir coupé - celui-ci n'avait touché que
+  `public/sw.js` et `public/service-worker.js`, deux fichiers que plus personne n'enregistrait.
+  Les images cassées (v1.292.3) et les ressources préchargées perdues venaient du même service
+  worker toujours actif, jamais du contenu des pages. `resources/js/sw-source.js` sert désormais,
+  à la MÊME adresse, un service worker de retrait qui se désenregistre et purge ses quatre
+  caches dès son activation - seul moyen de désinstaller chez les visiteurs qui l'ont déjà.
+  Mesure après construction : 384 octets au lieu de 37 592, zéro route Workbox, zéro entrée de
+  précache, et le paquet `pwa-*.js` ne contient plus aucun appel à `.register(`.
+- **Le piège qui aurait annulé ce correctif sans qu'aucun signal ne le montre.**
+  `public/build/.htaccess` servait `sw-source.js` en `immutable` pour un an, et Cloudflare le
+  tenait en cache d'edge. Une exception `no-cache` est posée pour ce seul fichier - c'est le seul
+  du répertoire dont le nom ne change pas quand son contenu change, donc le seul qui ne doit
+  jamais être figé.
+- **La fonction de typographie du projet appliquait la norme FRANÇAISE, pas la québécoise.**
+  `lv_typo_fr()` ajoutait une espace insécable avant `?!;`, que la norme de l'Office québécois
+  de la langue française interdit. La règle est scindée en deux : insécable avant `:` et `»`,
+  retrait de toute espace avant `;!?`. Aucun contenu servi n'en portait la trace - mesuré à
+  zéro sur l'accueil, les actualités, le blogue et le glossaire - parce que `typo:apply-fr`
+  n'est pas planifiée. C'était une bombe dormante : la commande est branchée sur huit tables.
+- **12 tests verrouillaient cette faute** et exigeaient explicitement l'insécable avant `?`. Ils
+  sont alignés sur la norme québécoise, et les cas d'un fichier de test redondant ont été
+  fusionnés plutôt que laissés en double. Décompte : 53 tests, 101 assertions.
+
+### Ajouté
+- **Les titres récoltés par la collecte RSS passent maintenant par la normalisation
+  typographique à l'écriture.** Un audit avait mesuré 4 438 écarts en base, dont 4 406 - soit
+  99,3 % - dans des titres de médias français. Corriger le passif ne servait à rien : chaque
+  collecte en réinjectait. C'est la porte d'écriture qui est corrigée, pas la base.
+
+### Retiré volontairement
+- **L'installabilité « Ajouter à l'écran d'accueil » et l'affichage automatique de la page hors
+  ligne.** Chrome exige un service worker actif avec un écouteur `fetch` pour considérer un site
+  installable : les retirer était la condition du correctif ci-dessus. Le câblage des invites
+  d'installation reste en place, inerte, pour le jour où la question se reposerait. Arbitrage
+  assumé : le contenu périmé servi aux visiteurs coûtait plus cher qu'une installabilité que
+  les mesures d'audience ne montrent utilisée par personne.
+
 ## [1.293.2] - 2026-09-21
 
 ### Corrigé

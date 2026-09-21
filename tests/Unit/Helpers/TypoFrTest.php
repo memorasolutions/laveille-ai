@@ -13,27 +13,64 @@ declare(strict_types=1);
 
 $nbsp = "\u{00A0}";
 
-it('ajoute NBSP avant ? collé au mot', function () use ($nbsp): void {
-    expect(lv_typo_fr('conformité?'))->toBe("conformité{$nbsp}?");
+it('ne touche pas au ? déjà collé au mot (norme québécoise : aucune espace avant)', function (): void {
+    expect(lv_typo_fr('conformité?'))->toBe('conformité?');
 });
 
-it('remplace espace ASCII par NBSP avant ?', function () use ($nbsp): void {
-    expect(lv_typo_fr('conformité ?'))->toBe("conformité{$nbsp}?");
+it('retire l\'espace ASCII avant ? au lieu de le remplacer par une insécable', function (): void {
+    expect(lv_typo_fr('conformité ?'))->toBe('conformité?');
 });
 
-it('est idempotent — applique 2× ne dégrade pas', function () use ($nbsp): void {
+it('est idempotent — applique 2× ne dégrade pas', function (): void {
     $once = lv_typo_fr('conformité?');
     $twice = lv_typo_fr($once);
     expect($twice)->toBe($once)
-        ->and($twice)->toBe("conformité{$nbsp}?");
+        ->and($twice)->toBe('conformité?');
 });
 
-it('couvre toute la ponctuation double FR : ? ! : ; »', function () use ($nbsp): void {
-    expect(lv_typo_fr('test?'))->toBe("test{$nbsp}?")
-        ->and(lv_typo_fr('test!'))->toBe("test{$nbsp}!")
+it('couvre toute la ponctuation FR : insécable avant : et », aucune espace avant ? ! ;', function () use ($nbsp): void {
+    expect(lv_typo_fr('test?'))->toBe('test?')
+        ->and(lv_typo_fr('test!'))->toBe('test!')
         ->and(lv_typo_fr('test:'))->toBe("test{$nbsp}:")
-        ->and(lv_typo_fr('test;'))->toBe("test{$nbsp};")
+        ->and(lv_typo_fr('test;'))->toBe('test;')
         ->and(lv_typo_fr('test»'))->toBe("test{$nbsp}»");
+});
+
+// Section fusionnée depuis TypoOqlfTest.php (2026-09-21, supprimé pour ne pas dupliquer
+// ce fichier) : verrouille la norme de l'Office québécois de la langue française, qui
+// DIFFÈRE de l'usage français sur un point que le réflexe fait rater - au Québec,
+// « ; », « ! » et « ? » ne prennent AUCUNE espace avant, alors que « : » et « » » en
+// prennent une insécable. La règle unique qui existait jusqu'au 2026-09-21 ajoutait une
+// insécable devant les cinq signes, donc fabriquait la faute au lieu de la corriger.
+// Aucun contenu servi ne la portait, la commande `typo:apply-fr` n'étant pas planifiée -
+// mais rien n'empêchait quelqu'un de la lancer. Ces tests sont ce qui empêche le retour
+// en arrière. Les cas déjà couverts ci-dessus (ponctuation glued, sans espace existante)
+// n'ont pas été redupliqués ; seuls les cas apportant une couverture distincte le sont
+// (espace ordinaire à retirer, insécable déjà posée à nettoyer, ponctuation déjà conforme).
+
+it('retire l\'espace ordinaire avant le point d\'exclamation (cas non collé)', function (): void {
+    expect(lv_typo_fr('Vraiment !'))->toBe('Vraiment!');
+});
+
+it('retire l\'espace ordinaire avant le point-virgule (cas non collé)', function (): void {
+    expect(lv_typo_fr('un ; deux'))->toBe('un; deux');
+});
+
+it('remplace l\'espace ordinaire avant le deux-points par une insécable', function () use ($nbsp): void {
+    expect(lv_typo_fr('Voici : le résultat'))->toBe("Voici{$nbsp}: le résultat");
+});
+
+it('place une espace insécable après le guillemet ouvrant et avant le fermant, même si une espace ordinaire existait déjà', function () use ($nbsp): void {
+    expect(lv_typo_fr('il dit « oui »'))->toBe("il dit «{$nbsp}oui{$nbsp}»");
+});
+
+it('conserve une ponctuation déjà conforme à la norme québécoise', function (): void {
+    expect(lv_typo_fr('Prêt? Oui!'))->toBe('Prêt? Oui!');
+});
+
+it('retire aussi les insécables déjà posées avant interrogation et exclamation (nettoyage de l\'ancienne faute)', function (): void {
+    expect(lv_typo_fr("prêt\u{00A0}?"))->toBe('prêt?');
+    expect(lv_typo_fr("prêt\u{00A0}!"))->toBe('prêt!');
 });
 
 it('ajoute NBSP après « (guillemet ouvrant FR)', function () use ($nbsp): void {
@@ -76,7 +113,7 @@ it('ne casse PAS les URL avec query string complexe (?ids=1,2&foo=bar)', functio
     expect($out)->toContain('href="https://laveille.ai/comparer?ids=1,2&foo=bar"');
 });
 
-it('préserve balises HTML (strong, em) et applique sur le texte intra-balise', function () use ($nbsp): void {
+it('préserve balises HTML (strong, em) et applique sur le texte intra-balise', function (): void {
     // Comportement validé : segmentation tag/texte → règles appliquées dans
     // chaque segment de texte indépendamment. L'intérieur de <em> est traité,
     // les balises sont laissées intactes. La ponctuation entre balises (limite
@@ -84,7 +121,7 @@ it('préserve balises HTML (strong, em) et applique sur le texte intra-balise', 
     // trade-off accepté (cas rare en pratique).
     $html = '<p><em>conformité?</em></p>';
     $out = lv_typo_fr($html);
-    expect($out)->toContain("<em>conformité{$nbsp}?</em>")
+    expect($out)->toContain('<em>conformité?</em>')
         ->and($out)->toContain('<p>')
         ->and($out)->toContain('</p>');
 });
@@ -101,7 +138,7 @@ it('ne modifie pas texte sans ponctuation cible', function (): void {
 it('gère phrase complexe FR avec multiples règles', function () use ($nbsp): void {
     $in = "Loi 25 : sanctions jusqu'à 25 M$ ou 4 % du CA mondial. Conformité?";
     $out = lv_typo_fr($in);
-    expect($out)->toBe("Loi 25{$nbsp}: sanctions jusqu'à 25{$nbsp}M\$ ou 4{$nbsp}% du CA mondial. Conformité{$nbsp}?");
+    expect($out)->toBe("Loi 25{$nbsp}: sanctions jusqu'à 25{$nbsp}M\$ ou 4{$nbsp}% du CA mondial. Conformité?");
 });
 
 it('ne touche PAS un ratio horaire comme 17:42 (chiffre suivi de :)', function () use ($nbsp): void {
@@ -113,8 +150,8 @@ it('ne touche PAS un ratio horaire comme 17:42 (chiffre suivi de :)', function (
     expect($out)->toBe("17{$nbsp}:42");
 });
 
-it('macro Str::typoFr est enregistrée et fonctionne identiquement', function () use ($nbsp): void {
-    expect(\Illuminate\Support\Str::typoFr('conformité?'))->toBe("conformité{$nbsp}?");
+it('macro Str::typoFr est enregistrée et fonctionne identiquement', function (): void {
+    expect(\Illuminate\Support\Str::typoFr('conformité?'))->toBe('conformité?');
 });
 
 it('préserve le JSON Laravel translatable — clés intactes, valeurs typographiées', function () use ($nbsp): void {
@@ -124,7 +161,7 @@ it('préserve le JSON Laravel translatable — clés intactes, valeurs typograph
     // Les valeurs sont typographiées.
     expect($out)->toContain('"fr_CA":')
         ->and($out)->toContain('"fr":')
-        ->and($out)->toContain("conformité{$nbsp}?")
+        ->and($out)->toContain('conformité?')
         ->and($out)->toContain("7{$nbsp}%");
     // Et c'est toujours du JSON valide
     expect(json_decode($out, true))->toBeArray();
@@ -135,7 +172,7 @@ it('JSON array imbriqué reste valide après typographie', function () use ($nbs
     $out = lv_typo_fr($in);
     $decoded = json_decode($out, true);
     expect($decoded)->toBeArray()
-        ->and($decoded['items'][0]['label'])->toBe("Conformité{$nbsp}?")
+        ->and($decoded['items'][0]['label'])->toBe('Conformité?')
         ->and($decoded['items'][0]['value'])->toBe("25{$nbsp}M\$");
 });
 
@@ -162,11 +199,11 @@ it('ne casse PAS &amp; &nbsp; &eacute; (entités courantes diverses)', function 
         ->and(lv_typo_fr('Caf&eacute; chaud?'))->toContain('&eacute;');
 });
 
-it('applique quand même le NBSP sur la ponctuation qui suit une entité protégée', function () use ($nbsp): void {
-    // Le "?" final n'est pas collé à l'entité (segment séparé) : il reste
-    // collé au dernier \S du segment texte qui le précède (ici "il").
+it('retire quand même l\'espace avant la ponctuation qui suit une entité protégée', function (): void {
+    // Le segment texte qui suit l'entité ("IA vous ment-il ?") est traité
+    // indépendamment : la règle 1b y retire l'espace avant "?" normalement.
     $out = lv_typo_fr('Votre détecteur d&rsquo;IA vous ment-il ?');
-    expect($out)->toContain("il{$nbsp}?")
+    expect($out)->toContain('il?')
         ->and($out)->toContain('&rsquo;');
 });
 

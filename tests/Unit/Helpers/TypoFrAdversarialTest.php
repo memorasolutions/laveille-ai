@@ -8,8 +8,6 @@ declare(strict_types=1);
  * mêlant balise ET entité imbriquées de façon pathologique.
  */
 
-$nbsp = "\u{00A0}";
-
 it('ne casse pas une entité imbriquée DANS un attribut de balise (<a href="&amp;">)', function (): void {
     $html = '<a href="&amp;">test</a>?';
     $out  = lv_typo_fr($html);
@@ -23,17 +21,17 @@ it('ne casse pas une entité imbriquée DANS un attribut de balise (<a href="&am
         ->and($out)->not->toContain('&amp' . "\u{00A0}" . ';');
 });
 
-it('ne casse pas plusieurs entités imbriquées dans un attribut avec ponctuation FR adjacente', function () use ($nbsp): void {
+it('ne casse pas plusieurs entités imbriquées dans un attribut avec ponctuation FR adjacente', function (): void {
     $html = '<a href="https://x.test/?a=1&amp;b=2" title="Test &amp; Test">lien</a> !';
     $out  = lv_typo_fr($html);
 
     expect($out)->toContain('href="https://x.test/?a=1&amp;b=2"')
         ->and($out)->toContain('title="Test &amp; Test"')
-        // Trade-off DÉJÀ documenté (TypoFrTest.php "préserve balises HTML") : la
-        // ponctuation séparée de la balise fermante par un espace n'est PAS jointe
-        // à travers la frontière de segment (pas un \S collé). Comportement inchangé
-        // par la segmentation à 3 voies, pas une régression de sécurité.
-        ->and($out)->toContain('</a> !');
+        // Norme québécoise (règle 1b, corrigée le 2026-09-21) : aucune espace avant
+        // « ! », donc la règle retire l'espace ASCII du segment texte qui suit la
+        // balise fermante - la retenue ne dépend pas d'un \S collé au même segment,
+        // contrairement à la règle 1a (insertion). Comportement voulu, pas une casse.
+        ->and($out)->toContain('</a>!');
 });
 
 it('entité juste avant une balise ouvrante ne fusionne pas ponctuation à travers la frontière', function (): void {
@@ -71,7 +69,9 @@ it('entité malformée (sans point-virgule) est traitée comme texte pur, pas co
     $out  = lv_typo_fr($html);
 
     expect($out)->toContain('&amp')
-        ->and($out)->toContain('suite' . "\u{00A0}" . '?');
+        // Aucune insécable ajoutée devant "?" (norme québécoise, règle 1b) : "suite?"
+        // était déjà collé sans espace dans l'input, rien à retirer non plus.
+        ->and($out)->toContain('suite?');
 });
 
 it('idempotence sur le cas pathologique balise+entité imbriquées (double application ne dégrade pas)', function (): void {

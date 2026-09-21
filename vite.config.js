@@ -80,7 +80,12 @@ export default defineConfig({
             injectManifest: {
                 // Précache LÉGER : js/css/woff2 + icônes PWA (png/ico) seulement.
                 // Les 271 SVG de drapeaux (~2,7 Mo) sont EXCLUS (install lourde = crash renderer au 1er login).
-                globPatterns: ['**/*.{js,css,ico,png,woff2}'],
+                // 2026-09-21 : sw-source.js est devenu un service worker de RETRAIT, il ne
+                // précache plus rien. Liste vide pour ne pas injecter un manifeste jamais lu -
+                // le fichier passe ainsi de plusieurs kilo-octets de données mortes à quelques
+                // centaines d'octets, donc plus vite téléchargé et vérifié par les navigateurs
+                // qui interrogent son adresse pour détecter une mise à jour.
+                globPatterns: [],
                 globIgnores: ['**/flag-icons/**', '**/*.map'],
                 maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
             },
