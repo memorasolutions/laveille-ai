@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.292.0] - 2026-09-21
+
+### Ajouté
+- **Deux fiches de glossaire : « Organisation internationale du Travail » (OIT) et « O*NET ».**
+  Rendues nécessaires par la série « IA et emplois 2030 », qui cite l'indice d'exposition de l'OIT
+  et s'appuie sur des études construites à partir de la base O*NET - sans elles, deux notions
+  centrales du dossier restaient des sigles opaques. L'angle retenu pour chacune est ce qui la rend
+  singulière : pour l'OIT, le TRIPARTISME (seule agence onusienne où employeurs et travailleurs
+  siègent avec les États) ; pour O*NET, le fait qu'elle décrive les métiers en TÂCHES, ce qui en
+  fait la matière première des études sur l'automatisation, et que son nombre de professions varie
+  selon l'unité comptée - ce qui explique des écarts entre études qui décrivent pourtant la même
+  base.
+
+### Vérifications
+- **Anti-doublon par FAMILLE de motifs**, pas par un seul mot : 860 termes recensés depuis le
+  sitemap, cherchés sur neuf motifs par notion. Les correspondances trouvées étaient toutes des
+  faux positifs de sous-chaîne (« droit-a-l-oubli » contient « oit », « chrome » contient « onet »).
+  Réserve assumée et inscrite dans la migration : le sitemap ne liste que des SLUGS, jamais les
+  ALIAS - ce qui est établi, c'est qu'aucun slug ne porte ces notions.
+- **Les quatre URL de sources ont été appelées**, pas seulement écrites : quatre réponses 200 sans
+  redirection. Et pour celle que j'avais reconstruite plutôt que reçue d'une recherche, le contenu
+  a été relu pour confirmer qu'il dit bien ce qu'on lui fait dire.
+- **Une invention a été interceptée avant publication.** Le modèle sollicité pour la rédaction avait
+  écrit qu'un syndicat et une association patronale « peuvent porter conjointement une plainte
+  devant l'OIT ». Ce fait ne figurait pas dans la matière fournie : il a été écarté et remplacé par
+  un fait vérifié à la source.
+
 ## [1.291.2] - 2026-09-20
 
 ### Corrigé
