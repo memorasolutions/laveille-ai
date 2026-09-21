@@ -16,7 +16,7 @@ type: style-de-projet
 ## Identité de voix
 
 - **Public cible** : professionnels, PME et curieux francophones du Québec sur
-  l'IA - du néophyte (guides « c'est quoi X ? ») au lecteur technique avancé
+  l'IA - du néophyte (guides « c'est quoi X? ») au lecteur technique avancé
   (séries « J'ai créé mon IA en local », comparatifs LLM/outils). Un article
   technique/comparatif ne doit pas exclure le néophyte : chaque terme pointu
   reste défini en encadré au premier usage.
@@ -42,10 +42,10 @@ type: style-de-projet
   X, mais un problème de Y » (structure contrastive), analogies du quotidien
   filées sur 2-3 phrases (le grille-pain et l'adaptateur, le divan trois
   places dans une Mini Cooper).
-- **Mots/tics à bannir** : ouvertures « Bien sûr »/« Certainement » ; connecteurs
-  scolaires mécaniques « Tout d'abord / Ensuite / Enfin » ; « Dans cet article,
-  nous allons » ; « Il est important de noter que » ; superlatifs vagues non
-  dosés ; tiret cadratin « — » (toujours virgule, parenthèses ou deux phrases).
+- **Mots/tics à bannir** : ouvertures « Bien sûr »/« Certainement »; connecteurs
+  scolaires mécaniques « Tout d'abord / Ensuite / Enfin »; « Dans cet article,
+  nous allons »; « Il est important de noter que »; superlatifs vagues non
+  dosés; tiret cadratin « — » (toujours virgule, parenthèses ou deux phrases).
 - **Vocabulaire technique obligatoire (contenu comparatif/tech)** : garder les
   termes anglais consacrés du domaine IA/dev tels quels - *tokens/s*, *token*,
   *inference*, *LLM*, *prompt*, *benchmark*, *context window*, *fine-tuning*,
@@ -53,7 +53,7 @@ type: style-de-projet
   `callout-vulgarisateur` ou le composant « La réponse » (voir Encadrés
   visuels). Ne jamais laisser un acronyme technique sans traduction immédiate.
 - **Anglicismes** : tolérés pour le jargon IA/dev établi ci-dessus (aucun
-  équivalent français naturel) ; à éviter partout ailleurs (« courriel » plutôt
+  équivalent français naturel); à éviter partout ailleurs (« courriel » plutôt
   qu'« email », etc.).
 
 ## Format par défaut
@@ -77,7 +77,7 @@ type: style-de-projet
 
 - **Structure préférée** : answer-first stricte.
   1. H1 formulé comme la question que poserait le lecteur à une IA (ex.
-     « Quel est le meilleur LLM de codage en 2026 ? »).
+     « Quel est le meilleur LLM de codage en 2026? »).
   2. Réponse courte de 40 à 50 mots juste sous le H1, avant toute analogie -
      dans le composant visuel « La réponse » (voir Encadrés visuels).
   3. Analogie d'ouverture concrète et québécoise.
@@ -87,12 +87,12 @@ type: style-de-projet
      moteurs IA/AEO citent en priorité le contenu structuré) - critère
      numéro un pour un article de comparatif technique.
   6. FAQ de 3 à 5 questions en H3, réponses de 40 à 80 mots (le guide central
-     dit 40-80 ; le socle `/article` demande 80-150 - pour ce projet,
+     dit 40-80; le socle `/article` demande 80-150 - pour ce projet,
      respecter la fourchette du guide maison, plus stricte, 40-80 mots).
   7. Section Sources tout à la fin (voir SEO/AEO/GEO ci-dessous).
 - **Densité de tableaux/listes** : haute pour un comparatif - au moins 1
   tableau `.tableau-article` de critères et, si pertinent, un second tableau
-  de prix/performance ; listes à puces pour les blocs « Ce que vous allez
+  de prix/performance; listes à puces pour les blocs « Ce que vous allez
   apprendre » en intro.
 - **Présence d'anecdotes/exemples chiffrés** : oui, systématique - au moins un
   test ou benchmark personnel de l'auteur (« j'ai testé », un chiffre réel
@@ -103,7 +103,7 @@ type: style-de-projet
 
 ## SEO / AEO / GEO spécifiques
 
-- **Mot-clé principal type** : question complète (« c'est quoi X ? »,
+- **Mot-clé principal type** : question complète (« c'est quoi X? »,
   « X vs Y comparatif 2026 », « meilleur X pour Y »).
 - **Schema à générer** : `BlogPosting` + `FAQPage` + `Person` (auteur) via les
   helpers déjà en place : `lv_jsonld_blog_posting()`, `lv_jsonld_faq_page()`,
@@ -144,7 +144,7 @@ partie 3 ») :
 > peux plus conduire. »
 > *(note : « tu » ici est une erreur d'édition isolée - à corriger en « vous »)*
 
-**Ouverture par analogie du quotidien** (article #1, « C'est quoi le MCP ? ») :
+**Ouverture par analogie du quotidien** (article #1, « C'est quoi le MCP? ») :
 
 > « Imaginez que vous essayez de brancher votre grille-pain, mais que chaque
 > prise de votre maison nécessite un adaptateur différent que vous devez
@@ -188,7 +188,7 @@ telle quelle en tête d'un article technique dense) :
 > « Note de l'auteur : Afin de rendre cet article technique accessible au
 > plus grand nombre, j'ai intégré de nombreux encadrés de vulgarisation.
 > Cela peut donner l'impression que l'article est très long, mais
-> rassurez-vous : il se lit plus vite qu'il n'y paraît ! »
+> rassurez-vous : il se lit plus vite qu'il n'y paraît! »
 
 ## Encadrés visuels
 
@@ -196,7 +196,7 @@ Le projet possède déjà un système complet de 11 encadrés (`.custom-callout`
 `public/css/components.css`, chargé après `charte.css`) réellement utilisé
 dans les articles publiés. **Ne pas en inventer de nouveaux** - documenter et
 réutiliser l'existant. 5 types couvrent tous les besoins d'un article
-comparatif technique (mapping avec la nomenclature du skill `/article`) ;
+comparatif technique (mapping avec la nomenclature du skill `/article`);
 contraste vérifié via `mcp__wcag-mcp__wcag_check_contrast` sur la paire
 couleur d'en-tête / fond réel (fond = teinte de la couleur à 6 % d'opacité
 sur blanc, tel que rendu à l'écran) et sur le texte de corps `#595959` hérité
@@ -214,7 +214,7 @@ Tous passent AA (≥ 4,5:1, seuil minimal du socle commun). Trois passent AAA
 (conseil, chiffre, citation) : à privilégier en premier choix quand le rôle le
 permet. `vulgarisateur` et `attention` restent AA seulement (couleurs de
 production déjà utilisées sur des dizaines d'articles publiés - non modifiées
-ici pour ne pas désynchroniser le rendu réel du site ; à signaler si un futur
+ici pour ne pas désynchroniser le rendu réel du site; à signaler si un futur
 audit `/wcag` veut les resserrer à 7:1).
 
 Pour un comparatif avec avantages/inconvénients par outil, les 2 classes
@@ -248,6 +248,27 @@ Autres composants réutilisables du même fichier (`components.css`) :
 
 ## Style photo/illustration
 
+> ⚠️ **DEUX FAMILLES D'IMAGES, ET ELLES NE SUIVENT PAS LA MÊME RÈGLE** (précision du
+> 2026-09-21, après une erreur réelle). Cette section décrivait UNE seule règle,
+> « 3D isométrique, pas de photo-réalisme », et elle a été appliquée à des
+> illustrations DE CORPS d'article qui relevaient en réalité de l'autre famille.
+> Deux images ont dû être refaites.
+>
+> - **Image de COUVERTURE** (l'og:image, la vignette de l'article) : la règle
+>   ci-dessous s'applique telle quelle - 3D isométrique épurée, pas de
+>   photo-réalisme. Rien ne change.
+> - **Illustrations DANS LE CORPS d'un article de fond** : c'est la
+>   **caricature photoréaliste** qui s'applique, et sa source normative est le
+>   skill `/article`, section « Le STYLE : caricature photoréaliste, et la
+>   frontière qui la rend sûre » (décision du fondateur, 2026-09-20). Ne pas
+>   recopier ce standard ici : il évoluerait à un endroit et pas à l'autre,
+>   ce qui est exactement ce qui a produit l'erreur.
+>
+> **Et avant de générer quoi que ce soit pour une série ou un dossier déjà
+> entamé : ouvrir une pièce DÉJÀ PUBLIÉE et relever son style, son crédit et
+> son gabarit.** Une page en ligne est ce que le lecteur voit; un document
+> peut être périmé.
+
 Cohérent avec la charte du site (`public/css/charte.css` `:root`) et la
 convention déjà établie pour les visuels IA du projet (miniatures glossaire/
 articles via `/nanobanana`, compte Gemini de l'utilisateur, jamais d'API
@@ -256,7 +277,8 @@ payante).
 - **Palette** : dominante teal `#064E5A` (primaire) avec touches accent
   `#9A2A06` (orange brûlé), sur fond clair `#F8FAFB`/blanc. Pas de bleu vif
   générique hors charte.
-- **Style** : illustration 3D isométrique épurée (pas de photo-réalisme, pas
+- **Style** (image de COUVERTURE - pour le corps, voir l'encadré ci-dessus) :
+  illustration 3D isométrique épurée (pas de photo-réalisme, pas
   de stock photo générique de bureau) - objets/scènes tech stylisés (puces,
   graphiques, terminaux, robots discrets) qui évoquent le sujet sans jamais
   intégrer de texte incrusté dans l'image (le texte est ajouté séparément si

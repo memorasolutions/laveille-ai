@@ -109,6 +109,30 @@ setCatchHandler(async ({ event }) => {
     if (event.request.destination === 'document') {
         return caches.match('/offline') || Response.error();
     }
+
+    // 2026-09-21 : une IMAGE reçoit une DERNIÈRE chance par le réseau avant d'abandonner.
+    // Signalé par le fondateur, console d'un article : « The FetchEvent for
+    // .../images/bd/ia-emplois-2030/alarme.jpg resulted in a network error response ». Ce
+    // message est produit par le Response.error() ci-dessous. Or les deux images visées
+    // répondaient parfaitement en direct (200, image/jpeg, 138 352 et 145 047 octets) : c'est
+    // donc la stratégie CacheFirst qui avait échoué, pas le serveur.
+    // Le défaut est silencieux PAR CONSTRUCTION : le lecteur voit une image cassée, et le
+    // serveur ne voit jamais passer la requête - il n'y a donc rien à trouver dans les
+    // journaux. Sans ce repli, un échec de CACHE devient un échec DÉFINITIF de l'image, alors
+    // qu'un simple passage réseau l'aurait servie.
+    // Aucune régression possible : on ajoute une tentative là où il n'y avait qu'un abandon.
+    // Si le réseau est réellement injoignable, on retombe sur le même Response.error() qu'avant.
+    if (event.request.destination === 'image') {
+        try {
+            const reponse = await fetch(event.request);
+            if (reponse && reponse.ok) {
+                return reponse;
+            }
+        } catch (e) {
+            // réseau réellement injoignable : on tombe dans le Response.error() ci-dessous
+        }
+    }
+
     return Response.error();
 });
 

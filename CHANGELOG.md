@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.292.3] - 2026-09-21
+
+### Corrigé
+- **Une image ne disparaît plus définitivement quand le cache du service worker échoue.**
+  Signalé par le fondateur, console d'un article : deux illustrations produisaient
+  « The FetchEvent ... resulted in a network error response », alors que les deux fichiers
+  répondaient parfaitement en direct (200, `image/jpeg`, 138 352 et 145 047 octets). Le message
+  venait du `setCatchHandler` du service worker, qui renvoyait `Response.error()` dès que la
+  stratégie `CacheFirst` échouait. Un échec de CACHE devenait donc un échec DÉFINITIF de
+  l'image. Les images reçoivent désormais une dernière chance par le réseau avant d'abandonner.
+  Aucune régression possible : on ajoute une tentative là où il n'y avait qu'un abandon, et si
+  le réseau est réellement injoignable on retombe sur le même comportement qu'avant.
+  **Ce défaut est silencieux par construction** : le lecteur voit une image cassée et le serveur
+  ne voit jamais passer la requête, donc rien n'apparaît dans les journaux.
+
+### Note de diagnostic, parce qu'elle vaut plus que le correctif
+  Le service worker était réputé NEUTRALISÉ depuis la version 1.287.7. La mesure montre qu'il ne
+  l'a jamais été : `public/sw.js` et `public/service-worker.js` sont bien des nettoyeurs qui se
+  désenregistrent, mais ce ne sont pas eux qui tournent. Chaque page charge `pwa-lg-*.js`, qui
+  appelle `new Workbox('/build/sw-source.js')` et ré-enregistre un service worker actif de
+  37 592 octets, avec quatre routes et un écouteur `fetch`. La neutralisation n'avait porté que
+  sur les deux anciens fichiers, jamais sur celui que Vite enregistre.
+
 ## [1.292.2] - 2026-09-21
 
 ### Corrigé
