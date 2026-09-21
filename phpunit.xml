@@ -81,6 +81,14 @@
              Modules/Health/tests/Feature/OpenRouterCreditCheckTest.php, qui l'instancie
              directement avec Http::fake. -->
         <env name="HEALTH_OPENROUTER_ENABLED" value="false"/>
+        <!-- Sans cette ligne, la suite echoue en CI alors qu elle passe sur le poste du
+             developpeur : config('decido.under_construction') vaut true PAR DEFAUT, et le
+             middleware DecidoUnderConstruction sert alors un 503 a tout utilisateur non
+             superadmin. Le .env local porte DECIDO_UNDER_CONSTRUCTION=false, la CI n avait
+             rien - d ou un test vert ici et rouge la-bas, depuis le 15 septembre 2026.
+             Le seul test qui a besoin de l etat « en construction » le pose lui-meme par
+             config()->set(), donc le figer a false ici ne masque aucune couverture. -->
+        <env name="DECIDO_UNDER_CONSTRUCTION" value="false"/>
         <!-- Cle FACTICE, jamais une vraie credential : de nombreux tests News (AiSummaryService,
              Http::fake sur openrouter.ai/*) lisent config('services.openrouter.api_key') et
              retournent null SANS appeler Http si elle est vide (garde legitime du service).

@@ -1,37 +1,61 @@
 # Changelog
 
+## [1.292.1] - 2026-09-21
+
+### Corrigé
+- **La suite de tests nocturne cesse de dépendre du poste sur lequel elle tourne.** Elle échouait
+  en intégration continue depuis le 15 septembre alors qu'elle passait en local, et l'écart
+  n'était pas dans le code : `config('decido.under_construction')` vaut `true` PAR DÉFAUT, ce qui
+  fait servir au middleware `DecidoUnderConstruction` un 503 de maintenance à tout utilisateur non
+  superadmin. Le `.env` du poste de développement portait `DECIDO_UNDER_CONSTRUCTION=false`; le
+  gabarit `.env.example` que l'intégration continue recopie ne porte pas cette variable du tout.
+  Elle est désormais déclarée dans `phpunit.xml`, au même titre que `APP_NAME` et
+  `OPENROUTER_API_KEY`, qui avaient été ajoutées pour exactement la même raison.
+  Mesure : variable forcée à `true`, 9 tests échouent; corrigée, les 175 tests du module
+  passent. Le seul test qui a besoin de l'état « en construction » le pose lui-même par
+  `config()->set()`, donc le figer ici ne masque aucune couverture.
+
+### Ajouté
+- **Deux illustrations pour les parties 2 et 3 de la série « IA et emplois 2030 ».** Déposées
+  dans `public/images/blog/`, en paire JPEG + WebP au format 1200x630. Elles EXPLIQUENT le propos
+  plutôt que de le décorer : la première oppose deux bureaux du même métier, l'un noyé sous des
+  tâches répétitives et l'autre presque vide; la seconde montre un graphique net qui se dissout
+  dans le brouillard. Contrôle par deux oracles multimodaux de familles différentes, en aveugle
+  (on leur demande de DÉCRIRE l'image, jamais de confirmer ce qu'elle devrait montrer) : les deux
+  ont décrit les scènes voulues et constaté l'absence de tout texte, chiffre, logo ou marque.
+
 ## [1.292.0] - 2026-09-21
 
 ### Ajouté
-- **Deux fiches de glossaire : « Organisation internationale du Travail » (OIT) et « O*NET ».**
+- **Deux fiches de glossaire : « Organisation internationale du Travail » (OIT) et « O*NET ».**
   Rendues nécessaires par la série « IA et emplois 2030 », qui cite l'indice d'exposition de l'OIT
   et s'appuie sur des études construites à partir de la base O*NET - sans elles, deux notions
   centrales du dossier restaient des sigles opaques. L'angle retenu pour chacune est ce qui la rend
-  singulière : pour l'OIT, le TRIPARTISME (seule agence onusienne où employeurs et travailleurs
-  siègent avec les États) ; pour O*NET, le fait qu'elle décrive les métiers en TÂCHES, ce qui en
+  singulière : pour l'OIT, le TRIPARTISME (seule agence onusienne où employeurs et travailleurs
+  siègent avec les États); pour O*NET, le fait qu'elle décrive les métiers en TÂCHES, ce qui en
   fait la matière première des études sur l'automatisation, et que son nombre de professions varie
   selon l'unité comptée - ce qui explique des écarts entre études qui décrivent pourtant la même
   base.
 
 ### Vérifications
-- **Anti-doublon par FAMILLE de motifs**, pas par un seul mot : 860 termes recensés depuis le
+- **Anti-doublon par FAMILLE de motifs**, pas par un seul mot : 860 termes recensés depuis le
   sitemap, cherchés sur neuf motifs par notion. Les correspondances trouvées étaient toutes des
   faux positifs de sous-chaîne (« droit-a-l-oubli » contient « oit », « chrome » contient « onet »).
-  Réserve assumée et inscrite dans la migration : le sitemap ne liste que des SLUGS, jamais les
+  Réserve assumée et inscrite dans la migration : le sitemap ne liste que des SLUGS, jamais les
   ALIAS - ce qui est établi, c'est qu'aucun slug ne porte ces notions.
-- **Les quatre URL de sources ont été appelées**, pas seulement écrites : quatre réponses 200 sans
+- **Les quatre URL de sources ont été appelées**, pas seulement écrites : quatre réponses 200 sans
   redirection. Et pour celle que j'avais reconstruite plutôt que reçue d'une recherche, le contenu
   a été relu pour confirmer qu'il dit bien ce qu'on lui fait dire.
 - **Une invention a été interceptée avant publication.** Le modèle sollicité pour la rédaction avait
   écrit qu'un syndicat et une association patronale « peuvent porter conjointement une plainte
-  devant l'OIT ». Ce fait ne figurait pas dans la matière fournie : il a été écarté et remplacé par
+  devant l'OIT ». Ce fait ne figurait pas dans la matière fournie : il a été écarté et remplacé par
   un fait vérifié à la source.
 
 ## [1.291.2] - 2026-09-20
 
 ### Corrigé
 - **L'image ouverte en plein écran était collée en haut à gauche au lieu d'être centrée.** Suite
-  directe du correctif précédent : `x-show`, lorsqu'il MONTRE un élément, remet son `style.display`
+  directe du correctif précédent : `x-show`, lorsqu'il MONTRE un élément, remet son `style.display`
   à vide - il effaçait donc le `display:flex` que 1.291.1 avait posé en style en ligne, et les
   règles de centrage `align-items`/`justify-content` ne s'appliquaient plus. Le display vit
   désormais dans une classe CSS (`.lv-visionneuse`), que `x-show` ne peut pas effacer.
