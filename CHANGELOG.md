@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.293.0] - 2026-09-21
+
+### Ajouté
+- **Fiche de glossaire « 01net »**, avec son illustration. Le média est une filiale de KELEOPS
+  FRANCE SAS, elle-même filiale de KELEOPS AG (Zoug, Suisse) - établi par les mentions légales,
+  qui sont une obligation juridique, après une divergence entre deux recherches dont l'une
+  attribuait encore le titre à TF1. Trois changements de propriétaire, pas quatre : le modèle
+  délégué a refusé d'écrire le chiffre que mon brief lui donnait, et il avait raison.
+
+### Corrigé
+- **Le cache-bust de tous les JS et CSS des outils était hors service en production.**
+  Le commit précédent (v1.292.3) a VIDÉ `config/version.php` : 29 lignes supprimées, aucune
+  ajoutée. `config('version.semver')` renvoyait donc null, et les gabarits rendaient `?v=`, vide.
+  Mesuré sur laveille.ai/outils/constructeur-prompts avant correction. Conséquence réelle : un
+  visiteur déjà venu continuait de recevoir les anciens fichiers, donc les correctifs livrés
+  depuis ne lui parvenaient pas - dont celui du constructeur de prompts en v1.289.6.
+  Ce qui rend ce défaut instructif : **un fichier de configuration vide ne casse rien
+  bruyamment.** Aucune page n'a planté, aucune erreur n'est remontée dans les journaux, et un
+  contrôle après déploiement qui vérifie « la page répond-elle 200 » n'aurait rien vu. Le seul
+  signal était une chaîne vide dans du HTML servi.
+- **Les fiches « OIT » et « O*NET » n'avaient aucune illustration**, contre la règle du skill qui
+  l'exige. Elles ont été mises en ligne ce matin en étant déclarées prouvées : elles ne l'étaient
+  pas sur ce point. Leur `hero_image` est maintenant posée par une migration distincte, plutôt
+  qu'en réécrivant la migration déjà jouée en production.
+
+### Vérifié
+- Les trois illustrations sont passées par deux oracles multimodaux de familles différentes, en
+  aveugle, avant d'être déployées : aucun texte déchiffrable, aucun logo, aucune personne
+  mineure. Deux écarts signalés et acceptés : des verres et feuillets vierges sur la table de la
+  fiche OIT, et deux silhouettes d'adultes floues au fond de la rue sur celle de 01net.
+
 ## [1.292.3] - 2026-09-21
 
 ### Corrigé
