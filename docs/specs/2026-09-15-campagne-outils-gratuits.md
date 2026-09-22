@@ -38,7 +38,7 @@ Mesure Google Analytics sur **90 jours**, colonne décisive : les **nouvelles pe
 | 7 | Raccourcisseur | 44 | 16 | 2 | Utilitaire, faible nouveauté. |
 | 8 | Oscilloscope RLC | 15 | 9 | 4 | Niche technique, public précis. |
 | 9 | Simulateur fiscal, calculatrice | 28 / 16 | 20 / 7 | **0** / 1 | Zéro nouvelle personne en 90 jours : ils ne servent qu'aux mêmes. |
-| — | Sudoku, mots croisés, minuteur | 21 / 16 / 28 | 11 / 10 / **4** | **0** | **Hors LinkedIn.** Le club des sages a noté qu'ils brouillent la thématique. Le minuteur fait 28 sessions pour 4 personnes : c'est un usage de classe, pas un produit. |
+| – | Sudoku, mots croisés, minuteur | 21 / 16 / 28 | 11 / 10 / **4** | **0** | **Hors LinkedIn.** Le club des sages a noté qu'ils brouillent la thématique. Le minuteur fait 28 sessions pour 4 personnes : c'est un usage de classe, pas un produit. |
 
 **Cinq outils ont ZÉRO nouvelle personne en 90 jours.** Ce n'est pas qu'ils sont mauvais : c'est que
 personne ne sait qu'ils existent. C'est exactement ce que la campagne corrige.
@@ -72,49 +72,105 @@ enregistré **aucune requête** sortante liée au texte. Les seuls appels observ
 performance de l'hébergeur et l'enregistrement du choix de témoins. On peut donc écrire « tout se
 passe dans ton navigateur » sans mentir.
 
-### Texte LinkedIn (à valider avant envoi)
+### Les textes, version 2 - réécrits le 2026-09-21 après DEUX rounds du club des sages
 
-> L'anonymiseur de laveille.ai ne colle pas d'étiquettes [NOM] dans ton texte. Il remplace tes
-> vraies données par des fausses, mais cohérentes.
+> **La version 1 de ces deux textes est morte, et il faut savoir pourquoi.** Les cinq oracles
+> (Codex, Perplexity, ChatGPT, Gemini, claude.ai), consultés en aveugle, ont convergé sur le même
+> verdict : c'était une **fiche produit**, pas quelque chose qu'on relaie. Elle ouvrait sur le nom
+> du produit au lieu du problème du lecteur, et quatre oracles sur cinq ont pointé la même phrase
+> comme signature d'écriture machine : *« Le numéro reste un numéro de téléphone, l'adresse
+> reste une adresse de Québec, le courriel reste un courriel. »* - un tricolon parfaitement
+> symétrique. Elle a été coupée.
+
+**Texte LinkedIn** (599 caractères, première ligne 74) :
+
+> J'ai fait résumer un dossier par ChatGPT sans lui donner un seul vrai nom.
 >
-> Marie Tremblay devient Nathalie Gagnon. Le numéro reste un numéro de téléphone, l'adresse reste
-> une adresse de Québec, le courriel reste un courriel. L'IA continue donc de comprendre ce qu'elle
-> lit, et sa réponse reste utilisable, ce qui n'arrive pas quand on remplace tout par des crochets.
+> Le dossier est fictif, l'essai est réel. Un outil a remplacé les coordonnées par d'autres tout aussi crédibles : Marie Tremblay est devenue Nathalie Gagnon. L'IA a travaillé là-dessus, puis l'outil a remis les vrais noms dans sa réponse.
 >
-> Ensuite tu recolles la réponse de l'IA dans l'outil, et il y remet tes vraies informations.
+> Ce qu'une page de vente ne dirait pas : c'est réversible, exprès. La Loi 25 garde « anonymiser » pour ce qui est irréversible. Ici, l'IA ne voit pas tes vraies données. Ce n'est pas une conformité.
 >
-> Tout se passe dans ton navigateur. Rien n'est envoyé sur nos serveurs.
+> Gratuit, sans compte. Le lien et le code QR sont sur la dernière diapositive.
 >
-> Le lien et le code QR sont sur la dernière diapositive.
+> #Loi25
 
-### Texte Facebook (à valider avant envoi)
+**Texte Facebook** (475 caractères, sous la coupure « voir plus » de 477) :
 
-> Tu veux faire résumer un dossier par une IA, sans lui donner le nom de ton client.
+> J'ai fait résumer un dossier par ChatGPT sans lui donner un seul vrai nom.
 >
-> L'anonymiseur de laveille.ai remplace les vraies données par des fausses cohérentes : Marie
-> Tremblay devient Nathalie Gagnon, l'adresse devient une autre adresse de Québec, le numéro reste
-> un numéro. L'IA comprend encore le texte, donc sa réponse reste utile.
+> Le dossier est fictif, l'essai est réel. Un outil remplace les coordonnées par d'autres tout aussi crédibles, l'IA travaille là-dessus, puis on recolle sa réponse dans l'outil, qui remet les vraies valeurs.
 >
-> Ensuite, tu recolles sa réponse et l'outil y remet tes vraies infos.
+> Un conseil que je me donne aussi : relis la restauration. Si l'IA mélange deux personnes, les vrais noms reviennent sur la mauvaise.
 >
-> Tout se passe dans ton navigateur. Le lien est en premier commentaire.
+> Gratuit, sans compte. Le lien est en premier commentaire.
 
-### Le visuel
+### Ce que le round 2 a détruit, et qui n'aurait pas dû partir
 
-**PRÊTE** : `docs/campagne-outils-gratuits/01-anonymiseur-comparaison.png` (1440 px, 65 Ko).
+Le deuxième round, lancé contre la RÉÉCRITURE et non contre la version 1, a intercepté une
+**preuve qui ne prouvait rien** :
 
-Capture faite en production le 2026-09-17, comparaison côte à côte « Votre texte » / « Texte
-anonymisé », les valeurs substituées surlignées des deux côtés. Elle montre le mécanisme en une
-seconde, sans légende.
+> « Coupe ton Wi-Fi et refais l'essai, ça fonctionne encore. »
 
-**La promesse du texte est re-prouvée le jour même** : pendant l'anonymisation, l'interception
-réseau n'a enregistré **aucune requête**. On peut écrire « tout se passe dans ton navigateur » sans
-mentir. La page l'affiche d'ailleurs elle-même : « 100 % local - traitement dans votre navigateur ».
+La formule venait d'un oracle du round 1, elle était séduisante, et elle est **fausse comme
+preuve** : une page déjà chargée continue de fonctionner hors ligne, que le code envoie des
+données ou non. Elle aurait pu prouver le contraire de ce qu'on voulait, et le lecteur technique
+l'aurait relevé en commentaire. Remplacée par la mesure réelle, qui figure maintenant sur la
+diapositive 3 du carrousel : l'inspecteur réseau n'enregistre aucune requête, mesuré les 15 et
+17 septembre 2026.
 
-**Données de l'exemple entièrement fictives** : le numéro est en 555, réservé à la fiction, et le
-numéro de dossier est 000-000-000. Aucune donnée réelle n'a servi à la démonstration.
+**Leçon, au-delà de ce texte** : une bonne idée d'oracle reste une idée non vérifiée. Le round de
+réfutation doit porter sur la RÉÉCRITURE, sinon il valide ce qu'on vient d'y introduire.
 
----
+### La contrainte juridique, trouvée par claude.ai et VÉRIFIÉE contre la loi
+
+Le mot « anonymiser » a un sens précis au Québec, et ce n'est pas le nôtre. Vérifié le
+2026-09-21 par recherche indépendante (sources : cai.gouv.qc.ca, legisquebec.gouv.qc.ca) :
+
+| Terme | Ce que dit la loi | Statut du renseignement |
+|---|---|---|
+| **Anonymisé** (art. 23, P-39.1) | il n'est plus raisonnable de prévoir qu'on puisse identifier la personne, de façon **irréversible** | cesse d'être un renseignement personnel |
+| **Dépersonnalisé** (art. 12) | ne permet plus d'identifier **directement** | **reste** un renseignement personnel |
+
+Notre outil est **réversible par conception** - c'est sa fonctionnalité, l'étape 2 remet les vraies
+valeurs. Le texte ne peut donc promettre aucune conformité, et il ne le fait plus : il dit
+exactement ce que le lecteur gagne, et ce qu'il ne gagne pas.
+
+Cette nuance n'est pas un frein à la viralité, c'est le contraire : **une page de vente ne se
+limite jamais elle-même.** C'est ce qui fait que le texte ne se lit pas comme une machine.
+
+> ⚠️ **Défaut distinct, EN PRODUCTION, tracé au ticket #2721** : la page de l'outil affiche
+> aujourd'hui deux badges « Conforme Loi 25 » et « Conforme RGPD », et sa méta
+> description dit « Conforme à la Loi 25 ». Rien n'a été modifié : c'est un choix de
+> positionnement produit, il revient à Stéphane.
+
+### Le visuel : un carrousel PDF de 5 diapositives, fabriqué le 2026-09-21
+
+**`docs/campagne-outils-gratuits/01-anonymiseur-carrousel.pdf`** - 5 pages carrées, 112 Ko,
+très loin du plafond de 20 Mo du portail. Source HTML conservée à côté
+(`01-anonymiseur-carrousel.source.html`) pour refaire ou décliner.
+
+| Diapo | Ce qu'elle porte |
+|---|---|
+| 1 | L'accroche, seule, sur fond plein |
+| 2 | **Le parcours d'une phrase réelle** : ce que tu écris → ce que l'IA reçoit, en gros texte |
+| 3 | Ce qui part sur le réseau : « Rien », avec la mesure datée |
+| 4 | La mise en garde : relis la restauration, et la nuance Loi 25 |
+| 5 | Le code QR et l'adresse |
+
+**La diapositive 2 est l'idée la plus forte du cycle**, et trois oracles sur cinq l'ont proposée
+indépendamment : montrer le PARCOURS plutôt que décrire le mécanisme. Un premier essai plaçait la
+capture d'écran de 1440 x 280 px dans la page : elle était **illisible sur un téléphone**, ce que
+seule l'inspection visuelle image par image a montré. Refaite en texte typographié.
+
+**Contrôles passés, chacun mesuré et non supposé** :
+- Code QR **décodé** (OpenCV) : il rend bien `https://laveille.ai/outils/anonymiseur`, et cette
+  page répond 200. Un QR non décodé est un lien mort qui ne se voit pas.
+- Contrastes WCAG : les 7 paires calculées passent AAA. L'orange des surtitres a dû être assombri
+  de `#c2691f` à `#a45614` - il était à 3,61:1 pour un seuil de 4,5:1.
+- Typographie québécoise : zéro faute, contrôle éprouvé par un TÉMOIN volontairement fautif.
+- Apostrophes typographiques dans tout le corps, aucune apostrophe droite.
+
+**Données de l'exemple entièrement fictives** : numéros en 555, réservés à la fiction.
 
 ## Le gabarit, pour ne pas repartir de zéro seize fois
 
@@ -122,7 +178,7 @@ Chaque annonce suit la même charpente, qui vaut pour tous les outils :
 
 1. **La situation concrète** où l'outil sert, en une phrase, du point de vue de qui a le problème.
 2. **Le mécanisme précis**, avec l'exemple réel de la capture. Jamais « simple et efficace ».
-3. **La limite ou la garantie décisive** - ici, le traitement local ; ailleurs, autre chose.
+3. **La limite ou la garantie décisive** - ici, le traitement local; ailleurs, autre chose.
 4. **Où trouver le lien** : dernière diapositive sur LinkedIn, premier commentaire sur Facebook.
 
 Et les trois interdits du skill de publication, qui tuent une annonce d'outil plus vite que tout :

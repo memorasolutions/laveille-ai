@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<title>Anonymiseur - carrousel LinkedIn</title>
+<style>
+  @page { size: 1080px 1080px; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  .d {
+    width:1080px; height:1080px; page-break-after:always;
+    padding:84px; display:flex; flex-direction:column; justify-content:center;
+    position:relative; background:#0b3d46; color:#ffffff;
+  }
+  .d:last-child { page-break-after:auto; }
+  .clair { background:#f7f5f0; color:#12303a; }
+  .num { position:absolute; top:52px; right:64px; font-size:26px; letter-spacing:.14em;
+         opacity:.55; font-weight:700; }
+  .marque { position:absolute; bottom:52px; left:84px; font-size:26px; letter-spacing:.05em;
+            opacity:.6; font-weight:600; }
+  h1 { font-size:76px; line-height:1.14; font-weight:800; letter-spacing:-.02em; }
+  h2 { font-size:58px; line-height:1.18; font-weight:800; letter-spacing:-.015em;
+       margin-bottom:34px; }
+  .geant { font-size:200px; font-weight:800; line-height:1; color:#f0a04b; margin-bottom:28px; }
+  p  { font-size:34px; line-height:1.5; font-weight:400; }
+  p + p { margin-top:26px; }
+  .sur { font-size:27px; letter-spacing:.16em; text-transform:uppercase; font-weight:700;
+         color:#f0a04b; margin-bottom:30px; }
+  .cap { width:100%; border-radius:16px; margin:14px 0 30px; display:block;
+         box-shadow:0 10px 40px rgba(0,0,0,.28); }
+  .fin { display:flex; align-items:center; gap:56px; margin-top:34px; }
+  .fin img { width:300px; height:300px; border-radius:18px; background:#fff; padding:14px; }
+  .url { font-size:38px; font-weight:800; line-height:1.35; }
+  .bloc { font-size:33px; line-height:1.45; background:#ffffff; border-radius:14px;
+          padding:30px 34px; border-left:8px solid #c9c3b4; }
+  .bloc.vert { border-left-color:#2c7a68; }
+  .bloc b { background:#d9efe7; padding:3px 4px; border-radius:5px; font-weight:800;
+            box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+  .fleche { font-size:52px; text-align:center; margin:18px 0; opacity:.45; }
+  .note { font-size:25px; opacity:.72; margin-top:18px; line-height:1.45; }
+</style>
+</head>
+<body>
+
+<section class="d">
+  <span class="num">1 / 5</span>
+  <h1>J’ai fait résumer un dossier par ChatGPT sans lui donner un seul vrai nom.</h1>
+  <p style="margin-top:40px;opacity:.82">Le dossier est fictif. L’essai, lui, est réel.</p>
+  <span class="marque">laveille.ai</span>
+</section>
+
+<section class="d clair">
+  <span class="num" style="color:#12303a">2 / 5</span>
+  <div class="sur" style="color:#a45614">Ce que tu écris</div>
+  <div class="bloc">Bonjour, je vous écris au sujet du dossier de
+    <b>Marie Tremblay</b>, jointe au <b>418 555-0142</b>.</div>
+  <div class="fleche">↓</div>
+  <div class="sur" style="color:#a45614">Ce que l’IA reçoit</div>
+  <div class="bloc vert">Bonjour, je vous écris au sujet du dossier de
+    <b>Nathalie Gagnon</b>, jointe au <b>775 555-5807</b>.</div>
+  <p style="margin-top:36px">Des remplacements crédibles, pas des crochets vides.
+     L’IA comprend donc encore ce qu’elle lit.</p>
+  <span class="marque" style="color:#12303a">laveille.ai</span>
+</section>
+
+<section class="d">
+  <span class="num">3 / 5</span>
+  <div class="sur">Ce qui part sur le réseau</div>
+  <div class="geant">Rien</div>
+  <p>Pendant l’opération, l’inspecteur réseau du navigateur n’enregistre aucune requête liée
+     au texte. Mesuré les 15 et 17 septembre 2026.</p>
+  <p class="note">Tout le traitement se fait dans la page, sur ton appareil.</p>
+  <span class="marque">laveille.ai</span>
+</section>
+
+<section class="d clair">
+  <span class="num" style="color:#12303a">4 / 5</span>
+  <h2>Relis la restauration.</h2>
+  <p>Si l’IA écrit « Mme Gagnon » ou mélange deux personnes, remettre les vrais noms peut
+     recoller un fait sur la mauvaise.</p>
+  <p><strong>Le point faible du procédé est là</strong>, dans la relecture, pas dans l’outil.</p>
+  <p class="note">Et c’est réversible, exprès. La Loi 25 garde le mot « anonymiser » pour ce qui
+     est irréversible. Ici, l’IA ne voit pas tes vraies données. Ce n’est pas une conformité.</p>
+  <span class="marque" style="color:#12303a">laveille.ai</span>
+</section>
+
+<section class="d">
+  <span class="num">5 / 5</span>
+  <div class="sur">Gratuit, sans compte</div>
+  <div class="fin">
+    <img src="qr.png" alt="Code QR vers l’outil">
+    <div>
+      <div class="url">laveille.ai<br>/outils/anonymiseur</div>
+      <p class="note">Scanne le code, ou tape l’adresse.<br>Aucune inscription, aucun paiement.</p>
+    </div>
+  </div>
+  <span class="marque">laveille.ai</span>
+</section>
+
+</body>
+</html>
