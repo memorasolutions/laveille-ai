@@ -19,7 +19,9 @@ Schedule::command('backup:clean')->dailyAt('04:00')->when(fn () => app()->enviro
 // Horizon (skip si ext-redis absent — shared hosting sans Redis)
 Schedule::command('horizon:snapshot')->everyFiveMinutes()->when(fn () => extension_loaded('redis'));
 
-// Activity log cleanup (30 days)
+// Purge du journal d'activité. La rétention réelle vit dans config/activitylog.php
+// (5 ans), PAS ici : ce commentaire annonçait 30 jours alors que le défaut du paquet,
+// seul appliqué faute de configuration publiée, en imposait 365.
 Schedule::command('activitylog:clean')->weekly();
 
 // Favicon cache refresh (hebdo, rafraîchit domaines expirés — cache DB 30j succès / 7j échec)

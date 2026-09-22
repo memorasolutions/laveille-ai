@@ -123,9 +123,26 @@ if (! function_exists('lv_typo_fr_apply_rules')) {
 
         // 1a) Norme de l'Office québécois de la langue française : une espace INSÉCABLE avant
         //     « : » et « » », en absorbant l'espace ordinaire, insécable ou fine déjà présente.
+        //
+        //     ⚠️ LE DEUX-POINTS N'EST TRAITÉ QUE S'IL EST SUIVI D'UNE ESPACE OU DE LA FIN DU TEXTE.
+        //     Sans cette condition, le quantificateur `*` (zéro espace accepté) s'appliquait à un
+        //     deux-points COLLÉ à son mot, et transformait `https://x` en `https<INSÉCABLE>://x` :
+        //     l'adresse devenait invalide. Mesuré le 2026-09-21 sur directory_tools#1, où le lien
+        //     Markdown `[https://chat.openai.com](https://chat.openai.com)` était cassé deux fois.
+        //     La même condition protège `mailto:`, `tel:` et l'heure numérique `13:52:45`, que
+        //     l'OQLF veut justement collée. C'est la correction À LA SOURCE du ticket #2289, qui
+        //     n'avait reçu qu'une réparation en aval (lv_repare_jonction_schema_url) : partout où
+        //     cette réparation n'était pas appelée, le défaut ressortait intact.
         $text = preg_replace(
-            '/(\S)[ \x{00A0}\x{202F}]*([:»])/u',
-            '$1' . $nbsp . '$2',
+            '/([^\s\x{00A0}\x{202F}])[ \x{00A0}\x{202F}]*:(?=[\s\x{00A0}\x{202F}]|\z)/u',
+            '$1' . $nbsp . ':',
+            $text
+        ) ?? $text;
+
+        //     Le guillemet fermant, lui, n'a pas ce risque : aucun schéma d'URI ne s'en sert.
+        $text = preg_replace(
+            '/([^\s\x{00A0}\x{202F}])[ \x{00A0}\x{202F}]*»/u',
+            '$1' . $nbsp . '»',
             $text
         ) ?? $text;
 

@@ -42,7 +42,7 @@ class TypoApplyFrCommand extends Command
                             {--dry : Show changes without saving}
                             {--table=* : Specific tables to process (default: full curated list)}';
 
-    protected $description = 'Applique la typographie française (NBSP) sur les colonnes texte user-facing — idempotent.';
+    protected $description = 'Applique la typographie québécoise (OQLF) sur les colonnes texte vues par le lecteur - idempotent.';
 
     /**
      * Plan de traitement : table => colonnes texte à normaliser.
@@ -84,7 +84,7 @@ class TypoApplyFrCommand extends Command
         'ads_placements' => ['name'],
         'directory_tools' => ['name', 'short_description', 'description'],
         'dictionary_terms' => ['name', 'definition'],
-        'news_articles' => ['title', 'summary'],
+        'news_articles' => ['title', 'seo_title', 'summary', 'meta_description'],
         'static_pages' => ['title', 'content', 'meta_title', 'meta_description'],
         'faqs' => ['question', 'answer'],
         'testimonials' => ['author_name', 'content'],
@@ -124,8 +124,32 @@ class TypoApplyFrCommand extends Command
             return self::FAILURE;
         }
 
-        $this->info(($dry ? '[DRY] ' : '') . 'Application typographie FR — NBSP avant ? ! : ; » et chiffre+unité');
+        $this->info(($dry ? '[DRY] ' : '') . 'Application typographie québécoise (OQLF) - insécable avant : et », aucune espace avant ; ! ?, chiffre+unité');
         $this->newLine();
+
+        // GARDE-FOU (regle MEMORA : backup + historique AVANT toute ecriture). Le fichier est
+        // ouvert MAINTENANT, avant la premiere ligne modifiee, et chaque valeur d'origine y est
+        // ecrite JUSTE AVANT son update - jamais apres la boucle. Un rattrapage anterieur avait
+        // plante au milieu de sa boucle et sa sauvegarde, placee apres, n'a jamais ete ecrite.
+        // Format JSON Lines : une ligne par colonne modifiee, rejouable telle quelle.
+        $handleSauvegarde = null;
+        $cheminSauvegarde = null;
+        if (! $dry) {
+            $dossier = storage_path('app/typo-apply-fr');
+            if (! is_dir($dossier) && ! @mkdir($dossier, 0775, true) && ! is_dir($dossier)) {
+                $this->error("Impossible de creer {$dossier} : AUCUNE ligne ecrite.");
+
+                return self::FAILURE;
+            }
+            $cheminSauvegarde = $dossier.'/'.now('America/Toronto')->format('Ymd-His').'.jsonl';
+            $handleSauvegarde = @fopen($cheminSauvegarde, 'wb');
+            if ($handleSauvegarde === false) {
+                $this->error("Impossible d'ouvrir la sauvegarde {$cheminSauvegarde} : AUCUNE ligne ecrite.");
+
+                return self::FAILURE;
+            }
+            $this->line("  Sauvegarde de retour arriere : <fg=cyan>{$cheminSauvegarde}</>");
+        }
 
         $totalChanged = 0;
         $totalRows = 0;
@@ -147,7 +171,7 @@ class TypoApplyFrCommand extends Command
             DB::table($table)
                 ->select(array_merge(['id'], $cols))
                 ->orderBy('id')
-                ->chunkById(500, function ($rows) use ($table, $cols, $dry, &$changedInTable, &$rowsInTable): void {
+                ->chunkById(500, function ($rows) use ($table, $cols, $dry, $handleSauvegarde, &$changedInTable, &$rowsInTable): void {
                     foreach ($rows as $row) {
                         $rowsInTable++;
                         $update = [];
@@ -164,6 +188,23 @@ class TypoApplyFrCommand extends Command
                         if (! empty($update)) {
                             $changedInTable++;
                             if (! $dry) {
+                                // La valeur d'origine part sur le disque AVANT la modification.
+                                foreach ($update as $colonne => $apres) {
+                                    $ligne = json_encode([
+                                        'table' => $table,
+                                        'id' => $row->id,
+                                        'colonne' => $colonne,
+                                        'avant' => $row->{$colonne},
+                                        'apres' => $apres,
+                                    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                                    if ($ligne === false || fwrite($handleSauvegarde, $ligne."\n") === false) {
+                                        throw new \RuntimeException(
+                                            'Echec d\'ecriture de la sauvegarde : arret avant modification de '
+                                            .$table.'#'.$row->id
+                                        );
+                                    }
+                                }
+                                fflush($handleSauvegarde);
                                 DB::table($table)->where('id', $row->id)->update($update);
                             }
                         }
@@ -177,6 +218,11 @@ class TypoApplyFrCommand extends Command
 
         $this->newLine();
         $this->info(($dry ? '[DRY] ' : '') . "Total : {$totalChanged} ligne(s) modifiée(s) sur {$totalRows} scannée(s)");
+
+        if ($handleSauvegarde !== null) {
+            fclose($handleSauvegarde);
+            $this->info("Sauvegarde de retour arriere ecrite : {$cheminSauvegarde}");
+        }
 
         if ($dry) {
             $this->comment('Aucune écriture effectuée (--dry). Relancer sans --dry pour appliquer.');

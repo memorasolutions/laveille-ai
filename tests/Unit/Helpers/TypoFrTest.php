@@ -141,14 +141,34 @@ it('gère phrase complexe FR avec multiples règles', function () use ($nbsp): v
     expect($out)->toBe("Loi 25{$nbsp}: sanctions jusqu'à 25{$nbsp}M\$ ou 4{$nbsp}% du CA mondial. Conformité?");
 });
 
-it('ne touche PAS un ratio horaire comme 17:42 (chiffre suivi de :)', function () use ($nbsp): void {
-    // "17:42" — le ":" est précédé d'un chiffre, donc match (\S)([:])
-    // → comportement attendu : NBSP ajouté. C'est correct typographiquement
-    //   mais sémantiquement c'est un format heure. On accepte ce trade-off
-    //   (cas rare en contenu éditorial vs gain énorme sur ponctuation FR).
-    $out = lv_typo_fr('17:42');
-    expect($out)->toBe("17{$nbsp}:42");
+it('ne touche PAS une heure numérique comme 17:42', function (): void {
+    // 2026-09-21 : ce test verrouillait un COMPROMIS ASSUMÉ - « 17:42 » devenait « 17<NBSP>:42 »,
+    // ce que le commentaire d'origine justifiait par « cas rare en contenu éditorial ». Le
+    // compromis n'a plus lieu d'être : depuis le correctif des URL, le deux-points n'est traité
+    // que s'il est SUIVI d'une espace ou de la fin du texte. Une heure reste donc intacte, ce qui
+    // est d'ailleurs la norme de l'OQLF (heure numérique collée : 13:52:45).
+    expect(lv_typo_fr('17:42'))->toBe('17:42');
+    expect(lv_typo_fr('Il est 13:52:45 pile.'))->toBe('Il est 13:52:45 pile.');
 });
+
+it('ne touche PAS une adresse, un courriel ni un lien en TEXTE BRUT', function (string $texte): void {
+    // Les cas HTML (<a href="...">) étaient déjà couverts plus haut. Ceux-ci ne l'étaient PAS,
+    // et c'est exactement là que le défaut du 2026-09-21 mordait : la règle du deux-points
+    // acceptait zéro espace, donc « https://x » devenait « https<NBSP>://x » dans de la prose,
+    // dans du Markdown et dans les descriptions d'outils de l'annuaire. Sans ces cas NÉGATIFS,
+    // rien n'aurait rougi - 54 lignes de l'annuaire allaient être abîmées par un rattrapage.
+    expect(lv_typo_fr($texte))->toBe($texte);
+})->with([
+    'adresse https nue' => ['https://chat.openai.com'],
+    'adresse http nue' => ['http://exemple.ca'],
+    'adresse ftp' => ['ftp://serveur.ca/fichier'],
+    'lien Markdown' => ['[Voir la fiche](https://laveille.ai/glossaire/mcp)'],
+    'deux adresses sur la même ligne' => ['[https://x.ca](https://x.ca)'],
+    'adresse courriel' => ['mailto:info@memora.ca'],
+    'lien téléphonique' => ['tel:+15551234567'],
+    'port dans une adresse' => ['http://127.0.0.1:8000/admin'],
+    'adresse au fil de la prose' => ['Voir https://laveille.ai/actualites pour la suite.'],
+]);
 
 it('macro Str::typoFr est enregistrée et fonctionne identiquement', function (): void {
     expect(\Illuminate\Support\Str::typoFr('conformité?'))->toBe('conformité?');

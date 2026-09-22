@@ -1,5 +1,55 @@
 # Changelog
 
+## [1.294.0] - 2026-09-21
+
+### Corrigé
+- **`lv_typo_fr()` cassait les adresses web, et le rattrapage typographique s'apprêtait à le
+  faire sur des centaines de liens.** La règle qui pose une espace insécable avant « : »
+  utilisait le quantificateur `*`, donc acceptait ZÉRO espace : elle s'appliquait à un
+  deux-points collé à son mot, et transformait `https://x` en `https<INSÉCABLE>://x`. Mesuré sur
+  `directory_tools#1`, où le lien Markdown `[https://chat.openai.com](https://chat.openai.com)`
+  était cassé deux fois. Le deux-points n'est désormais traité que s'il est suivi d'une espace ou
+  de la fin du texte, ce qui protège du même coup `mailto:`, `tel:` et l'heure numérique
+  `13:52:45` - que l'OQLF veut justement collée.
+  **Ce défaut était connu depuis le ticket #2289**, mais n'avait reçu qu'une réparation EN AVAL
+  (`lv_repare_jonction_schema_url`) : partout où cette réparation n'était pas appelée, il
+  ressortait intact. C'est la correction à la source. Sept lignes de `articles.content`
+  portaient déjà la trace du dégât.
+- **La rétention du journal d'activité n'était écrite nulle part, et les deux chiffres en
+  circulation étaient faux.** `routes/console.php` annonçait 30 jours en commentaire ;
+  `config/activitylog.php` n'ayant jamais été publié, la valeur réellement appliquée était le
+  défaut du paquet, 365 jours. La configuration est maintenant dans le dépôt, la rétention
+  portée à 5 ans, et le commentaire dit ce que le code fait. Sans ce correctif, le registre
+  éditorial qu'alimentent 20 modèles depuis février aurait commencé à s'effacer le 15 février
+  2027, silencieusement.
+- **Un compromis assumé depuis des mois est devenu caduc** : `17:42` devenait `17<INSÉCABLE>:42`,
+  ce que le test d'origine justifiait par « cas rare en contenu éditorial vs gain énorme sur
+  ponctuation FR ». Le correctif des URL règle ce cas au passage - une heure numérique reste
+  désormais intacte, ce qui est d'ailleurs la norme de l'OQLF.
+- Un test verrouillait encore l'usage FRANÇAIS (espace insécable avant « ? »), là où la norme
+  québécoise n'en veut aucune. Treizième test aligné sur l'OQLF.
+
+### Ajouté
+- **`typo:apply-fr` traite enfin le titre que le lecteur voit.** Son plan ne couvrait que
+  `news_articles.title` et `.summary` - or le H1 servi est `seo_title ?? title`. La commande
+  corrigeait donc le champ invisible et laissait le champ visible fautif. `seo_title` et
+  `meta_description` sont ajoutés au plan.
+- **Sauvegarde de retour arrière écrite AVANT la première modification**, en JSON Lines dans
+  `storage/app/typo-apply-fr/`, avec arrêt immédiat si elle échoue. Un rattrapage antérieur avait
+  planté au milieu de sa boucle et sa sauvegarde, placée après, n'avait jamais été écrite.
+- **9 cas NÉGATIFS** ajoutés à `tests/Unit/Helpers/TypoFrTest.php` - ce qui ne doit PAS changer :
+  adresse https/http/ftp nue, lien Markdown, deux adresses sur une ligne, `mailto:`, `tel:`, port,
+  adresse au fil de la prose. Les tests existants couvraient les URL **dans du HTML**
+  (`<a href="...">`), jamais en texte brut - précisément là où le défaut mordait. Preuve
+  rouge-vert faite : ces 9 cas rougissent tous sur l'ancienne version du helper.
+  `tests/Unit/Helpers/` : 61 tests, 110 assertions, tous verts.
+
+### Retiré
+- `public/images/tools/generateur-mots-passe.bak.jpg`, résidu du 22 mars 2026 versionné par
+  erreur avant que `.gitignore` ne porte ses règles `*.bak`. Servi en 200 depuis six mois,
+  référencé nulle part. L'image d'origine n'est pas touchée et git conserve l'historique.
+
+
 ## [1.293.3] - 2026-09-21
 
 ### Corrigé

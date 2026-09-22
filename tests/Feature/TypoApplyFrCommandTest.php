@@ -93,6 +93,6 @@ test('typo:apply-fr applies NBSP and writes only when not in dry mode', function
         ->assertExitCode(0);
 
     $row = DB::table('faqs')->where('id', $id)->first();
-    expect($row->question)->toBe("Combien coûte\u{00A0}: le service\u{00A0}?");
+    expect($row->question)->toBe("Combien coûte\u{00A0}: le service?");
     expect($row->answer)->toBe("Environ 25\u{00A0}% du temps standard.");
 });
