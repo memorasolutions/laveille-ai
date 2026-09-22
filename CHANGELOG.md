@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.294.3] - 2026-09-22
+
+### Ajouté
+- **Un verrou de COMPORTEMENT sur la migration de retrait de l'affirmation Loi 25.** Une deuxième
+  passe adversariale a montré que le seul test livré la veille regardait le CONTENU de trois
+  fichiers source, jamais le comportement de la migration : une recherche du nom de cette
+  migration dans les dossiers de tests ne renvoyait rien. Un commit ultérieur pouvait donc casser
+  la sélection par `LIKE`, la comparaison de slug ou la double représentation JSON sans que rien
+  ne rougisse. Cinq cas sont désormais figés : slug traduisible (le piège d'origine, verrouillé
+  par une assertion qui exige qu'un `where()` sur slug nu reste introuvable), fiche voisine dont
+  le slug contient le motif sans être la bonne, préservation mot pour mot d'une réécriture
+  éditoriale, idempotence et réversibilité, et enfin base sans la ligne visée - où la migration
+  doit passer sans bruit plutôt que bloquer un déploiement entier.
+
+### Vérifié EN PRODUCTION, après déploiement de la v1.294.2
+La même passe adversariale a relevé que toutes les preuves citées la veille avaient été obtenues
+AVANT le déploiement - exactement le schéma qui avait produit l'échec silencieux de la v1.294.1,
+déployée et déclarée réussie alors que la page servait toujours le texte fautif. La vérification
+post-déploiement avait bien été faite, mais elle n'était écrite nulle part. Elle l'est ici :
+- `/outils/anonymiseur`, `/outils` et `/glossaire/anonymisation` : **zéro occurrence** d'une
+  affirmation de conformité, recherchée sur toutes ses formes, accents et casse indifférents.
+- Le texte réellement servi le confirme, et il ne s'agit pas d'une page vide : le JSON-LD de la
+  page de l'outil porte « Le remplacement est RÉVERSIBLE par conception : c'est une
+  pseudonymisation, pas une anonymisation au sens de la Loi 25 », et la réponse de FAQ du
+  glossaire « un outil d'anonymisation local, qui applique exactement ce remplacement réversible ».
+- La réécriture éditoriale de la description, faite à la main dans l'écran d'administration, est
+  préservée mot pour mot.
+- Version servie : 1.294.2.
+- Les trois pages qui affirment légitimement une conformité sont intactes : la fiche
+  « pseudonymisation », la page d'accueil et la fiche « RGPD ».
+
 ## [1.294.2] - 2026-09-22
 
 ### Corrigé
