@@ -1,5 +1,66 @@
 # Changelog
 
+## [1.294.2] - 2026-09-22
+
+### Corrigé
+- **Le correctif de la v1.294.1 n'avait rien corrigé du tout, et rien ne l'avait signalé.**
+  La migration livrée la veille ne remplaçait la description de l'anonymiseur que si elle valait
+  EXACTEMENT le texte du seeder d'origine. C'était une garde volontaire, pour ne pas écraser une
+  réécriture faite à la main dans l'écran d'administration. Or la description de production avait
+  justement été réécrite à la main, et la base locale en portait une troisième variante : la garde
+  a donc bloqué le correctif dans les deux bases, sans lever la moindre erreur, pendant que le
+  déploiement était déclaré réussi. La mesure sur le site servi, et non sur le code, a montré que
+  la page affichait toujours « Conforme à la Loi 25 et au RGPD ».
+- **Le vrai périmètre n'était pas celui qu'on croyait : sept occurrences, mais seulement deux
+  données.** La description de l'outil est servie cinq fois (méta description, og:description,
+  JSON-LD de la page, et le JSON de la liste des outils), et la réponse de FAQ de la fiche de
+  glossaire « anonymisation » deux fois (HTML et JSON-LD FAQPage). Cette réponse-là se
+  contredisait dans la même phrase : elle expliquait que remplacer un nom relève de la
+  pseudonymisation, « pas de l'anonymisation - la clé de correspondance reste chez vous », puis
+  concluait en recommandant « un outil d'anonymisation conforme à la Loi 25 ».
+- **Trois autres pages affirment une conformité et n'ont PAS été touchées**, parce que leur
+  affirmation est exacte : la fiche « pseudonymisation » donne un conseil général sur la façon de
+  conserver une clé de correspondance, la page d'accueil présente la conformité Loi 25 comme un
+  THÈME éditorial du site, et la fiche « RGPD » explique le droit. Corriger par motif sans
+  regarder le sens les aurait dégradées toutes les trois.
+
+### Technique
+- La correction porte désormais sur la seule clause fautive, remplacée dans la chaîne brute plutôt
+  que par comparaison du texte entier : une réécriture éditoriale est préservée mot pour mot, et
+  la migration reste sans effet là où la clause n'existe pas, donc rejouable sans surprise.
+- Le remplacement cherche les DEUX représentations possibles d'un même texte. Mesure du jour : la
+  colonne `faq` ne contient aucun accent littéral, tout y est stocké en séquences d'échappement
+  (`\u00e9`). Un motif accentué n'y trouve rien - une réécriture par `REPLACE()` SQL aurait donc
+  échoué en silence exactement comme la précédente, pour une raison différente.
+- Deux témoins ont été exercés avant tout déploiement : un cycle `up()`/`down()` complet sur le
+  texte réel de production, et une vérification du mécanisme d'échappement sur du JSON réellement
+  stocké en base - motif littéral introuvable, motif échappé trouvé, JSON toujours valide, aucun
+  autre octet déplacé.
+
+### Ce qu'une passe adversariale a trouvé APRÈS coup, et qui change la portée du correctif
+- **Le correctif reproduisait le défaut qu'il corrigeait.** La moitié « glossaire » de la migration
+  faisait `where('slug', 'anonymisation')` sur `dictionary_terms`. Or ce slug est traduisible : il
+  contient `{"fr_CA":"anonymisation","fr":"anonymisation"}`, jamais la chaîne nue. C'était donc un
+  troisième no-op garanti, et la preuve traînait dans mon propre script de vérification, qui
+  décodait déjà ce slug en JSON sans que j'en tire la conséquence.
+- **La première correction de ce défaut aurait bloqué TOUS les déploiements.** Elle passait par
+  `JSON_UNQUOTE(JSON_EXTRACT(...))`, comme le fait le seeder du glossaire. Mais les tests et la CI
+  tournent sur SQLite, qui ne connaît pas `JSON_UNQUOTE` (« no such function », mesuré). Comme
+  `RefreshDatabase` rejoue toutes les migrations à chaque test, la suite entière aurait échoué.
+  La sélection ne fait donc plus aucun filtrage JSON côté SQL : elle ramène les candidats par un
+  `LIKE`, identique sur les deux moteurs, et tranche en PHP sur la valeur décodée.
+- **Le test livré ne s'exécutait pas du tout.** Il lui manquait `uses(TestCase::class)`, et le
+  dossier `Modules/Tools/tests/Feature` n'est pas couvert par `tests/Pest.php` : l'application
+  n'était jamais démarrée et `base_path()` échouait. Un verrou qui ne tourne pas vaut exactement un
+  verrou absent.
+- **Et son motif accusait du contenu exact.** Il attrapait « conformément à la Loi 25 », un conseil
+  pédagogique juste, présent dans le même seeder pour le terme « pseudonymisation ». Le motif
+  distingue désormais l'affirmation d'état (« conforme », « conformité ») de l'adverbe de manière,
+  et un témoin fige les trois formulations légitimes réellement présentes dans les fichiers - des
+  verbatim extraits du fichier, jamais retapés : la première version de ce témoin paraphrasait la
+  ligne 79 en lui ajoutant une fin inventée, qui était elle-même fautive. Le test a refusé la
+  paraphrase, et il avait raison.
+
 ## [1.294.1] - 2026-09-22
 
 ### Corrigé
