@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.294.1] - 2026-09-22
+
+### Corrigé
+- **L'anonymiseur affirmait « conforme Loi 25 et RGPD », et la page se contredisait elle-même.**
+  Cinq endroits portaient cette affirmation - la méta description, la description JSON-LD, la
+  liste de fonctionnalités JSON-LD et deux libellés de liens dans l'accordéon - pendant que la
+  même page déclarait, dans son JSON-LD, une « pseudonymisation RÉVERSIBLE avec table de
+  correspondance locale ». Or le glossaire de ce site rappelle que la pseudonymisation reste un
+  renseignement personnel, donc soumise à la Loi 25, contrairement à l'anonymisation, qui est
+  irréversible. Un visiteur pouvait donc croire que ses données sortaient du champ de la loi en
+  passant par l'outil. Elles n'en sortent pas.
+
+  L'affirmation de conformité est retirée partout. Elle est remplacée par ce qui est VRAI et qui
+  reste le vrai argument de l'outil : l'IA ne voit jamais les vraies données, et le remplacement
+  est réversible par conception. Les liens vers les fiches « Loi 25 » et « RGPD » du glossaire
+  sont conservés : seul le mot « Conforme » disparaît.
+
+- **La description en base de données est corrigée par une migration réversible**, parce qu'un
+  seeder ne se rejoue pas en production : sans elle, le code aurait été juste et la page aurait
+  continué d'afficher l'ancien texte. La migration ne touche que les lignes encore porteuses du
+  texte d'origine, pour ne pas écraser une description retouchée à la main.
+
+### Ajouté
+- **Les carrousels PDF sont désormais versionnés** dans `public/carrousels/`. Le carrousel de
+  l'anonymiseur y entre et part en production ; `plan-de-cours.pdf`, qui accompagne une
+  publication LinkedIn DÉJÀ parue, est rapatrié depuis le serveur et versionné à son tour
+  (empreintes vérifiées identiques). Ces fichiers ne tenaient jusqu'ici qu'à un dépôt manuel sur
+  le serveur : un carrousel perdu aurait vidé une publication déjà publiée.
+
 ## [1.294.0] - 2026-09-21
 
 ### Corrigé

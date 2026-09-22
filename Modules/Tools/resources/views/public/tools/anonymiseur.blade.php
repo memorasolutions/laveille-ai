@@ -5,7 +5,7 @@
 
 @php $shareData = $tool->getShareData(); @endphp
 @section('title', $tool->name . ' - ' . config('app.name'))
-@section('meta_description', $shareData['meta_description'] ?? 'Anonymisez vos textes avant de les envoyer à une IA, puis restaurez vos vraies données dans la réponse. 100 % local, conforme Loi 25 et RGPD.')
+@section('meta_description', $shareData['meta_description'] ?? 'Anonymisez vos textes avant de les envoyer à une IA, puis restaurez vos vraies données dans la réponse. 100 % local : l’IA ne voit jamais vos vraies données.')
 @section('og_type', $shareData['og_type'] ?? 'website')
 @section('og_image', $shareData['og_image'] ?? '')
 @section('share_text', $shareData['share_text'] ?? '')
@@ -23,7 +23,7 @@
         '@type' => 'SoftwareApplication',
         'name' => 'Anonymiseur de texte',
         'alternateName' => ['Anonymisation de prompts', 'Pseudonymisation client-side', 'Anonymizer La veille de Stef'],
-        'description' => "Outil 100 % local qui anonymise les données personnelles (noms, adresses, courriels, téléphones, dates, montants, numéros de dossier) avant l'envoi à une IA, puis restaure les vraies données dans la réponse reformulée. Conforme Loi 25 (Québec) et RGPD. Aucune donnée ne quitte votre navigateur.",
+        'description' => "Outil 100 % local qui anonymise les données personnelles (noms, adresses, courriels, téléphones, dates, montants, numéros de dossier) avant l'envoi à une IA, puis restaure les vraies données dans la réponse reformulée. Aucune donnée ne quitte votre navigateur. Le remplacement est RÉVERSIBLE par conception : c'est une pseudonymisation, pas une anonymisation au sens de la Loi 25.",
         'applicationCategory' => ['SecurityApplication', 'BusinessApplication'],
         'operatingSystem' => 'Web',
         'url' => url('/outils/anonymiseur'),
@@ -33,7 +33,7 @@
             'Détection automatique des données sensibles (regex québécoise)',
             'Pseudonymisation réversible avec table de correspondance locale',
             'Restauration des réponses IA reformulées (insensible casse/accents)',
-            'Conforme Loi 25 + RGPD',
+            'Aucune donnée personnelle envoyée vers une IA externe',
         ],
         'softwareVersion' => '2.0',
         // ACTION : now() prétendait que la page venait d'être modifiée à CHAQUE chargement -
@@ -78,8 +78,8 @@
                                 <p style="margin:0 0 .5rem;">{{ __('Votre texte, les règles et les correspondances vraie ↔ fictive restent sur votre appareil. Rien n\'est transmis : seul le texte déjà anonymisé sort, et uniquement si VOUS le copiez vers une IA externe.') }}</p>
                                 <p style="margin:0 0 .5rem;font-size:.88rem;color:#52586a;">{{ __('💾 Votre texte ET les correspondances sont enregistrés dans CE navigateur (jamais sur un serveur) pour les retrouver à votre retour – jusqu\'à « Réinitialiser » ou « Oublier mes données » (menu ⋯ Actions). Sur un poste partagé, effacez avant de partir.') }}</p>
                                 <p style="margin:0;font-size:.88rem;color:#52586a;">
-                                    <a href="/glossaire/loi-25" target="_blank" rel="noopener">{{ __('Conforme Loi 25') }}</a> ·
-                                    <a href="/glossaire/rgpd" target="_blank" rel="noopener">{{ __('Conforme RGPD') }}</a> ·
+                                    <a href="/glossaire/loi-25" target="_blank" rel="noopener">{{ __('Loi 25') }}</a> ·
+                                    <a href="/glossaire/rgpd" target="_blank" rel="noopener">{{ __('RGPD') }}</a> ·
                                     <a href="/glossaire/anonymisation" target="_blank" rel="noopener">{{ __('Comprendre l\'anonymisation') }}</a>
                                 </p>
                                 <div style="margin-top:.85rem;">
