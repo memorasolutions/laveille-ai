@@ -8,7 +8,7 @@ Ce projet est versionné dans le **github maison** (Forgejo local sur le Pi) ET 
 - **`origin` = GitHub** (`https://github.com/memorasolutions/laveille-ai.git`) - **c'est lui qui DÉCLENCHE la CI GitHub Actions et le déploiement en prod**. Le déploiement PASSE par `git push origin master`.
 - **`forge` = Forgejo Pi** (`http://100.66.177.50:3000/laveille/la-veille-de-stef-v2.git`) - miroir/backup local, aucune CI.
 
-**Règle de push pour CE projet** : pousser vers les DEUX à chaque livraison : `git push origin master` (CI + déploiement) PUIS `git push forge master` (miroir). Ne jamais mettre Forgejo en `origin` ici (casserait la CI). Le MCP `github-maison` (gm_push --remote=forge) sert pour le miroir ; `gm_whereami` en cas de doute.
+**Règle de push pour CE projet** : pousser vers les DEUX à chaque livraison : `git push origin master` (CI + déploiement) PUIS `git push forge master` (miroir). Ne jamais mettre Forgejo en `origin` ici (casserait la CI). Le MCP `github-maison` (gm_push --remote=forge) sert pour le miroir; `gm_whereami` en cas de doute.
 <!-- github-maison:end -->
 
 <!-- constructeur-prompts:frontiere-gabarits -->
@@ -51,7 +51,7 @@ seulement que le jeton ne porte pas le droit.
 ### Deux pièges de LECTURE, mesurés, qui induisent en erreur
 
 1. **Les suppressions douces rendent un enregistrement INVISIBLE alors qu'il existe.** Le
-   2026-09-13, l'API annonçait un seul compte LinkedIn ; il y en avait deux, celui de laveille.ai
+   2026-09-13, l'API annonçait un seul compte LinkedIn; il y en avait deux, celui de laveille.ai
    étant supprimé en douceur depuis le 20 mai. Sur cette lecture, une publication cliente a été
    retirée d'un lot à tort. **Ne jamais conclure « ça n'existe pas »** sur la seule réponse de
    l'API : dire « l'API ne m'en montre aucun », ce qui est différent.
@@ -112,7 +112,7 @@ médias communs pour ce réseau, il ne s'y ajoute pas.
 > appelle un carrousel dans un fil organique est un DOCUMENT feuilletable. Chez LinkedIn, le mot
 > « carousel » désigne autre chose, réservé aux publications commanditées, et la Posts API ne le
 > propose pas en organique. Formats acceptés pour un document : PDF, PPT, PPTX, DOC, DOCX, jusqu'à
-> 300 pages ; le portail n'accepte que le PDF pour l'instant.
+> 300 pages; le portail n'accepte que le PDF pour l'instant.
 >
 > **Voie de rechange qui a toujours fonctionné** : le téléversement d'un PDF depuis l'écran admin
 > du portail pose correctement le type `document`, parce qu'il lit le vrai type MIME du fichier.
@@ -121,18 +121,30 @@ médias communs pour ce réseau, il ne s'y ajoute pas.
 > **Historique de cette question, qui a basculé QUATRE fois** : « le portail ne dépose pas de PDF »
 > (2026-09-13), puis « FAUX, il le fait, vérifié dans le code » (2026-09-14, conclusion tirée de la
 > LECTURE du code), puis « il refuse, mesuré par un appel réel » (2026-09-19), puis « corrigé, et
-> la cause n'était pas celle qu'on croyait » (2026-09-20). **Lire le code dit ce qu'il PEUT faire ;
+> la cause n'était pas celle qu'on croyait » (2026-09-20). **Lire le code dit ce qu'il PEUT faire;
 > l'appeler dit ce qu'il FAIT.** Quand les deux divergent, c'est l'appel qui tranche - et quand
 > l'appel échoue, la cause peut encore être ailleurs que là où l'erreur s'affiche.
 
 ### Paramètres qui coûtent cher quand on les rate
 
 - **`scheduled_at` doit porter le décalage horaire** : `2026-10-12T09:00:00-04:00`. Le portail
-  stocke en UTC ; sans fuseau, la publication part 4 ou 5 heures à côté. Québec = -04:00 de mars à
+  stocke en UTC; sans fuseau, la publication part 4 ou 5 heures à côté. Québec = -04:00 de mars à
   novembre, -05:00 le reste de l'année.
 - **`first_comment` est UNIQUE pour toute la publication**, jamais par réseau (non implémenté
-  côté serveur). Il n'est posté que sur Facebook et LinkedIn ; **Google Business n'a pas de
+  côté serveur). Il n'est posté que sur Facebook et LinkedIn; **Google Business n'a pas de
   commentaires**, donc pour ce réseau les coordonnées vont dans le texte.
+
+  **CONSÉQUENCE, et elle décide du NOMBRE de publications à créer** (mesurée le 2026-09-21 en
+  simulant, puis retrouvée le 2026-09-22 sur une publication déjà programmée) : grouper les deux
+  réseaux dans un seul enregistrement enverrait le premier commentaire AUSSI sur LinkedIn, contre
+  la décision du 2026-09-11. Donc :
+  - **aucun premier commentaire dans la publication?** Un seul enregistrement peut viser les deux
+    réseaux, `social_account_content` servant à différencier les textes;
+  - **un premier commentaire est nécessaire, donc un lien sur Facebook?** **DEUX publications
+    séparées, obligatoirement.**
+
+  Ne jamais lire « les deux comptes sont sous la même entreprise, donc une seule publication
+  suffit » comme une permission de grouper : c'est vrai côté serveur et faux éditorialement.
 - **`media_urls` doivent être DIRECTES.** Une adresse qui redirige **échoue en silence** et la
   publication est créée sans image. Vérifier `download_error` avec `get_social_publication`.
 - **`social_account_content`** donne un texte différent par réseau. Tout identifiant y figurant
