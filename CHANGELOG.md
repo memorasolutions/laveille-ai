@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.295.0] - 2026-09-23
+
+### Ajouté
+- **Un statut de cycle de vie « Accès privé » dans le répertoire.** Il manquait, et son absence
+  produisait une affirmation fausse sur une fiche publique : celle de Headroom annonçait « Cette
+  plateforme a fermé ses portes. » alors que le service n'a jamais fermé - il répond 401 avec
+  « walls.sh is private », donc il est devenu privé. La note portée juste en dessous disait déjà
+  le contraire du bandeau : la fiche se contredisait elle-même.
+- **Le code savait déjà, c'est l'affichage qui n'avait pas les mots.** `CheckLinksCommand` classe
+  les codes 401, 402, 403 et 503 comme AMBIGUS et les exclut explicitement de DISPARU, réservé aux
+  404 et 410. Son commentaire cite même littéralement « walls.sh is private » comme exemple à ne
+  pas confondre avec un arrêt. Mais aucun des huit statuts affichables n'était juste : « en pause »
+  annonce un retour promis nulle part, « plus en ligne » et « arnaque » affirment une disparition
+  qui n'a pas eu lieu, et « actif » ferait disparaître le signal. La personne qui a classé cette
+  fiche a choisi la case la moins fausse ; le défaut était l'absence de case juste.
+- Message affiché : « Cet outil n'est plus accessible au public. » Il décrit ce que vit le
+  visiteur, sans affirmer une fermeture.
+
+### Technique
+- Le statut est volontairement NEUTRE : il n'entre ni dans les statuts actifs (l'accès public est
+  refusé) ni dans les statuts « hors service » au sens fermeture ou arnaque (le service existe
+  toujours et quelqu'un y accède). Même traitement que « acquis », « renommé » et « pivoté ».
+- **Aucune migration** : la colonne est un `VARCHAR(20)` libre, pas une énumération SQL.
+- L'icône est un cadenas plutôt que le sablier de « en pause » : deux statuts de sens différents ne
+  doivent pas porter le même glyphe, sinon seule la couleur les sépare et une personne daltonienne
+  n'en voit plus qu'un. Ce nom d'icône n'a eu besoin d'être ajouté à AUCUNE des deux tables de
+  traduction existantes - leur repli laisse passer tel quel un nom identique entre les deux
+  versions de la police, ce qui évite d'aggraver une duplication déjà connue.
+- Le test qui verrouille les messages de bandeau couvre désormais sept statuts au lieu de six.
+
 ## [1.294.3] - 2026-09-22
 
 ### Ajouté

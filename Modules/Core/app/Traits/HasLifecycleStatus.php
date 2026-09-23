@@ -17,6 +17,24 @@ trait HasLifecycleStatus
     public const STATUS_PAUSED = 'paused';
     public const STATUS_SCAM = 'scam';
 
+    /**
+     * Statut ajouté pour corriger un cas réel mesuré sur la fiche Headroom : elle affichait
+     * « Cette plateforme a fermé ses portes. » alors que le service n'a jamais fermé - il répond
+     * 401 avec le message « walls.sh is private », donc il est devenu PRIVÉ (accès restreint),
+     * pas disparu. Modules/Directory/app/Console/CheckLinksCommand.php classait déjà ce cas
+     * correctement en code : ses constantes AMBIGUS (401, 402, 403, 503) excluent explicitement
+     * ces codes de DISPARU (réservé aux 404/410), et son commentaire cite littéralement
+     * « walls.sh is private » comme exemple à ne pas confondre avec un arrêt. Le vocabulaire
+     * manquait seulement côté AFFICHAGE : aucun des 8 statuts existants n'était juste ('paused'
+     * annonce un retour promis nulle part, 'closed'/'scam' affirment une disparition qui n'a pas
+     * eu lieu, 'active' ferait disparaître le signal). 'private' comble ce trou précis.
+     * Classement (voir getIsLifecycleActiveAttribute() et getIsLifecycleDownAttribute()
+     * ci-dessous) : 'private' n'apparaît dans AUCUNE des deux listes, donc ni actif (l'accès
+     * public est refusé) ni « down » au sens fermeture/arnaque (le service existe toujours,
+     * quelqu'un y accède) - même traitement neutre que acquired/renamed/pivoted/paused.
+     */
+    public const STATUS_PRIVATE = 'private';
+
     public static function lifecycleStatuses(): array
     {
         return [
@@ -36,6 +54,19 @@ trait HasLifecycleStatus
                 'label' => 'En pause',
                 'color' => '#f59e0b',
                 'icon' => 'fa-pause-circle',
+                'severity' => 3,
+            ],
+            // Icône 'fa-lock' plutôt que le 'fa-pause-circle' de 'paused' : deux statuts qui
+            // veulent dire des choses différentes ne doivent pas porter le même glyphe, sinon
+            // seule la couleur les distingue et un daltonien ne voit plus qu'un seul statut.
+            // Ce nom n'a PAS besoin d'être ajouté à lifecycleIconMap() ni à sa copie de
+            // lifecycle-badge.blade.php : cette table traduit FA6 vers FA4, et son repli
+            // (`$iconMap[$rawIcon] ?? $rawIcon`) laisse passer tel quel tout nom identique dans
+            // les deux versions - ce qui est le cas de 'fa-lock'. Aucune duplication aggravée.
+            self::STATUS_PRIVATE => [
+                'label' => 'Accès privé',
+                'color' => '#64748b',
+                'icon' => 'fa-lock',
                 'severity' => 3,
             ],
             self::STATUS_RENAMED => [
@@ -128,6 +159,7 @@ trait HasLifecycleStatus
             self::STATUS_RENAMED => 'Cette plateforme a été renommée.',
             self::STATUS_PIVOTED => 'Cette plateforme a pivoté vers un nouveau positionnement.',
             self::STATUS_PAUSED => 'Cette plateforme est temporairement en pause.',
+            self::STATUS_PRIVATE => "Cet outil n'est plus accessible au public.",
             self::STATUS_SCAM => '⚠️ Cette plateforme est signalée comme arnaque – évitez-la.',
             self::STATUS_BETA => 'Cette plateforme est en phase bêta – fonctionnalités en développement.',
             default => 'Statut : ' . $this->lifecycle_label,

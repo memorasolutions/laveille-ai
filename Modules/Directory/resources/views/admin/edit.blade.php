@@ -103,6 +103,7 @@
                             <option value="active" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'active' ? 'selected' : '' }}>Actif</option>
                             <option value="beta" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'beta' ? 'selected' : '' }}>Bêta</option>
                             <option value="paused" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'paused' ? 'selected' : '' }}>En pause</option>
+                            <option value="private" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'private' ? 'selected' : '' }}>Accès privé</option>
                             <option value="renamed" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'renamed' ? 'selected' : '' }}>Renommé</option>
                             <option value="pivoted" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'pivoted' ? 'selected' : '' }}>Pivoté</option>
                             <option value="acquired" {{ old('lifecycle_status', $tool->lifecycle_status ?? 'active') === 'acquired' ? 'selected' : '' }}>Acquis</option>

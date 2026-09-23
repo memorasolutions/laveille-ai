@@ -20,9 +20,11 @@ declare(strict_types=1);
  * Statuts couverts - CORRECTIF au périmètre demandé : le brief d'origine parlait de « 7 statuts
  * non actifs », mais is_lifecycle_active (HasLifecycleStatus::getIsLifecycleActiveAttribute())
  * classe 'beta' comme ACTIF (avec 'active') - le bandeau ne s'affiche donc JAMAIS pour 'beta'
- * (@if(! $tool->is_lifecycle_active) dans lifecycle-banner.blade.php). Il n'y a que 6 statuts
+ * (@if(! $tool->is_lifecycle_active) dans lifecycle-banner.blade.php). Il n'y a que 7 statuts
  * réellement non actifs, et ce sont les seuls qu'un test de RENDU peut exercer : closed, acquired,
- * renamed, pivoted, paused, scam. 'beta' garde son texte dans l'accesseur (fidélité au composant
+ * renamed, pivoted, paused, private, scam ('private' ajouté le 2026-09-23 - accès restreint,
+ * ex. réponse 401 « walls.sh is private », voir le docblock de STATUS_PRIVATE dans
+ * HasLifecycleStatus.php). 'beta' garde son texte dans l'accesseur (fidélité au composant
  * d'origine) mais reste du code mort, inatteignable via le bandeau - inchangé par ce correctif.
  */
 
@@ -77,7 +79,7 @@ function extraireTexteBandeauLifecycle(string $html): string
     return trim(preg_replace('/\s+/', ' ', $noeuds->first()->text()));
 }
 
-$statutsNonActifs = ['closed', 'acquired', 'renamed', 'pivoted', 'paused', 'scam'];
+$statutsNonActifs = ['closed', 'acquired', 'renamed', 'pivoted', 'paused', 'private', 'scam'];
 
 foreach ($statutsNonActifs as $statut) {
     test("la fiche du statut lifecycle '{$statut}' affiche exactement le message de l'accesseur du modele", function () use ($statut) {

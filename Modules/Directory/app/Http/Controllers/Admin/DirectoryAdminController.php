@@ -147,7 +147,7 @@ class DirectoryAdminController extends Controller
             'featured_until' => 'nullable|date',
             'featured_order' => 'nullable|integer|min:0',
             'sort_order' => 'nullable|integer',
-            'lifecycle_status' => 'nullable|in:active,beta,closed,acquired,renamed,pivoted,paused,scam',
+            'lifecycle_status' => 'nullable|in:active,beta,closed,acquired,renamed,pivoted,paused,private,scam',
             'lifecycle_date' => 'nullable|date',
             'lifecycle_replacement_url' => 'nullable|url|max:500',
             'lifecycle_replacement_tool_id' => 'nullable|integer|exists:directory_tools,id',
