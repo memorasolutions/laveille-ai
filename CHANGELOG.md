@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.296.0] - 2026-09-23
+
+### Ajouté
+- **Un contrôle qui détecte les fiches dont le statut affiché contredit le dernier code HTTP
+  mesuré** : `directory:check-lifecycle-consistency`. Il vient d'un défaut réel trouvé la veille,
+  et surtout de la façon dont il a été trouvé - par hasard, en préparant une publication. Une
+  fiche annonçait « Cette plateforme a fermé ses portes. » alors que le service répondait 401 et
+  était seulement devenu privé.
+- **La matière existait déjà, personne ne la croisait.** `directory:check-links` écrit depuis des
+  mois `url_last_status`, `url_last_note` et `url_failure_streak` sur chaque fiche, et classe les
+  codes HTTP en familles - AMBIGUS pour 401, 402, 403 et 503, DISPARU pour 404 et 410. Son
+  commentaire cite même nommément le cas qui a déclenché tout ceci. Mais rien ne comparait ce
+  classement au statut RÉELLEMENT affiché au visiteur. C'est ce croisement qui aurait trouvé le
+  défaut sans intervention humaine.
+
+### Détail
+- Trois contradictions signalées : un statut « plus en ligne » alors que le code est ambigu (le
+  service est protégé ou inaccessible, pas disparu) ; un statut « actif » alors que le code dit
+  disparu ET que l'échec dure depuis au moins trois contrôles ; et le sens inverse, un « accès
+  privé » dont le dernier contrôle a reçu un succès plein, signe que l'accès a peut-être rouvert.
+- **Lecture seule, volontairement.** La commande signale, elle ne corrige rien : reclasser une
+  fiche est une décision éditoriale, et ça ne s'automatise pas. Un cas ambigu demande un oeil
+  humain, c'est précisément la leçon du défaut d'origine.
+- Le cas « rien à signaler » sort une ligne explicite. Un contrôle silencieux quand tout va bien
+  est indiscernable d'un contrôle qui n'a jamais tourné - défaut déjà payé sur ce projet.
+- Les familles de codes HTTP sont RÉUTILISÉES depuis `directory:check-links`, jamais redéfinies :
+  une seule source de vérité sur ce qu'un code veut dire ici. Leur visibilité a été élargie, seul
+  changement apporté à ce fichier.
+- La commande n'est PAS planifiée : elle s'exécute à la demande. Une option permet de la faire
+  échouer en présence d'une contradiction, pour un usage futur en surveillance.
+- 10 tests couvrent les trois contradictions, un cas sain, une fiche jamais contrôlée, le seuil
+  d'échec durable et sa contre-épreuve, et une preuve qu'aucun statut n'est jamais modifié.
+
 ## [1.295.0] - 2026-09-23
 
 ### Ajouté

@@ -20,15 +20,22 @@ class CheckLinksCommand extends Command
     /**
      * Codes qui signifient vraiment « la ressource n'existe plus ». C'est la SEULE famille
      * qui justifie une mise en quarantaine.
+     *
+     * Visibilité PUBLIC (et non private) depuis directory:check-lifecycle-consistency : cette
+     * commande compare le lifecycle_status affiché sur une fiche au dernier code HTTP mesuré ici
+     * et RÉUTILISE ce classement plutôt que de le redéfinir - une seule source de vérité sur ce
+     * qu'un code HTTP veut dire pour ce projet (règle DRY, CLAUDE.md).
      */
-    private const DISPARU = [404, 410];
+    public const DISPARU = [404, 410];
 
     /**
      * Codes ambigus où un simple code HTTP ne suffit pas à distinguer un vrai arrêt d'un
      * pare-feu, d'un mur de paiement ou d'un service en train de démarrer. On y conserve un
      * extrait court du corps (voir extractBodyNote()) pour qu'un humain tranche.
+     *
+     * Visibilité PUBLIC : voir le commentaire de DISPARU ci-dessus, même raison.
      */
-    private const AMBIGUS = [401, 402, 403, 503];
+    public const AMBIGUS = [401, 402, 403, 503];
 
     /**
      * Pause entre deux fiches consécutives, pour éviter de déclencher une limitation de débit
