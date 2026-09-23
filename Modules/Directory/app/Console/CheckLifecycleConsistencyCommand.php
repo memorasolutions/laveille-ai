@@ -22,7 +22,7 @@ use Modules\Directory\Models\Tool;
  *
  * RÉUTILISE les constantes DISPARU et AMBIGUS de CheckLinksCommand (rendues publiques pour
  * l'occasion) plutôt que de les redéfinir : DRY, et surtout, une seule source de vérité sur ce
- * qu'un code HTTP veut dire pour ce projet - CLAUDE.md l'exige explicitement pour une
+ * qu'un code HTTP veut dire pour ce projet - les regles du projet l'exigent pour une
  * connaissance métier comme celle-ci.
  *
  * Portée : Tool::published() uniquement, comme HealthCheckReportCommand - c'est le statut

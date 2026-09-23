@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.296.1] - 2026-09-23
+
+### Corrigé
+- **Deux commentaires de code nommaient le fichier de règles du projet**, ce que la règle
+  d'attribution interdit : tout ce qui est versionné porte la signature MEMORA solutions, et rien
+  dans le code ne doit désigner l'outil qui a servi à l'écrire. Les deux commentaires disent
+  maintenant « les règles du projet » sans citer de nom de fichier. Aucun changement de
+  comportement.
+- **Ce qui a laissé passer le défaut mérite d'être noté, plus que le défaut lui-même** : le
+  contrôle automatique avait bien compté deux occurrences et l'avait AFFICHÉ juste avant le
+  commit. Personne ne l'a lu. Un contrôle dont la sortie n'est pas regardée ne vaut pas mieux
+  qu'un contrôle absent - c'est exactement le motif corrigé la veille pour les migrations, où un
+  `DONE` affiché tenait lieu de preuve.
+
 ## [1.296.0] - 2026-09-23
 
 ### Ajouté

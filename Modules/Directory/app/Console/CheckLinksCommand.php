@@ -24,7 +24,7 @@ class CheckLinksCommand extends Command
      * Visibilité PUBLIC (et non private) depuis directory:check-lifecycle-consistency : cette
      * commande compare le lifecycle_status affiché sur une fiche au dernier code HTTP mesuré ici
      * et RÉUTILISE ce classement plutôt que de le redéfinir - une seule source de vérité sur ce
-     * qu'un code HTTP veut dire pour ce projet (règle DRY, CLAUDE.md).
+     * qu'un code HTTP veut dire pour ce projet (règle DRY du projet).
      */
     public const DISPARU = [404, 410];
 
