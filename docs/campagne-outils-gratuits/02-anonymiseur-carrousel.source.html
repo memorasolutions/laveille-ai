@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<title>Anonymiseur - carrousel LinkedIn - 23 septembre 2026</title>
+<style>
+  @page { size: 1080px 1350px; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  .d { width:1080px; height:1350px; page-break-after:always; padding:96px 84px 110px;
+       display:flex; flex-direction:column; justify-content:center;
+       position:relative; background:#0b3d46; color:#ffffff; overflow:hidden; }
+  .d:last-child { page-break-after:auto; }
+  .clair { background:#f7f5f0; color:#12303a; }
+  .prog { position:absolute; top:0; left:0; height:10px; background:#f0a04b; }
+  .ident { position:absolute; top:44px; left:84px; font-size:24px; letter-spacing:.20em;
+           font-weight:800; opacity:.62; }
+  .num { position:absolute; top:44px; right:84px; font-size:24px; letter-spacing:.12em;
+         opacity:.55; font-weight:700; }
+  .pied { position:absolute; bottom:52px; left:84px; font-size:24px; letter-spacing:.04em;
+          opacity:.6; font-weight:600; }
+  .glisse { position:absolute; bottom:52px; right:84px; font-size:24px; opacity:.55;
+            font-weight:700; }
+  h1 { font-size:78px; line-height:1.12; font-weight:800; letter-spacing:-.022em; }
+  h2 { font-size:60px; line-height:1.16; font-weight:800; letter-spacing:-.018em;
+       margin-bottom:36px; }
+  p  { font-size:35px; line-height:1.5; }
+  p + p { margin-top:28px; }
+  .sur { font-size:26px; letter-spacing:.17em; text-transform:uppercase; font-weight:800;
+         color:#f0a04b; margin-bottom:32px; }
+  .bloc { font-size:34px; line-height:1.55; background:#ffffff; border-radius:16px;
+          padding:34px 36px; border-left:9px solid #c9c3b4; color:#12303a; }
+  .bloc.ambre { border-left-color:#c9782a; }
+  .bloc b { padding:3px 5px; border-radius:6px; font-weight:800; background:#f7ddc2;
+            box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+  .barre { text-decoration:line-through; opacity:.38; font-weight:400; }
+  .note { font-size:26px; opacity:.72; margin-top:22px; line-height:1.45; }
+  ol { margin:0 0 0 2px; list-style:none; counter-reset:q; }
+  ol li { counter-increment:q; font-size:33px; line-height:1.4; padding:0 0 0 74px;
+          position:relative; margin-bottom:28px; }
+  ol li:last-child { margin-bottom:0; }
+  ol li::before { content:counter(q); position:absolute; left:0; top:-2px;
+                  width:50px; height:50px; border-radius:50%; background:#0b3d46;
+                  color:#fff; font-size:27px; font-weight:800;
+                  display:flex; align-items:center; justify-content:center; }
+  .fin { display:flex; align-items:center; gap:56px; margin-top:40px; }
+  .fin img { width:290px; height:290px; border-radius:18px; background:#fff; padding:14px; }
+  .url { font-size:38px; font-weight:800; line-height:1.35; }
+</style>
+</head>
+<body>
+
+<section class="d">
+  <div class="prog" style="width:120px"></div>
+  <span class="ident">LA VEILLE AI</span>
+  <span class="num">1 / 9</span>
+  <h1>J’ai caviardé un texte avant de le donner à une IA.</h1>
+  <p style="margin-top:44px;font-size:44px;line-height:1.35;color:#f0a04b;font-weight:700">
+    Ce qui est resté m’a plus inquiété que ce qui est parti.</p>
+  <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d clair">
+  <div class="prog" style="width:240px"></div>
+  <span class="ident" style="color:#12303a">LA VEILLE AI</span>
+  <span class="num" style="color:#12303a">2 / 9</span>
+  <div class="sur" style="color:#a45614">Pourquoi ça compte</div>
+  <h2>Un outil qui efface les noms donne un sentiment de sécurité.</h2>
+  <p>C’est exactement là qu’est le risque : on relit moins ce qu’on croit déjà protégé.</p>
+  <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d">
+  <div class="prog" style="width:360px"></div>
+  <span class="ident">LA VEILLE AI</span>
+  <span class="num">3 / 9</span>
+  <div class="sur">L’essai</div>
+  <h2>J’ai collé cette phrase, puis j’ai regardé ce qui sortait.</h2>
+  <div class="bloc">Marie Tremblay, 418 555-0142, dossier D-4471, Lévis.</div>
+  <p class="note" style="opacity:.8">Données inventées. L’essai, lui, est réel.</p>
+  <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d clair">
+  <div class="prog" style="width:480px"></div>
+  <span class="ident" style="color:#12303a">LA VEILLE AI</span>
+  <span class="num" style="color:#12303a">4 / 9</span>
+  <div class="sur" style="color:#a45614">Ce qui est parti tout seul</div>
+  <h1 style="font-size:84px">Le nom.<br>Le téléphone.</h1>
+  <p style="margin-top:44px">Aucun réglage, aucune liste à remplir. Ils quittent le texte avant qu’il parte.</p>
+  <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d">
+  <div class="prog" style="width:600px"></div>
+  <span class="ident">LA VEILLE AI</span>
+  <span class="num">5 / 9</span>
+  <div class="sur">Ce qui est resté</div>
+  <div class="bloc ambre"><span class="barre">Marie Tremblay</span>, <span class="barre">418 555-0142</span>,
+    dossier <b>D-4471</b>, <b>Lévis</b>.</div>
+  <p style="margin-top:38px">Dans un bureau de quinze personnes, ces deux-là suffisent à savoir de qui on parle.</p>
+  <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d clair">
+  <div class="prog" style="width:720px"></div>
+  <span class="ident" style="color:#12303a">LA VEILLE AI</span>
+  <span class="num" style="color:#12303a">6 / 9</span>
+  <div class="sur" style="color:#a45614">Pourquoi</div>
+  <h1 style="font-size:70px">Un nom ressemble à un nom. Un numéro de dossier ne ressemble à rien.</h1>
+  <p style="margin-top:42px">Ces outils repèrent des <b style="background:#f7ddc2;padding:2px 2px 2px 6px;border-radius:6px">formes</b>.
+    Or ce qui identifie quelqu’un n’a pas toujours une forme reconnaissable.</p>
+  <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d">
+  <div class="prog" style="width:840px"></div>
+  <span class="ident">LA VEILLE AI</span>
+  <span class="num">7 / 9</span>
+  <div class="sur">La nuance qu’on oublie</div>
+  <h2>Le point faible n’est pas l’outil. C’est la relecture.</h2>
+  <p>Quand l’IA répond, tu remets les vrais noms. Si elle a mélangé deux personnes en chemin,
+     tu recolles un fait sur la mauvaise.</p>
+  <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d clair">
+  <div class="prog" style="width:960px"></div>
+  <span class="ident" style="color:#12303a">LA VEILLE AI</span>
+  <span class="num" style="color:#12303a">8 / 9</span>
+  <div class="sur" style="color:#a45614">À garder</div>
+  <h2 style="font-size:52px;margin-bottom:44px">Avant de coller un texte dans une IA</h2>
+  <ol>
+    <li>Un nom traîne-t-il dans la signature ou l’en-tête?</li>
+    <li>La ville ou le quartier suffit-il à désigner la personne?</li>
+    <li>Y a-t-il un numéro interne : dossier, client, employé?</li>
+    <li>Une date précise identifie-t-elle à elle seule?</li>
+    <li>Le texte nomme-t-il un employeur ou un titre rare?</li>
+    <li>En relisant la réponse, est-ce que je remets les bons noms?</li>
+  </ol>
+  <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d">
+  <div class="prog" style="width:1080px"></div>
+  <span class="ident">LA VEILLE AI</span>
+  <span class="num">9 / 9</span>
+  <h1 style="font-size:66px">Caviarder, ce n’est pas protéger. C’est donner moins.</h1>
+  <div class="fin">
+    <img src="qr-anonymiseur-2026-09-23.png" alt="Code QR vers l’outil">
+    <div>
+      <div class="url">laveille.ai<br>/outils/anonymiseur</div>
+      <p class="note">Gratuit, sans compte.<br>Scanne le code, ou tape l’adresse.</p>
+    </div>
+  </div>
+  <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
+  
+</section>
+
+</body>
+</html>
