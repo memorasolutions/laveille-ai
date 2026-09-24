@@ -53,8 +53,8 @@ est exemptée d'approbation : **elle partira seule**. La 341 (LinkedIn, 11h00 Qu
   anonymisation réelle, témoin valide : le texte a bien été transformé).
 - Arrêt de la boucle décidé et justifié ; résiduels nommés, dont le nom de l'outil → tâche #2788.
 
-**Reste à vérifier :** que l'image de la 344 est téléchargée (`downloaded_at` non nul,
-`download_error` nul).
+**Vérifié :** l'image de la 344 a été téléchargée par le portail à 19h51 Québec (23:51:12 UTC),
+`download_error` nul, type `image`. Tâche #2786 close.
 
 ## ⛔ Ce qui BLOQUE en attendant une action de Stéphane
 
