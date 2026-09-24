@@ -1,61 +1,111 @@
-# État de session - La veille de Stef v2
+# État de session - la-veille-de-stef-v2
 
-> Fichier UNIQUE, réécrit à chaque fin de lot. Ne jamais l'empiler ni le dupliquer.
-> Il porte le POINT DE REPRISE, pas le détail (todolist) ni l'historique (QUESTIONS-CLAUDE.html).
+> Réécrit le **2026-09-24 à 19h28 Québec (23:28 UTC)**, sur demande de pause avant redémarrage
+> du Mac. Ce fichier est TOUJOURS le même : on le réécrit, on n'empile pas.
 
-**Dernière mise à jour : 2026-09-24, 12h25 Québec (16:25 UTC)**
+---
 
-## Où on en est
+## 🔴 Mise en pause : ce qui est fermé
 
-- **Carrousel « le test en 3 gestes », v7, EN LIGNE ET PROUVÉ.**
-  `https://laveille.ai/carrousels/anonymiseur-test-3-gestes-v7.pdf` - 200, zéro redirection,
-  8 pages, empreinte servie identique à la locale (`b5af502cddd98a70`).
-  **Aucune diapositive ne présente notre outil comme défaillant** - règle du fondateur du
-  2026-09-24, vérifiée par balayage des 8 pages.
-- **Ce qui a motivé la v7, et il faut le retenir** : la v6 attribuait à NOTRE outil une limite qui
-  appartient à toute la catégorie. Mesuré en aveugle avec la question commerciale ajoutée :
-  clarté 8/10, service rendu à l'entreprise **3/10**. Le contrôle de clarté seul, qui donnait
-  10/10, ne mesurait pas ce qui comptait.
-- **Deux publications programmées pour le 25 septembre**, `requires_client_approval: false`, donc
-  elles partiront seules. Leur titre commence par « GARDER » :
-  - **322** - Facebook, 08h00 Québec (12:00 UTC). Média téléchargé, aucune erreur.
-  - **323** - LinkedIn, 11h00 Québec (15:00 UTC), carrousel v7. Type `document`,
-    `downloaded_at` 16:23:14 UTC, `download_error` nul.
-- **Tout ce qui précède (314 à 321) a disparu du portail**, balayé pendant que je travaillais.
-  L'API n'en montre plus aucune. Rien à faire de ce côté.
-- **Skill `/publier` : 6 règles neuves aujourd'hui**, toutes écrites AVANT la livraison. Les deux
-  dernières sont l'interdit absolu d'autodénigrement et les 4 questions commerciales à poser à
-  l'oracle, avec leur critère de rejet.
-- **6 commits locaux, poussés sur le forge seulement.** Tous de la documentation : pas poussés vers
-  `origin` pour ne pas déclencher une fenêtre de 503 inutile. À grouper avec la prochaine livraison
-  de code réelle.
+| Élément | État vérifié |
+|---|---|
+| Navigateur Playwright | **fermé** (`browser_close`, aucun onglet restant) |
+| Sous-agents | **aucun lancé** dans ce segment de session |
+| Cron temporaire `2780396691` (passerelle artisan prod) | **RETIRÉ et vérifié** par un `cron_list` frais : il n'apparaît plus |
+| Script `storage/app/a2_runner.sh` en prod | **neutralisé** (`exit 0`), contenu relu après écriture |
+| `storage/app/a2_cmd.sh` en prod | **vidé** |
+| Écriture en cours en prod | **aucune** |
 
-## En cours
+### ⚠️ Correction d'une affirmation fausse faite plus tôt aujourd'hui
 
-- **#2686 - Module historique** : le club des sages a tranché l'architecture 80/20 en 2 rounds.
-  Reste UNE décision, celle de construire ou non. Rien n'est écrit dans le code.
-- **#1847 - Actus 2.0, sortir du flux** : chantier permanent, phase technique faite (flux -68 %).
-  Ce qui reste se mesure en verdicts publiés, pas en code.
+La tâche **#2762** était cochée « FAIT ET PROUVÉ - cron retiré et fichiers a2_* neutralisés ».
+**C'était faux sur les deux points** : à 19h25 Québec (23:25 UTC), le cron était toujours dans la
+liste et le script `a2_runner.sh` était intact et actif. Les deux ont été réellement fermés
+maintenant, et vérifiés par relecture. Le mécanisme d'auto-expiration du script aurait fini par le
+neutraliser, mais il n'était pas déclenché : l'auto-expiration n'est pas une preuve de retrait.
 
-## Ce qui BLOQUE en attendant une réponse ou une action de Stéphane
+---
 
-- **#2735 - Supprimer les publications 314, 315, 317 ET 318.** Le portail n'a AUCUNE route de
-  modification ni de suppression : corriger oblige à recréer, et le retrait des anciennes te revient.
-- **#2585** - Approuver la 300, refuser la 298. L'heure prévue est passée, rien n'est parti.
-- **#2368** - Clé secrète Turnstile : le code est correct et testé, seule la clé manque (règle 1Password).
-- **#2276 et #2638** - Deux prompts livrés, à coller dans d'autres sessions (Namaste santé, et la
-  session du connecteur MCP Facebook). Rien à faire ici.
-- **#2597** - Trace d'un robot d'IA sur /decido/ : 7 voies mesurées et fermées, seul le tableau de
-  bord Cloudflare peut répondre.
-- **#2722** - Le portail stocke une heure 4 h trop tôt. Contourné en envoyant l'heure UTC voulue,
-  mais le correctif appartient à la session du portail.
+## ✅ Ce qui est terminé et prouvé (fin de journée)
 
-## Prochaine action proposée
+- **Règle des oracles sur les images sociales** : chaînée dans `/publier`, imposée par le hook
+  `guard-publication-sociale.py` (contrôle 5), outil de trace `tracer_oracle.py`. Prouvée par un
+  appel réel bloqué.
+- **Mémoire du projet** : `MEMORY.md` ramené de 26 840 à 21 154 octets, sous la limite; elle
+  perdait ses 7 dernières lignes en silence.
+- **Fiches publiées ce jour** : 57539, 58294, 58216 (+ 2 doublons écartés avec mesure : 57924, 57693).
 
-**#2733** - intégrer dans `/publier` les règles de rédaction sociale que tu as transmises le
-2026-09-23 (source ChatGPT). C'est la seule tâche ouverte qui ne dépend de personne d'autre, et elle
-prolonge directement le travail de doctrine fait aujourd'hui.
+---
 
-Ensuite **#2732** - le défaut de l'anonymiseur lui-même : le nom de famille survit dans l'adresse
-courriel, et ni la ville ni le numéro de dossier ne sont détectés. Le carrousel publié l'assume
-explicitement ; l'outil, lui, n'est pas corrigé.
+## 🔄 En cours - LE POINT DE REPRISE EXACT
+
+### #2786 - Recréer la publication Facebook de l'anonymiseur
+
+La 343 est **déjà supprimée** (404 confirmé). La 341 (LinkedIn, carrousel PDF) est **conservée**,
+programmée au 2026-09-25 à 11h00 Québec (15:00 UTC), média téléchargé sans erreur.
+
+**Où j'en suis, précisément :**
+
+1. ✅ Image vérifiée : `https://laveille.ai/images/social/anonymiseur-caricature-2026-09.jpg`
+   - servie en 200, sans redirection, 231 056 octets, 1080x1350 (4:5)
+   - empreinte SHA-256 identique entre le fichier servi, la copie locale et celle du projet
+   - passe le contrôle mécanique `visuel.py`
+2. ✅ **Oracle 1 sur 2 obtenu** : claude.ai (navigateur, compte du fondateur), description en
+   aveugle consignée VERBATIM dans
+   `~/.claude/skills/publier/controles/traces/25f7d40168027dbc.json`
+   (copie dans `storage/app/travaux-session-2026-09-24/`).
+3. ⛔ **Oracle 2 manquant** → le hook BLOQUERA `create_social_publication` tant qu'il n'y en a pas
+   deux distincts. C'est le comportement voulu, pas une panne.
+
+**🔎 CE QUE L'ORACLE 1 A TROUVÉ, et qui doit être tranché avant de publier :**
+
+> L'image est **AMBIGUË** entre « anonymiser pour protéger » (lecture positive) et « camoufler,
+> faire disparaître des preuves » (lecture négative). Selon l'oracle, trois éléments font pencher
+> vers la lecture NÉGATIVE : la joie excessive du personnage, les taches de noir sur ses vêtements,
+> et le fait qu'on ne voie **jamais** ce qui est effacé. Verbatim : *« quelqu'un qui efface des
+> données avec un peu trop d'enthousiasme », sans savoir s'il faut s'en réjouir ou s'en inquiéter.*
+
+C'est exactement le type de défaut que la règle des oracles existe pour attraper, et il n'aurait
+pas été vu autrement : j'avais regardé cette image seul et je l'avais trouvée conforme.
+
+**À faire à la reprise, dans cet ordre :**
+1. Obtenir l'**oracle 2** (chatgpt.com au navigateur - jamais par Codex ni `agy`, règle du
+   2026-09-19). Méthode qui a marché sur claude.ai : ouvrir le menu « Ajouter des fichiers »,
+   puis `page.setInputFiles('input[type=file]', <chemin>)` - le `browser_file_upload` du MCP exige
+   un état modal qu'on n'obtient pas. Le menu ouvert intercepte les clics : faire `Escape` avant
+   de taper.
+2. **Trancher l'ambiguïté** : soit le texte lève le doute dès la première ligne, soit l'image est
+   refaite. Ne pas publier en espérant que le lecteur choisisse la bonne lecture.
+3. Composer le texte Facebook (3 mouvements, max 3 lignes rendues par bloc, aucune adresse web
+   dans le corps, lien en `first_comment`, champ `title` obligatoire), passer `crochet.py
+   --reseau facebook` et `aeration.py`.
+4. `create_social_publication` en `dry_run: true`, **relire l'heure stockée** (le portail a déjà
+   stocké 4 h trop tôt - #2722), puis `dry_run: false` et relire avec `get_social_publication`.
+
+---
+
+## ⛔ Ce qui BLOQUE en attendant une action de Stéphane
+
+| # | Ce qui est attendu |
+|---|---|
+| **#2735** | Supprimer les publications **334 à 342** dans le portail. Garder la **341**. L'API n'a aucune route DELETE : ce geste ne peut être fait que par toi. |
+| **#2759** | Publier les **parties 2 et 3** de la série dans l'admin (la double authentification me bloque). |
+| **#2585** | Approuver la publication **300**, refuser la **298**. L'heure prévue est passée, rien n'est parti. |
+| **#2368** | Clé secrète Turnstile (elle te revient, règle 1Password). |
+
+---
+
+## 📋 Ce qui reste en file (aucun travail entamé dessus)
+
+**16 cycles `/actu2`** : #2763, 2764, 2765, 2766, 2767, 2768, 2769, 2770, 2771, 2773, 2774, 2776,
+2777, 2778, 2779, 2781, 2783, 2784.
+Un piège connu : **#2780** (Le Monde) a une source VIDE derrière un mur d'abonnement - il faut
+passer par l'étude elle-même, pas par le relais.
+
+Le contrat de délégation est écrit une seule fois dans
+`storage/app/travaux-session-2026-09-24/CONTRAT-COMPOSITION-ACTU2.md` : le donner par son chemin
+aux agents, ne jamais recopier ses consignes dans les prompts.
+
+⚠️ **La passerelle d'exécution artisan en production est fermée.** Toute reprise de `/actu2` qui
+doit écrire en prod devra la reconstruire volontairement (cron + `a2_runner.sh`), et la refermer
+ensuite - en le VÉRIFIANT, pas en le supposant.
