@@ -3,25 +3,32 @@
 > Fichier UNIQUE, réécrit à chaque fin de lot. Ne jamais l'empiler ni le dupliquer.
 > Il porte le POINT DE REPRISE, pas le détail (todolist) ni l'historique (QUESTIONS-CLAUDE.html).
 
-**Dernière mise à jour : 2026-09-24, 11h35 Québec (15:35 UTC)**
+**Dernière mise à jour : 2026-09-24, 12h25 Québec (16:25 UTC)**
 
 ## Où on en est
 
-- **Carrousel LinkedIn « le test en 3 gestes », v6, EN LIGNE ET PROUVÉ.**
-  `https://laveille.ai/carrousels/anonymiseur-test-3-gestes-v6.pdf` - 200, zéro redirection,
-  8 pages, empreinte servie identique à la locale (`7e11d522f4a29cec`).
-  Révisé par deux oracles en aveugle, de familles différentes. Quatre défauts corrigés, dont une
-  contradiction que la correction du premier oracle avait créée.
-- **Deux publications programmées pour le 25 septembre**, toutes deux `requires_client_approval:
-  false`, donc elles partiront seules :
-  - **316** - Facebook, 08h00 Québec (12:00 UTC), image + lien en premier commentaire.
-  - **319** - LinkedIn, 11h00 Québec (15:00 UTC), carrousel v6 en PDF, aucun premier commentaire.
-    Vérifié : `type: document`, `downloaded_at` rempli, `download_error` nul.
-- **Skill `/publier` enrichi de 4 règles neuves** (5872 octets), écrites AVANT la livraison.
-- **4 commits locaux, poussés sur le forge seulement** (`fc6f9fc8e` et les 3 précédents). Tous des
-  changements de documentation : ils n'ont pas été poussés vers `origin` pour ne pas déclencher une
-  fenêtre de 503 inutile (21 fenêtres ont coûté deux mois de visibilité Google le 19 juillet).
-  À grouper avec la prochaine livraison de code réelle.
+- **Carrousel « le test en 3 gestes », v7, EN LIGNE ET PROUVÉ.**
+  `https://laveille.ai/carrousels/anonymiseur-test-3-gestes-v7.pdf` - 200, zéro redirection,
+  8 pages, empreinte servie identique à la locale (`b5af502cddd98a70`).
+  **Aucune diapositive ne présente notre outil comme défaillant** - règle du fondateur du
+  2026-09-24, vérifiée par balayage des 8 pages.
+- **Ce qui a motivé la v7, et il faut le retenir** : la v6 attribuait à NOTRE outil une limite qui
+  appartient à toute la catégorie. Mesuré en aveugle avec la question commerciale ajoutée :
+  clarté 8/10, service rendu à l'entreprise **3/10**. Le contrôle de clarté seul, qui donnait
+  10/10, ne mesurait pas ce qui comptait.
+- **Deux publications programmées pour le 25 septembre**, `requires_client_approval: false`, donc
+  elles partiront seules. Leur titre commence par « GARDER » :
+  - **322** - Facebook, 08h00 Québec (12:00 UTC). Média téléchargé, aucune erreur.
+  - **323** - LinkedIn, 11h00 Québec (15:00 UTC), carrousel v7. Type `document`,
+    `downloaded_at` 16:23:14 UTC, `download_error` nul.
+- **Tout ce qui précède (314 à 321) a disparu du portail**, balayé pendant que je travaillais.
+  L'API n'en montre plus aucune. Rien à faire de ce côté.
+- **Skill `/publier` : 6 règles neuves aujourd'hui**, toutes écrites AVANT la livraison. Les deux
+  dernières sont l'interdit absolu d'autodénigrement et les 4 questions commerciales à poser à
+  l'oracle, avec leur critère de rejet.
+- **6 commits locaux, poussés sur le forge seulement.** Tous de la documentation : pas poussés vers
+  `origin` pour ne pas déclencher une fenêtre de 503 inutile. À grouper avec la prochaine livraison
+  de code réelle.
 
 ## En cours
 
