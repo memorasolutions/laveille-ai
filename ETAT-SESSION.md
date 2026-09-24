@@ -39,50 +39,22 @@ neutraliser, mais il n'était pas déclenché : l'auto-expiration n'est pas une 
 
 ## 🔄 En cours - LE POINT DE REPRISE EXACT
 
-### #2786 - Recréer la publication Facebook de l'anonymiseur
+### #2786 - Publication Facebook de l'anonymiseur : RECRÉÉE (publication 344)
 
-La 343 est **déjà supprimée** (404 confirmé). La 341 (LinkedIn, carrousel PDF) est **conservée**,
-programmée au 2026-09-25 à 11h00 Québec (15:00 UTC), média téléchargé sans erreur.
+**Programmée au 2026-09-25 à 08h00 Québec (12:00 UTC)**, heure relue après écriture. La compagnie 33
+est exemptée d'approbation : **elle partira seule**. La 341 (LinkedIn, 11h00 Québec) est intacte.
 
-**Où j'en suis, précisément :**
+- Image : contrôlée par **deux oracles en aveugle** (claude.ai et chatgpt.com), trace complète avec
+  leur divergence et l'arbitrage dans `~/.claude/skills/publier/controles/traces/25f7d40168027dbc.json`.
+- Produit fini (image + texte + commentaire) : **4 passes, 2 familles**. Défauts corrigés au fil des
+  tours : exemple présenté comme vécu, test qui contredisait le principe du croisement, menace floue,
+  substitution qui peut fausser la question, portée du « se fait dans ton navigateur ».
+- Affirmation sur le traitement local : **mesurée** en production (aucune requête réseau pendant une
+  anonymisation réelle, témoin valide : le texte a bien été transformé).
+- Arrêt de la boucle décidé et justifié ; résiduels nommés, dont le nom de l'outil → tâche #2788.
 
-1. ✅ Image vérifiée : `https://laveille.ai/images/social/anonymiseur-caricature-2026-09.jpg`
-   - servie en 200, sans redirection, 231 056 octets, 1080x1350 (4:5)
-   - empreinte SHA-256 identique entre le fichier servi, la copie locale et celle du projet
-   - passe le contrôle mécanique `visuel.py`
-2. ✅ **Oracle 1 sur 2 obtenu** : claude.ai (navigateur, compte du fondateur), description en
-   aveugle consignée VERBATIM dans
-   `~/.claude/skills/publier/controles/traces/25f7d40168027dbc.json`
-   (copie dans `storage/app/travaux-session-2026-09-24/`).
-3. ⛔ **Oracle 2 manquant** → le hook BLOQUERA `create_social_publication` tant qu'il n'y en a pas
-   deux distincts. C'est le comportement voulu, pas une panne.
-
-**🔎 CE QUE L'ORACLE 1 A TROUVÉ, et qui doit être tranché avant de publier :**
-
-> L'image est **AMBIGUË** entre « anonymiser pour protéger » (lecture positive) et « camoufler,
-> faire disparaître des preuves » (lecture négative). Selon l'oracle, trois éléments font pencher
-> vers la lecture NÉGATIVE : la joie excessive du personnage, les taches de noir sur ses vêtements,
-> et le fait qu'on ne voie **jamais** ce qui est effacé. Verbatim : *« quelqu'un qui efface des
-> données avec un peu trop d'enthousiasme », sans savoir s'il faut s'en réjouir ou s'en inquiéter.*
-
-C'est exactement le type de défaut que la règle des oracles existe pour attraper, et il n'aurait
-pas été vu autrement : j'avais regardé cette image seul et je l'avais trouvée conforme.
-
-**À faire à la reprise, dans cet ordre :**
-1. Obtenir l'**oracle 2** (chatgpt.com au navigateur - jamais par Codex ni `agy`, règle du
-   2026-09-19). Méthode qui a marché sur claude.ai : ouvrir le menu « Ajouter des fichiers »,
-   puis `page.setInputFiles('input[type=file]', <chemin>)` - le `browser_file_upload` du MCP exige
-   un état modal qu'on n'obtient pas. Le menu ouvert intercepte les clics : faire `Escape` avant
-   de taper.
-2. **Trancher l'ambiguïté** : soit le texte lève le doute dès la première ligne, soit l'image est
-   refaite. Ne pas publier en espérant que le lecteur choisisse la bonne lecture.
-3. Composer le texte Facebook (3 mouvements, max 3 lignes rendues par bloc, aucune adresse web
-   dans le corps, lien en `first_comment`, champ `title` obligatoire), passer `crochet.py
-   --reseau facebook` et `aeration.py`.
-4. `create_social_publication` en `dry_run: true`, **relire l'heure stockée** (le portail a déjà
-   stocké 4 h trop tôt - #2722), puis `dry_run: false` et relire avec `get_social_publication`.
-
----
+**Reste à vérifier :** que l'image de la 344 est téléchargée (`downloaded_at` non nul,
+`download_error` nul).
 
 ## ⛔ Ce qui BLOQUE en attendant une action de Stéphane
 
