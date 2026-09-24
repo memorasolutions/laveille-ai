@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr-CA"><head><meta charset="utf-8">
+<title>Anonymiseur - test en 3 gestes v2 - 24 septembre 2026</title>
+<style>
+  @page { size: 1080px 1350px; margin: 0; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  .d { width:1080px; height:1350px; page-break-after:always; padding:96px 84px 110px;
+       display:flex; flex-direction:column; justify-content:center;
+       position:relative; background:#0b3d46; color:#fff; overflow:hidden; }
+  .d:last-child { page-break-after:auto; }
+  .clair { background:#f7f5f0; color:#12303a; }
+  .prog { position:absolute; top:0; left:0; height:10px; background:#f0a04b; }
+  .ident { position:absolute; top:44px; left:84px; font-size:24px; letter-spacing:.20em;
+           font-weight:800; opacity:.62; }
+  .num { position:absolute; top:44px; right:84px; font-size:24px; letter-spacing:.12em;
+         opacity:.55; font-weight:700; }
+  .pied { position:absolute; bottom:52px; left:84px; font-size:23px; letter-spacing:.04em;
+          opacity:.6; font-weight:600; }
+  .glisse { position:absolute; bottom:52px; right:84px; font-size:23px; opacity:.55; font-weight:700; }
+  h1 { font-size:76px; line-height:1.12; font-weight:800; letter-spacing:-.022em; }
+  h2 { font-size:56px; line-height:1.16; font-weight:800; letter-spacing:-.018em; margin-bottom:30px; }
+  p  { font-size:34px; line-height:1.5; }
+  p + p { margin-top:24px; }
+  .sur { font-size:25px; letter-spacing:.17em; text-transform:uppercase; font-weight:800;
+         color:#f0a04b; margin-bottom:26px; }
+  .cap { width:100%; border-radius:14px; display:block; margin:8px 0 22px;
+         box-shadow:0 12px 44px rgba(0,0,0,.30); }
+  .note { font-size:25px; opacity:.72; line-height:1.45; margin-top:16px; }
+  .fictif { display:inline-block; font-size:22px; letter-spacing:.10em; font-weight:800;
+            background:#c9782a; color:#fff; padding:7px 15px; border-radius:7px;
+            text-transform:uppercase; margin-bottom:20px; }
+  ul { list-style:none; margin-top:10px; }
+  ul li { font-size:35px; line-height:1.35; margin-bottom:22px; padding-left:60px; position:relative; }
+  ul li:last-child { margin-bottom:0; }
+  .ok::before  { content:"\2713"; position:absolute; left:0; color:#3fa08a; font-weight:800; font-size:38px; }
+  .non::before { content:"\2192"; position:absolute; left:0; color:#f0a04b; font-weight:800; font-size:38px; }
+  .fin { display:flex; align-items:center; gap:50px; margin-top:34px; }
+  .fin img { width:270px; height:270px; border-radius:16px; background:#fff; padding:13px; }
+  .url { font-size:36px; font-weight:800; line-height:1.35; }
+</style></head><body>
+
+<section class="d">
+  <div class="prog" style="width:135px"></div>
+  <span class="ident">LA VEILLE AI</span>
+  <span class="num">1 / 8</span>
+  <h1 style="font-size:70px">Votre outil de caviardage retire les noms. Pas forcément de quoi identifier la personne.</h1>
+  <p style="margin-top:38px;font-size:40px;line-height:1.32;color:#f0a04b;font-weight:700">
+    Et ce que vous envoyez reste des mois sur les serveurs de l’IA.</p>
+  <p style="margin-top:22px;font-size:31px;opacity:.85">Trois gestes pour vérifier avant de coller.</p>
+  <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d clair">
+  <div class="prog" style="width:270px"></div>
+  <span class="ident" style="color:#12303a">LA VEILLE AI</span>
+  <span class="num" style="color:#12303a">2 / 8</span>
+  <div class="sur" style="color:#a45614">Pourquoi ça compte</div>
+  <h2 style="font-size:50px">Une ville et un numéro de dossier ne sont pas des noms.</h2>
+  <p>Dans un bureau de quinze personnes, ils désignent quand même quelqu’un.
+     La loi québécoise parle d’un renseignement qui identifie
+     <b>directement OU indirectement</b>.</p>
+  <p class="note" style="margin-top:30px">Source : Commission d’accès à l’information du Québec.</p>
+  <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d">
+  <div class="prog" style="width:405px"></div>
+  <span class="ident">LA VEILLE AI</span>
+  <span class="num">3 / 8</span>
+  <div class="sur">Et ça ne s’efface pas en fermant l’onglet</div>
+  <h2 style="font-size:46px">Sur un compte personnel, ce que vous collez est conservé.</h2>
+  <ul style="margin-top:6px">
+    <li class="non" style="font-size:31px">Gemini : activité conservée <b>18 mois</b> par défaut</li>
+    <li class="non" style="font-size:31px">ChatGPT et Claude : effacement <b>30 jours</b> après VOTRE suppression</li>
+    <li class="non" style="font-size:31px">Claude, si l’amélioration du modèle est active : <b>jusqu’à 5 ans</b></li>
+  </ul>
+  <p class="note" style="margin-top:26px;opacity:.75">Relevé le 24 septembre 2026, documentation des trois
+     fournisseurs. Les offres d’entreprise ont des règles différentes.</p>
+  <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d clair">
+  <div class="prog" style="width:540px"></div>
+  <span class="ident" style="color:#12303a">LA VEILLE AI</span>
+  <span class="num" style="color:#12303a">4 / 8</span>
+  <div class="sur" style="color:#a45614">Geste 1</div>
+  <h2>Écrivez un texte d’essai, avec des repères que vous connaissez.</h2>
+  <span class="fictif">Exemple fictif</span>
+  <img class="cap" src="captures/01-avant-rogne.png" alt="Le texte d’essai avant traitement">
+  <p class="note">Un nom, un téléphone, un lieu, un numéro interne. Ajoutez vos
+     propres codes de dossier : ce sont eux que personne ne pense à vérifier.</p>
+  <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d">
+  <div class="prog" style="width:675px"></div>
+  <span class="ident">LA VEILLE AI</span>
+  <span class="num">5 / 8</span>
+  <div class="sur">Geste 2</div>
+  <h1 style="font-size:62px">Faites-le caviarder.</h1>
+  <p style="margin-top:36px;opacity:.88">C’est le geste que tout le monde fait,
+     et c’est là que la plupart des gens s’arrêtent.</p>
+  <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d clair">
+  <div class="prog" style="width:810px"></div>
+  <span class="ident" style="color:#12303a">LA VEILLE AI</span>
+  <span class="num" style="color:#12303a">6 / 8</span>
+  <div class="sur" style="color:#a45614">Geste 3</div>
+  <h2 style="font-size:50px">Lisez ce qui reste.</h2>
+  <img class="cap" src="captures/02-apres-rogne.png" alt="Le texte après traitement">
+  <p class="note">Ce qui est surligné a été remplacé par l’outil.
+     Le reste est parti tel quel.</p>
+  <p class="note" style="margin-top:14px;opacity:.95;font-weight:600;color:#a45614">
+     L’outil de la capture est le nôtre : gratuit, sans compte, et le texte
+     ne quitte pas votre navigateur.</p>
+  <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d">
+  <div class="prog" style="width:945px"></div>
+  <span class="ident">LA VEILLE AI</span>
+  <span class="num">7 / 8</span>
+  <div class="sur">Notre essai, et ses limites</div>
+  <ul>
+    <li class="ok" style="font-size:31px">Le nom a été remplacé
+      <span style="display:block;font-size:22px;opacity:.62;margin-top:2px">identifiant DIRECT</span></li>
+    <li class="ok" style="font-size:31px">Le téléphone a été remplacé
+      <span style="display:block;font-size:22px;opacity:.62;margin-top:2px">identifiant DIRECT</span></li>
+    <li class="non" style="font-size:31px">« D-4471 » est resté
+      <span style="display:block;font-size:22px;opacity:.62;margin-top:2px">identifiant de CONTEXTE</span></li>
+    <li class="non" style="font-size:31px">« Lévis » est resté
+      <span style="display:block;font-size:22px;opacity:.62;margin-top:2px">identifiant de CONTEXTE</span></li>
+  </ul>
+  <p style="margin-top:30px;font-size:30px;opacity:.86">Un seul texte, un seul essai.
+     Ce n’est ni un taux, ni une règle, ni le comportement sur d’autres textes.</p>
+  <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
+  <span class="glisse">Glisse &#8594;</span>
+</section>
+<section class="d clair">
+  <div class="prog" style="width:1080px"></div>
+  <span class="ident" style="color:#12303a">LA VEILLE AI</span>
+  <span class="num" style="color:#12303a">8 / 8</span>
+  <h1 style="font-size:54px;color:#12303a">Un nom se repère. Un numéro de dossier ne ressemble à rien.</h1>
+  <p style="margin-top:24px;font-size:29px">Les outils voient bien les identifiants directs.
+     Les identifiants de contexte, c’est à vous de les relire.</p>
+  <div class="fin">
+    <img src="qr-anonymiseur-2026-09-23.png" alt="Code QR vers l’outil">
+    <div>
+      <div class="url">laveille.ai<br>/outils/anonymiseur</div>
+      <p class="note">Gratuit, sans compte.<br>Faites le test avec votre propre outil.</p>
+    </div>
+  </div>
+  <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
+  
+</section>
+
+</body></html>
