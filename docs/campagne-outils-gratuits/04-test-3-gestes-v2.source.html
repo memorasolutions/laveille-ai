@@ -30,6 +30,13 @@
   .fictif { display:inline-block; font-size:22px; letter-spacing:.10em; font-weight:800;
             background:#c9782a; color:#fff; padding:7px 15px; border-radius:7px;
             text-transform:uppercase; margin-bottom:20px; }
+  ol { list-style:none; counter-reset:q; margin-top:10px; }
+  ol li { font-size:33px; line-height:1.34; margin-bottom:24px; padding-left:62px;
+          position:relative; counter-increment:q; }
+  ol li::before { content:counter(q); position:absolute; left:0; top:2px; width:42px;
+          height:42px; border-radius:50%; background:#f0a04b; color:#12303a;
+          font-size:25px; font-weight:800; text-align:center; line-height:42px; }
+  ol li:last-child { margin-bottom:0; }
   ul { list-style:none; margin-top:10px; }
   ul li { font-size:35px; line-height:1.35; margin-bottom:22px; padding-left:60px; position:relative; }
   ul li:last-child { margin-bottom:0; }
@@ -47,7 +54,7 @@
   <h1 style="font-size:66px">Notre outil a retiré le nom. Il a laissé la ville et le numéro de dossier.</h1>
   <p style="margin-top:34px;font-size:40px;line-height:1.32;color:#f0a04b;font-weight:700">
     Dans un petit milieu, ces deux-là suffisent à savoir de qui on parle.</p>
-  <p style="margin-top:22px;font-size:31px;opacity:.85">Trois gestes pour vérifier le vôtre avant de coller.</p>
+  <p style="margin-top:22px;font-size:31px;opacity:.85">Trois gestes pour vérifier VOTRE outil avant de coller.</p>
   <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
   <span class="glisse">Glisse &#8594;</span>
 </section>
@@ -97,10 +104,12 @@
   <div class="prog" style="width:675px"></div>
   <span class="ident">LA VEILLE AI</span>
   <span class="num">5 / 8</span>
-  <div class="sur">Geste 2</div>
-  <h1 style="font-size:62px">Faites-le caviarder.</h1>
-  <p style="margin-top:36px;opacity:.88">C’est le geste que tout le monde fait,
-     et c’est là que la plupart des gens s’arrêtent.</p>
+  <div class="sur">Gestes 2 et 3</div>
+  <h2 style="font-size:50px">Faites-le caviarder, puis lisez ce qui reste.</h2>
+  <img class="cap" src="captures/02-apres-rogne.png" alt="Le texte après traitement">
+  <p class="note">« Marie Tremblay » est devenue « Nathalie Gauthier »,
+     et le téléphone a changé. L’outil ne noircit pas : il remplace par un faux, en vert.
+     Tout ce qui n’est pas vert est resté intact.</p>
   <span class="pied">laveille.ai &#183; Stéphane Lapointe</span>
   <span class="glisse">Glisse &#8594;</span>
 </section>
@@ -108,14 +117,18 @@
   <div class="prog" style="width:810px"></div>
   <span class="ident" style="color:#12303a">LA VEILLE AI</span>
   <span class="num" style="color:#12303a">6 / 8</span>
-  <div class="sur" style="color:#a45614">Geste 3</div>
-  <h2 style="font-size:50px">Lisez ce qui reste.</h2>
-  <img class="cap" src="captures/02-apres-rogne.png" alt="Le texte après traitement">
-  <p class="note">Ce qui est surligné a été remplacé par l’outil.
-     Le reste est parti tel quel.</p>
-  <p class="note" style="margin-top:14px;opacity:.95;font-weight:600;color:#a45614">
-     L’outil de la capture est le nôtre : gratuit, sans compte, et le texte
-     ne quitte pas votre navigateur.</p>
+  <div class="sur" style="color:#a45614">Et maintenant, jugez</div>
+  <h2 style="font-size:46px">Ce qui reste identifie-t-il encore quelqu’un?</h2>
+  <ol>
+    <li>Une personne du milieu reconnaîtrait-elle quelqu’un avec ces indices?</li>
+    <li>Ces détails sont-ils nécessaires à votre demande? Sinon, retirez-les.</li>
+    <li>Peut-on les généraliser? « Lévis » devient « une succursale »,
+        « D-4471 » devient « un dossier ».</li>
+  </ol>
+  <p class="note" style="margin-top:26px;font-weight:600;color:#a45614;opacity:1">
+     Si le doute persiste, ne collez pas. Retravaillez le texte.</p>
+  <p class="note" style="margin-top:12px">L’outil des captures est le nôtre :
+     gratuit, sans compte, et le texte ne quitte pas votre navigateur.</p>
   <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
   <span class="glisse">Glisse &#8594;</span>
 </section>
@@ -143,14 +156,15 @@
   <div class="prog" style="width:1080px"></div>
   <span class="ident" style="color:#12303a">LA VEILLE AI</span>
   <span class="num" style="color:#12303a">8 / 8</span>
-  <h1 style="font-size:54px;color:#12303a">Un nom se repère. Un numéro de dossier ne ressemble à rien.</h1>
-  <p style="margin-top:24px;font-size:29px">Les outils voient bien les identifiants directs.
-     Les identifiants de contexte, c’est à vous de les relire.</p>
+  <h1 style="font-size:50px;color:#12303a">Un nom se repère. Un numéro de dossier ne ressemble à rien.</h1>
+  <p style="margin-top:22px;font-size:29px">Un outil ne connaît pas vos codes internes.
+     Vous, oui. C’est cette connaissance-là qui manque à la machine, et c’est pour ça
+     que la dernière relecture vous revient.</p>
   <div class="fin">
     <img src="qr-anonymiseur-2026-09-23.png" alt="Code QR vers l’outil">
     <div>
       <div class="url">laveille.ai<br>/outils/anonymiseur</div>
-      <p class="note">Gratuit, sans compte.<br>Faites le test avec votre propre outil.</p>
+      <p class="note">Gratuit, sans compte.<br>Faites l’essai sur un texte fictif.</p>
     </div>
   </div>
   <span class="pied" style="color:#12303a">laveille.ai &#183; Stéphane Lapointe</span>
