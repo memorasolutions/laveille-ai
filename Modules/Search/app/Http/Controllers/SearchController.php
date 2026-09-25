@@ -31,6 +31,7 @@ class SearchController
         $query = $request->string('q')->toString();
         $perPage = $request->integer('per_page', 15);
         $modelFilter = $request->input('model');
+        $voitTout = $this->searchService->voitTout($request->user());
 
         if ($modelFilter) {
             $models = $this->searchService->getSearchableModelsFor($request->user());
@@ -45,7 +46,7 @@ class SearchController
                 ], 422);
             }
 
-            $results = $this->searchService->searchModel($matchedModel, $query, $perPage);
+            $results = $this->searchService->searchModel($matchedModel, $query, $perPage, $voitTout);
 
             return response()->json([
                 'success' => true,
@@ -54,7 +55,7 @@ class SearchController
         }
 
         $models = $this->searchService->getSearchableModelsFor($request->user());
-        $results = $this->searchService->search($query, $models, $perPage);
+        $results = $this->searchService->search($query, $models, $perPage, $voitTout);
 
         $formatted = [];
         foreach ($results as $model => $items) {

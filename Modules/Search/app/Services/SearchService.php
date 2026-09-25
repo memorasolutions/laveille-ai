@@ -22,14 +22,41 @@ class SearchService
 {
     /**
      * @param  array<class-string>  $models
+     *
+     * Faille corrigee le 2026-09-25 : cette methode appelait $model::search($query) sans jamais
+     * appliquer le filtre de visibilite deja en place dans searchFront() (scopePublished /
+     * is_published / status=published). Le moteur Scout "database" (config/scout.php) ignore
+     * shouldBeSearchable() : un brouillon ou un article planifie a une date future sortait donc
+     * dans /api/v1/search pour tout membre authentifie, sans permission. $voitTout (calcule par
+     * le controleur via voitTout()) desactive ce filtre pour un administrateur, qui garde l'acces
+     * complet deja en place avant ce correctif.
      */
-    public function search(string $query, array $models, int $perPage = 15): array
+    public function search(string $query, array $models, int $perPage = 15, bool $voitTout = false): array
     {
         $results = [];
 
         foreach ($models as $model) {
-            if (method_exists($model, 'search')) {
-                $results[$model] = $model::search($query)->take($perPage)->get();
+            if (! method_exists($model, 'search')) {
+                continue;
+            }
+
+            try {
+                $builder = $model::search($query);
+
+                if (! $voitTout) {
+                    $builder->query(fn ($q) => $this->appliquerFiltreVisibilite($q, $model));
+                }
+
+                $results[$model] = $builder->take($perPage)->get();
+            } catch (\Throwable $e) {
+                // Meme garde que searchFront() : un modele dont la table n'existe pas (module
+                // desactive, cf. Modules/SaaS/Plan quand le module SaaS est off) ne doit pas
+                // faire echouer TOUTE la recherche multi-modeles.
+                Log::warning('[SearchService] search() section failed', [
+                    'model' => $model,
+                    'query' => $query,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 
@@ -121,13 +148,7 @@ class SearchService
                     }
                 });
 
-                if (method_exists($modelClass, 'scopePublished')) {
-                    $qb->published();
-                } elseif (Schema::hasColumn($table, 'is_published')) {
-                    $qb->where('is_published', true);
-                } elseif (Schema::hasColumn($table, 'status')) {
-                    $qb->where('status', 'published');
-                }
+                $this->appliquerFiltreVisibilite($qb, $modelClass, $table);
 
                 $paginator = $qb->paginate($perPage, ['*'], $sectionKey . '_page');
                 $count = $paginator->total();
@@ -157,9 +178,46 @@ class SearchService
         return ['sections' => $sections, 'total' => $total];
     }
 
-    public function searchModel(string $model, string $query, int $perPage = 15): LengthAwarePaginator
+    public function searchModel(string $model, string $query, int $perPage = 15, bool $voitTout = false): LengthAwarePaginator
     {
-        return $model::search($query)->paginate($perPage);
+        $builder = $model::search($query);
+
+        if (! $voitTout) {
+            $builder->query(fn ($q) => $this->appliquerFiltreVisibilite($q, $model));
+        }
+
+        return $builder->paginate($perPage);
+    }
+
+    /**
+     * Applique aux resultats Scout la MEME regle de visibilite que searchFront() : scopePublished()
+     * si le modele le definit, sinon la colonne is_published, sinon la colonne status = published.
+     * Aucun filtre si aucun des trois n'existe (comportement neutre, comme avant l'extraction).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $qb
+     * @param  class-string  $modelClass
+     */
+    private function appliquerFiltreVisibilite(Builder $qb, string $modelClass, ?string $table = null): Builder
+    {
+        if (method_exists($modelClass, 'scopePublished')) {
+            $qb->published();
+
+            return $qb;
+        }
+
+        $table ??= (new $modelClass())->getTable();
+
+        if (Schema::hasColumn($table, 'is_published')) {
+            $qb->where('is_published', true);
+
+            return $qb;
+        }
+
+        if (Schema::hasColumn($table, 'status')) {
+            $qb->where('status', 'published');
+        }
+
+        return $qb;
     }
 
     /**
@@ -189,17 +247,7 @@ class SearchService
      */
     public function getSearchableModelsFor(?\Illuminate\Contracts\Auth\Authenticatable $user): array
     {
-        $autorise = false;
-
-        try {
-            $autorise = $user !== null
-                && method_exists($user, 'can')
-                && $user->can('view_admin_panel');
-        } catch (\Throwable $e) {
-            $autorise = false;
-        }
-
-        if ($autorise) {
+        if ($this->voitTout($user)) {
             return $this->getSearchableModels();
         }
 
@@ -207,6 +255,25 @@ class SearchService
             $this->getSearchableModels(),
             static fn (string $modele): bool => ! in_array($modele, self::MODELES_SENSIBLES, true),
         ));
+    }
+
+    /**
+     * Un utilisateur "voit tout" (aucun filtre de visibilite, aucune desindexation de modele
+     * sensible) s'il porte la permission view_admin_panel. Fail-closed : au moindre doute sur
+     * les droits (methode can() absente ou levant une exception), on protege la donnee.
+     *
+     * Source unique de cette regle : reutilisee par getSearchableModelsFor() (acces au modele)
+     * ET par SearchController (transmis a search()/searchModel() pour le filtre de publication).
+     */
+    public function voitTout(?\Illuminate\Contracts\Auth\Authenticatable $user): bool
+    {
+        try {
+            return $user !== null
+                && method_exists($user, 'can')
+                && $user->can('view_admin_panel');
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     public function getSearchableModels(): array

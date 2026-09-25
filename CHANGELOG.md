@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.299.0] - 2026-09-25
+
+### Ajouté
+- **Commande `blog:category`** : `--missing` liste en JSON les articles sans catégorie, brouillons
+  compris ; `blog:category <id|slug> <slug-categorie> [--dry-run]` pose la catégorie, affiche
+  l'ancienne valeur et la journalise (journal d'activité et canal `composition`). Aucune commande
+  ne permettait de la poser : les derniers articles étaient publiés sans catégorie.
+
+### Corrigé
+- **L'API de recherche (`/api/v1/search`) ne renvoie plus brouillons ni articles planifiés** à un
+  membre qui n'est pas administrateur. Le filtre de visibilité de la recherche publique est
+  maintenant écrit une seule fois et appliqué aux trois recherches ; un administrateur garde
+  l'accès complet. La recherche ne plante plus si la table d'un module désactivé est absente.
+- `Article::shouldBeSearchable()` exclut aussi un article daté dans le futur.
+
 ## [1.298.0] - 2026-09-25
 
 ### Ajouté

@@ -205,7 +205,13 @@ class Article extends Model implements SearchableContract
 
     public function shouldBeSearchable(): bool
     {
-        return $this->status instanceof PublishedArticleState;
+        // Round recherche (2026-09-25) : un article "publie" mais planifie a une date future ne
+        // doit pas etre indexable non plus - meme regle que scopePublished(). Sans effet sur le
+        // moteur Scout "database" actuel (DatabaseEngine n'appelle jamais shouldBeSearchable()),
+        // mais correct le jour ou un moteur d'index reel (Meilisearch, Typesense...) est branche.
+        return $this->status instanceof PublishedArticleState
+            && $this->published_at !== null
+            && $this->published_at->lte(now());
     }
 
     protected function safeContent(): Attribute
