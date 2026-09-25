@@ -39,28 +39,33 @@ neutraliser, mais il n'était pas déclenché : l'auto-expiration n'est pas une 
 
 ## 🔄 En cours - LE POINT DE REPRISE EXACT
 
-### #2786 - Publication Facebook de l'anonymiseur : RECRÉÉE (publication 344)
+### Publication Facebook de l'anonymiseur : c'est la 345 (la 344 a été supprimée par Stéphane)
 
-**Programmée au 2026-09-25 à 08h00 Québec (12:00 UTC)**, heure relue après écriture. La compagnie 33
-est exemptée d'approbation : **elle partira seule**. La 341 (LinkedIn, 11h00 Québec) est intacte.
+**Programmée au 2026-09-25 à 08h00 Québec (12:00 UTC)**, partira seule. Image refaite après ses deux
+retours (rouleau impossible, « pas un caviardage ») : document tout noirci sauf UNE ligne surlignée
+épinglée à un lieu, générée par ChatGPT sur un prompt détaillé, validée par deux oracles en aveugle
+avec le NOUVEAU contrôle mécanique. Vérifié : heure, image téléchargée, empreinte servie = locale.
 
-- Image : contrôlée par **deux oracles en aveugle** (claude.ai et chatgpt.com), trace complète avec
-  leur divergence et l'arbitrage dans `~/.claude/skills/publier/controles/traces/25f7d40168027dbc.json`.
-- Produit fini (image + texte + commentaire) : **4 passes, 2 familles**. Défauts corrigés au fil des
-  tours : exemple présenté comme vécu, test qui contredisait le principe du croisement, menace floue,
-  substitution qui peut fausser la question, portée du « se fait dans ton navigateur ».
-- Affirmation sur le traitement local : **mesurée** en production (aucune requête réseau pendant une
-  anonymisation réelle, témoin valide : le texte a bien été transformé).
-- Arrêt de la boucle décidé et justifié ; résiduels nommés, dont le nom de l'outil → tâche #2788.
+**Livré ce soir en plus** : contrôle mécanique des images (étape 3 de `/article`, imposé par le hook,
+4 témoins), skill `/dalle` (ChatGPT image au navigateur, règle 14 amendée), contrôle
+`~/.claude/skills/actu2/controles/detecter_cartes.py` et règle « une carte n'est jamais l'image
+finale » dans `/actu2`.
 
-**Vérifié :** l'image de la 344 a été téléchargée par le portail à 19h51 Québec (23:51:12 UTC),
-`download_error` nul, type `image`. Tâche #2786 close.
+### EN COURS - #2792 : trois actualités illustrées par une carte texte au lieu d'une photo
+
+58216 (système ART / Mammoth), 58211 (tutorat), 49044 (HarvestBench). Plan : prompt détaillé par
+fiche, génération `/dalle` et `/nanobanana`, contrôle des oracles en 4 temps, puis `news:apply
+--image --credit` - ce qui exige de ROUVRIR la passerelle artisan de production, puis de la
+REFERMER en le vérifiant par relecture.
+
+### À faire ensuite - #2791 : ré-auditer les images validées par l'ancien protocole
+(illustrations des parties 2 et 3 de la série emplois 2030, et toute image depuis le 2026-09-20).
 
 ## ⛔ Ce qui BLOQUE en attendant une action de Stéphane
 
 | # | Ce qui est attendu |
 |---|---|
-| **#2735** | Supprimer les publications **334 à 342** dans le portail. Garder la **341**. L'API n'a aucune route DELETE : ce geste ne peut être fait que par toi. |
+| **#2735** | L'API ne me montre plus 338, 340, 342, 343, 344 : ménage probablement fait. Garder la **341** (LinkedIn) et la **345** (Facebook). |
 | **#2759** | Publier les **parties 2 et 3** de la série dans l'admin (la double authentification me bloque). |
 | **#2585** | Approuver la publication **300**, refuser la **298**. L'heure prévue est passée, rien n'est parti. |
 | **#2368** | Clé secrète Turnstile (elle te revient, règle 1Password). |
