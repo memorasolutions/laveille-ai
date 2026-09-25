@@ -1,7 +1,6 @@
 # État de session - la-veille-de-stef-v2
 
-> Réécrit le **2026-09-24 à 19h28 Québec (23:28 UTC)**, sur demande de pause avant redémarrage
-> du Mac. Ce fichier est TOUJOURS le même : on le réécrit, on n'empile pas.
+> Mis à jour le **2026-09-24 à 20h53 Québec (00:53 UTC le 25)**, après la clôture de #2792. Ce fichier est TOUJOURS le même : on le réécrit, on n'empile pas.
 
 ---
 
@@ -51,12 +50,19 @@ avec le NOUVEAU contrôle mécanique. Vérifié : heure, image téléchargée, e
 `~/.claude/skills/actu2/controles/detecter_cartes.py` et règle « une carte n'est jamais l'image
 finale » dans `/actu2`.
 
-### EN COURS - #2792 : trois actualités illustrées par une carte texte au lieu d'une photo
+### ✅ FAIT - #2792 : les trois cartes texte sont devenues de vraies illustrations (vers 20h52 Québec, 00:52 UTC)
 
-58216 (système ART / Mammoth), 58211 (tutorat), 49044 (HarvestBench). Plan : prompt détaillé par
-fiche, génération `/dalle` et `/nanobanana`, contrôle des oracles en 4 temps, puis `news:apply
---image --credit` - ce qui exige de ROUVRIR la passerelle artisan de production, puis de la
-REFERMER en le vérifiant par relecture.
+58211 (tutorat : salle vide), 58216 (ART / Mammoth : grille de flacons, un ambré), 49044
+(HarvestBench : tracteur sans conducteur, lièvre). Générées par ChatGPT (`/dalle`), contrôlées en
+aveugle par claude.ai et chatgpt.com (description + contrôle mécanique), arbitrage dans
+`storage/app/travaux-session-2026-09-24/arbitrage-cartes-2026-09-24.md`. Appliquées par
+`news:apply --enrich --image --credit`, code 0 ; anciennes cartes sauvegardées en prod dans
+`storage/app/backup-cartes-20260924/`. **Cloudflare les gardait un an** (`max-age=31536000`) : la
+purge ciblée par `tinker` a échoué (code 255, cause non établie), la zone laveille.ai a été purgée
+en entier. Preuves : empreintes servies sans `?cb` = empreintes après application,
+`detecter_cartes.py --pages 4` → 80 fiches, 0 carte ; planche des 3 WebP servis relue à l'oeil.
+**Passerelle refermée** : cron `2780396691` retiré (relu par `cron_list`), `a2_runner.sh` neutralisé
+(relu), `a2_expire` à 0.
 
 ### À faire ensuite - #2791 : ré-auditer les images validées par l'ancien protocole
 (illustrations des parties 2 et 3 de la série emplois 2030, et toute image depuis le 2026-09-20).
