@@ -1,0 +1,30 @@
+{
+    "name": "memora/signature",
+    "description": "",
+    "authors": [
+        {
+            "name": "MEMORA solutions",
+            "email": "info@memora.ca"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Signature\\": "app/",
+            "Modules\\Signature\\Database\\Factories\\": "database/factories/",
+            "Modules\\Signature\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Signature\\Tests\\": "tests/"
+        }
+    }
+}

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * #P0-audit 2026-08-30 (audit DRY overnight v1.237.1-v1.238.3, point 3) : translateBatch()
  * retirait déjà le tiret cadratin (—, U+2014) d'un titre traduit AVANT ce correctif, mais via sa
  * PROPRE copie de `str_replace('—', '-', $sansNumero)` - une TROISIÈME implémentation de la même
- * règle CLAUDE.md #10, à côté de lv_strip_em_dash() (app/Helpers/typo.php, la fonction DÉDIÉE du
+ * règle nº 10 du projet, à côté de lv_strip_em_dash() (app/Helpers/typo.php, la fonction DÉDIÉE du
  * projet pour cette règle précise) et de son usage dans NewsImageService::generateFallbackImage()
  * (v1.237.5). Les deux copies faisaient EXACTEMENT la même chose (même substitution caractère
  * pour caractère) - le risque n'est pas dans le comportement actuel, identique avant/après, mais

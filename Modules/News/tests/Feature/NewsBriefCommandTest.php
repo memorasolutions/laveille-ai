@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Tests de la commande news:brief - point d'entrée LECTURE SEULE du skill Claude Code local
+ * Tests de la commande news:brief - point d'entrée LECTURE SEULE du skill d'automatisation local
  * /actu2 (design doc "Actus - composition manuelle assistée" 2026-08-15, section
  * "Implémentation /actu2 - volet serveur (2026-08-17)"). Couvre : la fiche introuvable, la forme
  * du JSON canonique sorti sur stdout (tous les champs contractuels, y compris policy_version =

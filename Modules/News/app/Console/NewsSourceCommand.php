@@ -11,7 +11,7 @@ use Modules\News\Models\NewsArticle;
 use Modules\News\Services\SourceMarkdownFetcher;
 
 /**
- * Récolte serveur de l'ORIGINAL pour le skill Claude Code local /actu2 (design doc "Actus -
+ * Récolte serveur de l'ORIGINAL pour le skill d'automatisation local /actu2 (design doc "Actus -
  * composition manuelle assistée" 2026-08-15, section "Implémentation /actu2 - volet serveur
  * (2026-08-17)") : récupère l'URL de l'ORIGINAL trouvé par le skill (pas nécessairement l'URL déjà
  * collectée par le flux RSS - le skill peut avoir remonté jusqu'au communiqué, au post X ou à

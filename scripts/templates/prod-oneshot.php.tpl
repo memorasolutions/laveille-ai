@@ -68,7 +68,10 @@ if (! is_string($providedToken) || $providedToken === '' || ! hash_equals($expec
 // pose/corrige/retire une vérification, et son propre contrat de validation (exclusivité
 // verdict/inconclusive, vocabulaire fermé) vit entièrement dans Modules\Blog\Console\
 // ArticleVerifyCommand, jamais recopié ici.
-const COMMANDES_AUTORISEES = ['news:brief', 'news:source', 'news:apply', 'news:create-draft', 'news:backfill-auto-tools', 'blog:verify'];
+// news:hold ajoutée (2026-09-25, cycle /actu2 fiche 59018) : porte bornée de rétention de
+// composition (NewsHoldCommand) - pose composition_hold_until, jamais d'écriture Eloquent/SQL
+// directe par l'agent, même doctrine que le reste de la famille /actu2.
+const COMMANDES_AUTORISEES = ['news:brief', 'news:source', 'news:apply', 'news:create-draft', 'news:backfill-auto-tools', 'blog:verify', 'news:hold'];
 
 // ACTION : liste blanche des arguments/options, CETTE FOIS PAR COMMANDE - une commande autorisée
 // ne suffit pas non plus à tout permettre. Reflète exactement le $signature de chaque classe sous
@@ -96,6 +99,10 @@ const ARGUMENTS_AUTORISES = [
     // news:apply pour ce besoin - le contrat fin (clé verification, sous-clés autorisées) reste
     // dans ArticleVerifyCommand, cette ligne ne fait qu'autoriser l'appel de la commande.
     'blog:verify' => ['article', '--payload'],
+    // Jumeau exact du $signature de NewsHoldCommand : --days et --release sont mutuellement
+    // exclusifs (release prime), validés côté commande elle-même - cette ligne autorise seulement
+    // l'appel, le contrat fin reste dans NewsHoldCommand.
+    'news:hold' => ['article', '--days', '--release'],
 ];
 
 $commande = $_GET['cmd'] ?? null;

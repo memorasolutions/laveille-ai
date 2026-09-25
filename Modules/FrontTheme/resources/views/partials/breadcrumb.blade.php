@@ -25,6 +25,11 @@
                                         $breadcrumbRoutes = [
                                             __('Académie') => Route::has('academy.dashboard') ? route('academy.dashboard') : null,
                                             __('Outils') => Route::has('tools.index') ? route('tools.index') : null,
+                                            // Fil à 3 niveaux (Outils > Signature de courriel > Guide...) - section 9.5 du
+                                            // plan .devis/outil_signature_html/PLAN-OUTIL-SIGNATURE.md - l'outil devient
+                                            // l'élément INTERMÉDIAIRE sur ses pages de guide/gestion, il doit donc rester
+                                            // cliquable comme les autres entrées de cette table, pas seulement le dernier.
+                                            __('Signature de courriel') => Route::has('signature.assistant') ? route('signature.assistant') : null,
                                             __('Blog') => Route::has('blog.index') ? route('blog.index') : null,
                                             __('Glossaire Techno') => Route::has('dictionary.index') ? route('dictionary.index') : null,
                                             __('Répertoire techno') => Route::has('directory.index') ? route('directory.index') : null,

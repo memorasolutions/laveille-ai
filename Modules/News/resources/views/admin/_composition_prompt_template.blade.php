@@ -1,7 +1,7 @@
-{{-- Prompt d'orchestration pour Claude Code CLI - écran de composition manuelle d'une actualité.
+{{-- Prompt d'orchestration pour l'agent d'automatisation CLI - écran de composition manuelle d'une actualité.
      RÉVISION 2026-08-17 (design doc "Actus - composition manuelle assistée" 2026-08-15, section
-     "Révision 2026-08-17 - prompt d'orchestration Claude Code CLI") : le prompt cible désormais
-     Claude Code CLI (agent local avec accès au projet), qui rédige, produit la preuve éditoriale,
+     "Révision 2026-08-17 - prompt d'orchestration de l'agent d'automatisation CLI") : le prompt cible désormais
+     l'agent d'automatisation CLI (agent local avec accès au projet), qui rédige, produit la preuve éditoriale,
      génère l'image via le compte Gemini du propriétaire, puis écrit UNIQUEMENT via la commande
      bornée `php artisan news:apply` - JAMAIS d'Eloquent/SQL/tinker direct. Décision unanime du
      panel de 5 IA. Le standard de rédaction (étape 1 ci-dessous, rounds du panel antérieur -

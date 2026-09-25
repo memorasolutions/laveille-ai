@@ -90,7 +90,7 @@ class ToolMaintenanceCommand extends Command
     }
 
     /**
-     * Le jeton d'aperçu vit en table settings (jamais en dur, règle CLAUDE.md) - généré au
+     * Le jeton d'aperçu vit en table settings (jamais en dur, règle du projet) - généré au
      * premier `--on` s'il n'existe pas encore, puis réutilisé tel quel aux bascules suivantes.
      */
     private function printPreviewLink(string $slug): void

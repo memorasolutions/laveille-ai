@@ -305,7 +305,7 @@ document.addEventListener('alpine:init', function() {
             },
             copied: false,
             // "Améliorer avec mon IA" (Option 3 hybride, 2026-07-26 — validation croisée
-            // Codex/Gemini/claude.ai) : AUCUN appel réseau backend, zéro coût serveur (posture
+            // multi-IA) : AUCUN appel réseau backend, zéro coût serveur (posture
             // BYOA stricte). Le panneau ne fait qu'afficher les mêmes boutons "Ouvrir dans"/
             // "Copier" déjà existants, reparamétrés avec un méta-prompt généré côté client.
             metaPromptShown: false,
@@ -1507,7 +1507,7 @@ document.addEventListener('alpine:init', function() {
                 // « Cadre strict » (cadreStrict) - désactivé, elles disparaissent du prompt quelle
                 // que soit la position des cases à cocher, sans jamais y toucher elles-mêmes.
                 // Round 152 (2026-08-01) : PROFIL - un texte destiné à du code ou à une traduction ne
-                // doit pas hériter des règles de style français (Gemini + claude.ai ont convergé
+                // doit pas hériter des règles de style français (Gemini et un second oracle ont convergé
                 // indépendamment : dégrade le résultat ~1 fois sur 5, voir SPEC section 7). Gate
                 // ADDITIONNELLE au-dessus de Cadre strict, jamais à la place : Cadre strict coupe TOUT
                 // (quel que soit le profil), le profil ne coupe que ces 2 règles de style.

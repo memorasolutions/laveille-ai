@@ -23,7 +23,16 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
-        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        // ACTION: ne pose la valeur par defaut que si aucune valeur plus stricte n'a deja ete
+        // posee par le controleur (ex. le module signature-courriel, page de gestion par lien
+        // secret : Referrer-Policy: no-referrer, section 7.2 du plan outil-signature - un jeton en
+        // clair vit dans cette URL, jamais dans le referrer d'un lien sortant). SELF: 1 ligne
+        // changee (has() avant set()). RAISON: cette middleware ecrasait
+        // inconditionnellement toute valeur deja posee en amont, seul point du projet a fixer
+        // Referrer-Policy avant ce jour.
+        if (! $response->headers->has('Referrer-Policy')) {
+            $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        }
         $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), display-capture=(self)');
         // ACTION: screenpal.com + media.memora.solutions (CNAME ScreenPal en marque blanche) au frame-src GLOBAL
         // SELF: édition 1 ligne. RAISON: SecurityHeaders est la CSP globale active qui écrase AcademyCsp sur /academie ;

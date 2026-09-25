@@ -15,7 +15,7 @@ declare(strict_types=1);
  *    - Retry 1 fois si parse JSON échoue.
  *    - Active si OPENROUTER_API_KEY défini ET pp_search.driver != 'precomputed'.
  *
- * 2) Precomputed (fallback CLI orchestré depuis Claude Code MCP)
+ * 2) Precomputed (fallback CLI orchestré depuis l'agent d'automatisation via MCP)
  *    - Conservé pour pipelines batch dry-run où on injecte des résultats déjà produits.
  *
  * Poids 1 (web freshness, cross-source).

@@ -9,7 +9,7 @@ declare(strict_types=1);
 // conventions maison et un harnais d'exemple. C'est ce qui empêche le modèle d'inventer un
 // `resource_path('views/modules/...')` ou des clés de traduction anglaises.
 //
-// Le risque, soulevé par la validation croisée claude.ai : ce pack devient un POINT DE
+// Le risque, soulevé par la validation croisée en revue indépendante : ce pack devient un POINT DE
 // DÉFAILLANCE UNIQUE. Si un chemin qu'il cite est renommé, le modèle reproduit fidèlement une
 // référence morte, à l'échelle, sur tous les tests suivants. On passe d'erreurs aléatoires à
 // une erreur systématique - pire, parce que ça ressemble à de la cohérence.
@@ -100,7 +100,7 @@ it('keeps the free-tier model away from test generation (routing invariant)', fu
 
     $modelesDuTierTest = array_column($config['tiers']['test'], 'model');
 
-    // Règle ferme issue de la validation claude.ai : un endpoint gratuit ne touche jamais aux
+    // Règle ferme issue de la revue indépendante : un endpoint gratuit ne touche jamais aux
     // tests. Le risque de test vide y est maximal et l'économie réelle est nulle (~0,02 $ par
     // test généré avec le modèle retenu).
     foreach ($modelesDuTierTest as $modele) {

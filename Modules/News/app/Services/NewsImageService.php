@@ -152,8 +152,8 @@ class NewsImageService
     }
 
     /**
-     * ACTION : traite un fichier d'image local (révision 2026-08-17, prompt d'orchestration
-     * Claude Code CLI - design doc section "Révision 2026-08-17") - appelé par
+     * ACTION : traite un fichier d'image local (révision 2026-08-17, prompt d'orchestration de
+     * l'agent d'automatisation CLI - design doc section "Révision 2026-08-17") - appelé par
      * NewsApplyCommand::handle() en mode --image, une fois que l'agent a obtenu le fichier
      * généré via Gemini sur le disque local. RÉUTILISE la logique interne de
      * processFromUploadedFile() ci-dessus (extraite dans processImageAtPath() juste en dessous) :
@@ -234,7 +234,7 @@ class NewsImageService
         try {
             // ACTION : tiret cadratin retiré AVANT toute mesure/découpe/dessin - réutilise
             // lv_strip_em_dash() (app/Helpers/typo.php), l'utilitaire DÉDIÉ du projet pour cette
-            // règle précise (CLAUDE.md #10), plutôt que d'écrire une seconde règle ici. Un titre
+            // règle précise (règle nº 10 du projet), plutôt que d'écrire une seconde règle ici. Un titre
             // d'actualité n'est jamais une citation verbatim (contrairement à
             // composed_summary.quote) : rien n'empêche de lui appliquer cette fonction. Mesuré le
             // 2026-08-30 : 38 fiches vivantes bakaient un cadratin venu du titre brut de la

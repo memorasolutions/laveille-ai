@@ -10,7 +10,7 @@ declare(strict_types=1);
 | CE FICHIER NE CONTIENT AUCUNE DONNÉE. Il LIT la source unique :
 |     ~/.claude/refs/social-destinations.json
 |
-| Pourquoi une source unique (règle DRY, CLAUDE.md règle 11) : les mêmes
+| Pourquoi une source unique (règle DRY, règle nº 11 du projet) : les mêmes
 | destinations servent à laveille.ai ET aux pages clientes de MEMORA, qui
 | n'ont rien à voir avec ce dépôt. Recopier la liste ici en ferait deux
 | vérités, et corriger l'une en croyant avoir corrigé les deux est la

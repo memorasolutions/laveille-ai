@@ -28,7 +28,7 @@ use Illuminate\Support\Carbon;
  * propriété $editorialFields) - ce n'est pas la même donnée que $activitylogFields (Spatie
  * Activitylog, quand présent) : les deux se ressemblent souvent mais n'ont pas vocation à
  * toujours coïncider (journal d'audit interne vs. signal de fraîcheur publié), donc ne sont
- * jamais fusionnées entre elles (DRY nuancé, CLAUDE.md).
+ * jamais fusionnées entre elles (DRY nuancé, règle du projet).
  *
  * `ViewCounterService::record()` n'appelle jamais `save()` (il passe par le query builder brut
  * `increment()`, qui ne déclenche aucun événement Eloquent) : un compteur de vues ne peut donc

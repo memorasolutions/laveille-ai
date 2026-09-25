@@ -1,4 +1,4 @@
-{{-- Template du prompt Claude Code CLI. Source : mail "Rappel concentré IA hebdo".
+{{-- Template du prompt de l'agent d'automatisation CLI. Source : mail "Rappel concentré IA hebdo".
      Variables : $periodFr, $slugPeriod, $urlsBlock. --}}
 Tu es l'agent rédaction concentré IA hebdo laveille.ai.
 

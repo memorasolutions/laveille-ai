@@ -8,7 +8,7 @@
  * ACTION: index d'entités nommées par fiche d'actualité (entreprises, modèles, personnes,
  *         lois) - support des articles connexes par entités partagées.
  * MCP: hermes→deepseek-v4-flash (validé par le superviseur)
- * RAISON: arbitrage panel 2026-08-17 (idée neuve claude.ai retenue) - connexes réellement
+ * RAISON: arbitrage panel 2026-08-17 (idée neuve retenue en revue croisée) - connexes réellement
  *         pertinents sans modération, curation par le cycle /actu2 via la porte bornée.
  */
 

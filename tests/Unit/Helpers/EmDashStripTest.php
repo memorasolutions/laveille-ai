@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @project laveille.ai
  *
  * Tests Pest pour lv_strip_em_dash() — retrait du tiret cadratin (—, U+2014) de la prose
- * française composée par le site (CLAUDE.md règle 10 : « jamais de tiret cadratin »).
+ * française composée par le site (règle nº 10 du projet : « jamais de tiret cadratin »).
  * Verrouille : idempotence + substitution caractère pour caractère (espacement environnant
  * inchangé, qu'il soit présent ou non) + zéro régression sur un texte qui n'en contient pas.
  * Le test qui compte le plus n'est PAS ici : c'est NewsApplyCommandTest.php qui verrouille

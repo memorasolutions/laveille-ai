@@ -104,7 +104,7 @@ Route::prefix('admin/newsletter')
         // Templates marketing - delete
         Route::delete('/templates/{template}', [MarketingTemplateController::class, 'destroy'])->name('templates.destroy')->middleware('permission:delete_campaigns');
 
-        // Générateur de prompt newsletter pour Claude Code CLI
+        // Générateur de prompt newsletter pour l'agent d'automatisation CLI
         Route::prefix('prompt-builder')->name('prompt-builder.')->group(function () {
             // Lecture (view_newsletter)
             Route::get('/', [PromptBuilderController::class, 'index'])->name('index')->middleware('permission:view_newsletter');

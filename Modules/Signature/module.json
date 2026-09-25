@@ -1,0 +1,11 @@
+{
+    "name": "Signature",
+    "alias": "signature",
+    "description": "Générateur gratuit de signature HTML de courriel (laveille.ai)",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Signature\\Providers\\SignatureServiceProvider"
+    ],
+    "files": []
+}

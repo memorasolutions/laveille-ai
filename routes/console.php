@@ -166,6 +166,28 @@ Schedule::command('decido:purge-expired')->dailyAt('06:15');
 // courriel) si rien de nouveau depuis le dernier resume, voir NotifyPollActivityCommand.
 Schedule::command('decido:notify-poll-activity')->dailyAt('07:00')->withoutOverlapping();
 
+// Signature (generateur de signature HTML de courriel) - gatee sur le module actif (M4.3, meme
+// garde que SaaS/Academy plus haut) : Signature est un module DESACTIVABLE, et une commande
+// planifiee ici s'execute meme quand le ServiceProvider du module n'a jamais booté, ce qui casse
+// (NamespaceNotFoundException) des que le module est desactive sans que cette ligne le sache.
+if (\Nwidart\Modules\Facades\Module::find('Signature')?->isEnabled()) {
+    // Avertissement courriel (5 mois d'inactivite, membres + rappel opt-in visiteurs anonymes),
+    // planifie AVANT la purge de 06h35 pour qu'une signature sur le point d'etre purgee recoive
+    // toujours son avertissement avant d'etre potentiellement purgee le meme jour - meme ordre que
+    // Decido ci-dessus.
+    Schedule::command('signature:warn-expiring')->dailyAt('06:20')->withoutOverlapping();
+
+    // Purge a 6 mois (contenu + images, avec filet de quarantaine 30 jours - B2), sauf si une
+    // image a ete chargee recemment (section 6.7) ou si une signature de membre existe encore
+    // (M1.4, jamais purgee automatiquement).
+    Schedule::command('signature:purge-expired')->dailyAt('06:35')->withoutOverlapping();
+
+    // Vide definitivement la quarantaine et l'archive de purge (B2) apres le delai de retention
+    // (30 jours par defaut) - planifiee apres la purge du jour, aucune dependance d'ordre reelle
+    // entre elles (une quarantaine videe un jour donne ne concerne jamais les purges du jour meme).
+    Schedule::command('signature:purge-quarantaine')->dailyAt('06:50')->withoutOverlapping();
+}
+
 // News - filet de verification "publier = purger" (addendum Actus 2.0, 2026-08-17, exigence
 // fondateur : "important de ne jamais garder les articles originaux, important de verifier").
 // Trouve toute fiche publiee dont le texte source integral serait encore present (peu importe

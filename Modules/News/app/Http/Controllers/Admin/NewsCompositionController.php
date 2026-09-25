@@ -43,8 +43,8 @@ use Modules\News\Services\SourceMarkdownFetcher;
  * complément 5.2 déjà couvert ici). La bascule de publication existe déjà ailleurs
  * (Modules\News\Http\Controllers\AdminNewsController::toggleArticle).
  *
- * RÉVISION 2026-08-17 (design doc, section "Révision 2026-08-17 - prompt d'orchestration Claude
- * Code CLI") : generatePrompt() cible désormais Claude Code CLI comme exécutant complet et
+ * RÉVISION 2026-08-17 (design doc, section "Révision 2026-08-17 - prompt d'orchestration de
+ * l'agent d'automatisation CLI") : generatePrompt() cible désormais l'agent d'automatisation CLI comme exécutant complet et
  * accepte le texte source EN LIGNE (paramètre source_text, persisté avec la même règle que
  * update() via applySourceProvenance()). La seule porte d'écriture BORNÉE pour l'agent est la
  * commande `php artisan news:apply` (Modules\News\Console\NewsApplyCommand) - cette commande
@@ -65,7 +65,7 @@ use Modules\News\Services\SourceMarkdownFetcher;
  * source intégral en base.
  *
  * RÉVISION 2026-08-17 (fin de journée) - décision du propriétaire qui RENVERSE l'arbitrage
- * ci-dessus : l'agent Claude Code CLI publie désormais lui-même la fiche, en toute fin de son
+ * ci-dessus : l'agent d'automatisation CLI publie désormais lui-même la fiche, en toute fin de son
  * prompt d'orchestration, via `php artisan news:apply {id} --publish`
  * (Modules\News\Console\NewsApplyCommand) - PUIS donne au propriétaire le lien public direct
  * pour une inspection APRÈS publication, plutôt qu'avant. Mitigation retenue : cette porte
@@ -588,7 +588,7 @@ class NewsCompositionController extends Controller
             // documenté deux fois pour ce module - CONTRAINTES-SOUS-AGENTS.md, "une nouvelle clé
             // est soit du contenu, soit une méta-donnée").
             // MCP: SELF (<10 lignes utiles)
-            // RAISON: zéro casse (CLAUDE.md règle 1) - jamais de changement de statut hors du geste explicite de l'admin.
+            // RAISON: zéro casse (règle nº 1 du projet) - jamais de changement de statut hors du geste explicite de l'admin.
             'composed_summary_active' => $article->hasComposedSummary(),
             // Outils DÉJÀ liés (Lot 4b, section 2.7) - jamais la liste des outils disponibles
             // (celle-ci voyage une seule fois, indépendante de la fiche, voir index() et
@@ -929,7 +929,7 @@ class NewsCompositionController extends Controller
     }
 
     /**
-     * Génère le prompt d'orchestration Claude Code CLI (Phase B, design doc section 5.1 et 7,
+     * Génère le prompt d'orchestration de l'agent d'automatisation CLI (Phase B, design doc section 5.1 et 7,
      * révision 2026-08-17) à partir du texte source déjà collé, du titre de travail et d'un
      * angle éditorial optionnel. Calqué sur ConcentreBuilderController::generate() : aucune
      * écriture "métier" ici (le seul écrit possible est la persistance du texte source lui-même,
@@ -1150,7 +1150,7 @@ class NewsCompositionController extends Controller
     /**
      * Forme {slug, label} des outils DÉJÀ liés à la fiche (Lot 4b, section 2.8) - extrait pour
      * être réutilisé tel quel par show(), storeRelatedTool() et destroyRelatedTool() (DRY : 3e
-     * occurrence de la même projection, seuil d'abstraction du projet atteint, CLAUDE.md section
+     * occurrence de la même projection, seuil d'abstraction du projet atteint, règle du projet section
      * "DRY et anti-sur-ingénierie").
      *
      * @return \Illuminate\Support\Collection<int, array{slug: string, label: string}>

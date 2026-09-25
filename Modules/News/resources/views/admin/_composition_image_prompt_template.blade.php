@@ -3,7 +3,7 @@
      décision du propriétaire, panel de 5 IA : l'illustration générée par IA est abandonnée au
      profit d'une PHOTO cherchée dans une banque libre de droits, APRÈS que le texte de la fiche
      soit révisé et figé (étape 5 du gabarit d'orchestration). Ce gabarit ne produit donc plus un
-     prompt de génération d'image 3D isométrique, mais la CONSIGNE DE RECHERCHE que Claude Code CLI
+     prompt de génération d'image 3D isométrique, mais la CONSIGNE DE RECHERCHE que l'agent d'automatisation CLI
      (ou l'admin, via le bouton "copier") suit pour choisir la photo à l'étape 6. Le bouton de
      l'écran reste fonctionnel à l'identique : il copie ce texte tel quel.
      Variables : $title, $angle. --}}

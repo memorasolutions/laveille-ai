@@ -229,7 +229,7 @@ class TranslationService
                 foreach ($lignes as $i => $ligne) {
                     $sansNumero = preg_replace('/^\s*\d+\s*[.)]\s*/u', '', $ligne) ?? $ligne;
                     // #P0-audit 2026-08-30 : réutilise lv_strip_em_dash() (app/Helpers/typo.php),
-                    // l'utilitaire DÉDIÉ du projet pour cette règle (CLAUDE.md #10) - remplaçait
+                    // l'utilitaire DÉDIÉ du projet pour cette règle (règle nº 10 du projet) - remplaçait
                     // avant une TROISIÈME copie manuelle de exactement la même ligne
                     // (str_replace('—', '-', ...)), trouvée en auditant les livraisons v1.237-
                     // v1.238 qui avaient déjà consolidé les deux autres (voir NewsImageService::

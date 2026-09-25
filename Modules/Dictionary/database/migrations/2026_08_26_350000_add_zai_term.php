@@ -25,7 +25,7 @@ use Modules\Dictionary\Models\Term;
  * (même défaut que celui corrigé le 2026-08-23 sur "Google" qui renvoyait vers "Gemini").
  *
  * Recherche : session sans mcp__perplexity-pro-playwright__pp_search (non enregistré dans cette
- * session sous-agent) - repli documenté CLAUDE.md sur mcp__openrouter__chat_with_model modèle
+ * session sous-agent) - repli documenté dans la règle du projet sur mcp__openrouter__chat_with_model modèle
  * perplexity/sonar-pro (3 appels). Validation croisée : Wikipédia EN "Z.ai" (bien sourcée, lue en
  * entier) + Hugging Face (org "zai-org", licence MIT confirmée sur zai-org/GLM-4.6) + vérification
  * HTTP individuelle de chaque URL de sources (200 confirmé + horodatage Wayback Machine confirmé

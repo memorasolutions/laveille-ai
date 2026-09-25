@@ -10,7 +10,7 @@ declare(strict_types=1);
  * Driver : LLM analysis (qwen3-max via openrouter-free) sur le HTML brut
  * fetché. Poids 1 (cross-source, web-aware mais pas first-party render).
  *
- * Comme PpSearch, nécessite orchestration CLI (multi-ai-mcp côté Claude Code).
+ * Comme PpSearch, nécessite orchestration CLI (multi-ai-mcp côté agent d'automatisation).
  * En PHP runtime utilise les résultats pré-calculés via setPrecomputed().
  */
 

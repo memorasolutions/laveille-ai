@@ -19,7 +19,7 @@ namespace Modules\Dictionary\Support;
  * « publication de masse ». On mesure d'abord sur ce lot pilote, on étend seulement si ça sert -
  * jamais une initiative de code silencieuse.
  *
- * Point UNIQUE de cette liste (DRY strict, CLAUDE.md règle 11) : routes/web.php restreint la
+ * Point UNIQUE de cette liste (DRY strict, règle nº 11 du projet) : routes/web.php restreint la
  * route par cette même liste (routePattern(), aucune des 518 autres pages n'existe même au
  * niveau du routeur) et PublicDictionaryController::coverage() la revérifie en profondeur
  * (défense en profondeur, jamais une confiance aveugle dans le seul filtre de route). La vue ne

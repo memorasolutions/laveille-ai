@@ -258,7 +258,7 @@ if (! function_exists('lv_typo_fr')) {
 if (! function_exists('lv_strip_em_dash')) {
     /**
      * Retire le tiret cadratin (—, U+2014) d'un texte de prose FRANÇAISE composée par le site
-     * (accroche, « pourquoi ça compte », action concrète, etc.) — règle CLAUDE.md #10 : « jamais
+     * (accroche, « pourquoi ça compte », action concrète, etc.) — règle nº 10 du projet : « jamais
      * de tiret cadratin (utilise le trait d'union - ou le point-virgule) ».
      *
      * JAMAIS À BRANCHER SUR UNE CITATION VERBATIM (composed_summary.quote,

@@ -56,7 +56,7 @@ class NewsArticle extends Model implements Searchable
     protected array $activitylogFields = ['title', 'seo_title', 'summary', 'is_published', 'published_at', 'relevance_score'];
     protected string $activitylogName = 'news_article';
 
-    // ACTION : liste distincte de $activitylogFields ci-dessus (DRY nuancé, CLAUDE.md) - le
+    // ACTION : liste distincte de $activitylogFields ci-dessus (DRY nuancé, règle du projet) - le
     // journal d'audit et le signal de fraîcheur publié (JSON-LD dateModified, lastmod sitemap)
     // n'ont pas vocation à toujours coïncider. 'relevance_score' est volontairement ABSENT ici :
     // il est recalculé par un pipeline automatisé (EditorialTriageScorer), pas par une main
@@ -458,8 +458,8 @@ class NewsArticle extends Model implements Searchable
      * manuelle assistée" 2026-08-15, note datée 2026-08-17 "l'agent publie lui-même via
      * news:apply --publish") - extrait de NewsCompositionController::publish() (révision
      * 2026-08-17) pour être réutilisé TEL QUEL par ce même contrôleur (bouton manuel
-     * Publier-et-purger) ET par NewsApplyCommand (--publish, porte bornée de l'agent Claude Code
-     * CLI). DRY explicite exigé par le mandat : aucune divergence possible entre les deux
+     * Publier-et-purger) ET par NewsApplyCommand (--publish, porte bornée de l'agent
+     * d'automatisation CLI). DRY explicite exigé par le mandat : aucune divergence possible entre les deux
      * chemins de publication.
      *
      * Vérifie, dans l'ordre :
@@ -887,7 +887,7 @@ class NewsArticle extends Model implements Searchable
         // frappe possible, ex. « 3jours ») avant même le cast ; ce modèle défend son propre contrat
         // sur un ENTIER déjà casté, pour tout appelant interne (y compris l'automatisme de
         // NewsApplyCommand) - deux surfaces différentes, deux raisons de changer différentes
-        // (CLAUDE.md, section DRY : ne pas fusionner deux gardes qui n'évolueront pas ensemble).
+        // (règle du projet, section DRY : ne pas fusionner deux gardes qui n'évolueront pas ensemble).
         // MCP: SELF (<5 lignes)
         // RAISON: doctrine du projet - une entrée invalide est REFUSÉE explicitement, jamais
         // réinterprétée en silence.
@@ -1168,7 +1168,7 @@ class NewsArticle extends Model implements Searchable
      * communes puis fraîcheur. Sous-requête agrégée joinSub (jamais de groupBy sur
      * news_articles.*, incompatible ONLY_FULL_GROUP_BY).
      * MCP: hermes→deepseek-v4-flash (2e passe, squelette imposé par le superviseur)
-     * RAISON: arbitrage panel 2026-08-17 (idée neuve claude.ai retenue).
+     * RAISON: arbitrage panel 2026-08-17 (idée neuve retenue en revue croisée).
      */
     public function relatedByEntities(int $limit = 3): EloquentCollection
     {

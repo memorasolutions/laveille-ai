@@ -33,7 +33,7 @@ class AuthorPost extends Model
 
     // ACTION : proche de getActivitylogOptions() ci-dessus (+ excerpt/cover_image, réellement
     // affichés mais absents du journal d'audit) - propriété VOLONTAIREMENT distincte, voir
-    // Modules\Core\Traits\TracksEditorialModification (DRY nuancé, CLAUDE.md).
+    // Modules\Core\Traits\TracksEditorialModification (DRY nuancé, règle du projet).
     // MCP: SELF (<5 lignes)
     // RAISON: docs/specs/2026-09-11-mesure-visibilite-et-fraicheur.md, MESURE B.
     protected array $editorialFields = [

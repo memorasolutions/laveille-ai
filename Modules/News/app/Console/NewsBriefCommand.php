@@ -10,7 +10,7 @@ use Modules\News\Services\CompositionPromptBuilder;
 use Modules\News\Services\NewsImageService;
 
 /**
- * Point d'entrée LECTURE SEULE du skill Claude Code local /actu2 (design doc "Actus - composition
+ * Point d'entrée LECTURE SEULE du skill d'automatisation local /actu2 (design doc "Actus - composition
  * manuelle assistée" 2026-08-15, section "Implémentation /actu2 - volet serveur (2026-08-17)") :
  * sort un JSON canonique décrivant l'état courant d'une fiche, sur stdout, sans jamais écrire.
  * Le skill l'appelle en tout premier (avant toute décision de rédaction) pour connaître ce qui

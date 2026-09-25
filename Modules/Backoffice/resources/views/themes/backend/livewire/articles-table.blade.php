@@ -101,7 +101,7 @@
                         <th class="fw-medium" style="width:112px">{{ __('Statut') }}</th>
                         <th class="fw-medium" style="width:128px">{{ __('Catégorie') }}</th>
                         <th class="fw-medium" style="width:128px">{{ __('Auteur') }}</th>
-                        <th class="fw-medium user-select-none" style="width:112px;cursor:pointer" wire:click="sort('published_at')">
+                        <th class="fw-medium user-select-none" style="width:168px;cursor:pointer" wire:click="sort('published_at')">
                             {{ __('Publication') }}
                             @if($sortBy === 'published_at')
                                 <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
@@ -127,7 +127,10 @@
                                 </div>
                             @endif
                         </td>
-                        <td class="fw-medium text-body">{{ $article->title }}</td>
+                        <td class="fw-medium text-body">
+                            {{-- Le titre se replie sur plusieurs lignes : largeur bornee pour qu'il n'elargisse pas la table (demande fondateur 2026-09-25). --}}
+                            <div style="max-width:340px;white-space:normal;word-break:break-word">{{ $article->title }}</div>
+                        </td>
                         <td>
                             @can('update_articles')
                                 <select wire:change="changeStatus({{ $article->id }}, $event.target.value)"
@@ -144,14 +147,18 @@
                         <td class="text-muted">{{ $article->blogCategory?->name ?? '–' }}</td>
                         <td class="text-muted">{{ $article->user?->name ?? '–' }}</td>
                         <td class="text-muted">
-                            {{-- Date de publication : une date future = article planifié, invisible sur le site d'ici là --}}
-                            @if($article->published_at)
-                                {{ format_date($article->published_at, 'datetime') }}
-                                @if((string) $article->status === 'published' && $article->published_at->isFuture())
-                                    <span class="badge bg-warning-subtle text-warning-emphasis border d-block mt-1">{{ __('Prévue') }}</span>
-                                @endif
+                            {{-- « Publiée » = deja en ligne ; « Planifiee » = date future, invisible sur le site d'ici la. Heure du Quebec (app en America/Toronto). --}}
+                            @if((string) $article->status === 'published' && $article->published_at)
+                                @php($estPlanifiee = $article->published_at->isFuture())
+                                <span class="badge {{ $estPlanifiee ? 'bg-warning-subtle text-warning-emphasis' : 'bg-success-subtle text-success-emphasis' }} border d-inline-flex align-items-center gap-1 mb-1">
+                                    <i data-lucide="{{ $estPlanifiee ? 'clock' : 'check' }}" class="icon-sm"></i>
+                                    {{ $estPlanifiee ? __('Planifiée') : __('Publiée') }}
+                                </span>
+                                <span class="d-block small">{{ format_date($article->published_at, 'datetime') }}</span>
+                            @elseif($article->published_at)
+                                <span class="d-block small">{{ format_date($article->published_at, 'datetime') }}</span>
                             @else
-                                <span title="{{ __('Date de création') }}">{{ format_date($article->created_at) }}</span>
+                                <span class="d-block small" title="{{ __('Date de création') }}">{{ __('Créé le') }} {{ format_date($article->created_at) }}</span>
                             @endif
                         </td>
                         <td>

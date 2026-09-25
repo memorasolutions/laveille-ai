@@ -23,8 +23,8 @@ use Modules\News\Models\NewsArticle;
  * panel en trois rounds - section 5.1 et 10 du design doc. NE PAS le modifier sans revoir le
  * design doc.
  *
- * RÉVISION 2026-08-17 (design doc, section "Révision 2026-08-17 - prompt d'orchestration Claude
- * Code CLI") : le prompt cible désormais Claude Code CLI comme exécutant complet (rédaction +
+ * RÉVISION 2026-08-17 (design doc, section "Révision 2026-08-17 - prompt d'orchestration de
+ * l'agent d'automatisation CLI") : le prompt cible désormais l'agent d'automatisation CLI comme exécutant complet (rédaction +
  * preuve + écriture bornée via `php artisan news:apply` + image). build() a donc changé de
  * signature - il prend l'objet NewsArticle complet (id, slug, empreinte, updated_at nécessaires
  * aux métadonnées de fraîcheur) plutôt que le seul texte source. Panel de 5 IA unanime : la

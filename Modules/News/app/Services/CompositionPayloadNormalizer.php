@@ -30,7 +30,7 @@ use Illuminate\Support\Str;
  * reste une ligne `array_key_exists()` répétée à chaque appelant, jamais enveloppée ici - la
  * connaissance qui compte (la liste des valeurs permises) est déjà centralisée dans le modèle ;
  * envelopper la comparaison elle-même ajouterait une indirection sans réduire aucun risque de
- * divergence (CLAUDE.md, section « DRY et anti-sur-ingénierie »).
+ * divergence (règle du projet, section « DRY et anti-sur-ingénierie »).
  *
  * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
  * @project laveille.ai

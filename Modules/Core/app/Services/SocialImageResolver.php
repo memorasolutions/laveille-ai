@@ -18,7 +18,7 @@ namespace Modules\Core\Services;
  * sinon une image par défaut) existait déjà, dupliquée, dans Dictionary et News - et laissait
  * passer les images externes et certains résidus locaux sans .jpg jumeau. Ce service centralise
  * la règle à UN seul endroit, appelée par le Glossaire, les Actualités, le Blogue et les
- * Outils plutôt que recopiée dans chaque vue (DRY - CLAUDE.md règle 11).
+ * Outils plutôt que recopiée dans chaque vue (DRY - règle nº 11 du projet).
  */
 final class SocialImageResolver
 {

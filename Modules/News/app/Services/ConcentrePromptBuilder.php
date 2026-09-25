@@ -10,7 +10,7 @@ use InvalidArgumentException;
 use Modules\News\Models\NewsArticle;
 
 /**
- * S90 — Génère le prompt Claude Code CLI pour la rédaction du concentré IA hebdo.
+ * S90 — Génère le prompt de l'agent d'automatisation CLI pour la rédaction du concentré IA hebdo.
  *
  * Source du template : mail "Rappel concentré IA hebdo" envoyé chaque lundi 7h25
  * (cf gmail message 19e16c922194748c, 11 mai 2026). L'outil frontend remplace ce

@@ -77,14 +77,14 @@ class NewsServiceProvider extends ServiceProvider
             // BackfillAutoToolDetectionCommand ci-dessus, pour le pivot news_article_term.
             \Modules\News\Console\BackfillAutoTermDetectionCommand::class,
             \Modules\News\Console\NotifyNewsDigestCommand::class,
-            // Actus 2.0, révision 2026-08-17 (prompt d'orchestration Claude Code CLI) - SEULE
+            // Actus 2.0, révision 2026-08-17 (prompt d'orchestration de l'agent d'automatisation CLI) - SEULE
             // porte d'écriture bornée pour l'agent, voir docblock de la classe.
             \Modules\News\Console\NewsApplyCommand::class,
             // Actus 2.0, addendum 2026-08-17 (« purge garantie sur tous les chemins de
             // publication ») - filet de vérification quotidien, planifié dans routes/console.php.
             \Modules\News\Console\VerifySourcePurgeCommand::class,
             // Implémentation /actu2 - volet serveur (2026-08-17) : point d'entrée LECTURE SEULE
-            // du skill Claude Code local (JSON canonique) et récolte de l'ORIGINAL (2e porte
+            // du skill d'automatisation local (JSON canonique) et récolte de l'ORIGINAL (2e porte
             // d'écriture bornée, aux côtés de NewsApplyCommand) - voir docblocs des classes.
             \Modules\News\Console\NewsBriefCommand::class,
             \Modules\News\Console\NewsSourceCommand::class,

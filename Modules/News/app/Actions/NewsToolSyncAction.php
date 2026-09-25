@@ -235,7 +235,7 @@ final class NewsToolSyncAction
      *         d'une fiche... et fais la même chose pour le terme"), à l'endroit qui centralise
      *         déjà toute la logique du pivot news_article_term (ce fichier) et juste à côté de
      *         sa jumelle - jamais un service dédié séparé : seulement 2 occurrences de la même
-     *         mécanique de purge à ce jour, sous le seuil d'abstraction du projet (CLAUDE.md,
+     *         mécanique de purge à ce jour, sous le seuil d'abstraction du projet (règle du projet,
      *         "DRY et anti-sur-ingénierie" - 3e occurrence requise hors risque légal/financier).
      *
      * Utilise Term::getPublicUrl() et JAMAIS route('dictionary.show', $term->slug) en accès

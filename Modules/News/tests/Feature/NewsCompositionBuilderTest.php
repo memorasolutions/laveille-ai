@@ -531,7 +531,7 @@ it('generatePrompt backfills a missing source_content_hash for an article alread
     expect($article->fresh()->source_content_hash)->toBe($expectedHash);
 });
 
-// ── Révision 2026-08-17 : contenu du prompt d'orchestration Claude Code CLI ────────────────
+// ── Révision 2026-08-17 : contenu du prompt d'orchestration de l'agent d'automatisation CLI ────────────────
 
 it('the generated prompt contains the mission, the nonce-delimited source, the named prohibitions, the freshness metadata and the news:apply command', function () {
     $admin = ncbAdmin();

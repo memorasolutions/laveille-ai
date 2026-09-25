@@ -1,0 +1,11 @@
+/* Author: MEMORA solutions, https://memora.solutions ; info@memora.ca */
+
+.sig-template-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.sig-template-card { border: 2px solid #e5e7eb; border-radius: var(--r-base, 0.75rem); padding: 10px; text-align: center; cursor: pointer; background: #fff; }
+.sig-template-card.active { border-color: var(--c-primary, #064E5A); background: #f0f9f9; }
+.sig-repeater-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.sig-repeater-row > * { flex: 1; }
+.sig-preview-wrap { border: 1px solid #e5e7eb; border-radius: var(--r-base, 0.75rem); overflow: hidden; background: #f9fafb; }
+.sig-preview-wrap iframe { width: 100%; min-height: 220px; border: 0; background: #ffffff; }
+.sig-image-slot { border: 1px dashed #d1d5db; border-radius: 8px; padding: 10px; text-align: center; }
+.sig-secret-link { word-break: break-all; font-family: monospace; font-size: 12px; background: #f3f4f6; padding: 8px; border-radius: 6px; display: block; }

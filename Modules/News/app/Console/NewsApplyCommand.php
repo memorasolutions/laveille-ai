@@ -14,9 +14,9 @@ use Modules\News\Services\CompositionPromptBuilder;
 use Modules\News\Services\NewsImageService;
 
 /**
- * SEULE porte d'écriture bornée pour l'agent Claude Code CLI orchestré par l'écran de
+ * SEULE porte d'écriture bornée pour l'agent d'automatisation CLI orchestré par l'écran de
  * composition (design doc "Actus - composition manuelle assistée" 2026-08-15, section "Révision
- * 2026-08-17 - prompt d'orchestration Claude Code CLI"). Décision unanime du panel de 5 IA :
+ * 2026-08-17 - prompt d'orchestration de l'agent d'automatisation CLI"). Décision unanime du panel de 5 IA :
  * l'agent n'écrit JAMAIS librement en base (aucun Eloquent, aucun SQL, aucun tinker) - il ne peut
  * appliquer son travail que par CETTE commande, qui impose une liste blanche stricte de clés et
  * une double protection anti-écrasement (empreinte du texte source + updated_at).
@@ -63,7 +63,7 @@ use Modules\News\Services\NewsImageService;
  * inversement - c'est voulu (étape 4 du prompt généré, reprenable indépendamment de l'étape 3).
  *
  * NOTE DATÉE 2026-08-17 (fin de journée) - RENVERSE un arbitrage antérieur du panel de 5 IA du
- * MÊME jour : décision du propriétaire, l'agent Claude Code CLI publie désormais lui-même la
+ * MÊME jour : décision du propriétaire, l'agent d'automatisation CLI publie désormais lui-même la
  * fiche, en toute fin de son prompt d'orchestration (étape 6, après texte, image ET révision
  * adversariale obligatoire - étape 5, addendum reçu pendant cette même révision), via le mode
  * `--publish` ci-dessous, puis donne au propriétaire le lien public direct de la fiche pour une
@@ -383,7 +383,7 @@ class NewsApplyCommand extends Command
             // - lv_strip_em_dash() (app/Helpers/typo.php), jamais lv_typo_fr() (règle NBSP, pas de
             // rapport). title n'est jamais une citation verbatim : rien n'empêche de le nettoyer.
             // MCP: SELF (<5 lignes)
-            // RAISON: CLAUDE.md #10 - « jamais de tiret cadratin » - structural, pas ponctuel.
+            // RAISON: règle nº 10 du projet - « jamais de tiret cadratin » - structural, pas ponctuel.
             $updates['title'] = lv_strip_em_dash(trim($decoded['title']));
             if (! $this->option('enrich')) {
                 $updates['slug'] = NewsArticle::generateUniqueSlug($updates['title'], $article->id);

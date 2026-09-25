@@ -209,7 +209,7 @@ class Tool extends Model
      * Contournement "aperçu propriétaire" du mode maintenance : un paramètre d'URL valide
      * (?apercu=...) pose un cookie de contournement de 30 jours (pour un accès mobile sans
      * connexion), puis ce même cookie suffit sur les visites suivantes. Le jeton attendu vit en
-     * table settings (jamais en dur dans le code, règle CLAUDE.md) - régénérable sans
+     * table settings (jamais en dur dans le code, règle du projet) - régénérable sans
      * déploiement via `tools:maintenance {slug} --on`.
      */
     private static function hasValidMaintenancePreviewBypass(): bool

@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Modules\Newsletter\Services;
 
 /**
- * Assemble un PROMPT texte structuré destiné à Claude Code CLI pour générer
+ * Assemble un PROMPT texte structuré destiné à l'agent d'automatisation CLI pour générer
  * la newsletter hebdomadaire de « La veille de Stef » via le gabarit digest-weekly.
  *
  * Chaque section peut être AUTO (laisser DigestContentService/EditorialBank agir)

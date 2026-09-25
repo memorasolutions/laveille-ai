@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Tests de la commande news:source - récolte serveur de l'ORIGINAL pour le skill Claude Code
+ * Tests de la commande news:source - récolte serveur de l'ORIGINAL pour le skill d'automatisation
  * local /actu2 (design doc "Actus - composition manuelle assistée" 2026-08-15, section
  * "Implémentation /actu2 - volet serveur (2026-08-17)"). Couvre : le refus sur une fiche publiée,
  * le refus d'écraser un texte source déjà présent sans --replace, la persistance du Markdown +

@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 /**
- * Tests de la commande news:apply - SEULE porte d'écriture bornée pour l'agent Claude Code CLI
+ * Tests de la commande news:apply - SEULE porte d'écriture bornée pour l'agent d'automatisation CLI
  * de l'écran de composition (design doc "Actus - composition manuelle assistée" 2026-08-15,
- * section "Révision 2026-08-17 - prompt d'orchestration Claude Code CLI"). Couvre : le refus sur
+ * section "Révision 2026-08-17 - prompt d'orchestration de l'agent d'automatisation CLI"). Couvre : le refus sur
  * une fiche publiée, la liste blanche stricte des clés du payload, la double protection
  * anti-écrasement (empreinte + updated_at), l'application d'un payload valide, la fusion des
  * paires de preuve, et le dépôt d'image local (mêmes validations que le dépôt web).

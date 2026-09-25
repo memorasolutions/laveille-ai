@@ -26,7 +26,7 @@ use PDO;
  *
  * Centralise ce qui vivait AVANT en 3 copies identiques (AffiliateLinkTest, ThinContentNoindexTest,
  * DirectoryViewCounterTest - toutes dans Modules/Directory/tests/Feature) : un seul mécanisme,
- * DRY (règle CLAUDE.md #11), utilisable par n'importe quel module.
+ * DRY (règle nº 11 du projet), utilisable par n'importe quel module.
  *
  * Usage dans un fichier Pest (après uses()) :
  *   uses(\Tests\Concerns\RegistersMysqlSqliteCompatFunctions::class);

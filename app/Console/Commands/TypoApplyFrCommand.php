@@ -93,7 +93,7 @@ class TypoApplyFrCommand extends Command
     /**
      * Tables du plan dont l'absence du schéma est EXPLIQUÉE par un module nwidart optionnel
      * désactivé (modules_statuses.json) - un état normal de l'architecture « module
-     * activable/désactivable sans casse » (CLAUDE.md), jamais un défaut de configuration.
+     * activable/désactivable sans casse » (règle du projet), jamais un défaut de configuration.
      * Toute AUTRE table du plan absente du schéma réel N'A PAS cette excuse : c'est soit un nom
      * de table erroné (le cas 'pages' corrigé ci-dessus), soit une table jamais créée - dans les
      * deux cas guardPlanIntegrity() la traite comme un défaut et fait échouer la commande.

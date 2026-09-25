@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.300.0] - 2026-09-25
+
+### Ajouté
+- **Outil de génération de signatures HTML de courriel** (module Signature, en construction, visible du fondateur seul) : éditeur avec aperçu direct, compression d'image sans pixellisation, lien secret pour un visiteur non connecté, sauvegarde dans le compte des membres. Filet de sécurité : quarantaine opérateur de 30 jours avant toute purge (aucune suppression sans possibilité de restauration), identifiants d'image aléatoires non énumérables, métadonnées EXIF retirées des images servies.
+- **Fiche de glossaire « CVE »** avec son illustration.
+- Admin du blogue : la colonne « Publication » affiche un badge « Publiée » ou « Planifiée » avec la date et l'heure (Québec), et les titres peuvent tenir sur plusieurs lignes.
+- La commande `news:hold` est autorisée dans le runner de production.
+
+### Modifié
+- Le « Générateur de politique IA » est désactivé sur laveille.ai (module conservé, réversible).
+
+### Nettoyé
+- Retrait des références à des outils externes dans les commentaires du code (41 fichiers), conformément à la charte de code du projet.
+
 ## [1.299.0] - 2026-09-25
 
 ### Ajouté

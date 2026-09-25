@@ -221,7 +221,7 @@
                         .ct-check-grid{display:flex;flex-direction:column;gap:0.5rem;}
                         {{-- Multicol (pas grid) : lecture VERTICALE par colonnes, condition de validité de
                              l'exception « groupes de cases homogènes » à la règle 1 colonne (panel 5 oracles
-                             2026-08-09, claude.ai + Baymard) - le flux grid en Z faisait lire 1-2 / 3-4 / 5-6. --}}
+                             2026-08-09, revue croisée + Baymard) - le flux grid en Z faisait lire 1-2 / 3-4 / 5-6. --}}
                         @media (min-width: 768px){.ct-check-grid{display:block;columns:2;column-gap:1.25rem;}.ct-check-grid>label{break-inside:avoid;width:100%;margin-bottom:0.15rem;}}
                         {{-- Même mandat (champs COURTS côte à côte) : les deux champs du bloc Format
                              (« Format de sortie » et « Longueur précise ») partagent la largeur sur
@@ -273,7 +273,7 @@
                         .ct-conditional-block{margin-top:0.5rem;padding:0.5rem 0.65rem;background:var(--c-primary-light);border-left:3px solid var(--c-primary);border-radius:8px;}
                         {{-- Correctifs UX incrémentaux wizard 4 étapes (2026-08-05, club des sages) :
                              6 évolutions ciblées du gabarit existant, aucune refonte d'écrans - voir
-                             CLAUDE.md « pas de big-bang » (3 refontes annulées par l'utilisateur en 2026). --}}
+                             la règle du projet « pas de big-bang » (3 refontes annulées par l'utilisateur en 2026). --}}
 
                         {{-- #1 espacement bouton "Suivant"/nav collé au champ au-dessus. --}}
                         .ct-step-nav{margin-top:1.5rem;}
@@ -1044,7 +1044,7 @@
                                         </label>
                                     </div>
                                     {{-- Destination (OÙ) et Format attendu (QUOI) : 2 champs distincts mais liés
-                                         (décision d'architecture d'info validée Codex/claude.ai/Gemini, juillet 2026).
+                                         (décision d'architecture d'info validée en revue croisée multi-IA, juillet 2026).
                                          État interne inchangé : constraintCanvas + canvasAI pilotés par le getter/setter
                                          `destination` (voir constructeur-prompts-core.js) pour zéro régression au reload.
                                          Renommé « Créer un document modifiable » (section 6 du plan). --}}
@@ -1285,7 +1285,7 @@
                             <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
                                     x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
                             {{-- "Améliorer avec mon IA" (Option 3 hybride, Partie B — 2026-07-26,
-                                 validation croisée Codex/Gemini/claude.ai) : modèle BYOA strict.
+                                 validation croisée multi-IA) : modèle BYOA strict.
                                  AUCUN appel réseau backend — génère un méta-prompt 100% côté client
                                  (get metaPrompt()) et réutilise le mécanisme "Ouvrir dans"/"Copier"
                                  déjà existant pour le pousser vers l'IA déjà connectée de

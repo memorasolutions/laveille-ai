@@ -5,7 +5,7 @@
     UN VRAI bouton radio ou une VRAIE case à cocher (jamais un <div> qui imite un bouton sans en
     avoir le comportement clavier/lecteur d'écran), cible tactile >= 44px, et l'état sélectionné
     est indiqué par une coche EN PLUS de la couleur - jamais la couleur seule (exigence explicite
-    du panel Codex/Gemini/claude.ai, voir .outils/PLAN-FINAL-constructeur-2026-07-31.md section 10).
+    du panel de revue multi-IA, voir .outils/PLAN-FINAL-constructeur-2026-07-31.md section 10).
 
     Props :
     - type    : 'radio' | 'checkbox' (défaut 'checkbox')

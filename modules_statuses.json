@@ -53,5 +53,6 @@
     "Sso": true,
     "Books": true,
     "Journal": true,
-    "Decido": true
+    "Decido": true,
+    "Signature": true
 }
