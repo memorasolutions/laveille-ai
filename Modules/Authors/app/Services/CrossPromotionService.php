@@ -23,6 +23,10 @@ final class CrossPromotionService
                     ->where('id', '!=', $articleId)
                     ->where('user_id', '!=', $current->user_id)
                     ->where('status', 'published')
+                    // 2026-09-25 : sans cette borne, un article planifié (published_at futur)
+                    // remontait EN TÊTE de liste (tri décroissant sur published_at) - la
+                    // recommandation menait vers une page d'avant-première plutôt qu'un article.
+                    ->where('published_at', '<=', now())
                     ->when($current->category_id, fn ($q) => $q->where('category_id', $current->category_id))
                     ->orderByDesc('published_at')
                     ->limit($limit)
@@ -47,6 +51,8 @@ final class CrossPromotionService
                 return DB::table('articles')
                     ->where('user_id', '!=', $author->user_id)
                     ->where('status', 'published')
+                    // 2026-09-25 : même garde-fou que getRecommendationsForArticle() ci-dessus.
+                    ->where('published_at', '<=', now())
                     ->orderByDesc('published_at')
                     ->limit($limit)
                     ->get(['id', 'title', 'slug', 'user_id', 'published_at'])

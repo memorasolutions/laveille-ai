@@ -98,8 +98,12 @@ final class MiniSiteController extends Controller
         $timeline = collect();
 
         if ($author->user) {
+            // 2026-09-25 : published_at <= now() - un article "published" planifié dans le futur
+            // (avant-première) ne doit pas apparaître dans la chronologie publique du mini-site,
+            // ni y être trié en tête (orderByDesc('published_at') l'y placerait).
             $articles = \Modules\Blog\Models\Article::where('user_id', $author->user_id)
                 ->where('status', 'published')
+                ->where('published_at', '<=', now())
                 ->orderByDesc('published_at')
                 ->get();
 
@@ -160,8 +164,11 @@ final class MiniSiteController extends Controller
 
         $items = collect();
         if ($author->user) {
+            // 2026-09-25 : même garde-fou que show() ci-dessus - un article planifié ne doit pas
+            // apparaître dans le flux RSS public de l'auteur avant sa date de parution.
             $articles = \Modules\Blog\Models\Article::where('user_id', $author->user_id)
                 ->where('status', 'published')
+                ->where('published_at', '<=', now())
                 ->orderByDesc('published_at')
                 ->limit(20)
                 ->get();

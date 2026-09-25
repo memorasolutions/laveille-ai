@@ -91,7 +91,13 @@ class RagService
         }
 
         if (class_exists(\Modules\Blog\Models\Article::class)) {
+            // 2026-09-25 : published_at <= now() - ce contexte alimente le chatbot PUBLIC
+            // (Modules\AI\Livewire\ChatBot, ChatStreamController) et injecte le CONTENU intégral
+            // de l'article dans le prompt système. Sans cette borne, un article "published"
+            // planifié dans le futur (avant-première, non indexée, non affichée nulle part
+            // ailleurs) pouvait être cité et paraphrasé par le chatbot avant sa date de parution.
             $articles = \Modules\Blog\Models\Article::where('status', 'published')
+                ->where('published_at', '<=', now())
                 ->where(fn ($q) => $q->where('title', 'LIKE', "%{$query}%")
                     ->orWhere('content', 'LIKE', "%{$query}%"))
                 ->take($maxResults)

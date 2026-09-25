@@ -30,6 +30,8 @@
                             'slug' => $s,
                             'title' => $a->getTranslation('title', $locale, false) ?? $a->title,
                             'part_number' => $partNum,
+                            // Partie planifiée : annoncée avec sa date, son adresse sert une page d'avant-première
+                            'upcoming_at' => $a->published_at?->isFuture() ? $a->published_at : null,
                         ];
                     })
                     ->filter(fn ($item) => $item['part_number'] !== null)
@@ -67,6 +69,17 @@
                     <span style="font-size: 0.85rem; font-weight: 700; color: #064E5A; line-height: 1.2;">Partie {{ $part['part_number'] }}&nbsp;:</span>
                     <span style="font-size: 0.9rem; font-weight: 600; color: #1A1D23; line-height: 1.4;">{{ $truncatedTitle }}</span>
                 </div>
+            @elseif($part['upcoming_at'])
+                {{-- Partie planifiée : son adresse sert une page d'avant-première (200, noindex) jusqu'à la date prévue --}}
+                <a
+                    href="{{ url('/blog/' . $part['slug']) }}"
+                    aria-label="Partie {{ $part['part_number'] }}&nbsp;: {{ $truncatedTitle }}, à paraître le {{ format_date($part['upcoming_at'], 'long') }}"
+                    style="flex: 1 1 220px; max-width: 100%; background-color: #FFFFFF; border: 2px dashed #D5EDF0; border-radius: 8px; padding: 16px; text-decoration: none; display: flex; flex-direction: column; gap: 8px;"
+                >
+                    <span style="font-size: 0.85rem; font-weight: 700; color: #064E5A; line-height: 1.2;">Partie {{ $part['part_number'] }}&nbsp;:</span>
+                    <span style="font-size: 0.9rem; font-weight: 500; color: #1A1D23; line-height: 1.4;">{{ $truncatedTitle }}</span>
+                    <span style="font-size: 0.78rem; color: #4A5160; margin-top: auto; font-weight: 500;">À paraître le {{ format_date($part['upcoming_at'], 'long') }} →</span>
+                </a>
             @else
                 <a
                     href="{{ url('/blog/' . $part['slug']) }}"

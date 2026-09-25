@@ -44,7 +44,10 @@ class SitemapController
         // 2026-08-31 (#2092) : url('/blog/'.$article->slug) était un accès brut au slug traduisible
         // (même défaut que le plan de site cassé le 18 juillet 2026) - Article::getPublicUrl() existe
         // déjà depuis le 27 juillet 2026 et protège ce même besoin, il suffisait de l'appeler ici.
-        Article::where('status', 'published')->whereNotNull('published_at')->select(['id', 'slug', 'updated_at', 'featured_image'])->get()->each(function ($article) use ($sitemap) {
+        // 2026-09-25 : published_at <= now() ajouté - un article "published" planifié dans le futur
+        // (avant-première, PublicPostController::show()) sert une page noindex tant que sa date
+        // n'est pas atteinte ; l'annoncer au sitemap avant l'heure contredirait ce noindex.
+        Article::where('status', 'published')->whereNotNull('published_at')->where('published_at', '<=', now())->select(['id', 'slug', 'updated_at', 'featured_image'])->get()->each(function ($article) use ($sitemap) {
             $url = Url::create($article->getPublicUrl())
                 ->setLastModificationDate($article->updated_at)
                 ->setPriority(0.8)

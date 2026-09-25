@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.298.0] - 2026-09-25
+
+### Ajouté
+- **Un article planifié a maintenant une page d'avant-première.** Avant sa date, l'adresse d'un
+  article au statut publié mais daté dans le futur répond 200 avec une page « À paraître le lundi
+  29 septembre 2026 à 9 h » (titre, image, résumé, série), marquée noindex dans la page et dans
+  l'en-tête, jamais mise en cache, et sans le contenu de l'article. À la date prévue, la même
+  adresse sert l'article complet. Avant, elle répondait 404 alors que la partie 1 d'une série y
+  menait déjà.
+- **La liste des articles de l'admin distingue « Planifié » de « Publié »**, et la colonne
+  « Publication » affiche la date et l'heure de parution, avec un badge « Prévue » pour une date
+  future.
+
+### Corrigé
+- La navigation de série annonce une partie à venir avec sa date au lieu d'un lien vers un 404.
+- Le plan du site n'annonce plus les articles planifiés à Google avant leur date.
+- La promotion croisée et le mini-site des auteurs n'affichent plus d'articles planifiés, et le
+  robot conversationnel ne peut plus en citer le texte avant leur parution.
+
 ## [1.297.0] - 2026-09-25
 
 ### Ajouté

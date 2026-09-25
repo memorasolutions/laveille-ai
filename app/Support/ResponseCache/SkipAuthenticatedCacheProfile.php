@@ -6,6 +6,7 @@ namespace App\Support\ResponseCache;
 
 use Illuminate\Http\Request;
 use Spatie\ResponseCache\CacheProfiles\CacheAllSuccessfulGetRequests;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Empêche Spatie ResponseCache de mettre en cache les réponses des utilisateurs
@@ -38,5 +39,28 @@ class SkipAuthenticatedCacheProfile extends CacheAllSuccessfulGetRequests
         }
 
         return parent::shouldCacheRequest($request);
+    }
+
+    /**
+     * Ne JAMAIS mettre en cache une réponse qui porte X-Robots-Tag: noindex.
+     *
+     * Cas mesuré (2026-09-25) : la page d'avant-première d'un article de blogue planifié
+     * (PublicPostController::show(), route /blog/{slug} en cacheResponse:3600) porte cet
+     * en-tête tant que la date de parution n'est pas atteinte. Sans ce garde-fou, la PREMIÈRE
+     * visite (même celle de Stéphane en train de vérifier la page) fige cette version noindex
+     * dans le cache serveur - la mise en ligne réelle à l'heure prévue resterait alors invisible
+     * jusqu'à l'expiration du cache (jusqu'à 1h après la publication), et la page servirait
+     * encore l'ancien contenu (sans le contenu complet, sans les balises d'indexation) à tous
+     * les visiteurs suivants pendant ce délai.
+     */
+    public function shouldCacheResponse(Response $response): bool
+    {
+        $robotsTag = (string) $response->headers->get('X-Robots-Tag', '');
+
+        if (str_contains(strtolower($robotsTag), 'noindex')) {
+            return false;
+        }
+
+        return parent::shouldCacheResponse($response);
     }
 }

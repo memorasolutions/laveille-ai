@@ -101,9 +101,9 @@
                         <th class="fw-medium" style="width:112px">{{ __('Statut') }}</th>
                         <th class="fw-medium" style="width:128px">{{ __('Catégorie') }}</th>
                         <th class="fw-medium" style="width:128px">{{ __('Auteur') }}</th>
-                        <th class="fw-medium user-select-none" style="width:112px;cursor:pointer" wire:click="sort('created_at')">
-                            {{ __('Date') }}
-                            @if($sortBy === 'created_at')
+                        <th class="fw-medium user-select-none" style="width:112px;cursor:pointer" wire:click="sort('published_at')">
+                            {{ __('Publication') }}
+                            @if($sortBy === 'published_at')
                                 <i data-lucide="{{ $sortDirection === 'asc' ? 'chevron-up' : 'chevron-down' }}" class="icon-sm ms-1 text-primary"></i>
                             @else
                                 <i data-lucide="chevrons-up-down" class="icon-sm ms-1 text-muted"></i>
@@ -134,7 +134,7 @@
                                         class="form-select form-select-sm w-auto"
                                         aria-label="Changer le statut">
                                     <option value="draft" @selected((string) $article->status === 'draft')>{{ __('Brouillon') }}</option>
-                                    <option value="published" @selected((string) $article->status === 'published')>{{ __('Publié') }}</option>
+                                    <option value="published" @selected((string) $article->status === 'published')>{{ $article->published_at?->isFuture() ? __('Planifié') : __('Publié') }}</option>
                                     <option value="archived" @selected((string) $article->status === 'archived')>{{ __('Archivé') }}</option>
                                 </select>
                             @else
@@ -143,7 +143,17 @@
                         </td>
                         <td class="text-muted">{{ $article->blogCategory?->name ?? '–' }}</td>
                         <td class="text-muted">{{ $article->user?->name ?? '–' }}</td>
-                        <td class="text-muted">{{ format_date($article->created_at) }}</td>
+                        <td class="text-muted">
+                            {{-- Date de publication : une date future = article planifié, invisible sur le site d'ici là --}}
+                            @if($article->published_at)
+                                {{ format_date($article->published_at, 'datetime') }}
+                                @if((string) $article->status === 'published' && $article->published_at->isFuture())
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border d-block mt-1">{{ __('Prévue') }}</span>
+                                @endif
+                            @else
+                                <span title="{{ __('Date de création') }}">{{ format_date($article->created_at) }}</span>
+                            @endif
+                        </td>
                         <td>
                             <div class="dropdown" x-data="{ open: false }" @click.outside="open = false">
                                 <button @click="open = !open"

@@ -14,9 +14,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Modules\Blog\Models\Article;
 use Modules\Blog\Models\Category;
+use Modules\Blog\States\PublishedArticleState;
 use Modules\Settings\Facades\Settings;
 use Nwidart\Modules\Facades\Module;
 
@@ -96,18 +98,41 @@ class PublicPostController extends Controller
         return view('fronttheme::blog.index', compact('articles', 'categories', 'currentCategory'));
     }
 
-    public function show(string $slug): View
+    public function show(string $slug): View|Response
     {
         $locale = app()->getLocale();
 
+        $slugMatch = function (Builder $q) use ($slug, $locale) {
+            $q->where("slug->{$locale}", $slug)
+                ->orWhere('slug', $slug);
+        };
+
         $article = Article::query()
             ->published()
-            ->where(function (Builder $q) use ($slug, $locale) {
-                $q->where("slug->{$locale}", $slug)
-                    ->orWhere('slug', $slug);
-            })
+            ->where($slugMatch)
             ->with(['user', 'blogCategory', 'tagsRelation'])
-            ->firstOrFail();
+            ->first();
+
+        if (! $article) {
+            // Avant-première : un article au statut "published" dont published_at est dans le
+            // futur est un article PLANIFIÉ (contrairement à un brouillon, qui reste 404). Bonne
+            // pratique Google Search Central (2026-09-25) : l'adresse définitive sert une page
+            // d'avant-première en 200/noindex jusqu'à la date prévue, jamais un 404 ni un 503 -
+            // ni le contenu complet de l'article, qui ne doit JAMAIS transiter par cette page
+            // (voir fronttheme::blog.upcoming, qui ne reçoit jamais $article->content).
+            $upcoming = Article::query()
+                ->whereState('status', PublishedArticleState::class)
+                ->where('published_at', '>', now())
+                ->where($slugMatch)
+                ->with('blogCategory')
+                ->first();
+
+            abort_unless($upcoming, 404);
+
+            return response()
+                ->view('fronttheme::blog.upcoming', ['article' => $upcoming])
+                ->header('X-Robots-Tag', 'noindex');
+        }
 
         // Composants Blade réutilisables (ex. <x-fronttheme::text-generator .../>) embarqués dans le
         // contenu éditorial : Blade::render() DOIT s'exécuter ici, avant le début du rendu de la vue -
