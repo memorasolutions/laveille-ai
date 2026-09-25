@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.297.0] - 2026-09-25
+
+### Ajouté
+- **L'anonymiseur détecte maintenant les villes et les numéros de dossier.** Une note de dossier
+  fictive le montrait : « dossier D-4471, succursale de Lévis » traversait l'outil intact, alors que
+  ces deux détails suffisent souvent à retrouver une personne dans un registre interne. L'outil
+  reconnaît désormais 63 municipalités du Québec, une ville inconnue introduite par « succursale
+  de », « bureau de » ou « à », et les codes de dossier formés de lettres et de chiffres (D-4471,
+  AB12345, N° 2026-0042). Chacun est remplacé par une valeur de même forme, et reste réversible.
+
+### Corrigé
+- **Le vrai prénom survivait dans l'adresse courriel remplacée** quand le texte ne nommait la
+  personne que par son nom de famille (« Mme Tremblay ») : l'outil changeait « tremblay » mais
+  laissait « marie » dans le faux courriel. Le fragment inconnu du courriel est maintenant traité
+  comme un prénom à remplacer.
+- **Une ville à deux mots (« La Prairie », « Thetford Mines ») n'est plus prise pour un nom de
+  personne.** Défaut trouvé par les nouveaux tests, pas anticipé.
+- **L'illustration de la partie 3 de la série « IA et emplois 2030 » montrait une loupe à deux
+  manches**, défaut relevé par les deux familles d'oracles lors d'un ré-audit des images validées
+  avant l'existence du contrôle mécanique. Elle est refaite, au même chemin.
+- **Le lanceur de commandes de production refusait l'option `--with-source` de `news:brief`**,
+  pourtant en lecture seule et ajoutée à la commande le 12 septembre.
+
 ## [1.296.1] - 2026-09-23
 
 ### Corrigé

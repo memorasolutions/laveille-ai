@@ -83,7 +83,9 @@ const COMMANDES_AUTORISEES = ['news:brief', 'news:source', 'news:apply', 'news:c
 // gabarit pour news:regenerate-fallback-images laissait passer --force/--ids sans que rien dans ce
 // fichier ne les nomme).
 const ARGUMENTS_AUTORISES = [
-    'news:brief' => ['article'],
+    // --with-source ajoutée (2026-09-12) au vrai $signature de NewsBriefCommand (lecture pure,
+    // ajoute internal_source_text au JSON) - manquait ici depuis, corrigé le 2026-09-25.
+    'news:brief' => ['article', '--with-source'],
     'news:source' => ['article', 'url', '--replace'],
     'news:apply' => ['article', '--payload', '--image', '--credit', '--publish', '--enrich'],
     'news:create-draft' => ['url', '--title'],

@@ -5,7 +5,28 @@ const FAKE_DATA = {
   firstNamesF: ['Marie', 'Julie', 'Sophie', 'Isabelle', 'Nathalie', 'Claire', 'Émilie', 'Caroline', 'Manon', 'Audrey'],
   lastNames: ['Tremblay', 'Gagnon', 'Bouchard', 'Gauthier', 'Morin', 'Lavoie', 'Fortin', 'Gagné', 'Pelletier', 'Bélanger'],
   streets: ['rue Principale', 'avenue du Parc', 'boulevard Saint-Joseph', 'chemin de la Rivière', 'rue des Érables', 'avenue Laurier', 'boulevard René-Lévesque', 'rue Saint-Denis', 'chemin Sainte-Foy', 'rue de la Gauchetière'],
-  cities: ['Montréal', 'Québec', 'Laval', 'Gatineau', 'Longueuil', 'Sherbrooke', 'Saguenay', 'Lévis', 'Trois-Rivières', 'Terrebonne'],
+  // VILLES_QUEBEC : municipalités RÉELLES du Québec, des plus peuplées (Montréal) aux plus
+  // petites retenues ici (Sainte-Agathe-des-Monts) — 63 entrées, Lévis incluse. Sert DEUX rôles à
+  // la fois (jamais dupliqué, DRY) : (a) liste FERMÉE pour la DÉTECTION d'une ville connue dans le
+  // texte source (voir detectEntities, section « Villes connues ») ; (b) pioche de VRAIES villes pour
+  // generateFake('city', ...). Rangs 1 à 50 vérifiés auprès de l'Institut de la statistique du
+  // Québec (estimations démographiques au 1er juillet 2024, tableau mis à jour 2026-01-14) ; les
+  // 13 suivantes sont des municipalités réelles et constituées, vérifiées mais hors du seuil de
+  // 25 000 habitants publié par l'ISQ. Corrige le défaut #2732 (ex. « succursale de Lévis » non
+  // détecté).
+  cities: [
+    'Montréal', 'Québec', 'Laval', 'Gatineau', 'Longueuil', 'Sherbrooke', 'Lévis', 'Saguenay',
+    'Trois-Rivières', 'Terrebonne', 'Saint-Jean-sur-Richelieu', 'Brossard', 'Repentigny',
+    'Drummondville', 'Saint-Jérôme', 'Granby', 'Mirabel', 'Blainville', 'Saint-Hyacinthe',
+    'Mascouche', 'Châteauguay', 'Shawinigan', 'Rimouski', 'Dollard-des-Ormeaux', 'Victoriaville',
+    'Saint-Eustache', 'Salaberry-de-Valleyfield', 'Vaudreuil-Dorion', 'Rouyn-Noranda',
+    'Boucherville', 'Côte-Saint-Luc', 'Pointe-Claire', 'Sorel-Tracy', 'Saint-Georges', "Val-d'Or",
+    'Saint-Constant', 'Chambly', 'Sainte-Julie', 'Alma', 'Magog', 'Boisbriand', 'Sainte-Thérèse',
+    'La Prairie', 'Thetford Mines', 'Saint-Bruno-de-Montarville', 'Saint-Lin-Laurentides',
+    'Beloeil', "L'Assomption", 'Sept-Îles', 'Rivière-du-Loup', 'Joliette', 'Sainte-Catherine',
+    'Candiac', 'Varennes', 'Deux-Montagnes', 'Beauharnois', 'Marieville', 'Baie-Comeau', 'Amos',
+    'Cowansville', 'Gaspé', 'Matane', 'Sainte-Agathe-des-Monts'
+  ],
   // Domaines RÉSERVÉS À LA DOCUMENTATION/AUX EXEMPLES par la RFC 2606 (example.com/.net/.org) :
   // jamais attribuables à une vraie boîte courriel, contrairement aux anciens domaines listés ici
   // (gmail.com, hotmail.com, yahoo.ca, videotron.ca, bell.net sont de VRAIS domaines actifs — un
@@ -39,16 +60,28 @@ function getAccentClass(char) {
   return map[base] || char;
 }
 
-// Construit une regex bornée, insensible casse + accents, espaces flexibles.
-function buildAccentInsensitiveBoundedRegex(str) {
+// Construit le CORPS de la regex insensible accents (motif seul, sans bornes ni drapeaux) :
+// factorisation commune aux 3 fonctions qui suivent (bornée insensible casse, non bornée
+// insensible casse, et bornée SENSIBLE À LA CASSE réservée aux villes connues) — jamais dupliqué.
+// Les apostrophes (droite ' ou typographique ’ʼ`´) sont traitées comme une CLASSE au même titre
+// que les accents : une ville embarquée avec ’ (« L'Assomption ») doit rester détectable si le
+// texte collé par l'utilisateur utilise ' à la place, et inversement.
+function buildAccentTolerantPattern(str) {
   let escaped = escapeRegex(str).replace(/\s+/g, '\\s+');
   let pattern = '';
   for (let i = 0; i < escaped.length; i++) {
     const char = escaped[i];
     if (char === '\\') { pattern += char + escaped[++i]; continue; } // garde \. \s etc.
     if (char === '+') { pattern += char; continue; }
+    if (char === "'" || char === '’' || char === 'ʼ' || char === '`' || char === '´') { pattern += "['’ʼ`´]"; continue; }
     pattern += getAccentClass(char);
   }
+  return pattern;
+}
+
+// Construit une regex bornée, insensible casse + accents, espaces flexibles.
+function buildAccentInsensitiveBoundedRegex(str) {
+  const pattern = buildAccentTolerantPattern(str);
   const startBoundary = /^\w/.test(str) ? '(?<![A-Za-zÀ-ÖØ-öø-ÿ0-9])' : '(?<!\\w)';
   const endBoundary = /\w$/.test(str) ? '(?![A-Za-zÀ-ÖØ-öø-ÿ0-9])' : '(?!\\w)';
   return new RegExp(startBoundary + pattern + endBoundary, 'gi');
@@ -57,15 +90,22 @@ function buildAccentInsensitiveBoundedRegex(str) {
 // Variante sans boundary pour la restauration : les pseudos sont uniques par construction,
 // inutile de risquer un échec de \b quand le texte IA est collé (textContent sans séparateurs).
 function buildAccentInsensitiveUnboundedRegex(str) {
-  let escaped = escapeRegex(str).replace(/\s+/g, '\\s+');
-  let pattern = '';
-  for (let i = 0; i < escaped.length; i++) {
-    const char = escaped[i];
-    if (char === '\\') { pattern += char + escaped[++i]; continue; }
-    if (char === '+') { pattern += char; continue; }
-    pattern += getAccentClass(char);
-  }
-  return new RegExp(pattern, 'gi');
+  return new RegExp(buildAccentTolerantPattern(str), 'gi');
+}
+
+// Variante RÉSERVÉE à la détection des villes CONNUES (VILLES_QUEBEC / FAKE_DATA.cities) : mêmes
+// tolérances accent/apostrophe que ci-dessus, mais SANS le drapeau insensible-casse global.
+// getAccentClass ne rend déjà insensible à la casse QUE les lettres a/e/i/o/u/c/n (voir sa table) ;
+// toutes les autres lettres — donc la première lettre de la plupart des noms de villes québécoises
+// (L, M, T, V, S, B, R, G, D, C…) — restent exigées dans leur casse EXACTE telle qu'écrite dans la
+// liste (toujours capitalisée). But : un nom de ville qui est AUSSI un mot commun (« La Prairie »
+// la ville / « la prairie » le champ) ne doit pas anonymiser du texte ordinaire qui ne parle
+// d'aucune ville. Corrige le défaut #2732 sans introduire de nouveau faux positif.
+function buildCityDetectionRegex(name) {
+  const pattern = buildAccentTolerantPattern(name);
+  const startBoundary = '(?<![A-Za-zÀ-ÖØ-öø-ÿ0-9])';
+  const endBoundary = '(?![A-Za-zÀ-ÖØ-öø-ÿ0-9])';
+  return new RegExp(startBoundary + pattern + endBoundary, 'g');
 }
 
 // Mots courants (verbes d'introduction, salutations, connecteurs) qui précèdent souvent un vrai
@@ -118,6 +158,14 @@ function detectEntities(text) {
     const k = (value || '').trim();
     if (k && !seen.has(normalize(k))) { seen.add(normalize(k)); entities.push({ value: k, category, label, confidence: confidence || 0.9 }); }
   };
+  // VILLES_CONNUES : hissé ici (au lieu d'être redéclaré localement à l'étape 2c comme avant) pour
+  // être réutilisé DANS la détection de nom elle-même (étapes 2 et 2b) — sans quoi une ville
+  // composée de deux mots séparés par un espace ET grammaticalement valides comme prénom+nom
+  // (« La Prairie », « Thetford Mines ») est happée comme un faux NOM DE PERSONNE avant même que
+  // l'étape « Villes connues » (17) n'ait la chance de la voir : push() dédoublonne par valeur
+  // exacte, donc la seconde tentative (ville) est alors silencieusement ignorée. Corrige un défaut
+  // découvert PAR l'ajout des nouvelles villes du ticket #2732 (mesuré par exécution, pas supposé).
+  const VILLES_CONNUES = new Set(FAKE_DATA.cities.map(normalize));
   let m;
   // 1. Noms avec titre de civilité (capture le nom, pas le titre). Un SEUL mot après le titre
   //    = nom de famille seul → catégorie 'lastName' (ne JAMAIS inventer un prénom + nom complet).
@@ -193,9 +241,22 @@ function detectEntities(text) {
   // 8. Téléphone CA
   const phone = /(?<!\d)(?:\(\d{3}\)|\d{3})[-.\s]?\d{3}[-.\s]?\d{4}(?!\d)/g;
   while ((m = phone.exec(text))) push(m[0], 'phone', 'Téléphone', 0.9);
-  // 9. Numéro de dossier
-  const dossier = /(?:#|dossier\s*(?:n[°o]\s*)?)\d+/gi;
+  // 9. Numéro de dossier / code interne — élargi pour couvrir les codes lettre(s)+chiffres
+  // (« D-4471 », « AB12345 ») et le préfixe « N° »/« No » utilisé SEUL (sans le mot « dossier »),
+  // en plus des formes déjà couvertes (« #1234 », « dossier 1234 », « dossier n° 1234 »). Corrige
+  // le défaut #2732 (« dossier D-4471 » jamais détecté : l'ancien motif exigeait un chiffre
+  // IMMÉDIATEMENT après « dossier », donc échouait dès qu'une lettre de préfixe s'interposait).
+  // Le préfixe de contexte reste obligatoire ici (mot « dossier », symbole « # », ou « N°»/« No ») :
+  // un code alphanumérique nu, sans aucun contexte, sortirait du périmètre « numéro de dossier »
+  // (pourrait être un code produit, une plaque…) — voir l'étape suivante pour ce cas plus strict.
+  const dossier = /(?:#|dossier\s*(?:n[°o]\.?\s*)?|n[°o]\.?\s*(?:de\s+dossier\s*)?)[:\s]*([A-ZÀ-Ÿ]{0,4}-?\d[\d-]*)/gi;
   while ((m = dossier.exec(text))) push(m[0], 'dossier', 'Numéro de dossier', 0.95);
+  // 9b. Code interne NU (sans mot « dossier »/« # »/« N° ») mais de forme distinctive : 2 à 4
+  // lettres MAJUSCULES collées à 4 chiffres ou plus, sans séparateur (« AB12345 »). Forme rare en
+  // prose ordinaire ; ne collisionne pas avec le RAMQ (exige exactement 4 lettres + 8 chiffres,
+  // capté par l'étape 3 déjà exécutée — le Set `seen` empêche tout double-comptage du même texte).
+  const codeInterne = /\b[A-ZÀ-Ÿ]{2,4}\d{4,8}\b/g;
+  while ((m = codeInterne.exec(text))) push(m[0], 'dossier', 'Numéro de dossier', 0.75);
   // 10. Montant
   const amount = /\$\s*\d+(?:[ ,]\d{3})*(?:[.,]\d{2})?\s*(?:CAD|cad)?/g;
   while ((m = amount.exec(text))) push(m[0], 'amount', 'Montant', 0.95);
@@ -272,6 +333,12 @@ function detectEntities(text) {
     }
     if (!w1Ignore && !w2Ignore) {
       const valeur = (m[1] + m[2] + m[3]).replace(/\s+/g, ' ').trim();
+      // Ville connue faite de deux mots séparés par un espace ET grammaticalement valides comme
+      // prénom+nom (« La Prairie », « Thetford Mines ») : ne PAS la happer comme un faux nom de
+      // personne, sinon push() (dédoublonnage par valeur exacte) empêche ensuite l'étape « Villes
+      // connues » de la détecter comme ce qu'elle est réellement. Mesuré par exécution : sans ce
+      // garde-fou, l'ajout des nouvelles villes du ticket #2732 en perdait deux sur 63.
+      if (VILLES_CONNUES.has(normalize(valeur))) continue;
       push(valeur, 'name', 'Nom complet', 0.8);
     }
   }
@@ -288,15 +355,15 @@ function detectEntities(text) {
   while ((m = nameAllCaps.exec(text))) {
     const w1Ignore = estMotIgnore(m[1], STOPWORDS), w2Ignore = estMotIgnore(m[2], STOPWORDS);
     if (w1Ignore && !w2Ignore) { nameAllCaps.lastIndex = m.index + m[1].length; continue; }
-    if (!w1Ignore && !w2Ignore) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.75);
+    if (!w1Ignore && !w2Ignore && !VILLES_CONNUES.has(normalize(`${m[1]} ${m[2]}`))) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.75);
   }
   // 2c. Inversion « Nom, Prénom » (fréquente dans les tableaux/listes triées alphabétiquement). Les
   // deux composantes sont poussées séparément (firstName/lastName) plutôt que le span complet avec
   // la virgule : chaque mot est alors remplacé indépendamment à sa position, la virgule reste
   // intacte, et la logique existante de buildRules()/nameMap (déjà écrite pour firstName/lastName)
-  // s'applique sans code additionnel à dupliquer. FAKE_DATA.cities est réutilisé (jamais dupliqué)
-  // comme liste d'exclusion : sans elle, « Trois-Rivières, Québec » serait pris pour un nom inversé.
-  const VILLES_CONNUES = new Set(FAKE_DATA.cities.map(normalize));
+  // s'applique sans code additionnel à dupliquer. VILLES_CONNUES (hissé plus haut, jamais
+  // redéclaré ici) sert de liste d'exclusion : sans elle, « Trois-Rivières, Québec » serait pris
+  // pour un nom inversé.
   const nameInverted = new RegExp(
     '(?<![A-Za-zÀ-ÿ])(' + NAME_WORD + '),[^\\S\\r\\n]+(' + NAME_WORD + ')(?![A-Za-zÀ-ÿ])',
     'gu'
@@ -322,6 +389,70 @@ function detectEntities(text) {
       const re = new RegExp('(?<![A-Za-zÀ-ÿ])' + escapeRegex(word) + '(?![A-Za-zÀ-ÿ])', 'i');
       if (re.test(residual)) push(word, i === 0 ? 'firstName' : 'lastName', i === 0 ? 'Prénom' : 'Nom de famille', 0.7);
     });
+  }
+  // 16. Cohérence courriel ↔ nom : fuite du fragment MANQUANT (défaut #2732). relinkEmails()
+  // (plus bas dans ce fichier) sait déjà rendre un faux courriel cohérent avec un faux nom — mais
+  // seulement pour les fragments (prénom/nom) qui ont CHACUN leur propre entité détectée ailleurs
+  // dans le texte. Si le texte ne nomme la personne que partiellement en clair (ex. « Mme Tremblay »
+  // — un titre + le seul nom de famille) alors que son courriel complet « marie.tremblay@… »
+  // contient AUSSI le prénom, ce prénom n'était détecté NULLE PART : relinkEmails changeait bien
+  // « tremblay » mais laissait « marie » tel quel, RÉEL, dans le faux courriel généré — une fuite
+  // pire qu'une incohérence, prouvée par exécution (voir repro2.cjs, scénario A). Le correctif :
+  // si un jeton de la partie locale d'un courriel correspond à un fragment de nom DÉJÀ détecté,
+  // et que l'AUTRE jeton du même courriel ne correspond à AUCUNE entité connue, ce dernier est
+  // presque toujours l'autre moitié du même nom réel (motif prénom.nom très répandu) — on le pousse
+  // comme entité à son tour, pour qu'il reçoive lui aussi un faux cohérent via le pipeline normal
+  // (buildRules → uniqueFake → relinkEmails, tous réutilisés tels quels, DRY).
+  const MOTS_LOCAUX_COURRIEL_IGNORES = ['info', 'contact', 'contacts', 'admin', 'administration', 'support', 'ventes', 'vente', 'rh', 'secretariat', 'secretaire', 'accueil', 'service', 'services', 'communication', 'communications', 'marketing', 'facturation', 'comptabilite', 'direction', 'noreply', 'webmaster', 'postmaster', 'general', 'commercial', 'reception', 'urgence', 'urgences'];
+  const fragmentsNomsConnus = new Set();
+  entities.filter((e) => ['name', 'firstName', 'lastName'].includes(e.category)).forEach((e) => {
+    String(e.value).split(/[\s-]+/).forEach((w) => { if (normalize(w).length >= 2) fragmentsNomsConnus.add(normalize(w)); });
+  });
+  for (const ent of entities.filter((e) => e.category === 'email')) {
+    const at = ent.value.indexOf('@');
+    if (at < 1) continue;
+    const local = ent.value.slice(0, at);
+    const tokens = local.split(/[._+-]/).filter((t) => /^[a-zà-ÿ]{2,}$/i.test(t));
+    if (tokens.length < 2) continue;
+    const connu = (t) => fragmentsNomsConnus.has(normalize(t));
+    const matches = tokens.some(connu);
+    if (!matches) continue; // aucun fragment connu dans ce courriel : rien à relier, pas de fuite possible (voir commentaire de relinkEmails)
+    tokens.forEach((tok, idx) => {
+      if (connu(tok)) return;
+      if (MOTS_LOCAUX_COURRIEL_IGNORES.includes(normalize(tok))) return; // « info.tremblay@… » : « info » n'est pas un prénom
+      const valeur = tok.charAt(0).toUpperCase() + tok.slice(1).toLowerCase();
+      push(valeur, idx === 0 ? 'firstName' : 'lastName', idx === 0 ? 'Prénom' : 'Nom de famille', 0.7);
+    });
+  }
+  // 17. Villes CONNUES du Québec (VILLES_QUEBEC = FAKE_DATA.cities, ≥60 municipalités, Lévis
+  // incluse — corrige le défaut #2732, ex. « succursale de Lévis » jamais détecté). Triée du nom
+  // le plus LONG au plus court avant la boucle par discipline défensive (aucune des entrées
+  // actuelles n'est préfixe d'une autre, vérifié, mais un futur ajout à la liste pourrait l'être).
+  // buildCityDetectionRegex (défini plus haut, jamais dupliqué) exige la VRAIE casse de la
+  // première lettre pour ne pas confondre un mot commun homographe avec la ville (« la prairie »
+  // le champ vs « La Prairie » la municipalité).
+  const villesTriees = [...FAKE_DATA.cities].sort((a, b) => b.length - a.length);
+  for (const ville of villesTriees) {
+    const cityRe = buildCityDetectionRegex(ville);
+    while ((m = cityRe.exec(text))) push(m[0], 'city', 'Ville', 0.85);
+  }
+  // 18. Ville CAPITALISÉE INCONNUE de VILLES_QUEBEC, repérée par le CONTEXTE (« succursale de X »,
+  // « bureau de X », « à X ») — couvre les municipalités absentes de la liste fermée (qui ne
+  // retient que les ~60 plus peuplées). Exclusions pour ne pas confondre avec un prénom/nom de
+  // personne déjà repéré ailleurs dans CE texte (entities est déjà rempli à ce stade, y compris par
+  // l'étape 16 ci-dessus) ni avec un mot courant (estMotIgnore, déjà défini plus haut, jamais
+  // dupliqué). Placée EN DERNIER : elle a besoin que toutes les entités « nom » du texte soient
+  // déjà connues pour exclure correctement.
+  const nomsPersonnesConnus = new Set();
+  entities.filter((e) => ['name', 'firstName', 'lastName'].includes(e.category)).forEach((e) => {
+    String(e.value).split(/[\s-]+/).forEach((w) => nomsPersonnesConnus.add(normalize(w)));
+  });
+  const cityContext = /\b(?:succursale\s+de\s+(?:l['’])?|bureau\s+de\s+(?:l['’])?|à\s+)([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)/gu;
+  while ((m = cityContext.exec(text))) {
+    const candidat = m[1];
+    if (estMotIgnore(candidat, STOPWORDS)) continue;
+    if (nomsPersonnesConnus.has(normalize(candidat))) continue;
+    push(candidat, 'city', 'Ville', 0.7);
   }
   return entities;
 }
@@ -388,10 +519,14 @@ function extraireVoieAdresse(original) {
 function generateFake(category, original) {
   switch (category) {
     case 'dossier': {
-      const num = original.match(/\d+/)[0];
-      const fake = num.replace(/\d/g, () => Math.floor(Math.random() * 10).toString());
-      return original.replace(/\d+/, fake);
+      // Chaque groupe de chiffres est randomisé INDÉPENDAMMENT (/g, pas seulement le premier) :
+      // un code comme « N° 2026-0042 » contient DEUX groupes séparés par un tiret, et l'ancienne
+      // version (un seul .replace sans /g) ne changeait que le premier, laissant le second groupe
+      // réel intact — fuite partielle. Les lettres de préfixe (« D-», « AB») restent inchangées :
+      // « code de même forme », la donnée identifiante est le chiffre, pas la lettre de catégorie.
+      return original.replace(/\d+/g, (grp) => grp.replace(/\d/g, () => Math.floor(Math.random() * 10).toString()));
     }
+    case 'city': return tirerSubstitutDistinct(FAKE_DATA.cities, original);
     case 'email': {
       return `${getRandomItem(FAKE_DATA.firstNamesM).toLowerCase()}.${getRandomItem(FAKE_DATA.lastNames).toLowerCase()}@${getRandomItem(FAKE_DATA.domains)}`;
     }
@@ -499,7 +634,7 @@ function uniqueFake(category, original, used) {
 function tokenLabel(category) {
   const labelMap = {
     name: 'PERSONNE', firstName: 'PERSONNE', lastName: 'PERSONNE',
-    dossier: 'DOSSIER', address: 'ADRESSE', email: 'COURRIEL',
+    dossier: 'DOSSIER', address: 'ADRESSE', email: 'COURRIEL', city: 'VILLE',
     phone: 'TEL', amount: 'MONTANT', date: 'DATE'
   };
   return labelMap[category] || 'ORG';
