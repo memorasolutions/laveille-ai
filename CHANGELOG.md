@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.301.0] - 2026-09-25
+
+### Ajouté
+- Deux fiches de glossaire : « facturation à l'usage » et « routage automatique de modèles ».
+- Outil tirage-présentations, quatre ajouts de flexibilité : tirer des personnes sans aucune question, n'utiliser qu'un sous-ensemble des questions saisies, vider la liste des apprenants sans effacer les questions (et l'inverse), et attribuer plusieurs questions aléatoires distinctes à chaque apprenant.
+
 ## [1.300.0] - 2026-09-25
 
 ### Ajouté
