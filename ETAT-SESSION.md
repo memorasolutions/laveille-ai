@@ -1,28 +1,26 @@
 # État de session - la-veille-de-stef-v2
 
-> Mis à jour le **2026-09-25 à 08h14 Québec (12:14 UTC)**, en plein lot /actu2. Ce fichier est TOUJOURS le même : on le réécrit, on n'empile pas. Version précédente : `.backups/ETAT-SESSION-2026-09-24-2053.md`.
+> Mis à jour le **2026-09-25 à 09h43 Québec (13:43 UTC)**. Ce fichier est TOUJOURS le même : on le réécrit, on n'empile pas. Version précédente : `.backups/ETAT-SESSION-2026-09-25-0814.md`.
 
 ---
 
 ## ✅ Où on en est (terminé et prouvé)
 
-- **Publication 345** (anonymiseur, Facebook) : partie à **08h01 Québec (12:01 UTC)**, `published_at` relu par `get_social_publication`.
-- **v1.297.0** en production (anonymiseur : villes, numéros de dossier, prénom caché dans le courriel), poussée sur GitHub et la forge.
-- **Élagage nocturne des brouillons** : la règle `news:hold` est écrite dans `/actu2` (section 0 bis); les 18 fiches du lot ont une retenue de 14 jours.
-- **Contrôleur `verif_payload.py`** renforcé ce matin, avec deux contrôles neufs testés sur témoin : forme `{label, url}` des sources primaires, et espace ordinaire collée à une insécable.
-- **13 fiches /actu2 dont le texte est APPLIQUÉ en production** (non publiées) : 58676, 58471, 58466, 57860, 57645, 58468, 57540, 58624, 58511, 58492, 58179, 57713, et 57647 (en file, lot 5). Sorties : `storage/app/a2_out_lot1..5_20260925.txt` sur le serveur.
+- **v1.298.0 en production** : les articles planifiés ne sont plus lisibles avant leur date. Les parties 2 et 3 de « IA et emplois 2030 » répondent 200 avec `noindex`, affichent « À paraître le mardi 29 septembre 2026 à 9 h » et « le mardi 6 octobre 2026 à 9 h », ne sont pas en cache et sont absentes du plan de site. Le robot conversationnel et les mini-sites d'auteurs ne les exposent plus. La liste admin affiche « Planifié » et la date prévue (tests 3/3, à constater par Stéphane, la capture exige sa connexion 2FA).
+- **Registre des publications** : `docs/publications/registre-publications.csv` (294, 296, 345), et le hook refuse désormais une publication laveille.ai sans UTM.
+- **Caricature** : règle « la personne doit se lire comme une caricature » écrite dans `/article`, `/publier` et `/dalle`.
+- **13 fiches /actu2 dont le texte est appliqué en production** (non publiées), 5 autres rédigées.
 
 ## 🔄 En cours (ce qui reste à prouver)
 
-- **Images des 13 fiches** : un sous-agent les génère par ChatGPT au navigateur, puis deux oracles les contrôlent en aveugle. Prompts : `storage/app/travaux-session-2026-09-25/images-lot/prompts.txt`.
-- Ensuite : `news:apply --image --credit`, puis `news:apply --publish`, puis vérification servie (`?cb=`, `detecter_cartes.py`, capture).
-- **Sous-agents /actu2 encore actifs** : 58491 (Paper2Agent), 58740 (pertes OpenAI), 58484 (Opus 5.5), 58692 (règlement Siri), 58668 (appels Gemini).
-- **Passerelle prod OUVERTE** : cron `2780396691` actif, `a2_runner.sh` actif avec auto-expiration (`a2_expire`). À fermer À LA MAIN après le dernier lot : `cron_remove`, neutraliser le runner, `a2_expire` à 0, puis relire `cron_list`. L'auto-expiration n'est pas un retrait.
+- **Images des 18 fiches** : sous-agent de génération au navigateur (ChatGPT, limites de débit fréquentes), contrôle en aveugle par deux oracles. Ensuite : rouvrir la passerelle, `news:apply --image --credit`, `--publish`, vérifier ce qui est servi, refermer la passerelle à la main.
+- **Système de mesure publications -> trafic** (#2799) : Perplexity et DeepSeek consultés (`storage/app/travaux-session-2026-09-25/club-mesure/`), ChatGPT, Gemini et claude.ai au navigateur restent à consulter, puis rounds 2 et 3.
+- **Audit des prompts** livré, non appliqué : `storage/app/travaux-session-2026-09-25/audit-prompts/`.
 
 ## ⏸️ Ce qui attend une réponse du fondateur
 
-#2585 (approuver la 300, refuser la 298) · #2735 (garder 341 et 345, supprimer les anciennes) · #2759 (parties 2 et 3 de la série) · #2788 (nom « Anonymiseur ») · #2368 (clé Turnstile dans 1Password) · #2276 et #2638 (prompts à coller dans d'autres sessions) · #2597 (tableau de bord Cloudflare) · #2722 (heure du portail) · 7 commits déjà poussés signés d'une IA : les réécrire exige un force-push, donc ta demande explicite.
+#2585 (approuver la 300, refuser la 298) · #2735 (garder 341 et 345) · #2788 (nom « Anonymiseur ») · #2368 (clé Turnstile) · #2276 et #2638 (prompts à transmettre) · #2597 (Cloudflare) · #2722 (heure du portail) · 7 commits signés d'une IA : réécriture = force-push, sur ta demande seulement.
 
 ## ➡️ Prochaine action proposée
 
-Recevoir les images contrôlées, les appliquer et publier les 13 fiches, vérifier ce qui est servi, fermer la passerelle, puis traiter les 5 fiches restantes de la même façon.
+Recevoir les images contrôlées, publier les 18 fiches, refermer la passerelle, puis lancer le round 1 du club des sages au navigateur sur le système de mesure.

@@ -4,7 +4,7 @@
 
 ### Ajouté
 - **Un article planifié a maintenant une page d'avant-première.** Avant sa date, l'adresse d'un
-  article au statut publié mais daté dans le futur répond 200 avec une page « À paraître le lundi
+  article au statut publié mais daté dans le futur répond 200 avec une page « À paraître le mardi
   29 septembre 2026 à 9 h » (titre, image, résumé, série), marquée noindex dans la page et dans
   l'en-tête, jamais mise en cache, et sans le contenu de l'article. À la date prévue, la même
   adresse sert l'article complet. Avant, elle répondait 404 alors que la partie 1 d'une série y
