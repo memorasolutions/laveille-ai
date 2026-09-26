@@ -83,18 +83,98 @@ function signatureAssistant(config) {
         showGalleryModal: false,
         galleryCategory: 'toutes',
         gallerySelected: null,
+        // LOT 7 (2026-09-26) - modale de confirmation « Remise à zéro » (Alpine pur, jamais
+        // confirm() natif) : la remise à zéro efface un travail en cours, donc on confirme d'abord.
+        showResetModal: false,
+        _resetOpener: null,
         _galleryOpener: null,
 
         init() {
+            // Capture des valeurs par défaut VIERGES (avant toute restauration) - sert au bouton
+            // « Remise à zéro » pour repartir de zéro sans dupliquer les défauts du composant.
+            this._pristine = {
+                template: this.template,
+                content: JSON.parse(JSON.stringify(this.content)),
+                images: JSON.parse(JSON.stringify(this.images)),
+            };
+            // Sauvegarde locale (navigateur) de la signature en cours : restaurée au chargement,
+            // auto-sauvegardée à chaque changement. Uniquement pour une session ANONYME neuve -
+            // jamais quand une signature existante est déjà chargée depuis le serveur (token/id).
+            this._restoreLocalDraft();
             this.updatePreview();
-            this.$watch('template', () => this.updatePreview());
-            this.$watch('content', () => this.updatePreview(), { deep: true });
-            this.$watch('images', () => this.updatePreview(), { deep: true });
+            this.$watch('template', () => { this.updatePreview(); this._saveLocalDraft(); });
+            this.$watch('content', () => { this.updatePreview(); this._saveLocalDraft(); }, { deep: true });
+            this.$watch('images', () => { this.updatePreview(); this._saveLocalDraft(); }, { deep: true });
         },
 
         csrfToken() {
             var meta = document.querySelector('meta[name="csrf-token"]');
             return meta ? meta.content : '';
+        },
+
+        // ------------------------------------------------------------------
+        // Brouillon local (localStorage) - aucune donnée personnelle ne quitte le navigateur du
+        // visiteur, jamais envoyée nulle part. Tout accès est protégé (navigation privée, quota,
+        // stockage bloqué) : une erreur n'interrompt jamais l'éditeur.
+        // ------------------------------------------------------------------
+        _localDraftKey() { return 'lv_signature_draft_v1'; },
+
+        _hasServerDraft() { return !!(this.signatureId || this.token); },
+
+        _restoreLocalDraft() {
+            if (this._hasServerDraft()) { return; }
+            try {
+                var raw = window.localStorage.getItem(this._localDraftKey());
+                if (!raw) { return; }
+                var d = JSON.parse(raw);
+                if (!d || typeof d !== 'object') { return; }
+                if (typeof d.template === 'string') { this.template = d.template; }
+                if (d.content && typeof d.content === 'object') { this.content = Object.assign({}, this.content, d.content); }
+                if (d.images && typeof d.images === 'object') { this.images = Object.assign({}, this.images, d.images); }
+            } catch (e) { /* stockage indisponible/illisible : on ignore, jamais casser la page */ }
+        },
+
+        _saveLocalDraft() {
+            if (this._hasServerDraft()) { return; }
+            try {
+                window.localStorage.setItem(this._localDraftKey(), JSON.stringify({
+                    template: this.template,
+                    content: this.content,
+                    images: this.images,
+                }));
+            } catch (e) { /* quota dépassé / stockage refusé : on ignore */ }
+        },
+
+        // « Remise à zéro » : ouvre d'abord une confirmation DU THÈME (jamais confirm() natif),
+        // car l'action efface un travail en cours. On mémorise le déclencheur pour lui rendre le
+        // focus si l'utilisateur annule (WCAG 2.4.3).
+        openResetModal() {
+            this._resetOpener = document.activeElement;
+            this.showResetModal = true;
+        },
+        closeResetModal() {
+            this.showResetModal = false;
+            if (this._resetOpener && typeof this._resetOpener.focus === 'function') {
+                this._resetOpener.focus();
+            }
+            this._resetOpener = null;
+        },
+        // Confirmation reçue : on efface le brouillon local et on repart des valeurs vierges,
+        // retour à l'étape 1. Réversible seulement par une nouvelle saisie.
+        confirmReset() {
+            this.showResetModal = false;
+            this._resetOpener = null;
+            this.resetSignature();
+        },
+        resetSignature() {
+            try { window.localStorage.removeItem(this._localDraftKey()); } catch (e) { /* ignore */ }
+            this.template = this._pristine.template;
+            this.content = JSON.parse(JSON.stringify(this._pristine.content));
+            this.images = JSON.parse(JSON.stringify(this._pristine.images));
+            this.step = 1;
+            this.showStepValidation = false;
+            this.updatePreview();
+            if (typeof this._focusStepHeading === 'function') { this._focusStepHeading(); }
         },
 
         // ------------------------------------------------------------------

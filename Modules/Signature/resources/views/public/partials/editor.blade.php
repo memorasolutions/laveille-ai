@@ -60,6 +60,17 @@
         </template>
     </div>
 
+    {{-- LOT 7 (2026-09-26) - « Remise à zéro » : la signature en cours est auto-sauvegardée dans le
+         navigateur (localStorage) et restaurée au rafraîchissement ; ce bouton repart de zéro. Placé
+         hors de la barre de navigation collante pour ne pas côtoyer « Suivant » (clic destructeur à
+         l'écart du chemin courant), toujours visible quel que soit l'étape. Confirmation par une
+         modale DU THÈME (jamais confirm() natif). --}}
+    <div class="d-flex justify-content-end mb-2">
+        <button type="button" class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="openResetModal()">
+            🔄 {{ __('Remise à zéro') }}
+        </button>
+    </div>
+
     <div class="row g-4">
         <div class="col-lg-7">
             <div id="sig-wizard-steps" @focusin="onWizardFieldFocusIn($event)" @focusout="onWizardFieldFocusOut($event)">
@@ -344,13 +355,14 @@
                     </div>
                     @endif
 
-                    {{-- Mention laveille.ai : commentaire HTML INVISIBLE dans la signature rendue,
-                         présent dans le code source. Activée par défaut, retirable ici. Pilote le
-                         moteur canonique (renderSignature) partagé par l'aperçu, la copie et l'export. --}}
+                    {{-- Mention laveille.ai VISIBLE au bas de la signature rendue. Affichée par défaut,
+                         retirable ici. (Le commentaire HTML de mention, lui, reste toujours présent dans
+                         le code source, non désactivable.) Pilote le moteur canonique (renderSignature)
+                         partagé par l'aperçu, la copie et l'export. --}}
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="sig-show-attribution" x-model="content.show_attribution">
                         <label class="form-check-label small" for="sig-show-attribution">
-                            {{ __('Inclure une petite mention «'."\u{00A0}".'créé avec laveille.ai'."\u{00A0}".'» dans le code HTML (commentaire invisible dans la signature)') }}
+                            {{ __('Afficher une petite mention «'."\u{00A0}".'Créé avec laveille.ai'."\u{00A0}".'» au bas de la signature') }}
                         </label>
                     </div>
 
@@ -373,11 +385,21 @@
                     </div>
                 </div>
 
-                {{-- Navigation Précédent/Suivant, commune aux 5 étapes. --}}
-                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                    <button type="button" class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1">← {{ __('Précédent') }}</button>
-                    <span x-show="step === 1"></span>
-                    <button type="button" class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 5">{{ __('Suivant') }} →</button>
+                {{-- LOT 7 (2026-09-26) - navigation Précédent/Suivant COLLANTE en bas de la colonne du
+                     formulaire (verdict de 2 oracles, familles différentes : barre collante plutôt que
+                     duplication haut+bas, qui créerait deux « Suivant » redondants pour les lecteurs
+                     d'écran). Reste toujours atteignable sans défiler jusqu'au bas de l'étape.
+                     Après le formulaire dans le DOM ; scroll-padding-bottom sur #sig-wizard-steps
+                     (signature.css) empêche la barre de recouvrir le champ actif ni ses erreurs
+                     (WCAG 2.4.11) ; cibles ≥ 44 px ; env(safe-area-inset-bottom) sur mobile. --}}
+                <div class="sig-wizard-nav" role="group" aria-label="{{ __('Navigation entre les étapes') }}">
+                    <div class="sig-wizard-nav__side sig-wizard-nav__side--start">
+                        <button type="button" class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1">← {{ __('Précédent') }}</button>
+                    </div>
+                    <span class="sig-wizard-nav__status">{{ __('Étape') }} <span x-text="step"></span> {{ __('sur') }} 5</span>
+                    <div class="sig-wizard-nav__side sig-wizard-nav__side--end">
+                        <button type="button" class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 5">{{ __('Suivant') }} →</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -442,6 +464,28 @@
                 </div>
                 <p class="sig-email-frame__note form-text small text-muted mb-0">{{ __('Simulation - le rendu peut varier selon le client de courriel.') }}</p>
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- LOT 7 (2026-09-26) - modale MAISON de confirmation « Remise à zéro » (Alpine pur, jamais
+     confirm()/alert() natif - même patron que les autres modales : role=dialog, focus piégé via
+     focusFirstIn()/trapFocusTab(), Échap ferme, focus rendu au déclencheur à la fermeture). Confirme
+     avant d'effacer un travail en cours (le brouillon local et la saisie de l'étape courante). --}}
+<div x-show="showResetModal" x-cloak
+     class="sig-modal-overlay"
+     role="dialog" aria-modal="true" aria-labelledby="sigResetModalTitle" aria-describedby="sigResetModalDesc"
+     x-init="$watch('showResetModal', (v) => v && $nextTick(() => focusFirstIn($el)))"
+     @keydown.escape.window="closeResetModal()"
+     @keydown.tab="trapFocusTab($event)">
+    <div class="sig-reset-modal" @click.outside="closeResetModal()">
+        <h2 id="sigResetModalTitle" class="h5 fw-bold mb-2">{{ __('Tout recommencer?') }}</h2>
+        <p id="sigResetModalDesc" class="mb-3">
+            {{ __('La signature en cours sera effacée et l\'assistant repartira de zéro, à l\'étape 1. Cette action est irréversible.') }}
+        </p>
+        <div class="d-flex justify-content-end gap-2 flex-wrap">
+            <button type="button" class="ct-btn ct-btn-outline" @click="closeResetModal()">{{ __('Annuler') }}</button>
+            <button type="button" class="ct-btn ct-btn-outline-danger" @click="confirmReset()">🔄 {{ __('Remise à zéro') }}</button>
         </div>
     </div>
 </div>

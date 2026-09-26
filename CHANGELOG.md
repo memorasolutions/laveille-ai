@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.305.0] - 2026-09-26
+
+### Ajouté
+- **Outil de signatures : sauvegarde automatique de la signature en cours dans le navigateur, restaurée au rafraîchissement.** Comme les autres outils du site, l'assistant enregistre la signature en cours dans le navigateur du visiteur (localStorage, aucune donnée envoyée nulle part) et la restaure telle quelle au rechargement de la page. Rien n'est sauvegardé lorsqu'une signature existante est déjà chargée depuis le serveur (lien secret ou compte membre), pour ne pas écraser un travail en base. Accès protégé (navigation privée, quota, stockage bloqué) : une erreur de stockage n'interrompt jamais l'éditeur.
+- **Outil de signatures : bouton « Remise à zéro ».** Repart d'une signature vierge, à l'étape 1, après une confirmation par une fenêtre du thème (jamais une fenêtre native du navigateur). L'action efface le brouillon local : elle est donc précédée d'une confirmation explicite, car elle supprime le travail en cours.
+
+### Modifié
+- **Outil de signatures : la mention « créé avec laveille.ai » se scinde en deux.** Le COMMENTAIRE HTML d'attribution est désormais TOUJOURS présent dans le code de la signature (non désactivable, invisible pour le lecteur). La case à cocher de l'étape « Finaliser » pilote maintenant une MENTION VISIBLE au bas de la signature rendue (affichée par défaut, retirable). Cela corrige le comportement de la version 1.304.0, où la case retirait le commentaire et où aucune mention visible n'existait. Les deux moteurs de rendu (aperçu côté navigateur et rendu côté serveur) restent des jumeaux exacts.
+- **Outil de signatures : la navigation « Précédent » et « Suivant » suit le défilement.** La barre d'action devient collante en bas de la colonne du formulaire, avec un indicateur « Étape X sur 5 » au centre : elle reste atteignable sans défiler jusqu'au bas de l'étape. Retenu après avis de deux oracles de familles différentes, qui ont écarté la duplication haut et bas (deux boutons « Suivant » identiques nuisent aux lecteurs d'écran). Cibles tactiles d'au moins 44 pixels, réserve d'espace au bas de la zone défilante pour que la barre ne recouvre jamais le champ actif (WCAG 2.4.11), et respect de la zone sûre du bas sur mobile.
+
 ## [1.304.0] - 2026-09-26
 
 ### Ajouté

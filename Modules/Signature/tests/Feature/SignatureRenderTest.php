@@ -666,19 +666,20 @@ test('LOT 4 - les 8 gabarits d\'origine (LOT 1-3) ne changent PAS de rendu aprè
         ->and($htmlMinimal)->not->toContain('margin:0 auto');
 })->with(['minimal', 'professionnel', 'portrait', 'compact', 'vertical', 'banniere', 'executive', 'social']);
 
-test('la mention laveille.ai est présente PAR DÉFAUT (aucune clé show_attribution)', function (): void {
+test('PAR DÉFAUT : commentaire HTML en TÊTE (toujours) ET mention VISIBLE au bas', function (): void {
     $html = SignatureRenderer::render([
         'first_name' => 'Marie',
         'last_name' => 'Tremblay',
         'email' => 'marie@example.com',
     ], 'minimal');
 
-    // Commentaire HTML invisible dans la signature rendue, présent dans la source, en TÊTE.
-    expect($html)->toContain('<!-- Signature créée gratuitement avec laveille.ai')
-        ->and($html)->toStartWith('<!-- Signature créée gratuitement avec laveille.ai');
+    // Le commentaire HTML (invisible dans la signature, présent dans la source) est en TÊTE ;
+    // la mention VISIBLE (un vrai lien `>laveille.ai</a>`, absent du commentaire) est présente.
+    expect($html)->toStartWith('<!-- Signature créée gratuitement avec laveille.ai')
+        ->and($html)->toContain('>laveille.ai</a>');
 });
 
-test('show_attribution=false RETIRE la mention laveille.ai', function (): void {
+test('show_attribution=false : le commentaire HTML RESTE (non désactivable), la mention VISIBLE est retirée', function (): void {
     $html = SignatureRenderer::render([
         'first_name' => 'Marie',
         'last_name' => 'Tremblay',
@@ -686,12 +687,12 @@ test('show_attribution=false RETIRE la mention laveille.ai', function (): void {
         'show_attribution' => false,
     ], 'minimal');
 
-    expect($html)->not->toContain('laveille.ai -->')
-        ->and($html)->not->toContain('<!-- Signature créée gratuitement')
-        ->and($html)->toStartWith('<table'); // le corps de la signature commence directement
+    // Le commentaire est toujours là (en tête) ; seule la mention visible (le lien) disparaît.
+    expect($html)->toStartWith('<!-- Signature créée gratuitement avec laveille.ai')
+        ->and($html)->not->toContain('>laveille.ai</a>');
 });
 
-test('show_attribution=true GARDE la mention laveille.ai', function (): void {
+test('show_attribution=true : commentaire HTML ET mention VISIBLE', function (): void {
     $html = SignatureRenderer::render([
         'first_name' => 'Marie',
         'last_name' => 'Tremblay',
@@ -699,7 +700,8 @@ test('show_attribution=true GARDE la mention laveille.ai', function (): void {
         'show_attribution' => true,
     ], 'minimal');
 
-    expect($html)->toContain('<!-- Signature créée gratuitement avec laveille.ai');
+    expect($html)->toContain('<!-- Signature créée gratuitement avec laveille.ai')
+        ->and($html)->toContain('>laveille.ai</a>');
 });
 
 test('le commentaire de mention est sûr : jamais la suite -- (interdite en commentaire HTML) ni de tiret cadratin', function (): void {

@@ -147,14 +147,27 @@ final class SignatureRenderer
             $body .= self::blocBanniere($images[$def['banner_role']] ?? null, $f);
         }
 
-        // Mention laveille.ai en COMMENTAIRE HTML (invisible dans la signature rendue, présente
-        // dans la source) - activée par défaut, retirable par la case de l'éditeur. Jumeau exact
-        // de renderSignature() dans signature-render.js.
+        // Mention VISIBLE de laveille.ai au bas de la signature - AFFICHÉE par défaut, RETIRABLE
+        // par la case de l'éditeur (show_attribution). Jumeau exact de renderSignature().
         if ($f['show_attribution']) {
-            $body = self::ATTRIBUTION_COMMENT.$body;
+            $body .= self::blocAttribution($fontStack, $fontScale);
         }
 
+        // Commentaire HTML de mention : TOUJOURS présent (non désactivable), invisible dans la
+        // signature rendue mais présent dans la source. Jumeau exact de renderSignature().
+        $body = self::ATTRIBUTION_COMMENT.$body;
+
         return $body;
+    }
+
+    /**
+     * Mention VISIBLE de laveille.ai au bas de la signature (petit texte gris #6b7280, ~4,8:1 sur
+     * blanc, lié à l'outil). Affichée par défaut, retirée quand show_attribution est faux. Jumeau
+     * exact de blocAttribution() dans signature-render.js.
+     */
+    private static function blocAttribution(string $fontStack, float $fontScale): string
+    {
+        return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;border-collapse:collapse;margin-top:8px;"><tr><td style="font-family:'.$fontStack.';font-size:'.self::scalePx('11px', $fontScale).';color:#6b7280;">Créé gratuitement avec <a href="https://laveille.ai/outils/signature-courriel" style="color:#6b7280;text-decoration:underline;">laveille.ai</a></td></tr></table>';
     }
 
     /**

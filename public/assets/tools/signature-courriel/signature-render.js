@@ -241,6 +241,13 @@
         return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;border-collapse:collapse;"><tr><td style="background-color:#ffffff;">' + inner + '</td></tr></table>';
     }
 
+    // Mention VISIBLE de laveille.ai au bas de la signature - petit texte discret gris (#6b7280,
+    // ~4,8:1 sur blanc), lié à l'outil. Affichée par défaut, retirable par la case de l'éditeur.
+    // Jumeau exact de SignatureRenderer::blocAttribution().
+    function blocAttribution(fontStack, fontScale) {
+        return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;border-collapse:collapse;margin-top:8px;"><tr><td style="font-family:' + fontStack + ';font-size:' + scalePx('11px', fontScale) + ';color:#6b7280;">Créé gratuitement avec <a href="https://laveille.ai/outils/signature-courriel" style="color:#6b7280;text-decoration:underline;">laveille.ai</a></td></tr></table>';
+    }
+
     function blocColonneTexte(f, accent, fontStack, nameSize, socialEmphasis, nameDivider, fontScale) {
         var html = '<table role="presentation" cellpadding="0" cellspacing="0" border="0">';
         html += blocIdentite(f, accent, fontStack, nameSize, nameDivider, fontScale);
@@ -381,13 +388,16 @@
             body += blocBanniere(images[def.banner_role], f, f.cta_url);
         }
 
-        // Mention laveille.ai en COMMENTAIRE HTML (invisible dans la signature rendue, présente
-        // dans la source) - activée par défaut, retirable par la case de l'éditeur. Jumeau exact
-        // de SignatureRenderer::render() : le commentaire ne contient jamais la suite « -- »
-        // (interdite dans un commentaire HTML) ni de tiret cadratin (règle 10).
+        // Mention VISIBLE de laveille.ai au bas de la signature - AFFICHÉE par défaut, RETIRABLE
+        // par la case de l'éditeur (show_attribution). Jumeau exact de SignatureRenderer::render().
         if (f.show_attribution) {
-            body = ATTRIBUTION_COMMENT + body;
+            body += blocAttribution(fontStack, fontScale);
         }
+
+        // Commentaire HTML de mention : TOUJOURS présent (non désactivable), invisible dans la
+        // signature rendue mais présent dans la source. Jamais la suite « -- » (interdite dans un
+        // commentaire HTML) ni de tiret cadratin (règle 10).
+        body = ATTRIBUTION_COMMENT + body;
 
         return body;
     }
