@@ -94,6 +94,11 @@ final class SignatureRenderer
 
     private const PORTRAIT_SHAPES = ['carre', 'rond'];
 
+    // Mention laveille.ai en commentaire HTML (jumeau exact de ATTRIBUTION_COMMENT dans
+    // signature-render.js). Invisible dans la signature rendue, présente dans la source. Ne
+    // contient JAMAIS la suite « -- » (interdite dans un commentaire HTML) ni de tiret cadratin.
+    private const ATTRIBUTION_COMMENT = "<!-- Signature créée gratuitement avec laveille.ai, https://laveille.ai/outils/signature-courriel -->\n";
+
     private const SOCIAL_ICONS = [
         'linkedin' => '💼',
         'facebook' => '📘',
@@ -140,6 +145,13 @@ final class SignatureRenderer
         // (voir docblock de SignatureTemplateRegistry).
         if (! empty($def['banner_role'])) {
             $body .= self::blocBanniere($images[$def['banner_role']] ?? null, $f);
+        }
+
+        // Mention laveille.ai en COMMENTAIRE HTML (invisible dans la signature rendue, présente
+        // dans la source) - activée par défaut, retirable par la case de l'éditeur. Jumeau exact
+        // de renderSignature() dans signature-render.js.
+        if ($f['show_attribution']) {
+            $body = self::ATTRIBUTION_COMMENT.$body;
         }
 
         return $body;
@@ -196,6 +208,9 @@ final class SignatureRenderer
             'font_scale' => is_string($content['font_scale'] ?? null) && array_key_exists($content['font_scale'], self::FONT_SCALE_FACTORS)
                 ? $content['font_scale']
                 : 'moyenne',
+            // Mention laveille.ai (commentaire HTML) - activée par défaut, seule une valeur
+            // explicitement fausse la retire (jumeau de normalize() dans signature-render.js).
+            'show_attribution' => filter_var($content['show_attribution'] ?? true, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true,
         ];
     }
 

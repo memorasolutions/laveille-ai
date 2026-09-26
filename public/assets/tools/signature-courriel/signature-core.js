@@ -28,7 +28,9 @@ function signatureAssistant(config) {
             accent_color: '#064E5A', font_family: 'Arial', social_links: [], mention_lines: [],
             // LOT 3 (2026-09-25) - défauts neutres, aucun impact sur le rendu tant qu'ils ne sont
             // pas changés (voir SignatureRenderer::normalize()).
-            pronouns: '', portrait_shape: 'carre', font_scale: 'moyenne'
+            pronouns: '', portrait_shape: 'carre', font_scale: 'moyenne',
+            // Mention laveille.ai en commentaire HTML - ACTIVÉE par défaut, la case peut la retirer.
+            show_attribution: true
         }, config.initialContent || {}),
         images: Object.assign({ logo: null, portrait: null, banniere: null }, config.initialImages || {}),
         templates: config.templates || [

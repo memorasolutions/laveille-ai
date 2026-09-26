@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.304.0] - 2026-09-26
+
+### Ajouté
+- **Outil de signatures : mention « créé avec laveille.ai » en option (activée par défaut, désactivable).** Une case à cocher dans l'étape « Finaliser » insère un COMMENTAIRE HTML (`<!-- Signature créée gratuitement avec laveille.ai, ... -->`) en tête du code de la signature. Il est INVISIBLE dans la signature rendue (le lecteur ne le voit pas), mais présent dans la source. La case est cochée par défaut; la décocher retire complètement le commentaire. Le comportement passe par le moteur de rendu unique (aperçu JS + rendu serveur PHP), donc l'aperçu, la copie riche et l'export du code HTML sont cohérents. 4 tests neufs verrouillent le défaut activé, le retrait, la présence et la sûreté du commentaire (jamais la suite « -- » interdite en HTML, jamais de tiret cadratin).
+
+### Corrigé
+- **Outil de signatures : dans la fenêtre « Code HTML de la signature », le code débordait horizontalement sans retour à la ligne.** La zone de code forçait `white-space: pre` (aucun retour à la ligne). Elle passe à `white-space: pre-wrap` avec césure des longues chaînes (`word-break`/`overflow-wrap`), pour que les longues lignes (URLs, styles en ligne) reviennent à la ligne au lieu d'imposer un défilement horizontal.
+
 ## [1.303.5] - 2026-09-26
 
 ### Corrigé

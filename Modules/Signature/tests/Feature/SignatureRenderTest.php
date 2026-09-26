@@ -665,3 +665,54 @@ test('LOT 4 - les 8 gabarits d\'origine (LOT 1-3) ne changent PAS de rendu aprè
         ->and($htmlMinimal)->not->toContain('text-align:center')
         ->and($htmlMinimal)->not->toContain('margin:0 auto');
 })->with(['minimal', 'professionnel', 'portrait', 'compact', 'vertical', 'banniere', 'executive', 'social']);
+
+test('la mention laveille.ai est présente PAR DÉFAUT (aucune clé show_attribution)', function (): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie',
+        'last_name' => 'Tremblay',
+        'email' => 'marie@example.com',
+    ], 'minimal');
+
+    // Commentaire HTML invisible dans la signature rendue, présent dans la source, en TÊTE.
+    expect($html)->toContain('<!-- Signature créée gratuitement avec laveille.ai')
+        ->and($html)->toStartWith('<!-- Signature créée gratuitement avec laveille.ai');
+});
+
+test('show_attribution=false RETIRE la mention laveille.ai', function (): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie',
+        'last_name' => 'Tremblay',
+        'email' => 'marie@example.com',
+        'show_attribution' => false,
+    ], 'minimal');
+
+    expect($html)->not->toContain('laveille.ai -->')
+        ->and($html)->not->toContain('<!-- Signature créée gratuitement')
+        ->and($html)->toStartWith('<table'); // le corps de la signature commence directement
+});
+
+test('show_attribution=true GARDE la mention laveille.ai', function (): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie',
+        'last_name' => 'Tremblay',
+        'email' => 'marie@example.com',
+        'show_attribution' => true,
+    ], 'minimal');
+
+    expect($html)->toContain('<!-- Signature créée gratuitement avec laveille.ai');
+});
+
+test('le commentaire de mention est sûr : jamais la suite -- (interdite en commentaire HTML) ni de tiret cadratin', function (): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie',
+        'last_name' => 'Tremblay',
+        'email' => 'marie@example.com',
+    ], 'minimal');
+
+    // Isoler le commentaire (première ligne) et vérifier qu'il ne contient AUCUNE suite "--"
+    // à l'intérieur (les seules occurrences de "--" permises sont les délimiteurs <!-- et -->).
+    $comment = strtok($html, "\n");
+    $inner = trim(str_replace(['<!--', '-->'], '', $comment));
+    expect($inner)->not->toContain('--')
+        ->and($inner)->not->toContain('—'); // règle 10 : jamais de tiret cadratin
+});

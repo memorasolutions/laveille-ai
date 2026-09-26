@@ -344,6 +344,16 @@
                     </div>
                     @endif
 
+                    {{-- Mention laveille.ai : commentaire HTML INVISIBLE dans la signature rendue,
+                         présent dans le code source. Activée par défaut, retirable ici. Pilote le
+                         moteur canonique (renderSignature) partagé par l'aperçu, la copie et l'export. --}}
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="sig-show-attribution" x-model="content.show_attribution">
+                        <label class="form-check-label small" for="sig-show-attribution">
+                            {{ __('Inclure une petite mention «'."\u{00A0}".'créé avec laveille.ai'."\u{00A0}".'» dans le code HTML (commentaire invisible dans la signature)') }}
+                        </label>
+                    </div>
+
                     <div class="d-flex gap-2 flex-wrap">
                         <button type="button" class="ct-btn ct-btn-primary" @click="copyToClipboard()">📋 {{ __('Copier') }}</button>
                         <button type="button" class="ct-btn ct-btn-outline" @click="downloadHtm()">⬇️ {{ __('Télécharger (.htm)') }}</button>

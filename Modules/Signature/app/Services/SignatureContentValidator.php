@@ -68,6 +68,8 @@ final class SignatureContentValidator
             'content.mention_lines' => ['nullable', 'array', 'max:6'],
             'content.mention_lines.*' => ['string', 'max:160'],
             'content.qr_enabled' => ['nullable', 'boolean'],
+            // Mention laveille.ai en commentaire HTML - activée par défaut, la case peut la retirer.
+            'content.show_attribution' => ['nullable', 'boolean'],
             // LOT 3 (2026-09-25) - pronoms, forme du portrait, taille de police. Enum FERMÉ pour
             // les deux derniers (Rule::in), jamais une valeur libre.
             'content.pronouns' => ['nullable', 'string', 'max:30'],

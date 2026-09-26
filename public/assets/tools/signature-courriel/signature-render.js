@@ -23,6 +23,10 @@
 (function (global) {
     'use strict';
 
+    // Mention laveille.ai en commentaire HTML (jumeau exact de SignatureRenderer::ATTRIBUTION_COMMENT).
+    // JAMAIS la suite « -- » (interdite dans un commentaire HTML), jamais de tiret cadratin (règle 10).
+    var ATTRIBUTION_COMMENT = '<!-- Signature créée gratuitement avec laveille.ai, https://laveille.ai/outils/signature-courriel -->\n';
+
     var FONT_STACK = {
         Arial: "Arial, Helvetica, sans-serif",
         Helvetica: "Helvetica, Arial, sans-serif",
@@ -91,7 +95,10 @@
             // LOT 3 (2026-09-25).
             pronouns: String(content.pronouns || '').trim(),
             portrait_shape: PORTRAIT_SHAPES.indexOf(content.portrait_shape) !== -1 ? content.portrait_shape : 'carre',
-            font_scale: typeof content.font_scale === 'string' && FONT_SCALE_FACTORS.hasOwnProperty(content.font_scale) ? content.font_scale : 'moyenne'
+            font_scale: typeof content.font_scale === 'string' && FONT_SCALE_FACTORS.hasOwnProperty(content.font_scale) ? content.font_scale : 'moyenne',
+            // Mention laveille.ai (commentaire HTML invisible) - activée par défaut, seule la
+            // valeur EXPLICITEMENT false la retire (jumeau de SignatureRenderer::normalize()).
+            show_attribution: content.show_attribution !== false
         };
     }
 
@@ -372,6 +379,14 @@
         // cliquable en plus de son corps habituel - voir SignatureRenderer::render().
         if (def.banner_role) {
             body += blocBanniere(images[def.banner_role], f, f.cta_url);
+        }
+
+        // Mention laveille.ai en COMMENTAIRE HTML (invisible dans la signature rendue, présente
+        // dans la source) - activée par défaut, retirable par la case de l'éditeur. Jumeau exact
+        // de SignatureRenderer::render() : le commentaire ne contient jamais la suite « -- »
+        // (interdite dans un commentaire HTML) ni de tiret cadratin (règle 10).
+        if (f.show_attribution) {
+            body = ATTRIBUTION_COMMENT + body;
         }
 
         return body;
