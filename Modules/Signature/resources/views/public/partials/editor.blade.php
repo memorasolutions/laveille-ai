@@ -447,7 +447,7 @@
      (voir son docblock). Aucun iframe de rendu réel ne subsiste dans cette galerie; le rendu réel
      ne vit plus que dans le panneau « Aperçu en direct » du wizard. --}}
 <div x-show="showGalleryModal" x-cloak
-     style="position:fixed;inset:0;z-index:1055;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);padding:16px;"
+     class="sig-modal-overlay"
      role="dialog" aria-modal="true" aria-labelledby="sigGalleryModalTitle"
      x-init="$watch('showGalleryModal', (v) => v && $nextTick(() => focusFirstIn($el)))"
      @keydown.escape.window="closeGallery()"
@@ -510,7 +510,7 @@
      moteur canonique (renderSignature), copiable en un clic - utile pour un client courriel qui
      exige de coller le code source plutôt qu'une copie riche. --}}
 <div x-show="showHtmlModal" x-cloak
-     style="position:fixed;inset:0;z-index:1055;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);"
+     class="sig-modal-overlay"
      role="dialog" aria-modal="true" aria-labelledby="sigHtmlModalTitle"
      x-init="$watch('showHtmlModal', (v) => v && $nextTick(() => focusFirstIn($el)))"
      @keydown.escape.window="showHtmlModal = false"
@@ -536,7 +536,7 @@
      fournit pas) - jamais alert()/confirm() natif (règle projet). Focus piégé (M4.5) via
      focusFirstIn()/trapFocusTab() (signature-core.js), aucun plugin Alpine Focus dans ce projet. --}}
 <div x-show="showTokenModal" x-cloak
-     style="position:fixed;inset:0;z-index:1055;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);"
+     class="sig-modal-overlay"
      role="dialog" aria-modal="true" aria-labelledby="sigTokenModalTitle"
      x-init="$watch('showTokenModal', (v) => v && $nextTick(() => focusFirstIn($el)))"
      @keydown.escape.window="showTokenModal = false"

@@ -27,6 +27,11 @@
 
 /* LOT 4 - Galerie de mises en page (modale). Couleurs de texte reprises de SignatureRenderer.php
    (#374151/#111827) - déjà vérifiées AAA (7:1) sur fond blanc par la charte du projet. */
+/* Overlay commun des modales MAISON (galerie, HTML, jeton). display:flex vit dans une CLASSE,
+   jamais en style inline : Alpine x-show s'approprie la propriete display et efface un flex
+   pose en inline, ce qui decentrait la modale (collee en haut a gauche). La bande d'apercu
+   mobile utilise deja ce patron par classe. */
+.sig-modal-overlay { position: fixed; inset: 0; z-index: 1055; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.5); padding: 16px; }
 .sig-gallery-modal { background: #fff; border-radius: var(--r-base, 0.75rem); max-width: 960px; width: 96%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 1rem 3rem rgba(0,0,0,.2); }
 .sig-gallery-tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
 .sig-gallery-tab { border: 1px solid #d1d5db; background: #fff; color: #374151; border-radius: 999px; padding: 8px 16px; min-height: 24px; font-size: 14px; cursor: pointer; }

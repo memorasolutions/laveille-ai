@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.303.3] - 2026-09-26
+
+### Corrigé
+- **Outil de signatures : la fenêtre « Toutes les mises en page » n'était pas centrée** (collée en haut à gauche). Cause : le `display:flex` de centrage vivait dans le style EN LIGNE de l'overlay, or Alpine (`x-show`) s'approprie la propriété `display` et effaçait ce `flex` à l'affichage, laissant l'overlay en `block`. Le centrage passe désormais par une classe CSS `.sig-modal-overlay` (comme le fait déjà, correctement, la bande d'aperçu mobile). Corrige les trois fenêtres modales de l'outil (galerie, code HTML, jeton).
+
 ## [1.303.2] - 2026-09-26
 
 ### Corrigé
