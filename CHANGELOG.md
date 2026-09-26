@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.305.2] - 2026-09-26
+
+### Corrigé
+- **Outil de signatures : le brouillon local n'était pas effacé après un enregistrement réussi** (trouvé par la passe adversariale du gate /100). Sur la page de création, le jeton de la signature n'est pas connu au chargement, si bien qu'une signature déjà enregistrée était silencieusement réinjectée à une visite suivante - une fuite possible entre deux signatures sur un poste partagé. Correctif : `save()` efface le brouillon local dès que la signature est persistée côté serveur. Et « Remise à zéro » n'efface plus le brouillon local quand on est sur la page de gestion d'une signature serveur (jeton présent), pour ne pas détruire un brouillon anonyme en cours dans un autre onglet. Vérifié en local sur la page réelle : après un enregistrement réussi, la clé `lv_signature_draft_v1` est bien vidée; la remise à zéro du flux de création continue d'effacer la saisie.
+
 ## [1.305.1] - 2026-09-26
 
 ### Corrigé

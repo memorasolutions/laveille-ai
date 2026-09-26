@@ -167,7 +167,13 @@ function signatureAssistant(config) {
             this.resetSignature();
         },
         resetSignature() {
-            try { window.localStorage.removeItem(this._localDraftKey()); } catch (e) { /* ignore */ }
+            // On n'efface le brouillon local QUE dans le flux anonyme (page de création). Depuis la
+            // page de gestion d'une signature serveur (jeton/id présents), le brouillon local ne nous
+            // appartient pas : il peut venir d'un autre onglet en cours de saisie anonyme - ne pas le
+            // détruire par un « Remise à zéro » sans rapport.
+            if (!this._hasServerDraft()) {
+                try { window.localStorage.removeItem(this._localDraftKey()); } catch (e) { /* ignore */ }
+            }
             this.template = this._pristine.template;
             this.content = JSON.parse(JSON.stringify(this._pristine.content));
             this.images = JSON.parse(JSON.stringify(this._pristine.images));
@@ -454,6 +460,11 @@ function signatureAssistant(config) {
                     this.issuedManageUrl = data.manage_url || '';
                     this.showTokenModal = true;
                 }
+                // La signature est désormais persistée côté serveur : le brouillon local devient
+                // obsolète. On l'efface pour ne pas le réinjecter à une visite ultérieure sur la page
+                // de création (où le jeton n'est pas connu au chargement) - évite qu'une signature
+                // déjà enregistrée réapparaisse pour une autre personne sur un poste partagé.
+                try { window.localStorage.removeItem(this._localDraftKey()); } catch (e) { /* ignore */ }
                 if (window.toast) { window.toast('Signature enregistrée', 'success', 2500); }
                 return true;
             } catch (e) {
