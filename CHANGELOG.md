@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.303.0] - 2026-09-26
+
+### Ajouté
+- **Outil de signatures : galerie de mises en page.** Un bouton « Voir toutes les mises en page » ouvre une fenêtre à onglets par catégorie, avec un vrai aperçu de chaque disposition (pas un simple schéma). Six nouvelles dispositions distinctes s'ajoutent (photo à droite, logo à gauche, coordonnées sous le nom, logo en bas, photo centrée, deux colonnes) : 14 gabarits au total.
+- **L'éditeur de signatures devient un assistant par étapes** (mise en page, vos informations, images, style et liens, finalisation), avec un aperçu toujours visible : collant à droite sur ordinateur dans un cadre de courriel, et une bande d'aperçu agrandissable sur mobile qui se réduit dès qu'on saisit un champ.
+
+### Modifié
+- Le sélecteur de gabarit, la galerie et l'aperçu réutilisent le même moteur de rendu : aucune logique dupliquée.
+
 ## [1.302.0] - 2026-09-25
 
 ### Ajouté

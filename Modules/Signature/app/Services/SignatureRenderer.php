@@ -334,6 +334,20 @@ final class SignatureRenderer
      * seule colonne comme avec la colonne de texte des agencements ci-dessus). Bon pour mobile et
      * les signatures longues.
      *
+     * LOT 4 (2026-09-26) - 3 propriétés transverses de plus, TOUTES à défaut neutre (absentes du
+     * gabarit `vertical` d'origine, sortie inchangée pour lui) :
+     *   - `image_position` (`top` par défaut, ou `bottom`) : place l'image après les réseaux plutôt
+     *     qu'en tête (gabarit `logo_bas`).
+     *   - `centered` (bool) : `text-align:center` sur le conteneur (hérité par tout le texte, y
+     *     compris le bouton CTA en `display:inline-block`) + `margin:0 auto` sur l'image, pour un
+     *     bloc entièrement centré (gabarit `photo_centree`). Repli assumé et documenté : Outlook de
+     *     bureau (moteur Word) applique `text-align` de façon moins fiable qu'un client web/mobile -
+     *     dégradation gracieuse (contenu lisible, simplement aligné à gauche), jamais un plantage.
+     *   - `contact_divider` (bool) : filet horizontal fin entre le bloc identité et le bloc contact
+     *     (gabarit `coordonnees_sous_nom`) - à ne pas confondre avec `name_divider`, qui souligne le
+     *     nom LUI-MÊME. Contenu non vide (`&nbsp;`) pour ne jamais ressembler à une cellule orpheline
+     *     laissée par erreur.
+     *
      * @param  array<string, mixed>  $def
      * @param  array<string, mixed>  $f
      * @param  array<string, array{url: string, width: int, height: int}>  $images
@@ -341,20 +355,41 @@ final class SignatureRenderer
     private static function assembleVertical(array $def, array $f, array $images, string $accent, string $fontStack, float $fontScale = 1.0): string
     {
         $imageRole = $def['image_role'] ?? null;
+        $centered = (bool) ($def['centered'] ?? false);
+        $imageExtraStyle = $imageRole !== null ? self::resolveImageStyle($imageRole, $def, $f) : '';
+        if ($centered) {
+            $imageExtraStyle .= 'margin:0 auto;';
+        }
         $image = $imageRole !== null
-            ? self::blocImage($images[$imageRole] ?? null, $def['image_alt'] ?? '', self::resolveImageStyle($imageRole, $def, $f), $f)
+            ? self::blocImage($images[$imageRole] ?? null, $def['image_alt'] ?? '', $imageExtraStyle, $f)
             : '';
 
-        $html = '<table role="presentation" cellpadding="0" cellspacing="0" border="0">';
-        if ($image !== '') {
-            $html .= '<tr><td style="padding-bottom:'.self::e($def['image_gap'] ?? '10px').';">'.$image.'</td></tr>';
+        $imagePosition = $def['image_position'] ?? 'top';
+        $imageGap = self::e($def['image_gap'] ?? '10px');
+        $imageRow = $image !== '' ? '<tr><td style="padding-'.($imagePosition === 'bottom' ? 'top' : 'bottom').':'.$imageGap.';">'.$image.'</td></tr>' : '';
+        $reseauxHtml = self::blocReseaux($f['social_links'], $fontStack, $accent, (bool) ($def['social_emphasis'] ?? false), $fontScale);
+        $contactDividerRow = ($def['contact_divider'] ?? false)
+            ? '<tr><td style="padding-top:8px;padding-bottom:8px;border-top:1px solid '.self::e($accent).';font-size:1px;line-height:1px;">&nbsp;</td></tr>'
+            : '';
+
+        $tableStyle = $centered ? ' style="text-align:center;"' : '';
+        $html = '<table role="presentation" cellpadding="0" cellspacing="0" border="0"'.$tableStyle.'>';
+        if ($imagePosition !== 'bottom') {
+            $html .= $imageRow;
         }
         $html .= self::blocIdentite($f, $accent, $fontStack, $def['name_size'] ?? '16px', (bool) ($def['name_divider'] ?? false), $fontScale);
+        $html .= $contactDividerRow;
         $html .= self::blocContact($f, $fontStack, $fontScale);
         $html .= self::blocTagline($f, $fontStack, $fontScale);
-        $html .= self::blocReseaux($f['social_links'], $fontStack, $accent, (bool) ($def['social_emphasis'] ?? false), $fontScale);
+        if ($imagePosition !== 'bottom') {
+            $html .= $reseauxHtml;
+        }
         $html .= self::blocMentions($f['mention_lines'], $fontStack, $fontScale);
         $html .= self::blocCta($f, $accent, $fontStack, $fontScale);
+        if ($imagePosition === 'bottom') {
+            $html .= $reseauxHtml;
+            $html .= $imageRow;
+        }
         $html .= '</table>';
 
         return self::wrap($html);

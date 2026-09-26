@@ -11,6 +11,68 @@
 var SIG_PORTRAIT_SHAPE_LABELS = { carre: 'Carré', rond: 'Rond' };
 var SIG_FONT_SCALE_LABELS = { petite: 'Petite', moyenne: 'Moyenne', grande: 'Grande' };
 
+// LOT 4 - libellés FR accentués des catégories de la galerie (clés = valeur `category` du registre,
+// voir SignatureTemplateRegistry). "toutes" est l'onglet ajouté par la galerie elle-même, absent du
+// registre.
+var SIG_GALLERY_CATEGORY_LABELS = {
+    toutes: 'Toutes', classiques: 'Classiques', photo: 'Photo', vertical: 'Vertical',
+    banniere: 'Bannière', reseaux: 'Réseaux sociaux'
+};
+
+// LOT 4 - images de remplacement GÉNÉRIQUES (SVG en ligne, aucune dépendance réseau, aucune donnée
+// réelle) pour les vignettes de la galerie : un mini-aperçu FIDÈLE au moteur de rendu doit pouvoir
+// afficher un logo/un portrait/une bannière même sans qu'aucune image n'ait jamais été téléversée.
+var SIG_GALLERY_PLACEHOLDER_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="40" viewBox="0 0 96 40">'
+    + '<rect width="96" height="40" rx="6" fill="#e5e7eb"/>'
+    + '<circle cx="20" cy="20" r="10" fill="#064E5A"/>'
+    + '<rect x="38" y="14" width="46" height="5" rx="2.5" fill="#9ca3af"/>'
+    + '<rect x="38" y="23" width="32" height="5" rx="2.5" fill="#cbd5e1"/>'
+    + '</svg>'
+);
+var SIG_GALLERY_PLACEHOLDER_PORTRAIT = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">'
+    + '<rect width="80" height="80" fill="#e5e7eb"/>'
+    + '<circle cx="40" cy="32" r="16" fill="#9ca3af"/>'
+    + '<path d="M12 78c4-18 20-28 28-28s24 10 28 28" fill="#9ca3af"/>'
+    + '</svg>'
+);
+var SIG_GALLERY_PLACEHOLDER_BANNIERE = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="150" viewBox="0 0 600 150">'
+    + '<rect width="600" height="150" fill="#064E5A"/>'
+    + '<rect x="24" y="55" width="260" height="14" rx="7" fill="#ffffff" opacity="0.85"/>'
+    + '<rect x="24" y="80" width="180" height="10" rx="5" fill="#ffffff" opacity="0.6"/>'
+    + '</svg>'
+);
+
+// LOT 4 - jeu de données d'exemple GÉNÉRIQUE pour la galerie : un nom, un poste, une organisation, un
+// courriel, un téléphone, un site, des réseaux et les 3 images de remplacement ci-dessus. Jamais une
+// donnée réelle - seulement de quoi montrer un VRAI rendu (texte réel du moteur), pas un schéma
+// abstrait comme HubSpot.
+function signatureGallerySampleState() {
+    return {
+        content: {
+            first_name: 'Camille', last_name: 'Roy', job_title: 'Conseillère en communication',
+            organization: 'Studio Exemple', email: 'camille.roy@exemple.com', phone: '514-555-0142',
+            mobile: '438-555-0199', website: 'https://exemple.com', address: '',
+            tagline: 'Au service de votre image de marque',
+            cta_text: 'Prendre rendez-vous', cta_url: 'https://exemple.com/rendez-vous',
+            accent_color: '#064E5A', font_family: 'Arial',
+            social_links: [
+                { platform: 'linkedin', url: 'https://linkedin.com/in/exemple' },
+                { platform: 'facebook', url: 'https://facebook.com/exemple' }
+            ],
+            mention_lines: ['Exemple à titre indicatif seulement'],
+            pronouns: '', portrait_shape: 'carre', font_scale: 'moyenne'
+        },
+        images: {
+            logo: { url: SIG_GALLERY_PLACEHOLDER_LOGO, width: 96, height: 40 },
+            portrait: { url: SIG_GALLERY_PLACEHOLDER_PORTRAIT, width: 80, height: 80 },
+            banniere: { url: SIG_GALLERY_PLACEHOLDER_BANNIERE, width: 600, height: 150 }
+        }
+    };
+}
+
 function signatureAssistant(config) {
     return {
         template: config.initialTemplate || 'minimal',
@@ -23,7 +85,12 @@ function signatureAssistant(config) {
             pronouns: '', portrait_shape: 'carre', font_scale: 'moyenne'
         }, config.initialContent || {}),
         images: Object.assign({ logo: null, portrait: null, banniere: null }, config.initialImages || {}),
-        templates: config.templates || ['minimal', 'professionnel', 'portrait', 'compact', 'vertical', 'banniere', 'executive', 'social'],
+        templates: config.templates || [
+            'minimal', 'professionnel', 'portrait', 'compact', 'vertical', 'banniere', 'executive', 'social',
+            // LOT 4 - repli défensif seulement (les 3 contrôleurs qui servent l'éditeur passent
+            // toujours `templates` depuis Signature::templates() - jamais rencontré en usage normal).
+            'photo_droite', 'logo_gauche', 'logo_bas', 'photo_centree', 'deux_colonnes', 'coordonnees_sous_nom'
+        ],
         fontFamilies: config.fontFamilies || ['Arial', 'Helvetica', 'Verdana', 'Georgia', 'Tahoma'],
         socialPlatforms: config.socialPlatforms || ['linkedin', 'facebook', 'instagram', 'x', 'youtube', 'website'],
         // LOT 3 - options des nouveaux champs de contenu (voir SignatureContentValidator).
@@ -45,6 +112,18 @@ function signatureAssistant(config) {
         previewSrcdoc: '',
         // LOT 3 - bascule d'aperçu bureau/mobile (largeur contrainte, voir signature.css).
         previewMode: 'desktop',
+        // LOT 5 (2026-09-26) - assistant par étapes : 1 Mise en page, 2 Vos informations,
+        // 3 Images, 4 Style et liens, 5 Finaliser. `step` est la SEULE source de vérité de
+        // l'étape affichée (x-show="step === N" dans editor.blade.php) - jamais un doublon d'état.
+        step: 1,
+        showStepValidation: false,
+        // Bande d'aperçu collante mobile (<lg) : réduite à une poignée dès qu'un champ de saisie
+        // reçoit le focus (clavier virtuel) - voir onWizardFieldFocusIn/Out plus bas - pour ne
+        // jamais recouvrir le champ actif, ses erreurs ni les boutons Précédent/Suivant.
+        mobilePreviewCollapsed: false,
+        // Feuille plein écran (bouton « Agrandir » de la bande mobile) - aperçu à taille réelle.
+        mobilePreviewSheetOpen: false,
+        _previewSheetOpener: null,
         showTokenModal: false,
         issuedManageUrl: '',
         confirmRotate: false,
@@ -52,6 +131,11 @@ function signatureAssistant(config) {
         // LOT 3 - modale « Voir le code HTML » (export brut, copie en un clic).
         showHtmlModal: false,
         htmlSourceCode: '',
+        // LOT 4 - modale « Galerie de mises en page » (onglets par catégorie, vraies vignettes).
+        showGalleryModal: false,
+        galleryCategory: 'toutes',
+        gallerySelected: null,
+        _galleryOpener: null,
 
         init() {
             this.updatePreview();
@@ -63,6 +147,117 @@ function signatureAssistant(config) {
         csrfToken() {
             var meta = document.querySelector('meta[name="csrf-token"]');
             return meta ? meta.content : '';
+        },
+
+        // ------------------------------------------------------------------
+        // Assistant par étapes (LOT 5, 2026-09-26) - navigation + validation minimale. Seule
+        // l'étape 2 (Vos informations) bloque la progression : une signature minimale exige
+        // prénom, nom et un courriel valide - EXACTEMENT les 3 champs `required` de
+        // SignatureContentValidator côté serveur (content.first_name/last_name/email), jamais un
+        // champ de plus. Tout le reste (étapes 1, 3, 4, 5) est optionnel et ne bloque jamais.
+        // ------------------------------------------------------------------
+        hasMinimalIdentity() {
+            var email = (this.content.email || '').trim();
+            return !!(this.content.first_name && this.content.first_name.trim())
+                && !!(this.content.last_name && this.content.last_name.trim())
+                && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        },
+        canGoToStep(s) {
+            if (s <= 2) { return true; }
+            return this.hasMinimalIdentity();
+        },
+        goToStep(s) {
+            if (this.canGoToStep(s)) {
+                this.showStepValidation = false;
+                this.step = s;
+                this._focusStepHeading();
+            } else {
+                // Renvoie à l'étape 2 (celle qui porte les champs manquants) plutôt que de
+                // bloquer silencieusement sur place - la personne voit tout de suite ce qui manque.
+                this.showStepValidation = true;
+                this.step = 2;
+                this._focusStepHeading();
+            }
+        },
+        nextStep() {
+            this.goToStep(Math.min(this.step + 1, 5));
+        },
+        prevStep() {
+            if (this.step > 1) {
+                this.step--;
+                this._focusStepHeading();
+            }
+        },
+        _focusStepHeading() {
+            var self = this;
+            this.$nextTick(function () {
+                var el = document.getElementById('sigStepHeading' + self.step);
+                if (el && typeof el.focus === 'function') { el.focus(); }
+            });
+        },
+        // Trois états visuels du stepper (jamais un simple booléen) - lisibles SANS la couleur
+        // (WCAG 1.4.1) : le glyphe change (chiffre/✓) ET l'aria-label du bouton porte toujours le
+        // nom de l'étape + son état. Seule l'étape 2 distingue "partiel" (un champ rempli sur les
+        // trois) - les autres étapes sont entièrement optionnelles : "complétée" y signale
+        // seulement qu'un choix a été personnalisé, jamais une obligation à remplir.
+        stepState(n) {
+            if (n === 1) { return 'complete'; } // un gabarit est toujours choisi (valeur par défaut)
+            if (n === 2) {
+                if (this.hasMinimalIdentity()) { return 'complete'; }
+                if (this.content.first_name || this.content.last_name || this.content.email) { return 'partiel'; }
+                return 'vide';
+            }
+            if (n === 3) {
+                return (this.images.logo || this.images.portrait || this.images.banniere) ? 'complete' : 'vide';
+            }
+            if (n === 4) {
+                var touched = this.content.social_links.length > 0
+                    || this.content.mention_lines.length > 0
+                    || !!this.content.cta_text
+                    || !!this.content.cta_url
+                    || this.content.accent_color !== '#064E5A'
+                    || this.content.font_family !== 'Arial'
+                    || this.content.font_scale !== 'moyenne';
+                return touched ? 'complete' : 'vide';
+            }
+            return 'vide'; // étape 5 (Finaliser) : pas de notion de complétion, seulement des actions
+        },
+        stepStateLabel(n) {
+            var state = this.stepState(n);
+            if (state === 'complete') { return 'complétée'; }
+            if (state === 'partiel') { return 'en cours'; }
+            return 'à faire';
+        },
+
+        // ------------------------------------------------------------------
+        // Aperçu mobile collant (LOT 5) - bande réduite en haut + feuille plein écran. Réutilise
+        // previewSrcdoc (même moteur que l'aperçu bureau, aucune logique de rendu dupliquée).
+        // ------------------------------------------------------------------
+        // Dès qu'un vrai champ de saisie reçoit le focus (clavier virtuel), la bande se réduit à
+        // une poignée. `focusin`/`focusout` sont délégués depuis le conteneur des étapes
+        // (#sig-wizard-steps, editor.blade.php) - aucun champ individuel à instrumenter un par un.
+        onWizardFieldFocusIn(event) {
+            if (event.target && event.target.matches && event.target.matches('input,select,textarea')) {
+                this.mobilePreviewCollapsed = true;
+            }
+        },
+        onWizardFieldFocusOut(event) {
+            // `relatedTarget` porte le prochain élément focusé (supporté par les navigateurs
+            // courants sur focusout) : s'il s'agit encore d'un champ, on reste réduit - on
+            // ré-agrandit seulement quand le focus quitte réellement la zone de saisie.
+            var next = event.relatedTarget;
+            var stillInField = !!(next && next.matches && next.matches('input,select,textarea'));
+            if (!stillInField) { this.mobilePreviewCollapsed = false; }
+        },
+        openPreviewSheet() {
+            this._previewSheetOpener = document.activeElement;
+            this.mobilePreviewSheetOpen = true;
+        },
+        closePreviewSheet() {
+            this.mobilePreviewSheetOpen = false;
+            if (this._previewSheetOpener && typeof this._previewSheetOpener.focus === 'function') {
+                this._previewSheetOpener.focus();
+            }
         },
 
         // LOT 2 - libellé d'affichage d'un gabarit : lu dans window.SIGNATURE_TEMPLATES (registre
@@ -81,6 +276,102 @@ function signatureAssistant(config) {
         },
         fontScaleLabel(value) {
             return SIG_FONT_SCALE_LABELS[value] || value;
+        },
+
+        // LOT 4 - « quand l'utiliser » d'un gabarit, lu dans window.SIGNATURE_TEMPLATES (même patron
+        // que templateLabel() ci-dessus) - affiché sous chaque vignette de la galerie.
+        templateHint(tpl) {
+            var def = (window.SIGNATURE_TEMPLATES || {})[tpl];
+            return (def && def.hint) || '';
+        },
+
+        // ------------------------------------------------------------------
+        // Galerie de mises en page (LOT 4) - onglets par catégorie (registre), vraies vignettes
+        // (même moteur renderSignature() que l'aperçu principal, jeu de données d'exemple générique).
+        // ------------------------------------------------------------------
+
+        // Catégories DISTINCTES du registre, dans leur ordre de première apparition (jamais triées
+        // alphabétiquement - l'ordre du registre reflète déjà un classement éditorial voulu),
+        // précédées de l'onglet « toutes » ajouté par la galerie elle-même.
+        galleryCategoriesWithAll() {
+            var registry = window.SIGNATURE_TEMPLATES || {};
+            var seen = [];
+            this.templates.forEach(function (tpl) {
+                var cat = (registry[tpl] && registry[tpl].category) || 'classiques';
+                if (seen.indexOf(cat) === -1) { seen.push(cat); }
+            });
+            return ['toutes'].concat(seen);
+        },
+        galleryCategoryLabel(cat) {
+            return SIG_GALLERY_CATEGORY_LABELS[cat] || cat;
+        },
+        // Gabarits de l'onglet actif, dans l'ordre du registre - jamais un ré-agencement propre à la
+        // galerie (une seule source d'ordre, comme templates ci-dessus).
+        galleryTemplatesFor(cat) {
+            var registry = window.SIGNATURE_TEMPLATES || {};
+            return this.templates.filter(function (tpl) {
+                if (cat === 'toutes') { return true; }
+                return (registry[tpl] && registry[tpl].category) === cat;
+            });
+        },
+
+        openGallery() {
+            // Élément qui avait le focus avant l'ouverture (le bouton « Voir toutes les mises en
+            // page ») - retrouvé à la fermeture, pour ne jamais perdre le focus clavier dans la page.
+            this._galleryOpener = document.activeElement;
+            this.gallerySelected = this.template;
+            this.galleryCategory = 'toutes';
+            this.showGalleryModal = true;
+        },
+        _closeGalleryReturnFocus() {
+            this.showGalleryModal = false;
+            if (this._galleryOpener && typeof this._galleryOpener.focus === 'function') {
+                this._galleryOpener.focus();
+            }
+        },
+        closeGallery() {
+            this._closeGalleryReturnFocus();
+        },
+        selectGalleryTemplate(tpl) {
+            this.gallerySelected = tpl;
+        },
+        // Applique le choix et ferme - updatePreview() est déjà déclenché par le $watch('template')
+        // posé dans init(), aucun appel direct requis ici (DRY).
+        applyGalleryTemplate() {
+            if (this.gallerySelected) { this.template = this.gallerySelected; }
+            this._closeGalleryReturnFocus();
+        },
+
+        // Navigation clavier ← → (et Origine/Fin) sur la barre d'onglets (ARIA tablist) - déplace le
+        // focus ET sélectionne l'onglet visé (patron d'onglets standard, activation immédiate).
+        // `delta` est soit un entier (±1, cyclique), soit 'first'/'last' pour Origine/Fin.
+        galleryMoveTab(delta) {
+            var cats = this.galleryCategoriesWithAll();
+            var next;
+            if (delta === 'first') {
+                next = cats[0];
+            } else if (delta === 'last') {
+                next = cats[cats.length - 1];
+            } else {
+                var index = cats.indexOf(this.galleryCategory);
+                // Modulo à deux temps : robuste même pour un delta négatif (JS `%` peut renvoyer un
+                // résultat négatif sur un dividende négatif).
+                next = cats[((index + delta) % cats.length + cats.length) % cats.length];
+            }
+            this.galleryCategory = next;
+            this.$nextTick(() => {
+                var el = document.getElementById('sig-gallery-tab-' + next);
+                if (el) { el.focus(); }
+            });
+        },
+
+        // Rendu d'une vignette - réutilise le moteur canonique renderSignature() (même fonction que
+        // l'aperçu principal) avec le jeu de données d'exemple générique, jamais une logique de rendu
+        // dupliquée pour la galerie.
+        galleryThumbSrcdoc(tpl) {
+            var sample = signatureGallerySampleState();
+            var html = renderSignature({ template: tpl, content: sample.content, images: sample.images });
+            return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>body{margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;background:#ffffff;}</style></head><body>' + html + '</body></html>';
         },
 
         addSocialLink() {

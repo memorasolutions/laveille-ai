@@ -110,12 +110,11 @@ test('Signature::templates() DÉRIVE du registre - une seule source de vérité,
 // LOT 2 (2026-09-25) - 4 nouveaux gabarits (vertical, banniere, executive, social)
 // ------------------------------------------------------------------
 
-test('le registre contient EXACTEMENT 8 gabarits après le LOT 2', function (): void {
-    expect(Signature::templates())->toHaveCount(8)
-        ->and(Signature::templates())->toBe([
-            'minimal', 'professionnel', 'portrait', 'compact',
-            'vertical', 'banniere', 'executive', 'social',
-        ]);
+test('le registre contient EXACTEMENT 8 gabarits après le LOT 2 (les 8 premiers, avant les 6 ajouts du LOT 4)', function (): void {
+    expect(array_slice(Signature::templates(), 0, 8))->toBe([
+        'minimal', 'professionnel', 'portrait', 'compact',
+        'vertical', 'banniere', 'executive', 'social',
+    ]);
 });
 
 test('les 4 nouveaux gabarits produisent aussi une structure de tables sans flex/grid/position', function (string $template): void {
@@ -291,7 +290,7 @@ test('les gabarits minimal/professionnel/portrait/compact ne changent PAS de ren
 test('SignatureTemplateRegistry::definitions() renvoie le registre COMPLET, sérialisable, une entrée par gabarit', function (): void {
     $definitions = SignatureTemplateRegistry::definitions();
 
-    expect($definitions)->toHaveCount(8)
+    expect($definitions)->toHaveCount(14)
         ->and(array_keys($definitions))->toBe(Signature::templates());
 
     foreach ($definitions as $template => $def) {
@@ -466,4 +465,203 @@ test('LOT 3 - masquage propre : données minimales (aucun champ optionnel, aucun
         ->and($html)->not->toContain('<img')
         // Aucune cellule de tableau vide (un bloc absent ne doit jamais laisser un <td></td>).
         ->and($html)->not->toMatch('/<td[^>]*>\s*<\/td>/');
+})->with(['minimal', 'professionnel', 'portrait', 'compact', 'vertical', 'banniere', 'executive', 'social']);
+
+// ------------------------------------------------------------------
+// LOT 4 (2026-09-26) - galerie de mises en page : 6 nouveaux gabarits (photo_droite, logo_gauche,
+// logo_bas, photo_centree, deux_colonnes, coordonnees_sous_nom) + category/hint sur les 14.
+// ------------------------------------------------------------------
+
+test('LOT 4 - le registre contient EXACTEMENT 14 gabarits, dans l\'ordre : les 8 précédents puis les 6 nouveaux', function (): void {
+    expect(Signature::templates())->toHaveCount(14)
+        ->and(Signature::templates())->toBe([
+            'minimal', 'professionnel', 'portrait', 'compact',
+            'vertical', 'banniere', 'executive', 'social',
+            'photo_droite', 'logo_gauche', 'logo_bas', 'photo_centree', 'deux_colonnes', 'coordonnees_sous_nom',
+        ]);
+});
+
+test('LOT 4 - chaque gabarit du registre (14/14) porte un `category` et un `hint` non vides', function (): void {
+    $definitions = SignatureTemplateRegistry::definitions();
+    $categoriesConnues = ['classiques', 'photo', 'vertical', 'banniere', 'reseaux'];
+
+    expect($definitions)->toHaveCount(14);
+
+    foreach ($definitions as $template => $def) {
+        expect($def)->toHaveKey('category')
+            ->and($def)->toHaveKey('hint')
+            ->and($def['category'])->toBeString()->not->toBe('')
+            ->and(in_array($def['category'], $categoriesConnues, true))->toBeTrue()
+            ->and($def['hint'])->toBeString()
+            ->and(mb_strlen($def['hint']))->toBeGreaterThanOrEqual(60)
+            ->and(mb_strlen($def['hint']))->toBeLessThanOrEqual(110);
+    }
+});
+
+test('LOT 4 - les 6 nouveaux gabarits produisent une structure de tables sans flex/grid/position, avec un jeu COMPLET', function (string $template): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com',
+        'job_title' => 'Directrice', 'organization' => 'Acme inc.', 'phone' => '514-555-0100',
+        'tagline' => 'Sur rendez-vous seulement',
+        'cta_text' => 'Réserver un appel', 'cta_url' => 'https://laveille.ai/reserver',
+        'social_links' => [['platform' => 'linkedin', 'url' => 'https://linkedin.com/in/marie']],
+        'mention_lines' => ['Membre de l\'Ordre'],
+    ], $template, [
+        'logo' => ['url' => 'https://laveille.ai/logo.png', 'width' => 96, 'height' => 40],
+        'portrait' => ['url' => 'https://laveille.ai/portrait.png', 'width' => 80, 'height' => 80],
+    ]);
+
+    expect($html)->toContain('<table')
+        ->and($html)->not->toContain('display:flex')
+        ->and($html)->not->toContain('display: flex')
+        ->and($html)->not->toContain('grid-template')
+        ->and($html)->not->toContain('position:absolute')
+        ->and($html)->not->toContain('position: absolute')
+        ->and($html)->toContain('Marie Tremblay');
+})->with(['photo_droite', 'logo_gauche', 'logo_bas', 'photo_centree', 'deux_colonnes', 'coordonnees_sous_nom']);
+
+test('LOT 4 - les 6 nouveaux gabarits se rendent sans erreur avec un jeu MINIMAL (masquage propre, aucune cellule vide)', function (string $template): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com',
+    ], $template);
+
+    expect($html)->toContain('Marie Tremblay')
+        ->and($html)->not->toContain('<img')
+        ->and($html)->not->toMatch('/<td[^>]*>\s*<\/td>/');
+})->with(['photo_droite', 'logo_gauche', 'logo_bas', 'photo_centree', 'deux_colonnes', 'coordonnees_sous_nom']);
+
+test('LOT 4 - photo_droite place l\'image dans la 2e cellule (texte puis photo), miroir de portrait', function (): void {
+    $content = ['first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com'];
+    $images = ['portrait' => ['url' => 'https://laveille.ai/portrait.png', 'width' => 80, 'height' => 80]];
+
+    $htmlDroite = SignatureRenderer::render($content, 'photo_droite', $images);
+    $htmlGauche = SignatureRenderer::render($content, 'portrait', $images);
+
+    // photo_droite : le texte (nom) apparaît AVANT l'image dans le HTML (2e cellule de la rangée).
+    expect(strpos($htmlDroite, 'Marie Tremblay'))->toBeLessThan(strpos($htmlDroite, '<img'))
+        // portrait (miroir) : l'inverse - l'image (1re cellule) apparaît AVANT le nom.
+        ->and(strpos($htmlGauche, '<img'))->toBeLessThan(strpos($htmlGauche, 'Marie Tremblay'));
+});
+
+test('LOT 4 - logo_gauche porte le filet supérieur du gabarit professionnel, mais SANS le séparateur latéral de minimal', function (): void {
+    $content = ['first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com'];
+    $images = ['logo' => ['url' => 'https://laveille.ai/logo.png', 'width' => 96, 'height' => 40]];
+
+    $htmlLogoGauche = SignatureRenderer::render($content, 'logo_gauche', $images);
+    $htmlMinimal = SignatureRenderer::render($content, 'minimal', $images);
+
+    expect($htmlLogoGauche)->toContain('border-top:3px solid')
+        ->and($htmlLogoGauche)->not->toContain('border-left:2px solid')
+        ->and($htmlMinimal)->not->toContain('border-top:3px solid')
+        ->and($htmlMinimal)->toContain('border-left:2px solid')
+        // Logo à GAUCHE - l'image précède le nom dans le HTML, comme minimal.
+        ->and(strpos($htmlLogoGauche, '<img'))->toBeLessThan(strpos($htmlLogoGauche, 'Marie Tremblay'));
+});
+
+test('LOT 4 - logo_bas groupe le logo et les réseaux tout en bas (après le nom et les mentions)', function (): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com',
+        'social_links' => [['platform' => 'linkedin', 'url' => 'https://linkedin.com/in/marie']],
+        'mention_lines' => ['Membre de l\'Ordre'],
+    ], 'logo_bas', [
+        'logo' => ['url' => 'https://laveille.ai/logo.png', 'width' => 96, 'height' => 40],
+    ]);
+
+    $posName = strpos($html, 'Marie Tremblay');
+    $posMentions = strpos($html, 'Membre de l&#039;Ordre');
+    $posReseaux = strpos($html, 'LinkedIn');
+    $posImage = strpos($html, '<img');
+
+    expect($posName)->not->toBeFalse()->and($posMentions)->not->toBeFalse()
+        ->and($posReseaux)->not->toBeFalse()->and($posImage)->not->toBeFalse();
+
+    // Ordre : nom, mentions, PUIS réseaux et logo groupés tout en bas.
+    expect($posName)->toBeLessThan($posMentions)
+        ->and($posMentions)->toBeLessThan($posReseaux)
+        ->and($posReseaux)->toBeLessThan($posImage);
+});
+
+test('LOT 4 - logo_bas SANS logo téléversé ne casse pas (masquage propre, réseaux seuls en bas)', function (): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com',
+        'social_links' => [['platform' => 'linkedin', 'url' => 'https://linkedin.com/in/marie']],
+    ], 'logo_bas');
+
+    expect($html)->toContain('Marie Tremblay')
+        ->and($html)->toContain('LinkedIn')
+        ->and($html)->not->toContain('<img');
+});
+
+test('LOT 4 - photo_centree centre le contenu (text-align:center) et l\'image (margin:0 auto), vertical garde un rendu à gauche', function (): void {
+    $content = ['first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com'];
+    $images = ['portrait' => ['url' => 'https://laveille.ai/portrait.png', 'width' => 80, 'height' => 80]];
+
+    $htmlCentree = SignatureRenderer::render($content, 'photo_centree', $images);
+    $htmlVertical = SignatureRenderer::render($content, 'vertical', $images);
+
+    expect($htmlCentree)->toContain('text-align:center')
+        ->and($htmlCentree)->toContain('margin:0 auto')
+        ->and($htmlVertical)->not->toContain('text-align:center')
+        ->and($htmlVertical)->not->toContain('margin:0 auto');
+});
+
+test('LOT 4 - deux_colonnes affiche une photo (pas un logo) séparée du texte par un filet vertical net', function (): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com',
+    ], 'deux_colonnes', [
+        'portrait' => ['url' => 'https://laveille.ai/portrait.png', 'width' => 80, 'height' => 80],
+    ]);
+
+    expect($html)->toContain('Photo de Marie Tremblay')
+        ->and($html)->toContain('border-left:2px solid')
+        ->and(strpos($html, '<img'))->toBeLessThan(strpos($html, 'Marie Tremblay'));
+});
+
+test('LOT 4 - coordonnees_sous_nom n\'affiche AUCUNE image et insère un filet horizontal entre l\'identité et le contact', function (): void {
+    $html = SignatureRenderer::render([
+        'first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com',
+        'phone' => '514-555-0100',
+    ], 'coordonnees_sous_nom', [
+        'logo' => ['url' => 'https://laveille.ai/logo.png', 'width' => 96, 'height' => 40],
+        'portrait' => ['url' => 'https://laveille.ai/portrait.png', 'width' => 80, 'height' => 80],
+    ]);
+
+    $posName = strpos($html, 'Marie Tremblay');
+    $posDivider = strpos($html, 'border-top:1px solid');
+    $posPhone = strpos($html, '514-555-0100');
+
+    expect($html)->not->toContain('<img')
+        ->and($posName)->not->toBeFalse()->and($posDivider)->not->toBeFalse()->and($posPhone)->not->toBeFalse()
+        ->and($posName)->toBeLessThan($posDivider)
+        ->and($posDivider)->toBeLessThan($posPhone);
+});
+
+test('LOT 4 - les 8 gabarits d\'origine (LOT 1-3) ne changent PAS de rendu après l\'ajout des 6 nouveaux (non-régression stricte)', function (string $template): void {
+    $contentComplet = [
+        'first_name' => 'Marie', 'last_name' => 'Tremblay', 'job_title' => 'Directrice',
+        'organization' => 'Acme inc.', 'email' => 'marie@example.com', 'phone' => '514-555-0100',
+        'mobile' => '438-555-0100', 'website' => 'https://exemple.com', 'address' => '123 rue Principale',
+        'tagline' => 'Sur rendez-vous seulement', 'cta_text' => 'Réserver un appel',
+        'cta_url' => 'https://laveille.ai/reserver', 'accent_color' => '#064E5A', 'font_family' => 'Georgia',
+        'social_links' => [
+            ['platform' => 'linkedin', 'url' => 'https://linkedin.com/in/marie'],
+            ['platform' => 'facebook', 'url' => 'https://facebook.com/marie'],
+        ],
+        'mention_lines' => ['Membre de l\'Ordre', 'Numéro de permis 12345'],
+    ];
+    $images = [
+        'logo' => ['url' => 'https://laveille.ai/logo.png', 'width' => 96, 'height' => 40],
+        'portrait' => ['url' => 'https://laveille.ai/portrait.png', 'width' => 80, 'height' => 80],
+        'banniere' => ['url' => 'https://laveille.ai/banniere.png', 'width' => 600, 'height' => 150],
+    ];
+
+    // Aucune trace des propriétés transverses ajoutées au LOT 4 pour la seule famille `vertical`
+    // (image_position=bottom, centered, contact_divider) - absentes des 8 définitions LOT 1-3.
+    $htmlComplet = SignatureRenderer::render($contentComplet, $template, $images);
+    $htmlMinimal = SignatureRenderer::render(['first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com'], $template);
+
+    expect($htmlComplet)->not->toContain('text-align:center')
+        ->and($htmlComplet)->not->toContain('margin:0 auto')
+        ->and($htmlMinimal)->not->toContain('text-align:center')
+        ->and($htmlMinimal)->not->toContain('margin:0 auto');
 })->with(['minimal', 'professionnel', 'portrait', 'compact', 'vertical', 'banniere', 'executive', 'social']);

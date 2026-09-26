@@ -13,3 +13,65 @@
 .sig-secret-link { word-break: break-all; font-family: monospace; font-size: 12px; background: #f3f4f6; padding: 8px; border-radius: 6px; display: block; }
 /* LOT 3 - "Voir le code HTML" : zone de code brute, sélectionnable, lisible. */
 .sig-html-source { font-family: monospace; font-size: 12px; white-space: pre; }
+
+/* LOT 4 - Galerie de mises en page (modale). Couleurs de texte reprises de SignatureRenderer.php
+   (#374151/#111827) - déjà vérifiées AAA (7:1) sur fond blanc par la charte du projet. */
+.sig-gallery-modal { background: #fff; border-radius: var(--r-base, 0.75rem); max-width: 960px; width: 96%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 1rem 3rem rgba(0,0,0,.2); }
+.sig-gallery-tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
+.sig-gallery-tab { border: 1px solid #d1d5db; background: #fff; color: #374151; border-radius: 999px; padding: 8px 16px; min-height: 24px; font-size: 14px; cursor: pointer; }
+.sig-gallery-tab.active { background: var(--c-primary, #064E5A); border-color: var(--c-primary, #064E5A); color: #ffffff; }
+.sig-gallery-scroll { overflow-y: auto; flex: 1 1 auto; }
+.sig-gallery-grid { display: flex; flex-wrap: wrap; gap: 16px; }
+.sig-gallery-card { width: 200px; min-height: 24px; border: 2px solid #e5e7eb; border-radius: var(--r-base, 0.75rem); background: #fff; padding: 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 6px; position: relative; }
+.sig-gallery-card:hover { border-color: #9ca3af; }
+.sig-gallery-card.selected { border-color: var(--c-primary, #064E5A); background: #f0f9f9; }
+.sig-gallery-thumb-viewport { position: relative; width: 100%; height: 150px; overflow: hidden; border-radius: 6px; border: 1px solid #e5e7eb; background: #ffffff; display: block; }
+.sig-gallery-thumb-viewport iframe { position: absolute; top: 0; left: 0; width: 600px; height: 460px; border: 0; transform: scale(0.325); transform-origin: top left; pointer-events: none; }
+.sig-gallery-card-label { font-weight: bold; font-size: 14px; color: #111827; }
+.sig-gallery-card-hint { font-size: 12px; color: #374151; }
+.sig-gallery-card-current { position: absolute; top: 8px; right: 8px; background: var(--c-primary, #064E5A); color: #ffffff; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 999px; }
+@media (max-width: 480px) { .sig-gallery-card { width: 100%; } }
+
+/* LOT 5 (2026-09-26) - assistant par étapes + aperçu collant. Le stepper réutilise .ct-stepper
+   du constructeur de prompts (voir constructeur-prompts.blade.php ~284-317) - IDENTIQUE, aucune
+   règle dupliquée ici : la classe est globale (build Vite commun), pas propre à cet outil. */
+
+/* Cadre courriel sobre (bureau collant ET feuille mobile) : fond blanc, quelques lignes grises
+   pour évoquer un message au-dessus de la signature, note de simulation - décision arbitrée dans
+   storage/app/signature-wizard-spec.md (convergence des deux oracles consultés). */
+.sig-email-frame { background: #ffffff; border: 1px solid #e5e7eb; border-radius: var(--r-base, 0.75rem); padding: 14px; }
+.sig-email-frame__meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.sig-email-frame__line { display: block; height: 8px; border-radius: 4px; background: #e5e7eb; }
+.sig-email-frame__line--w60 { width: 60%; }
+.sig-email-frame__line--w90 { width: 90%; }
+.sig-email-frame__line--w40 { width: 40%; }
+.sig-email-frame__note { margin-top: 10px; }
+
+/* Aperçu BUREAU collant (≥lg) - reste visible pendant le défilement du formulaire. Le site n'a pas
+   d'en-tête fixe (voir grep effectué avant implémentation) : un petit décalage sous le haut de
+   viewport suffit, pas besoin de compenser une hauteur d'en-tête. */
+@media (min-width: 992px) {
+    .sig-preview-sticky { position: sticky; top: 16px; }
+}
+
+/* Bande d'aperçu collante MOBILE (<lg) - masquée par défaut (d-lg-none la montre en dessous de
+   lg), collée en haut du viewport (aucun en-tête fixe à compenser sur ce site), réduite mais
+   lisible. Réduite à une poignée sur focus d'un champ (voir onWizardFieldFocusIn/Out) pour ne
+   jamais recouvrir le champ actif, ses erreurs ni les boutons Précédent/Suivant (WCAG 2.4.11). */
+.sig-mobile-preview-bar { position: sticky; top: 0; z-index: 1020; background: #ffffff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+.sig-mobile-preview-bar__inner { display: flex; align-items: center; gap: 8px; padding: 6px 10px; }
+.sig-mobile-preview-bar__viewport { position: relative; flex: 1 1 auto; width: 100%; height: 140px; max-height: 160px; min-height: 130px; overflow: hidden; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff; }
+.sig-mobile-preview-bar__viewport iframe { position: absolute; top: 0; left: 0; width: 600px; height: 460px; border: 0; transform: scale(0.22); transform-origin: top left; pointer-events: none; }
+.sig-mobile-preview-handle { display: none; min-height: 40px; padding: 6px 14px; border: 1px solid #d1d5db; border-radius: 999px; background: #fff; color: #374151; font-size: 13px; cursor: pointer; }
+.sig-mobile-preview-expand { min-height: 40px; }
+/* État réduit (focus clavier virtuel ouvert) : seule la poignée reste visible, tout le reste de la
+   bande disparaît - c'est ce qui libère l'espace au-dessus du champ actif. */
+.sig-mobile-preview-bar--collapsed .sig-mobile-preview-bar__viewport,
+.sig-mobile-preview-bar--collapsed .sig-mobile-preview-expand { display: none; }
+.sig-mobile-preview-bar--collapsed .sig-mobile-preview-handle { display: inline-flex; align-items: center; }
+
+/* Feuille plein écran MOBILE (bouton « Agrandir ») - aperçu à taille réelle, défilable. */
+.sig-preview-sheet-overlay { position: fixed; inset: 0; z-index: 1057; background: rgba(0,0,0,.5); display: flex; flex-direction: column; }
+.sig-preview-sheet { margin-top: auto; width: 100%; max-height: 92vh; background: #fff; border-radius: 16px 16px 0 0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -0.5rem 2rem rgba(0,0,0,.25); }
+.sig-preview-sheet__header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #e5e7eb; flex: 0 0 auto; }
+.sig-preview-sheet__body { overflow-y: auto; padding: 16px; flex: 1 1 auto; }

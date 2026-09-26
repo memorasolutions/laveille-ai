@@ -308,18 +308,39 @@
 
     // Agencement `vertical` (LOT 2) : blocs EMPILÉS - image, puis identité, contact, accroche,
     // réseaux, mentions et CTA. Bon pour mobile et les signatures longues.
+    //
+    // LOT 4 - jumeau exact de SignatureRenderer::assembleVertical() : `image_position` (`top`/`bottom`),
+    // `centered` (text-align:center + image margin:0 auto) et `contact_divider` (filet entre identité
+    // et contact) - tous à défaut neutre, sortie du gabarit `vertical` d'origine inchangée.
     function assembleVertical(def, f, images, accent, fontStack, fontScale) {
         var imageRole = def.image_role || null;
-        var image = imageRole ? blocImage(images[imageRole], def.image_alt, resolveImageStyle(imageRole, def, f), f) : '';
+        var centered = !!def.centered;
+        var imageExtraStyle = imageRole ? resolveImageStyle(imageRole, def, f) : '';
+        if (centered) { imageExtraStyle += 'margin:0 auto;'; }
+        var image = imageRole ? blocImage(images[imageRole], def.image_alt, imageExtraStyle, f) : '';
 
-        var html = '<table role="presentation" cellpadding="0" cellspacing="0" border="0">';
-        if (image !== '') { html += '<tr><td style="padding-bottom:' + (def.image_gap || '10px') + ';">' + image + '</td></tr>'; }
+        var imagePosition = def.image_position || 'top';
+        var imageGap = esc(def.image_gap || '10px');
+        var imageRow = image !== '' ? '<tr><td style="padding-' + (imagePosition === 'bottom' ? 'top' : 'bottom') + ':' + imageGap + ';">' + image + '</td></tr>' : '';
+        var reseauxHtml = blocReseaux(f.social_links, fontStack, accent, !!def.social_emphasis, fontScale);
+        var contactDividerRow = def.contact_divider
+            ? '<tr><td style="padding-top:8px;padding-bottom:8px;border-top:1px solid ' + esc(accent) + ';font-size:1px;line-height:1px;">&nbsp;</td></tr>'
+            : '';
+
+        var tableStyle = centered ? ' style="text-align:center;"' : '';
+        var html = '<table role="presentation" cellpadding="0" cellspacing="0" border="0"' + tableStyle + '>';
+        if (imagePosition !== 'bottom') { html += imageRow; }
         html += blocIdentite(f, accent, fontStack, def.name_size || '16px', def.name_divider, fontScale);
+        html += contactDividerRow;
         html += blocContact(f, fontStack, fontScale);
         html += blocTagline(f, fontStack, fontScale);
-        html += blocReseaux(f.social_links, fontStack, accent, !!def.social_emphasis, fontScale);
+        if (imagePosition !== 'bottom') { html += reseauxHtml; }
         html += blocMentions(f.mention_lines, fontStack, fontScale);
         html += blocCta(f, accent, fontStack, fontScale);
+        if (imagePosition === 'bottom') {
+            html += reseauxHtml;
+            html += imageRow;
+        }
         html += '</table>';
 
         return wrap(html);
