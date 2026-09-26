@@ -151,3 +151,14 @@ html { scroll-padding-bottom: 96px; }
 
 /* Modale de confirmation « Remise a zero » (meme fond que sig-modal-overlay, boite compacte). */
 .sig-reset-modal { background: #fff; border-radius: var(--r-base, 0.75rem); max-width: 480px; width: 96%; padding: 20px; box-shadow: 0 1rem 3rem rgba(0,0,0,.2); }
+
+/* LOT 8 (2026-09-26) - l'apercu en direct ne SUIVAIT PAS au defilement : mesure du 2026-09-26,
+   l'apercu quittait le viewport (top -697 px a 1400 px de defilement) au lieu de rester colle.
+   CAUSE RACINE : l'ancetre .page-wrapper du theme porte overflow:hidden, ce qui en fait un
+   conteneur de defilement inerte et NEUTRALISE tout position:sticky descendant. La charte a deja
+   fait ce choix pour body (overflow-x:clip, "ne casse pas position:sticky"), mais pas pour
+   .page-wrapper. On le corrige ICI, scope aux 2 pages de l'editeur (signature.css n'est chargee
+   que la) : overflow-x:clip garde l'anti-defilement horizontal voulu, overflow-y:visible rend le
+   sticky de l'apercu operant. Selecteur "body .page-wrapper" pour l'emporter a coup sur sur la
+   regle .page-wrapper du theme, quel que soit l'ordre de chargement. */
+body .page-wrapper { overflow-x: clip; overflow-y: visible; }

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.305.1] - 2026-09-26
+
+### Corrigé
+- **Outil de signatures : l'aperçu en direct ne SUIVAIT PAS au défilement.** Mesuré : en descendant la page, l'aperçu quittait l'écran (position à -697 px à 1400 px de défilement) au lieu de rester collé. Cause racine : l'ancêtre `.page-wrapper` du thème porte `overflow: hidden`, ce qui en fait un conteneur de défilement inerte et NEUTRALISE tout `position: sticky` descendant. La charte avait déjà réglé le même piège pour `body` (`overflow-x: clip`, qui ne casse pas le sticky), mais pas pour `.page-wrapper`. Corrigé, scopé aux deux pages de l'éditeur : `overflow-x: clip` conserve l'anti-défilement horizontal voulu, `overflow-y: visible` rend l'aperçu collant opérant. Vérifié en direct : l'aperçu reste ancré en haut (top 16 px) pendant qu'on descend le formulaire, sur toute la hauteur de sa colonne.
+
 ## [1.305.0] - 2026-09-26
 
 ### Ajouté
