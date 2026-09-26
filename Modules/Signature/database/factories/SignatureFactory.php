@@ -15,7 +15,7 @@ class SignatureFactory extends Factory
     {
         return [
             'admin_token_hash' => hash('sha256', fake()->uuid()),
-            'template' => Signature::TEMPLATES[0],
+            'template' => Signature::templates()[0],
             'content' => [
                 'first_name' => fake()->firstName(),
                 'last_name' => fake()->lastName(),

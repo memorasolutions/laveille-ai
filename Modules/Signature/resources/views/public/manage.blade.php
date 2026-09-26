@@ -28,6 +28,8 @@
                             templates: @js($templates),
                             fontFamilies: @js($fontFamilies),
                             socialPlatforms: @js($socialPlatforms),
+                            portraitShapes: @js($portraitShapes),
+                            fontScales: @js($fontScales),
                             token: {{ $token ? "'".$token."'" : 'null' }},
                             signatureId: {{ $signatureId ?? 'null' }},
                             updateUrl: '{{ $formAction }}',

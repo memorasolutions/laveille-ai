@@ -94,6 +94,47 @@ test('la validation refuse un courriel invalide et une signature reste non cré�
     expect(Signature::count())->toBe(0);
 });
 
+// ------------------------------------------------------------------
+// LOT 3 (2026-09-25) - validation des nouveaux champs de contenu.
+// ------------------------------------------------------------------
+
+test('LOT 3 - la validation accepte les valeurs valides de portrait_shape, font_scale et pronoms', function (): void {
+    $this->actingAs($this->superadmin)
+        ->postJson(route('signature.draft.store'), sigPayload([
+            'content' => ['portrait_shape' => 'rond', 'font_scale' => 'grande', 'pronouns' => 'elle'],
+        ]))
+        ->assertCreated();
+
+    $signature = Signature::first();
+    expect($signature->content['portrait_shape'])->toBe('rond')
+        ->and($signature->content['font_scale'])->toBe('grande')
+        ->and($signature->content['pronouns'])->toBe('elle');
+});
+
+test('LOT 3 - la validation refuse une valeur de portrait_shape hors de l\'enum fermé', function (): void {
+    $this->actingAs($this->superadmin)
+        ->postJson(route('signature.draft.store'), sigPayload(['content' => ['portrait_shape' => 'triangle']]))
+        ->assertStatus(422);
+});
+
+test('LOT 3 - la validation refuse une valeur de font_scale hors de l\'enum fermé', function (): void {
+    $this->actingAs($this->superadmin)
+        ->postJson(route('signature.draft.store'), sigPayload(['content' => ['font_scale' => 'enorme']]))
+        ->assertStatus(422);
+});
+
+test('LOT 3 - la validation refuse des pronoms de plus de 30 caractères', function (): void {
+    $this->actingAs($this->superadmin)
+        ->postJson(route('signature.draft.store'), sigPayload(['content' => ['pronouns' => str_repeat('x', 31)]]))
+        ->assertStatus(422);
+});
+
+test('LOT 3 - les pronoms restent facultatifs (absence acceptée)', function (): void {
+    $this->actingAs($this->superadmin)
+        ->postJson(route('signature.draft.store'), sigPayload())
+        ->assertCreated();
+});
+
 /**
  * B4 - le VRAI chemin membre passe par le JS de la page rendue, pas par un patchJson direct
  * (qui contourne entièrement le bug qu'on corrige : save() ne calculait jamais la bonne URL/méthode

@@ -600,7 +600,7 @@ document.addEventListener('alpine:init', function() {
                     self._editingId = null;
                     self.saveName = '';
                     self.saving = false;
-                    window.dispatchEvent(new CustomEvent('toast', { detail: { message: '{{ __("Configuration sauvegardée") }}' } }));
+                    window.toast('{{ __("Configuration sauvegardée") }}', 'success', 2000);
                 })
                 .catch(function(e) { self.saveError = e.message; self.saving = false; setTimeout(function() { self.saveError = ''; }, 4000); });
             },

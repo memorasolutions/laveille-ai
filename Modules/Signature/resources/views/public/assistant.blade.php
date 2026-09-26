@@ -2,7 +2,7 @@
 @extends(fronttheme_layout())
 
 @section('title', 'Générateur de signature de courriel gratuit - ' . config('app.name'))
-@section('meta_description', 'Créez une signature de courriel professionnelle gratuite, sans compte obligatoire' . "\u{00A0}" . ': 4 gabarits, liens sociaux, logo et portrait, copie en un clic.')
+@section('meta_description', 'Créez une signature de courriel professionnelle gratuite, sans compte obligatoire' . "\u{00A0}" . ': 8 gabarits, liens sociaux, logo, portrait et bannière, copie en un clic.')
 
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Signature de courriel'), 'breadcrumbItems' => [__('Outils'), __('Signature de courriel')]])
@@ -40,6 +40,8 @@
                             templates: @js($templates),
                             fontFamilies: @js($fontFamilies),
                             socialPlatforms: @js($socialPlatforms),
+                            portraitShapes: @js($portraitShapes),
+                            fontScales: @js($fontScales),
                             draftStoreUrl: '{{ $formAction }}',
                             imagesUploadUrl: '{{ route('signature.images.store') }}'
                          })">

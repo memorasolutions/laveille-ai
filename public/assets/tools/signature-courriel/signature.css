@@ -7,5 +7,9 @@
 .sig-repeater-row > * { flex: 1; }
 .sig-preview-wrap { border: 1px solid #e5e7eb; border-radius: var(--r-base, 0.75rem); overflow: hidden; background: #f9fafb; }
 .sig-preview-wrap iframe { width: 100%; min-height: 220px; border: 0; background: #ffffff; }
+/* LOT 3 - bascule d'aperçu bureau/mobile : contraint la largeur pour vérifier le rendu mobile. */
+.sig-preview-wrap--mobile { max-width: 360px; margin: 0 auto; }
 .sig-image-slot { border: 1px dashed #d1d5db; border-radius: 8px; padding: 10px; text-align: center; }
 .sig-secret-link { word-break: break-all; font-family: monospace; font-size: 12px; background: #f3f4f6; padding: 8px; border-radius: 6px; display: block; }
+/* LOT 3 - "Voir le code HTML" : zone de code brute, sélectionnable, lisible. */
+.sig-html-source { font-family: monospace; font-size: 12px; white-space: pre; }

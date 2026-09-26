@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.302.0] - 2026-09-25
+
+### Ajouté
+- **Outil de signatures de courriel enrichi** (module Signature, en construction) : le nombre de gabarits passe de 4 à 8 (minimal, professionnel, portrait, compact, vertical, bannière, executive, social), tous pilotés par un registre déclaratif unique et des composants de rendu réutilisables, sans duplication du moteur. Nouveau gabarit « bannière » avec une bannière visuelle cliquable.
+- Trois nouvelles options de personnalisation : pronoms, forme de la photo (carrée ou ronde), taille de police (petite, moyenne, grande).
+- Copie riche et export du code HTML de la signature, aperçu bureau et mobile.
+
+### Modifié
+- Le moteur de rendu des signatures applique désormais des couleurs et un fond explicites, pour rester lisible dans les clients de courriel en mode sombre.
+- L'aperçu instantané côté client est piloté par le même registre que le rendu serveur : ajouter un gabarit ne demande plus de code dupliqué.
+- Outil tirage-présentations : la confirmation de sauvegarde passe par le même mécanisme de notification que les autres actions de l'outil (cohérence d'affichage).
+
 ## [1.301.0] - 2026-09-25
 
 ### Ajouté

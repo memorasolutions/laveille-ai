@@ -1,6 +1,11 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 {{-- Partagé par public.assistant (création) et public.manage (lien secret / membre) - DRY strict :
      un seul formulaire, alimenté par le même moteur de rendu (signature-render.js). --}}
+{{-- LOT 2 : le registre PHP (SignatureTemplateRegistry) sérialisé pour que signature-render.js
+     lise le MÊME agencement par gabarit que SignatureRenderer.php, plutôt que de le dupliquer -
+     injecté ici (avant les scripts poussés en fin de page) pour être disponible dès le premier
+     appel à renderSignature(). --}}
+<script>window.SIGNATURE_TEMPLATES = @json($templateDefinitions ?? []);</script>
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="mb-3">
@@ -10,7 +15,7 @@
                     <div class="sig-template-card" :class="{active: template === tpl}" @click="template = tpl"
                          role="button" tabindex="0" :aria-pressed="template === tpl ? 'true' : 'false'"
                          @keydown.enter.prevent="template = tpl" @keydown.space.prevent="template = tpl">
-                        <span x-text="tpl.charAt(0).toUpperCase() + tpl.slice(1)"></span>
+                        <span x-text="templateLabel(tpl)"></span>
                     </div>
                 </template>
             </div>
@@ -35,6 +40,11 @@
                 <label class="form-label" for="sig-organization">{{ __('Organisation') }}</label>
                 <input id="sig-organization" type="text" class="form-control" x-model="content.organization" maxlength="120">
             </div>
+        </div>
+        {{-- LOT 3 - pronoms (facultatif), affichés discrètement après le nom. --}}
+        <div class="mb-2">
+            <label class="form-label" for="sig-pronouns">{{ __('Pronoms (facultatif)') }}</label>
+            <input id="sig-pronouns" type="text" class="form-control" x-model="content.pronouns" maxlength="30" placeholder="{{ __('Ex. : elle, il, iel') }}">
         </div>
         <div class="row g-2 mb-2">
             <div class="col-md-6">
@@ -91,6 +101,27 @@
                 <select id="sig-font-family" class="form-select" x-model="content.font_family">
                     <template x-for="font in fontFamilies" :key="font">
                         <option :value="font" x-text="font"></option>
+                    </template>
+                </select>
+            </div>
+        </div>
+
+        {{-- LOT 3 - forme du portrait (n'affecte jamais le logo) et taille de police de base. --}}
+        <div class="row g-2 mb-3">
+            <div class="col-md-6">
+                <label class="form-label" for="sig-portrait-shape">{{ __('Forme du portrait') }}</label>
+                <select id="sig-portrait-shape" class="form-select" x-model="content.portrait_shape">
+                    <template x-for="shape in portraitShapes" :key="shape">
+                        <option :value="shape" x-text="portraitShapeLabel(shape)"></option>
+                    </template>
+                </select>
+                <p class="form-text small">{{ __("N'affecte que le portrait, jamais le logo.") }}</p>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="sig-font-scale">{{ __('Taille du texte') }}</label>
+                <select id="sig-font-scale" class="form-select" x-model="content.font_scale">
+                    <template x-for="scale in fontScales" :key="scale">
+                        <option :value="scale" x-text="fontScaleLabel(scale)"></option>
                     </template>
                 </select>
             </div>
@@ -169,6 +200,39 @@
             </div>
         </div>
 
+        {{-- Bannière (LOT 2, gabarit « Bannière ») - même mécanisme d'upload que logo/portrait
+             ci-dessus (mêmes gardes de sécurité : SignatureImagePipeline, quarantaine, public_id).
+             Toujours visible, comme logo/portrait, pour permettre de la préparer avant de choisir
+             ce gabarit. --}}
+        <div class="row g-3 mb-3">
+            <div class="col-12">
+                <label class="form-label fw-bold" for="sig-banniere-file">{{ __('Bannière') }}</label>
+                <div class="sig-image-slot">
+                    <template x-if="images.banniere && images.banniere.url">
+                        <img :src="images.banniere.url" :width="images.banniere.display_width" alt="" class="mb-2" style="max-width:100%;">
+                    </template>
+                    <input id="sig-banniere-file" type="file" accept="image/jpeg,image/png,image/webp" class="form-control form-control-sm" @change="onFileSelected('banniere', $event)" :disabled="uploading.banniere">
+                    <template x-if="images.banniere">
+                        <div class="mt-2">
+                            <label class="form-label small" for="sig-banniere-range">{{ __("Taille d'affichage") }} (<span x-text="images.banniere.display_width"></span>px)</label>
+                            <input id="sig-banniere-range" type="range" class="form-range" min="120" max="600" x-model.number="images.banniere.display_width" @input="resizeImage('banniere', images.banniere.display_width)">
+                        </div>
+                    </template>
+                    <span class="spinner-border spinner-border-sm" x-show="uploading.banniere" role="status">
+                        <span class="visually-hidden">{{ __('Téléversement en cours') }}</span>
+                    </span>
+                    <p class="form-text small">{{ __('Image pleine largeur affichée sous tes coordonnées - utilisée uniquement par le gabarit «'."\u{00A0}".'Bannière'."\u{00A0}".'», cliquable vers le lien de l\'appel à l\'action ci-dessus.') }}</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- LOT 3 - sécurité mode sombre (angle mort nommé par le club des sages) : le moteur pose
+             déjà des couleurs de texte explicites et un fond blanc sur l'enveloppe, mais un logo
+             texte-sur-fond-opaque reste un piège que seul le choix de l'image peut éviter. --}}
+        <p class="form-text small text-muted">
+            🌓 {{ __('Certains clients de courriel inversent les couleurs en mode sombre' . "\u{00A0}" . ': privilégie un logo à fond neutre ou transparent sûr plutôt qu\'un texte noir sur un fond blanc opaque, qui deviendrait illisible si le fond bascule en sombre.') }}
+        </p>
+
         @if($showReminderOptIn ?? false)
         <div class="form-check mb-3">
             <input type="checkbox" class="form-check-input" id="sigReminderOptIn" x-model="reminderOptIn">
@@ -196,6 +260,9 @@
         <div class="d-flex gap-2 flex-wrap">
             <button type="button" class="btn btn-primary" @click="copyToClipboard()">📋 {{ __('Copier') }}</button>
             <button type="button" class="btn btn-outline-secondary" @click="downloadHtm()">⬇️ {{ __('Télécharger (.htm)') }}</button>
+            {{-- LOT 3 - export brut, pour un client courriel qui exige de coller le code source
+                 (ex. champ « Signature HTML » de Gmail/Outlook web en mode « éditeur HTML »). --}}
+            <button type="button" class="btn btn-outline-secondary" @click="openHtmlCode()">👀 {{ __('Voir le code HTML') }}</button>
             <button type="button" class="btn btn-outline-primary" @click="save()" :disabled="saving">
                 <span x-show="!saving">💾 {{ __('Enregistrer') }}</span>
                 <span x-show="saving">{{ __('Enregistrement...') }}</span>
@@ -210,9 +277,42 @@
     </div>
 
     <div class="col-lg-5">
-        <label class="form-label fw-bold" id="sig-preview-label">{{ __('Aperçu en direct') }}</label>
-        <div class="sig-preview-wrap">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+            <label class="form-label fw-bold mb-0" id="sig-preview-label">{{ __('Aperçu en direct') }}</label>
+            {{-- LOT 3 - bascule bureau/mobile : contraint la largeur de l'aperçu pour vérifier le
+                 rendu mobile, sans dupliquer l'iframe. --}}
+            <div class="btn-group btn-group-sm" role="group" aria-label="{{ __('Largeur de l\'aperçu') }}">
+                <button type="button" class="btn" :class="previewMode === 'desktop' ? 'btn-primary' : 'btn-outline-secondary'" @click="previewMode = 'desktop'" :aria-pressed="previewMode === 'desktop' ? 'true' : 'false'">🖥️ {{ __('Bureau') }}</button>
+                <button type="button" class="btn" :class="previewMode === 'mobile' ? 'btn-primary' : 'btn-outline-secondary'" @click="previewMode = 'mobile'" :aria-pressed="previewMode === 'mobile' ? 'true' : 'false'">📱 {{ __('Mobile') }}</button>
+            </div>
+        </div>
+        <div class="sig-preview-wrap" :class="{ 'sig-preview-wrap--mobile': previewMode === 'mobile' }">
             <iframe :srcdoc="previewSrcdoc" title="{{ __('Aperçu de la signature') }}" aria-labelledby="sig-preview-label" sandbox=""></iframe>
+        </div>
+    </div>
+</div>
+
+{{-- LOT 3 - modale MAISON « Voir le code HTML » (même patron que la modale du jeton ci-dessous :
+     Alpine pur, jamais alert()/confirm()/prompt() natif). Le code montré est le rendu FINAL du
+     moteur canonique (renderSignature), copiable en un clic - utile pour un client courriel qui
+     exige de coller le code source plutôt qu'une copie riche. --}}
+<div x-show="showHtmlModal" x-cloak
+     style="position:fixed;inset:0;z-index:1055;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);"
+     role="dialog" aria-modal="true" aria-labelledby="sigHtmlModalTitle"
+     x-init="$watch('showHtmlModal', (v) => v && $nextTick(() => focusFirstIn($el)))"
+     @keydown.escape.window="showHtmlModal = false"
+     @keydown.tab="trapFocusTab($event)">
+    <div style="background:#fff;border-radius:var(--r-base,0.75rem);max-width:640px;width:94%;padding:1.5rem;box-shadow:0 1rem 3rem rgba(0,0,0,.2);" @click.outside="showHtmlModal = false">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 id="sigHtmlModalTitle" class="mb-0">{{ __('Code HTML de la signature') }}</h5>
+            <button type="button" class="btn-close" @click="showHtmlModal = false" aria-label="{{ __('Fermer') }}"></button>
+        </div>
+        <p class="form-text small">{{ __('Colle ce code dans le champ « Signature HTML » de ton client courriel (voir nos guides ci-dessous), ou utilise plutôt le bouton «'."\u{00A0}".'Copier'."\u{00A0}".'» pour une copie déjà mise en forme.') }}</p>
+        <label class="visually-hidden" for="sig-html-source">{{ __('Code HTML de la signature') }}</label>
+        <textarea id="sig-html-source" class="form-control sig-html-source" rows="10" readonly x-text="htmlSourceCode" @click="$event.target.select()"></textarea>
+        <div class="text-end mt-3 d-flex gap-2 justify-content-end">
+            <button type="button" class="btn btn-secondary" @click="showHtmlModal = false">{{ __('Fermer') }}</button>
+            <button type="button" class="btn btn-outline-primary" @click="copyHtmlSource()">📋 {{ __('Copier le code') }}</button>
         </div>
     </div>
 </div>

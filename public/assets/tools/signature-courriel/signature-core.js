@@ -6,18 +6,29 @@
  * la signature, produit EXCLUSIVEMENT par window.renderSignature() (signature-render.js, section 4
  * du plan : une seule fonction alimente l'aperçu, la copie et le téléchargement).
  */
+// LOT 3 - jumeau exact de SignatureContentValidator::PORTRAIT_SHAPES/FONT_SCALES (libellés FR
+// accentués - les clés techniques restent ASCII, valeur stockée en base).
+var SIG_PORTRAIT_SHAPE_LABELS = { carre: 'Carré', rond: 'Rond' };
+var SIG_FONT_SCALE_LABELS = { petite: 'Petite', moyenne: 'Moyenne', grande: 'Grande' };
+
 function signatureAssistant(config) {
     return {
         template: config.initialTemplate || 'minimal',
         content: Object.assign({
             first_name: '', last_name: '', job_title: '', organization: '', email: '', phone: '',
             mobile: '', website: '', address: '', tagline: '', cta_text: '', cta_url: '',
-            accent_color: '#064E5A', font_family: 'Arial', social_links: [], mention_lines: []
+            accent_color: '#064E5A', font_family: 'Arial', social_links: [], mention_lines: [],
+            // LOT 3 (2026-09-25) - défauts neutres, aucun impact sur le rendu tant qu'ils ne sont
+            // pas changés (voir SignatureRenderer::normalize()).
+            pronouns: '', portrait_shape: 'carre', font_scale: 'moyenne'
         }, config.initialContent || {}),
         images: Object.assign({ logo: null, portrait: null, banniere: null }, config.initialImages || {}),
-        templates: config.templates || ['minimal', 'professionnel', 'portrait', 'compact'],
+        templates: config.templates || ['minimal', 'professionnel', 'portrait', 'compact', 'vertical', 'banniere', 'executive', 'social'],
         fontFamilies: config.fontFamilies || ['Arial', 'Helvetica', 'Verdana', 'Georgia', 'Tahoma'],
         socialPlatforms: config.socialPlatforms || ['linkedin', 'facebook', 'instagram', 'x', 'youtube', 'website'],
+        // LOT 3 - options des nouveaux champs de contenu (voir SignatureContentValidator).
+        portraitShapes: config.portraitShapes || ['carre', 'rond'],
+        fontScales: config.fontScales || ['petite', 'moyenne', 'grande'],
         token: config.token || null,
         signatureId: config.signatureId || null,
         draftStoreUrl: config.draftStoreUrl,
@@ -32,10 +43,15 @@ function signatureAssistant(config) {
         saving: false,
         uploading: { logo: false, portrait: false, banniere: false },
         previewSrcdoc: '',
+        // LOT 3 - bascule d'aperçu bureau/mobile (largeur contrainte, voir signature.css).
+        previewMode: 'desktop',
         showTokenModal: false,
         issuedManageUrl: '',
         confirmRotate: false,
         linkActionBusy: false,
+        // LOT 3 - modale « Voir le code HTML » (export brut, copie en un clic).
+        showHtmlModal: false,
+        htmlSourceCode: '',
 
         init() {
             this.updatePreview();
@@ -47,6 +63,24 @@ function signatureAssistant(config) {
         csrfToken() {
             var meta = document.querySelector('meta[name="csrf-token"]');
             return meta ? meta.content : '';
+        },
+
+        // LOT 2 - libellé d'affichage d'un gabarit : lu dans window.SIGNATURE_TEMPLATES (registre
+        // PHP sérialisé, voir signature-render.js) plutôt que capitalisé depuis la clé technique -
+        // certaines clés (ex. "banniere") perdraient leur accent, d'autres ("executive") ne sont
+        // pas des mots français. Repli sur la capitalisation UNIQUEMENT si le registre est absent.
+        templateLabel(tpl) {
+            var def = (window.SIGNATURE_TEMPLATES || {})[tpl];
+            if (def && def.label) { return def.label; }
+            return tpl.charAt(0).toUpperCase() + tpl.slice(1);
+        },
+
+        // LOT 3 - libellés FR accentués des nouveaux champs (mêmes clés ASCII que le validateur).
+        portraitShapeLabel(value) {
+            return SIG_PORTRAIT_SHAPE_LABELS[value] || value;
+        },
+        fontScaleLabel(value) {
+            return SIG_FONT_SCALE_LABELS[value] || value;
         },
 
         addSocialLink() {
@@ -263,6 +297,22 @@ function signatureAssistant(config) {
                 if (window.toast) { window.toast('Signature copiée - collez-la dans votre client courriel', 'success', 3000); }
             } catch (e) {
                 if (window.toast) { window.toast('Impossible de copier automatiquement - sélectionnez l\'aperçu et copiez-le manuellement.', 'warning', 5000); }
+            }
+        },
+
+        // LOT 3 - « Voir le code HTML » : export brut dans une modale DU THÈME (jamais une popup
+        // native), avec copie en un clic. Le HTML montré est le rendu FINAL du moteur canonique
+        // (renderSignature), identique à celui produit par copyToClipboard()/downloadHtm().
+        openHtmlCode() {
+            this.htmlSourceCode = renderSignature({ template: this.template, content: this.content, images: this.images });
+            this.showHtmlModal = true;
+        },
+        async copyHtmlSource() {
+            try {
+                await navigator.clipboard.writeText(this.htmlSourceCode);
+                if (window.toast) { window.toast('Code HTML copié', 'success', 2000); }
+            } catch (e) {
+                if (window.toast) { window.toast('Impossible de copier automatiquement - sélectionne le texte et copie-le manuellement.', 'warning', 4000); }
             }
         },
 

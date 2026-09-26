@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Signature\Database\Factories\SignatureFactory;
+use Modules\Signature\Services\SignatureTemplateRegistry;
 
 /**
  * Une signature HTML de courriel (visiteur anonyme via lien secret, ou membre via user_id).
@@ -26,8 +27,6 @@ class Signature extends Model
     use HasFactory;
 
     protected $table = 'signatures';
-
-    public const TEMPLATES = ['minimal', 'professionnel', 'portrait', 'compact'];
 
     public const STATUS_ACTIVE = 'active';
 
@@ -61,6 +60,19 @@ class Signature extends Model
     protected $hidden = [
         'admin_token_hash',
     ];
+
+    /**
+     * Liste des gabarits valides - DÉRIVÉE de {@see SignatureTemplateRegistry}, source unique
+     * (LOT 1, 2026-09-25). Ancien `const TEMPLATES` retiré : un tableau PHP `const` ne peut pas
+     * appeler de méthode dans son initialiseur, donc rester une constante littérale aurait obligé
+     * à maintenir deux listes en parallèle - exactement ce que le registre doit éviter.
+     *
+     * @return list<string>
+     */
+    public static function templates(): array
+    {
+        return SignatureTemplateRegistry::templates();
+    }
 
     protected static function newFactory(): SignatureFactory
     {

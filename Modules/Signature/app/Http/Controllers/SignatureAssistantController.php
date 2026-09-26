@@ -7,6 +7,7 @@ namespace Modules\Signature\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use Modules\Signature\Models\Signature;
+use Modules\Signature\Services\SignatureTemplateRegistry;
 
 class SignatureAssistantController extends Controller
 {
@@ -18,11 +19,17 @@ class SignatureAssistantController extends Controller
     public function create(): View
     {
         return view('signature::public.assistant', [
-            'templates' => Signature::TEMPLATES,
+            'templates' => Signature::templates(),
+            // LOT 2 : le registre COMPLET, sérialisé pour l'aperçu JS (window.SIGNATURE_TEMPLATES,
+            // voir Modules/Signature/resources/views/public/partials/editor.blade.php).
+            'templateDefinitions' => SignatureTemplateRegistry::definitions(),
             'fontFamilies' => \Modules\Signature\Services\SignatureContentValidator::FONT_FAMILIES,
             'socialPlatforms' => \Modules\Signature\Services\SignatureContentValidator::SOCIAL_PLATFORMS,
+            // LOT 3 (2026-09-25).
+            'portraitShapes' => \Modules\Signature\Services\SignatureContentValidator::PORTRAIT_SHAPES,
+            'fontScales' => \Modules\Signature\Services\SignatureContentValidator::FONT_SCALES,
             'initialContent' => null,
-            'initialTemplate' => Signature::TEMPLATES[0],
+            'initialTemplate' => Signature::templates()[0],
             'formAction' => route('signature.draft.store'),
             'formMethod' => 'POST',
             'signature' => null,

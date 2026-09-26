@@ -12,6 +12,7 @@ use Illuminate\View\View;
 use Modules\Signature\Models\Signature;
 use Modules\Signature\Services\SignatureContentValidator;
 use Modules\Signature\Services\SignaturePurgeService;
+use Modules\Signature\Services\SignatureTemplateRegistry;
 
 /**
  * « Mes signatures » - patron direct de Modules\Tools\Http\Controllers\UserPromptController /
@@ -52,9 +53,13 @@ class UserSignatureController extends Controller
             // réaffiché après création) ni updateUrl seuls ne suffisent au téléversement d'image,
             // qui doit prouver la propriété autrement (SignatureImageController::resolveSignature()).
             'signatureId' => $signature->id,
-            'templates' => Signature::TEMPLATES,
+            'templates' => Signature::templates(),
+            'templateDefinitions' => SignatureTemplateRegistry::definitions(),
             'fontFamilies' => SignatureContentValidator::FONT_FAMILIES,
             'socialPlatforms' => SignatureContentValidator::SOCIAL_PLATFORMS,
+            // LOT 3 (2026-09-25).
+            'portraitShapes' => SignatureContentValidator::PORTRAIT_SHAPES,
+            'fontScales' => SignatureContentValidator::FONT_SCALES,
             'initialContent' => $signature->content,
             'initialTemplate' => $signature->template,
             'initialImages' => $signature->imagesPayload(),

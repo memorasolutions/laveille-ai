@@ -20,6 +20,16 @@ final class SignatureContentValidator
 
     public const SOCIAL_PLATFORMS = ['linkedin', 'facebook', 'instagram', 'x', 'youtube', 'website'];
 
+    /**
+     * LOT 3 (2026-09-25) - forme du portrait (n'affecte JAMAIS le logo, voir SignatureRenderer).
+     * Clés ASCII volontairement sans accent (valeur stockée en base, patron déjà établi par les
+     * clés de gabarit comme `banniere` - le libellé accentué vit côté vue, jamais dans la valeur).
+     */
+    public const PORTRAIT_SHAPES = ['carre', 'rond'];
+
+    /** LOT 3 - facteur d'échelle appliqué aux tailles de police de base (voir SignatureRenderer). */
+    public const FONT_SCALES = ['petite', 'moyenne', 'grande'];
+
     /** @return array<string, mixed> */
     public static function validated(array $data): array
     {
@@ -36,7 +46,7 @@ final class SignatureContentValidator
         };
 
         return [
-            'template' => ['required', 'string', Rule::in(Signature::TEMPLATES)],
+            'template' => ['required', 'string', Rule::in(Signature::templates())],
             'content' => ['required', 'array'],
             'content.first_name' => ['required', 'string', 'max:80'],
             'content.last_name' => ['required', 'string', 'max:80'],
@@ -58,6 +68,11 @@ final class SignatureContentValidator
             'content.mention_lines' => ['nullable', 'array', 'max:6'],
             'content.mention_lines.*' => ['string', 'max:160'],
             'content.qr_enabled' => ['nullable', 'boolean'],
+            // LOT 3 (2026-09-25) - pronoms, forme du portrait, taille de police. Enum FERMÉ pour
+            // les deux derniers (Rule::in), jamais une valeur libre.
+            'content.pronouns' => ['nullable', 'string', 'max:30'],
+            'content.portrait_shape' => ['nullable', 'string', Rule::in(self::PORTRAIT_SHAPES)],
+            'content.font_scale' => ['nullable', 'string', Rule::in(self::FONT_SCALES)],
             // Rappel opt-in (section 6.7) - jamais requis, jamais transformé en compte.
             'reminder_email' => ['nullable', 'string', 'email:rfc', 'max:190'],
         ];
