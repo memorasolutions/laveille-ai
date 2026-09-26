@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.303.2] - 2026-09-26
+
+### Corrigé
+- **Outil de signatures : le fil d'étapes s'affichait empilé à la verticale**, cercles et numéros mal alignés, au lieu d'une ligne horizontale. Cause exacte : un commentaire de la feuille de style contenait la suite « */ » (dans « --sys-status-*/--c-primary »), qui refermait le commentaire trop tôt et faisait disparaître, par récupération d'erreur du navigateur, la règle de disposition du fil placée juste en dessous. Le train de la veille (v1.303.1) avait bien ajouté cette règle, mais elle n'était jamais appliquée à cause de ce commentaire. Corrigé à la source, le fil retrouve sa ligne et ses numéros centrés.
+
 ## [1.303.1] - 2026-09-26
 
 ### Corrigé

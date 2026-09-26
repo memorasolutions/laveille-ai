@@ -55,7 +55,7 @@
    <style> propre à constructeur-prompts.blade.php (page Modules/Tools), jamais chargé par cet
    outil - l'éditeur de signature ne charge QUE signature.css. Sans elles, le navigateur affiche
    les <button>/<div> du stepper en blocs empilés par défaut, exactement le symptôme décrit.
-   Règles reprises ICI à l'identique (mêmes jetons de couleur --sys-status-*/--c-primary, déjà
+   Règles reprises ICI à l'identique (mêmes jetons de couleur --sys-status et --c-primary, déjà
    posés globalement par le thème) plutôt qu'extraites dans un fichier partagé : sortir ce patron
    de deux pages indépendantes est un changement d'architecture qui dépasse le périmètre de cette
    correction (le brief ne demande que le stepper de CET outil), et dupliquer un patron de design
