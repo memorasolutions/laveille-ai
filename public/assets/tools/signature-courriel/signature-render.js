@@ -132,7 +132,12 @@
 
     function blocImage(image, altMode, extraStyle, f) {
         if (!image || !image.url || !image.width || !image.height) { return ''; }
-        return '<img src="' + esc(image.url) + '" width="' + parseInt(image.width, 10) + '" height="' + parseInt(image.height, 10) +
+        // La taille RENDUE suit display_width/display_height (curseur « Taille d'affichage »),
+        // pas les dimensions intrinseques du fichier - sinon le curseur ne change rien a l'apercu.
+        // Repli sur width/height quand aucun display_* n'est pose (image jamais redimensionnee).
+        var w = parseInt(image.display_width || image.width, 10);
+        var h = parseInt(image.display_height || Math.round((image.height / image.width) * w), 10);
+        return '<img src="' + esc(image.url) + '" width="' + w + '" height="' + h +
             '" alt="' + esc(imageAlt(altMode, f)) + '" style="display:block;border:0;outline:none;text-decoration:none;' + (extraStyle || '') + '">';
     }
 

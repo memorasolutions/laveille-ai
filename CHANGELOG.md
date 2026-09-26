@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.303.4] - 2026-09-26
+
+### Corrigé
+- **Outil de signatures : le curseur « Taille d'affichage » (logo, portrait, bannière) ne changeait rien dans l'aperçu en direct.** Le moteur de rendu dimensionnait l'image avec ses dimensions intrinsèques (`width`/`height`), en ignorant `display_width`/`display_height` posés par le curseur. Il suit désormais la taille d'affichage (hauteur proportionnelle), côté aperçu JS ET rendu serveur PHP. Vérifié en direct : toutes les options (taille d'image, taille de police, couleur d'accent, forme de portrait, champs texte) se reflètent immédiatement dans l'aperçu.
+
 ## [1.303.3] - 2026-09-26
 
 ### Corrigé

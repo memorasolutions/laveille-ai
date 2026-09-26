@@ -449,11 +449,16 @@ final class SignatureRenderer
             return '';
         }
 
+        // La taille RENDUE suit display_width/display_height (curseur « Taille d'affichage »),
+        // pas les dimensions intrinseques du fichier - miroir exact de blocImage() cote JS.
+        $w = (int) ($image['display_width'] ?? $image['width']);
+        $h = (int) ($image['display_height'] ?? (int) round(($image['height'] / $image['width']) * $w));
+
         return sprintf(
             '<img src="%s" width="%d" height="%d" alt="%s" style="display:block;border:0;outline:none;text-decoration:none;%s">',
             self::e($image['url']),
-            (int) $image['width'],
-            (int) $image['height'],
+            $w,
+            $h,
             self::e(self::imageAlt($altMode, $f)),
             $extraStyle
         );
