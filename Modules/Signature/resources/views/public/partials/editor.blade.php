@@ -33,7 +33,7 @@
             <span class="sig-mobile-preview-bar__viewport" aria-hidden="true">
                 <iframe :srcdoc="previewSrcdoc" tabindex="-1" title="" sandbox=""></iframe>
             </span>
-            <button type="button" class="btn btn-outline-primary btn-sm sig-mobile-preview-expand" @click="openPreviewSheet()">
+            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm sig-mobile-preview-expand" @click="openPreviewSheet()">
                 🔍 {{ __('Agrandir') }}
             </button>
         </div>
@@ -71,7 +71,7 @@
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <label class="form-label fw-bold mb-0" id="sig-template-label">{{ __('Gabarit') }}</label>
                             {{-- LOT 4 - ouvre la galerie de mises en page (modale, onglets par catégorie, schémas de disposition). --}}
-                            <button type="button" class="btn btn-outline-primary btn-sm" @click="openGallery()">
+                            <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="openGallery()">
                                 🖼️ {{ __('Voir toutes les mises en page') }}
                             </button>
                         </div>
@@ -295,10 +295,10 @@
                                 </select>
                                 <label :for="'sig-social-url-' + index" class="visually-hidden" x-text="'{{ __('Adresse du lien') }} ' + (index + 1)"></label>
                                 <input :id="'sig-social-url-' + index" type="url" class="form-control" x-model="link.url" placeholder="https://" maxlength="255">
-                                <button type="button" class="btn btn-outline-danger btn-sm" @click="removeSocialLink(index)" aria-label="{{ __('Retirer ce lien') }}">✕</button>
+                                <button type="button" class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="removeSocialLink(index)" aria-label="{{ __('Retirer ce lien') }}">✕</button>
                             </div>
                         </template>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" @click="addSocialLink()" x-show="content.social_links.length < 6">+ {{ __('Ajouter un lien social') }}</button>
+                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="addSocialLink()" x-show="content.social_links.length < 6">+ {{ __('Ajouter un lien social') }}</button>
                     </div>
 
                     {{-- Répéteur : lignes de mention légale/secondaire --}}
@@ -308,10 +308,10 @@
                             <div class="sig-repeater-row">
                                 <label :for="'sig-mention-line-' + index" class="visually-hidden" x-text="'{{ __('Ligne de mention') }} ' + (index + 1)"></label>
                                 <input :id="'sig-mention-line-' + index" type="text" class="form-control" x-model="content.mention_lines[index]" maxlength="160" aria-labelledby="sig-mention-lines-label">
-                                <button type="button" class="btn btn-outline-danger btn-sm" @click="removeMentionLine(index)" aria-label="{{ __('Retirer cette ligne') }}">✕</button>
+                                <button type="button" class="ct-btn ct-btn-outline-danger ct-btn-sm" @click="removeMentionLine(index)" aria-label="{{ __('Retirer cette ligne') }}">✕</button>
                             </div>
                         </template>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" @click="addMentionLine()" x-show="content.mention_lines.length < 6">+ {{ __('Ajouter une ligne') }}</button>
+                        <button type="button" class="ct-btn ct-btn-outline ct-btn-sm" @click="addMentionLine()" x-show="content.mention_lines.length < 6">+ {{ __('Ajouter une ligne') }}</button>
                         <p class="form-text small" x-show="content.mention_lines.length > 2">⚠️ {{ __('Une signature trop longue nuit à la lisibilité.') }}</p>
                     </div>
                 </div>
@@ -345,12 +345,12 @@
                     @endif
 
                     <div class="d-flex gap-2 flex-wrap">
-                        <button type="button" class="btn btn-primary" @click="copyToClipboard()">📋 {{ __('Copier') }}</button>
-                        <button type="button" class="btn btn-outline-secondary" @click="downloadHtm()">⬇️ {{ __('Télécharger (.htm)') }}</button>
+                        <button type="button" class="ct-btn ct-btn-primary" @click="copyToClipboard()">📋 {{ __('Copier') }}</button>
+                        <button type="button" class="ct-btn ct-btn-outline" @click="downloadHtm()">⬇️ {{ __('Télécharger (.htm)') }}</button>
                         {{-- LOT 3 - export brut, pour un client courriel qui exige de coller le code source
                              (ex. champ « Signature HTML » de Gmail/Outlook web en mode « éditeur HTML »). --}}
-                        <button type="button" class="btn btn-outline-secondary" @click="openHtmlCode()">👀 {{ __('Voir le code HTML') }}</button>
-                        <button type="button" class="btn btn-outline-primary" @click="save()" :disabled="saving">
+                        <button type="button" class="ct-btn ct-btn-outline" @click="openHtmlCode()">👀 {{ __('Voir le code HTML') }}</button>
+                        <button type="button" class="ct-btn ct-btn-outline" @click="save()" :disabled="saving">
                             <span x-show="!saving">💾 {{ __('Enregistrer') }}</span>
                             <span x-show="saving">{{ __('Enregistrement...') }}</span>
                         </button>
@@ -365,9 +365,9 @@
 
                 {{-- Navigation Précédent/Suivant, commune aux 5 étapes. --}}
                 <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                    <button type="button" class="btn btn-outline-secondary" @click="prevStep()" x-show="step > 1">← {{ __('Précédent') }}</button>
+                    <button type="button" class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1">← {{ __('Précédent') }}</button>
                     <span x-show="step === 1"></span>
-                    <button type="button" class="btn btn-primary" @click="nextStep()" x-show="step < 5">{{ __('Suivant') }} →</button>
+                    <button type="button" class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 5">{{ __('Suivant') }} →</button>
                 </div>
             </div>
         </div>
@@ -383,8 +383,8 @@
                     {{-- LOT 3 - bascule bureau/mobile : contraint la largeur de l'aperçu pour vérifier le
                          rendu mobile, sans dupliquer l'iframe. --}}
                     <div class="btn-group btn-group-sm" role="group" aria-label="{{ __('Largeur de l\'aperçu') }}">
-                        <button type="button" class="btn" :class="previewMode === 'desktop' ? 'btn-primary' : 'btn-outline-secondary'" @click="previewMode = 'desktop'" :aria-pressed="previewMode === 'desktop' ? 'true' : 'false'">🖥️ {{ __('Bureau') }}</button>
-                        <button type="button" class="btn" :class="previewMode === 'mobile' ? 'btn-primary' : 'btn-outline-secondary'" @click="previewMode = 'mobile'" :aria-pressed="previewMode === 'mobile' ? 'true' : 'false'">📱 {{ __('Mobile') }}</button>
+                        <button type="button" class="ct-btn ct-btn-sm" :class="previewMode === 'desktop' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="previewMode = 'desktop'" :aria-pressed="previewMode === 'desktop' ? 'true' : 'false'">🖥️ {{ __('Bureau') }}</button>
+                        <button type="button" class="ct-btn ct-btn-sm" :class="previewMode === 'mobile' ? 'ct-btn-primary' : 'ct-btn-outline'" @click="previewMode = 'mobile'" :aria-pressed="previewMode === 'mobile' ? 'true' : 'false'">📱 {{ __('Mobile') }}</button>
                     </div>
                 </div>
                 {{-- Cadre courriel sobre : fond blanc, quelques lignes grises pour évoquer un message
@@ -497,8 +497,8 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2 p-3 pt-2 border-top">
-            <button type="button" class="btn btn-secondary" @click="closeGallery()">{{ __('Annuler') }}</button>
-            <button type="button" class="btn btn-primary" @click="applyGalleryTemplate()" :disabled="!gallerySelected">
+            <button type="button" class="ct-btn ct-btn-outline" @click="closeGallery()">{{ __('Annuler') }}</button>
+            <button type="button" class="ct-btn ct-btn-primary" @click="applyGalleryTemplate()" :disabled="!gallerySelected">
                 {{ __('Utiliser cette mise en page') }}
             </button>
         </div>
@@ -524,8 +524,8 @@
         <label class="visually-hidden" for="sig-html-source">{{ __('Code HTML de la signature') }}</label>
         <textarea id="sig-html-source" class="form-control sig-html-source" rows="10" readonly x-text="htmlSourceCode" @click="$event.target.select()"></textarea>
         <div class="text-end mt-3 d-flex gap-2 justify-content-end">
-            <button type="button" class="btn btn-secondary" @click="showHtmlModal = false">{{ __('Fermer') }}</button>
-            <button type="button" class="btn btn-outline-primary" @click="copyHtmlSource()">📋 {{ __('Copier le code') }}</button>
+            <button type="button" class="ct-btn ct-btn-outline" @click="showHtmlModal = false">{{ __('Fermer') }}</button>
+            <button type="button" class="ct-btn ct-btn-outline" @click="copyHtmlSource()">📋 {{ __('Copier le code') }}</button>
         </div>
     </div>
 </div>
@@ -549,7 +549,7 @@
         <p>{{ __('Ce lien te permet de modifier ta signature plus tard. Nous ne pouvons pas te le renvoyer si tu le perds.') }}</p>
         <code class="sig-secret-link" x-text="issuedManageUrl"></code>
         <div class="text-end mt-3">
-            <button type="button" class="btn btn-secondary" @click="showTokenModal = false">{{ __('Fermer') }}</button>
+            <button type="button" class="ct-btn ct-btn-outline" @click="showTokenModal = false">{{ __('Fermer') }}</button>
         </div>
     </div>
 </div>

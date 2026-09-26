@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.303.5] - 2026-09-26
+
+### Corrigé
+- **Outil de signatures : les boutons de l'éditeur ne respectaient pas la charte du site** (ils reprenaient le style Bootstrap par défaut, bleu générique, au lieu du système de boutons teal du site). Tous les boutons de l'assistant passent au système de charte `ct-btn` (primaire teal plein, contour teal, contour danger, petit format) : « Suivant » et « Précédent », les ajouts de lien social et de ligne, la bascule d'aperçu Bureau/Mobile, les retraits. Vérifié à l'oeil : les boutons « Ajouter » sont désormais teal `#064E5A` (couleur `--c-primary`), police d'entête « Plus Jakarta Sans », comme le reste du site. Les boutons de fermeture des fenêtres (`btn-close`) et le groupe de bascule (`btn-group`) sont conservés tels quels.
+
 ## [1.303.4] - 2026-09-26
 
 ### Corrigé
