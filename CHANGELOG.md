@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.303.1] - 2026-09-26
+
+### Corrigé
+- **Outil de signatures : le sélecteur de gabarit et la galerie affichent un SCHÉMA de disposition** (miniature abstraite : avatar, logo, lignes de texte, réseaux, séparateurs) pour chaque gabarit, au lieu de simples boutons ou d'aperçus chargés - on comprend la mise en page d'un coup d'oeil. Le schéma est dérivé du registre, donc fidèle à chaque disposition.
+- L'assistant à étapes retrouve un fil de progression propre (les styles du fil n'étaient pas chargés dans cet outil).
+
 ## [1.303.0] - 2026-09-26
 
 ### Ajouté

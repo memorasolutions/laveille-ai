@@ -53,17 +53,51 @@ test('la modale de la galerie porte une sémantique ARIA tablist/tab/tabpanel co
         ->and($html)->toContain('galleryMoveTab(-1)');
 });
 
-test('la modale de la galerie réutilise le moteur JS registre-driven pour ses vignettes (aucune logique de rendu dupliquée)', function (): void {
+test('la modale de la galerie réutilise le schéma de disposition registre-driven pour ses vignettes (aucune logique de rendu dupliquée, plus aucun aperçu réel en iframe)', function (): void {
     $html = $this->actingAs($this->superadmin)->get(route('signature.assistant'))->getContent();
 
-    expect($html)->toContain('galleryThumbSrcdoc(tpl)')
+    // LOT 6 (2026-09-26) - les vignettes de la galerie sont désormais le MÊME schéma de
+    // disposition abstrait (wireframe) que le sélecteur de l'étape 1, jamais un vrai mini-aperçu
+    // en iframe (rejeté par le fondateur : illisible une fois réduit à l'échelle d'une vignette).
+    expect($html)->toContain('templateWireframe(tpl)')
+        ->and($html)->toContain('window.SIGNATURE_TEMPLATE_WIREFRAMES')
         ->and($html)->toContain('selectGalleryTemplate(tpl)')
         ->and($html)->toContain('applyGalleryTemplate()')
         ->and($html)->toContain('Utiliser cette mise en page')
+        // Non-régression : l'ancienne fonction de mini-aperçu réel n'existe plus.
+        ->and($html)->not->toContain('galleryThumbSrcdoc')
+        // Seuls les 3 iframes de l'aperçu RÉEL (bureau collant, bande mobile, feuille mobile)
+        // subsistent - aucun 4e iframe pour la galerie.
+        ->and(substr_count($html, '<iframe'))->toBe(3)
         // Jamais de popup native.
         ->and($html)->not->toMatch('/[^.]\balert\s*\(/')
         ->and($html)->not->toMatch('/[^.]\bconfirm\s*\(/')
         ->and($html)->not->toMatch('/[^.]\bprompt\s*\(/');
+});
+
+test('le sélecteur de gabarits de l\'étape 1 porte le même schéma de disposition que la galerie (une seule source, jamais un bouton texte nu)', function (): void {
+    $html = $this->actingAs($this->superadmin)->get(route('signature.assistant'))->getContent();
+
+    expect($html)->toContain('sig-template-card__wireframe')
+        ->and(substr_count($html, 'templateWireframe(tpl)'))->toBe(2);
+});
+
+test('window.SIGNATURE_TEMPLATE_WIREFRAMES sérialise un schéma SVG non vide pour les 14 gabarits', function (): void {
+    $html = $this->actingAs($this->superadmin)->get(route('signature.assistant'))->getContent();
+
+    preg_match('/window\.SIGNATURE_TEMPLATE_WIREFRAMES\s*=\s*(\{.*?\});/s', $html, $matches);
+    expect($matches)->toHaveCount(2);
+
+    $decoded = json_decode($matches[1], true);
+    expect($decoded)->toBeArray()
+        ->and($decoded)->toHaveCount(14)
+        ->and(array_keys($decoded))->toBe(SignatureTemplateRegistry::templates());
+
+    foreach ($decoded as $template => $svg) {
+        expect($svg)->toBeString()
+            ->and($svg)->not->toBe('')
+            ->and($svg)->toContain('<svg');
+    }
 });
 
 test('window.SIGNATURE_TEMPLATES sérialise category et hint pour les 14 gabarits - même registre que le moteur de rendu', function (): void {

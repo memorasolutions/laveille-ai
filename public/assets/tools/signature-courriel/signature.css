@@ -1,8 +1,19 @@
 /* Author: MEMORA solutions, https://memora.solutions ; info@memora.ca */
 
-.sig-template-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
-.sig-template-card { border: 2px solid #e5e7eb; border-radius: var(--r-base, 0.75rem); padding: 10px; text-align: center; cursor: pointer; background: #fff; }
+/* LOT 6 (2026-09-26) - REJET du fondateur sur le rendu précédent (simples boutons texte dans des
+   cases vides) : chaque carte montre maintenant un schéma de disposition (wireframe abstrait,
+   voir SignatureWireframeRenderer) au-dessus du libellé, dans l'esprit du sélecteur de gabarits de
+   HubSpot. */
+.sig-template-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.sig-template-card { display: flex; flex-direction: column; gap: 8px; border: 2px solid #e5e7eb; border-radius: var(--r-base, 0.75rem); padding: 10px; text-align: center; cursor: pointer; background: #fff; }
+.sig-template-card:hover { border-color: #9ca3af; }
 .sig-template-card.active { border-color: var(--c-primary, #064E5A); background: #f0f9f9; }
+.sig-template-card:focus-visible { outline: 2px solid var(--c-primary, #064E5A); outline-offset: 2px; }
+/* Le schéma - ratio 4:3 (mêmes proportions que le viewBox 0 0 160 120 du SVG serveur), fond blanc,
+   fine bordure grise distincte de la bordure de la carte (repère visuel du "cadre" du wireframe). */
+.sig-template-card__wireframe { display: block; width: 100%; aspect-ratio: 4 / 3; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; }
+.sig-template-card__wireframe svg { display: block; width: 100%; height: 100%; }
+.sig-template-card__label { font-size: 13px; font-weight: 600; color: #111827; }
 .sig-repeater-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
 .sig-repeater-row > * { flex: 1; }
 .sig-preview-wrap { border: 1px solid #e5e7eb; border-radius: var(--r-base, 0.75rem); overflow: hidden; background: #f9fafb; }
@@ -25,16 +36,57 @@
 .sig-gallery-card { width: 200px; min-height: 24px; border: 2px solid #e5e7eb; border-radius: var(--r-base, 0.75rem); background: #fff; padding: 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 6px; position: relative; }
 .sig-gallery-card:hover { border-color: #9ca3af; }
 .sig-gallery-card.selected { border-color: var(--c-primary, #064E5A); background: #f0f9f9; }
-.sig-gallery-thumb-viewport { position: relative; width: 100%; height: 150px; overflow: hidden; border-radius: 6px; border: 1px solid #e5e7eb; background: #ffffff; display: block; }
-.sig-gallery-thumb-viewport iframe { position: absolute; top: 0; left: 0; width: 600px; height: 460px; border: 0; transform: scale(0.325); transform-origin: top left; pointer-events: none; }
+/* LOT 6 (2026-09-26) - remplace l'ancien iframe de mini-aperçu réel (mis à l'échelle par transform,
+   illisible une fois réduit) par le MÊME schéma de disposition abstrait que le sélecteur de
+   l'étape 1 (SVG direct, aucune mise à l'échelle approximative requise - le viewBox du SVG fait
+   déjà le travail). */
+.sig-gallery-thumb-viewport { display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 6px; border: 1px solid #e5e7eb; background: #ffffff; }
+.sig-gallery-thumb-viewport svg { display: block; width: 100%; height: 100%; }
 .sig-gallery-card-label { font-weight: bold; font-size: 14px; color: #111827; }
 .sig-gallery-card-hint { font-size: 12px; color: #374151; }
 .sig-gallery-card-current { position: absolute; top: 8px; right: 8px; background: var(--c-primary, #064E5A); color: #ffffff; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 999px; }
 @media (max-width: 480px) { .sig-gallery-card { width: 100%; } }
 
-/* LOT 5 (2026-09-26) - assistant par étapes + aperçu collant. Le stepper réutilise .ct-stepper
-   du constructeur de prompts (voir constructeur-prompts.blade.php ~284-317) - IDENTIQUE, aucune
-   règle dupliquée ici : la classe est globale (build Vite commun), pas propre à cet outil. */
+/* LOT 5 (2026-09-26) - assistant par étapes + aperçu collant. Le stepper réutilise le MARQUAGE
+   .ct-stepper du constructeur de prompts (voir constructeur-prompts.blade.php ~284-317).
+   CORRECTIF LOT 6 (2026-09-26) - le commentaire d'origine ci-dessus affirmait que ".ct-stepper est
+   globale (build Vite commun)". C'était FAUX, et c'est la cause du 3e défaut signalé par le
+   fondateur (stepper vertical mal aligné, boutons empilés) : ces règles sont en réalité un
+   <style> propre à constructeur-prompts.blade.php (page Modules/Tools), jamais chargé par cet
+   outil - l'éditeur de signature ne charge QUE signature.css. Sans elles, le navigateur affiche
+   les <button>/<div> du stepper en blocs empilés par défaut, exactement le symptôme décrit.
+   Règles reprises ICI à l'identique (mêmes jetons de couleur --sys-status-*/--c-primary, déjà
+   posés globalement par le thème) plutôt qu'extraites dans un fichier partagé : sortir ce patron
+   de deux pages indépendantes est un changement d'architecture qui dépasse le périmètre de cette
+   correction (le brief ne demande que le stepper de CET outil), et dupliquer un patron de design
+   VISUEL entre deux outils qui peuvent évoluer chacun de leur côté reste dans les clous du DRY
+   nuancé du projet (ressemblance de forme, pas connaissance métier partagée). */
+.ct-stepper { display: flex; align-items: flex-start; width: 100%; margin: 0; padding: 0; }
+.ct-stepper__item { position: relative; flex: 1 1 0; min-width: 0; display: flex; justify-content: center; }
+.ct-stepper__item:not(:last-child)::after { content: ''; position: absolute; top: 17px; left: calc(50% + 21px); right: calc(-50% + 21px); height: 2px; background: var(--sys-border-default, #D1D5DB); z-index: 0; }
+.ct-stepper__item--done:not(:last-child)::after { background: var(--sys-status-success-text, #054F3A); }
+.ct-stepper__btn { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 44px; min-width: 44px; padding: 2px 6px; border: 0; background: transparent; cursor: pointer; color: var(--c-text-secondary); width: 100%; border-radius: 8px; }
+.ct-stepper__circle { position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--sys-border-default, #D1D5DB); background: #fff; color: var(--c-text-secondary); font-weight: 700; font-size: 0.85rem; line-height: 1; transition: background .15s ease, border-color .15s ease, color .15s ease; }
+.ct-stepper__label { font-size: 0.72rem; font-weight: 600; max-width: 92px; text-align: center; line-height: 1.2; }
+.ct-stepper__btn--on .ct-stepper__circle { background: var(--c-primary); border-color: var(--c-primary); color: #fff; }
+.ct-stepper__btn--on .ct-stepper__label { color: var(--c-primary); font-weight: 800; }
+.ct-stepper__btn--done .ct-stepper__circle { background: var(--sys-status-success-bg, #D1FAE5); border-color: var(--sys-status-success-text, #054F3A); color: var(--sys-status-success-text, #054F3A); }
+.ct-stepper__btn--on.ct-stepper__btn--done .ct-stepper__circle { background: var(--c-primary); border-color: var(--c-primary); color: #fff; }
+/* État "en cours" (3e état, jamais un simple booléen) - jetons --sys-status-warning-* déjà en
+   service ailleurs sur ce site. Le badge ::after est un repère de FORME (pastille), pas
+   seulement de couleur (WCAG 1.4.1). */
+.ct-stepper__btn--partial .ct-stepper__circle { background: var(--sys-status-warning-bg, #FFEDD5); border-color: var(--sys-status-warning-text, #7C2D12); color: var(--sys-status-warning-text, #7C2D12); }
+.ct-stepper__btn--partial .ct-stepper__circle::after { content: ''; position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: var(--sys-status-warning-text, #7C2D12); border: 2px solid #fff; }
+.ct-stepper__btn--on.ct-stepper__btn--partial .ct-stepper__circle { background: var(--c-primary); border-color: var(--c-primary); color: #fff; }
+.ct-stepper__btn:hover .ct-stepper__circle { border-color: var(--c-primary); }
+.ct-stepper__btn:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+@media (max-width: 520px) {
+    .ct-stepper__label { display: none; }
+    .ct-stepper__btn--on .ct-stepper__label { display: block; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; max-width: none; margin-top: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ct-stepper__circle { transition: none; }
+}
 
 /* Cadre courriel sobre (bureau collant ET feuille mobile) : fond blanc, quelques lignes grises
    pour évoquer un message au-dessus de la signature, note de simulation - décision arbitrée dans

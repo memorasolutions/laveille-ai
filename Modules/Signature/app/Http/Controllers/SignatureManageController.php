@@ -12,6 +12,7 @@ use Modules\Signature\Http\Controllers\Concerns\ResolvesSignatureByToken;
 use Modules\Signature\Models\Signature;
 use Modules\Signature\Services\SignatureContentValidator;
 use Modules\Signature\Services\SignatureTemplateRegistry;
+use Modules\Signature\Services\SignatureWireframeRenderer;
 
 class SignatureManageController extends Controller
 {
@@ -36,6 +37,7 @@ class SignatureManageController extends Controller
                 'token' => $token,
                 'templates' => Signature::templates(),
                 'templateDefinitions' => SignatureTemplateRegistry::definitions(),
+                'templateWireframes' => SignatureWireframeRenderer::map(),
                 'fontFamilies' => SignatureContentValidator::FONT_FAMILIES,
                 'socialPlatforms' => SignatureContentValidator::SOCIAL_PLATFORMS,
                 // LOT 3 (2026-09-25).

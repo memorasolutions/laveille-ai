@@ -6,6 +6,13 @@
      injecté ici (avant les scripts poussés en fin de page) pour être disponible dès le premier
      appel à renderSignature(). --}}
 <script>window.SIGNATURE_TEMPLATES = @json($templateDefinitions ?? []);</script>
+{{-- LOT 6 (2026-09-26, refonte du sélecteur de gabarit) : schémas de disposition (wireframes)
+     ABSTRAITS des 14 gabarits, calculés une fois côté serveur (SignatureWireframeRenderer, dérivé
+     du MÊME registre que window.SIGNATURE_TEMPLATES ci-dessus, jamais de la clé du gabarit) -
+     source unique consommée par templateWireframe(tpl) (signature-core.js), à la fois par le
+     sélecteur de l'étape 1 et par la galerie modale. Remplace les anciens iframes de mini-aperçu
+     réel de la galerie, jugés illisibles à l'échelle d'une vignette. --}}
+<script>window.SIGNATURE_TEMPLATE_WIREFRAMES = @json($templateWireframes ?? []);</script>
 
 {{-- LOT 5 (2026-09-26) - assistant par ÉTAPES + aperçu collant. Réorganisation de l'éditeur
      (aucun champ ni aucune fonctionnalité perdue - tout est RÉPARTI en 5 étapes courtes), avec le
@@ -63,17 +70,21 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <label class="form-label fw-bold mb-0" id="sig-template-label">{{ __('Gabarit') }}</label>
-                            {{-- LOT 4 - ouvre la galerie de mises en page (modale, onglets par catégorie, vraies vignettes). --}}
+                            {{-- LOT 4 - ouvre la galerie de mises en page (modale, onglets par catégorie, schémas de disposition). --}}
                             <button type="button" class="btn btn-outline-primary btn-sm" @click="openGallery()">
                                 🖼️ {{ __('Voir toutes les mises en page') }}
                             </button>
                         </div>
+                        {{-- LOT 6 - schéma de disposition (wireframe abstrait) au lieu d'un simple bouton
+                             texte, dans l'esprit du sélecteur de gabarits de HubSpot : la FORME de la
+                             disposition se voit d'un coup d'oeil, avant même de lire le libellé. --}}
                         <div class="sig-template-cards mt-2" role="group" aria-labelledby="sig-template-label">
                             <template x-for="tpl in templates" :key="tpl">
                                 <div class="sig-template-card" :class="{active: template === tpl}" @click="template = tpl"
                                      role="button" tabindex="0" :aria-pressed="template === tpl ? 'true' : 'false'"
                                      @keydown.enter.prevent="template = tpl" @keydown.space.prevent="template = tpl">
-                                    <span x-text="templateLabel(tpl)"></span>
+                                    <span class="sig-template-card__wireframe" x-html="templateWireframe(tpl)" aria-hidden="true"></span>
+                                    <span class="sig-template-card__label" x-text="templateLabel(tpl)"></span>
                                 </div>
                             </template>
                         </div>
@@ -428,9 +439,13 @@
 {{-- LOT 4 - modale MAISON « Galerie de mises en page » (même patron que les autres modales de cette
      page : Alpine pur, jamais alert()/confirm()/prompt() natif, focus piégé via
      focusFirstIn()/trapFocusTab() de signature-core.js). Barre d'onglets ARIA (tablist/tab/tabpanel)
-     par catégorie du registre + grille de vignettes, chacune un VRAI mini-aperçu (même moteur
-     renderSignature() que l'aperçu principal, jeu de données d'exemple générique - jamais un schéma
-     abstrait). --}}
+     par catégorie du registre + grille de vignettes.
+     LOT 6 (2026-09-26) - REJET du fondateur sur les vignettes du LOT 4 : le VRAI mini-aperçu en
+     iframe (moteur renderSignature() + jeu de données d'exemple) rendait mal une fois réduit à
+     l'échelle d'une vignette. Remplacé par le MÊME schéma de disposition abstrait (wireframe) que
+     le sélecteur de l'étape 1 - templateWireframe(tpl), source unique SignatureWireframeRenderer
+     (voir son docblock). Aucun iframe de rendu réel ne subsiste dans cette galerie; le rendu réel
+     ne vit plus que dans le panneau « Aperçu en direct » du wizard. --}}
 <div x-show="showGalleryModal" x-cloak
      style="position:fixed;inset:0;z-index:1055;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);padding:16px;"
      role="dialog" aria-modal="true" aria-labelledby="sigGalleryModalTitle"
@@ -472,9 +487,7 @@
                             @click="selectGalleryTemplate(tpl)"
                             :aria-pressed="gallerySelected === tpl ? 'true' : 'false'"
                             :aria-current="template === tpl ? 'true' : 'false'">
-                        <span class="sig-gallery-thumb-viewport">
-                            <iframe :srcdoc="galleryThumbSrcdoc(tpl)" tabindex="-1" aria-hidden="true" sandbox=""></iframe>
-                        </span>
+                        <span class="sig-gallery-thumb-viewport" x-html="templateWireframe(tpl)" aria-hidden="true"></span>
                         <span class="sig-gallery-card-current" x-show="template === tpl">✓ {{ __('Actuel') }}</span>
                         <span class="sig-gallery-card-label" x-text="templateLabel(tpl)"></span>
                         <span class="sig-gallery-card-hint" x-text="templateHint(tpl)"></span>

@@ -13,6 +13,7 @@ use Modules\Signature\Models\Signature;
 use Modules\Signature\Services\SignatureContentValidator;
 use Modules\Signature\Services\SignaturePurgeService;
 use Modules\Signature\Services\SignatureTemplateRegistry;
+use Modules\Signature\Services\SignatureWireframeRenderer;
 
 /**
  * « Mes signatures » - patron direct de Modules\Tools\Http\Controllers\UserPromptController /
@@ -55,6 +56,7 @@ class UserSignatureController extends Controller
             'signatureId' => $signature->id,
             'templates' => Signature::templates(),
             'templateDefinitions' => SignatureTemplateRegistry::definitions(),
+            'templateWireframes' => SignatureWireframeRenderer::map(),
             'fontFamilies' => SignatureContentValidator::FONT_FAMILIES,
             'socialPlatforms' => SignatureContentValidator::SOCIAL_PLATFORMS,
             // LOT 3 (2026-09-25).

@@ -19,60 +19,6 @@ var SIG_GALLERY_CATEGORY_LABELS = {
     banniere: 'Bannière', reseaux: 'Réseaux sociaux'
 };
 
-// LOT 4 - images de remplacement GÉNÉRIQUES (SVG en ligne, aucune dépendance réseau, aucune donnée
-// réelle) pour les vignettes de la galerie : un mini-aperçu FIDÈLE au moteur de rendu doit pouvoir
-// afficher un logo/un portrait/une bannière même sans qu'aucune image n'ait jamais été téléversée.
-var SIG_GALLERY_PLACEHOLDER_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="96" height="40" viewBox="0 0 96 40">'
-    + '<rect width="96" height="40" rx="6" fill="#e5e7eb"/>'
-    + '<circle cx="20" cy="20" r="10" fill="#064E5A"/>'
-    + '<rect x="38" y="14" width="46" height="5" rx="2.5" fill="#9ca3af"/>'
-    + '<rect x="38" y="23" width="32" height="5" rx="2.5" fill="#cbd5e1"/>'
-    + '</svg>'
-);
-var SIG_GALLERY_PLACEHOLDER_PORTRAIT = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">'
-    + '<rect width="80" height="80" fill="#e5e7eb"/>'
-    + '<circle cx="40" cy="32" r="16" fill="#9ca3af"/>'
-    + '<path d="M12 78c4-18 20-28 28-28s24 10 28 28" fill="#9ca3af"/>'
-    + '</svg>'
-);
-var SIG_GALLERY_PLACEHOLDER_BANNIERE = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="150" viewBox="0 0 600 150">'
-    + '<rect width="600" height="150" fill="#064E5A"/>'
-    + '<rect x="24" y="55" width="260" height="14" rx="7" fill="#ffffff" opacity="0.85"/>'
-    + '<rect x="24" y="80" width="180" height="10" rx="5" fill="#ffffff" opacity="0.6"/>'
-    + '</svg>'
-);
-
-// LOT 4 - jeu de données d'exemple GÉNÉRIQUE pour la galerie : un nom, un poste, une organisation, un
-// courriel, un téléphone, un site, des réseaux et les 3 images de remplacement ci-dessus. Jamais une
-// donnée réelle - seulement de quoi montrer un VRAI rendu (texte réel du moteur), pas un schéma
-// abstrait comme HubSpot.
-function signatureGallerySampleState() {
-    return {
-        content: {
-            first_name: 'Camille', last_name: 'Roy', job_title: 'Conseillère en communication',
-            organization: 'Studio Exemple', email: 'camille.roy@exemple.com', phone: '514-555-0142',
-            mobile: '438-555-0199', website: 'https://exemple.com', address: '',
-            tagline: 'Au service de votre image de marque',
-            cta_text: 'Prendre rendez-vous', cta_url: 'https://exemple.com/rendez-vous',
-            accent_color: '#064E5A', font_family: 'Arial',
-            social_links: [
-                { platform: 'linkedin', url: 'https://linkedin.com/in/exemple' },
-                { platform: 'facebook', url: 'https://facebook.com/exemple' }
-            ],
-            mention_lines: ['Exemple à titre indicatif seulement'],
-            pronouns: '', portrait_shape: 'carre', font_scale: 'moyenne'
-        },
-        images: {
-            logo: { url: SIG_GALLERY_PLACEHOLDER_LOGO, width: 96, height: 40 },
-            portrait: { url: SIG_GALLERY_PLACEHOLDER_PORTRAIT, width: 80, height: 80 },
-            banniere: { url: SIG_GALLERY_PLACEHOLDER_BANNIERE, width: 600, height: 150 }
-        }
-    };
-}
-
 function signatureAssistant(config) {
     return {
         template: config.initialTemplate || 'minimal',
@@ -285,6 +231,15 @@ function signatureAssistant(config) {
             return (def && def.hint) || '';
         },
 
+        // LOT 6 (2026-09-26) - schéma de disposition (wireframe abstrait) d'un gabarit : SOURCE
+        // UNIQUE (window.SIGNATURE_TEMPLATE_WIREFRAMES, calculée une fois côté serveur par
+        // SignatureWireframeRenderer à partir du registre - voir son docblock), consommée à
+        // l'identique par le sélecteur de l'étape 1 ET par la galerie modale, via x-html. Jamais un
+        // aperçu réel (aucune donnée de contenu) - remplace les anciens iframes de mini-aperçu.
+        templateWireframe(tpl) {
+            return (window.SIGNATURE_TEMPLATE_WIREFRAMES || {})[tpl] || '';
+        },
+
         // ------------------------------------------------------------------
         // Galerie de mises en page (LOT 4) - onglets par catégorie (registre), vraies vignettes
         // (même moteur renderSignature() que l'aperçu principal, jeu de données d'exemple générique).
@@ -363,15 +318,6 @@ function signatureAssistant(config) {
                 var el = document.getElementById('sig-gallery-tab-' + next);
                 if (el) { el.focus(); }
             });
-        },
-
-        // Rendu d'une vignette - réutilise le moteur canonique renderSignature() (même fonction que
-        // l'aperçu principal) avec le jeu de données d'exemple générique, jamais une logique de rendu
-        // dupliquée pour la galerie.
-        galleryThumbSrcdoc(tpl) {
-            var sample = signatureGallerySampleState();
-            var html = renderSignature({ template: tpl, content: sample.content, images: sample.images });
-            return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><style>body{margin:0;padding:16px;font-family:Arial,Helvetica,sans-serif;background:#ffffff;}</style></head><body>' + html + '</body></html>';
         },
 
         addSocialLink() {
