@@ -276,7 +276,22 @@
                              la règle du projet « pas de big-bang » (3 refontes annulées par l'utilisateur en 2026). --}}
 
                         {{-- #1 espacement bouton "Suivant"/nav collé au champ au-dessus. --}}
-                        .ct-step-nav{margin-top:1.5rem;}
+                        {{-- Barre de navigation COLLANTE en bas (2026-09-26, même patron que l'outil de
+                             signature, demande du fondateur) : .ct-step-nav est un enfant direct de
+                             #cpWizard (haut), donc bottom:0 la garde ancrée en bas de l'écran pendant
+                             tout le défilement du wizard. Le correctif .page-wrapper (overflow:hidden du
+                             thème neutralise position:sticky) est OBLIGATOIRE ici comme pour la signature,
+                             sinon la barre ne suit pas. Cibles 44 px, env(safe-area-inset-bottom) mobile,
+                             scroll-padding-bottom pour ne pas recouvrir le champ actif (WCAG 2.4.11). --}}
+                        .ct-step-nav{position:sticky;bottom:0;z-index:1010;margin-top:1.5rem;padding:10px 4px calc(10px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--sys-border-default,#D1D5DB);}
+                        .cp-wizard-nav__row{display:flex;align-items:center;gap:8px;}
+                        .cp-wizard-nav__side{flex:1 1 0;display:flex;}
+                        .cp-wizard-nav__side--start{justify-content:flex-start;}
+                        .cp-wizard-nav__side--end{justify-content:flex-end;}
+                        .cp-wizard-nav__status{flex:0 0 auto;text-align:center;font-size:14px;font-weight:600;color:var(--c-text-secondary,#4B5563);white-space:nowrap;}
+                        .cp-wizard-nav__row .ct-btn{min-height:44px;}
+                        body .page-wrapper{overflow-x:clip;overflow-y:visible;}
+                        html{scroll-padding-bottom:96px;}
 
                         {{-- #2 + #4 stepper visuel 2026 : cercles numérotés + connecteur + coche de
                              complétion. Conserve exactement role="tablist"/role="tab" (test
@@ -1108,10 +1123,14 @@
                         <div x-show="showValidation && step === 2 && (!(verbType === 'custom' ? verbCustom : verb) || !taskObject)" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
                             {{ __('Le verbe d\'action et la description de votre demande sont requis avant de continuer.') }}
                         </div>
-                        <div class="d-flex justify-content-between mb-4">
-                            <button class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1" style="min-height:44px;">{{ __('Précédent') }}</button>
-                            <div x-show="step === 1"></div>
-                            <button class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 4" style="min-height:44px;">{{ __('Suivant') }}</button>
+                        <div class="cp-wizard-nav__row">
+                            <div class="cp-wizard-nav__side cp-wizard-nav__side--start">
+                                <button class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1" style="min-height:44px;">← {{ __('Précédent') }}</button>
+                            </div>
+                            <span class="cp-wizard-nav__status">{{ __('Étape') }} <span x-text="step"></span> {{ __('sur') }} 4</span>
+                            <div class="cp-wizard-nav__side cp-wizard-nav__side--end">
+                                <button class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 4" style="min-height:44px;">{{ __('Suivant') }} →</button>
+                            </div>
                         </div>
                         </div>
 

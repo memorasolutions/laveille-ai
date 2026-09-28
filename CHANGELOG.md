@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.305.3] - 2026-09-28
+
+### Corrigé
+- **Constructeur de prompts : la navigation « Précédent » et « Suivant » ne suivait pas le défilement.** Même correctif que celui livré pour l'outil de signatures (v1.305.0/.1) : la barre devient collante en bas de la colonne du formulaire, avec un indicateur « Étape X sur 4 » au centre, atteignable sans défiler jusqu'au bas de l'étape. Cibles tactiles d'au moins 44 pixels, réserve d'espace au bas de la zone défilante pour que la barre ne recouvre jamais le champ actif (WCAG 2.4.11), respect de la zone sûre du bas sur mobile. Même piège corrigé au passage : l'ancêtre `.page-wrapper` du thème porte `overflow: hidden`, ce qui neutralise `position: sticky` - surcharge scopée à cette page (`overflow-x: clip`, `overflow-y: visible`).
+
 ## [1.305.2] - 2026-09-26
 
 ### Corrigé
@@ -718,22 +723,22 @@ post-déploiement avait bien été faite, mais elle n'était écrite nulle part.
   tous les visiteurs suivants - la maintenance aurait été contournée pour tout le monde, en silence.
 
 ### Corrigé
-- **Constructeur de prompts : l'outil mentait sur son propre état.** Les 4 étapes s'affichaient
+- **Constructeur de prompts : l'outil mentait sur son propre état.** Les 4 étapes s'affichaient
   « complétée » alors que les 19 champs étaient vides, et la complétude se propageait EN CASCADE -
   finir l'étape 3 marquait instantanément l'étape 4, jamais ouverte. Cause : le drapeau était armé
   par la simple NAVIGATION, pas par une saisie. Désormais trois états (vide, en cours, complétée),
   calculés sur le contenu réel des champs et lisibles sans la couleur.
-- **Constructeur de prompts : les menus laissés sur « Aucune » injectaient quand même une valeur.**
+- **Constructeur de prompts : les menus laissés sur « Aucune » injectaient quand même une valeur.**
   L'écran affichait « -- Aucune -- » pendant que le résumé annonçait « longueur modéré (300-500
   mots) » et « ton professionnel » : la personne croyait ne rien imposer et imposait pourtant une
   contrainte au modèle. Règle appliquée partout dans le générateur : une valeur absente n'injecte
   RIEN, jamais de texte de remplissage - une contrainte fausse dégrade la réponse davantage qu'une
   contrainte absente. Deux fuites du même genre ont été trouvées au passage sur les retours affichés.
-- **Constructeur de prompts : 832 caractères produits sans aucune saisie**, se terminant par la
+- **Constructeur de prompts : 832 caractères produits sans aucune saisie**, se terminant par la
   phrase absurde « Produis maintenant : la demande ci-dessus ». Sans tâche, il n'y a plus de prompt
   du tout. Les destinations restent inactives tant qu'aucun prompt réel n'existe, mais l'explication
   de ce à quoi sert le résultat, elle, reste visible en tout temps.
-- **Constructeur de prompts : jargon et accessibilité.** « Prédéfini » devient « Dans une liste » ;
+- **Constructeur de prompts : jargon et accessibilité.** « Prédéfini » devient « Dans une liste » ;
   « zero-shot » et « few-shot », affichés sans explication, deviennent « Réponse directe » et « Avec
   des exemples ». Libellés visibles reliés aux champs personnalisés, cibles tactiles portées à 44 px,
   focus déplacé vers le titre de l'étape après « Suivant » (un lecteur d'écran n'apprenait jamais que
@@ -1014,7 +1019,7 @@ post-déploiement avait bien été faite, mais elle n'était écrite nulle part.
 ## [1.289.6] - 2026-09-18
 
 ### Corrigé
-- **Constructeur de prompts : la dernière phrase du prompt ("Produis maintenant : ...") ne
+- **Constructeur de prompts : la dernière phrase du prompt ("Produis maintenant : ...") ne
   coupe plus la demande en plein milieu.** Signalement du fondateur : certains champs
   semblaient tronqués et la fin du prompt paraissait bizarre.
 
@@ -6007,12 +6012,12 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 ## [1.196.0] - 2026-08-20
 
 ### Ajouté
-- **Constructeur de prompts : « Partir de mon brouillon » (Brique 2, l'idée neuve la mieux notée du club, 96).** À l'état vide du constructeur, un point d'entrée discret permet de coller un texte existant (courriel, notes, ancien prompt) ; l'outil le transforme en une demande réutilisable qui pré-remplit le wizard avec des espaces à remplir détectés. Endpoint `POST /outils/constructeur-prompts/depuis-brouillon` (`throttle:5,60`), qui réutilise le service LLM applicatif existant (`AiService::chat()`, budgété, avec la garde de confidentialité `OpenRouterPrivacy` deny+zdr obligatoire - Loi 25, testée). La sortie du modèle n'est JAMAIS crue aveuglément : validée (clés autorisées, taskObject non vide, espaces = sous-chaînes réelles de la demande), tout échec = 422 propre jamais un 500 ; texte tronqué à 4000 caractères, contenu utilisateur jamais journalisé. Détection de renseignements personnels côté client (réutilise l'Anonymiseur) : si le texte collé en contient, un avertissement non bloquant renvoie vers l'outil Anonymiseur - sans réintroduire de panneau de masquage intégré (doctrine du 2026-08-04 respectée).
+- **Constructeur de prompts : « Partir de mon brouillon » (Brique 2, l'idée neuve la mieux notée du club, 96).** À l'état vide du constructeur, un point d'entrée discret permet de coller un texte existant (courriel, notes, ancien prompt) ; l'outil le transforme en une demande réutilisable qui pré-remplit le wizard avec des espaces à remplir détectés. Endpoint `POST /outils/constructeur-prompts/depuis-brouillon` (`throttle:5,60`), qui réutilise le service LLM applicatif existant (`AiService::chat()`, budgété, avec la garde de confidentialité `OpenRouterPrivacy` deny+zdr obligatoire - Loi 25, testée). La sortie du modèle n'est JAMAIS crue aveuglément : validée (clés autorisées, taskObject non vide, espaces = sous-chaînes réelles de la demande), tout échec = 422 propre jamais un 500 ; texte tronqué à 4000 caractères, contenu utilisateur jamais journalisé. Détection de renseignements personnels côté client (réutilise l'Anonymiseur) : si le texte collé en contient, un avertissement non bloquant renvoie vers l'outil Anonymiseur - sans réintroduire de panneau de masquage intégré (doctrine du 2026-08-04 respectée).
 
 ## [1.195.1] - 2026-08-20
 
 ### Corrigé
-- **Constructeur de prompts : 500 corrigé (bibliothèque de pré-prompts).** La variable `$officialTemplates` était utilisée à l'état vide du wizard AVANT sa définition (Blade rend de haut en bas), ce qui plantait la page. La définition est remontée avant son premier usage. Un test de RENDU du blade (les deux cas : avec et sans gabarits) comble le trou de couverture qui avait laissé passer le 500 - les tests précédents validaient la logique mais ne rendaient jamais la page.
+- **Constructeur de prompts : 500 corrigé (bibliothèque de pré-prompts).** La variable `$officialTemplates` était utilisée à l'état vide du wizard AVANT sa définition (Blade rend de haut en bas), ce qui plantait la page. La définition est remontée avant son premier usage. Un test de RENDU du blade (les deux cas : avec et sans gabarits) comble le trou de couverture qui avait laissé passer le 500 - les tests précédents validaient la logique mais ne rendaient jamais la page.
 
 ## [1.195.0] - 2026-08-20
 
@@ -6424,7 +6429,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 ## [1.169.0] - 2026-08-12
 
 ### Ajouté
-- **Constructeur de prompts : avertissement de seuil AVANT le clic.** Les boutons « Ouvrir dans ChatGPT / Claude / Perplexity » préremplissent la conversation par l’URL, mais uniquement si le prompt encodé tient dans 4000 caractères ; au-delà, l’outil bascule en copie vers le presse-papiers. L’utilisateur ne découvrait ce changement de comportement qu’APRÈS avoir cliqué. Un avis apparaît désormais dès que le seuil est franchi. Ordre de grandeur mesuré sur un vrai prompt français généré par l’outil (ratio d’encodage 1,535) : 4000 caractères encodés valent environ 2600 caractères bruts, soit à peu près 400 mots.
+- **Constructeur de prompts : avertissement de seuil AVANT le clic.** Les boutons « Ouvrir dans ChatGPT / Claude / Perplexity » préremplissent la conversation par l’URL, mais uniquement si le prompt encodé tient dans 4000 caractères ; au-delà, l’outil bascule en copie vers le presse-papiers. L’utilisateur ne découvrait ce changement de comportement qu’APRÈS avoir cliqué. Un avis apparaît désormais dès que le seuil est franchi. Ordre de grandeur mesuré sur un vrai prompt français généré par l’outil (ratio d’encodage 1,535) : 4000 caractères encodés valent environ 2600 caractères bruts, soit à peu près 400 mots.
 
 ### Modifié
 - **Frontière instruction/donnée : le texte collé n’est plus confondable avec une consigne.** Le champ « Contexte additionnel » était inséré dans le prompt final entre des triples guillemets `"""` qui n’étaient jamais échappés. Le jour où un utilisateur y colle un vrai document (un courriel de client, un rapport reçu), une phrase impérative contenue dans ce document pouvait être lue par le modèle comme une consigne venant de l’utilisateur : c’est le mécanisme classique de l’injection de prompt. Le texte collé est maintenant entouré d’un délimiteur unique tiré au hasard à chaque génération, de la forme `⟦DONNEES-a3f9⟧ … ⟦/DONNEES-a3f9⟧` : le contenu collé ne peut pas refermer une balise dont il ignore le suffixe. Une instruction accompagne le bloc et énonce que ce qui s’y trouve est de la donnée à traiter, jamais une consigne à exécuter. Cela réduit fortement le risque sans prétendre l’annuler : aucun délimiteur ne rend un modèle immunisé.
@@ -6455,13 +6460,13 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 - **P0 - le JavaScript de la v1.167.0 n'avait jamais été livré.** La vue déployée appelait sept fonctions (`addZoneFromInput`, `handleZonePaste`, `removeZone`, `isSearchVerbActive`, `isDatedSearchVerbActive`, la collection `zones`) absentes du fichier servi en ligne : le champ des zones géographiques était donc inerte en production. Cause : le fichier vit dans `public/assets/`, hors des chemins listés au moment de préparer le commit précédent, et le suivi de version de l'asset (`?v=` dérivé du SemVer) changeait malgré tout, ce qui donnait toutes les apparences d'un déploiement réussi. Leçon retenue : vérifier le CONTENU du fichier réellement servi, jamais le seul numéro de version de son URL.
 
 ### Modifié
-- **Constructeur de prompts : la confirmation du bouton « Recommencer » passe en modale centrée.** L'ancien mécanisme demandait de cliquer une seconde fois sur le bouton dans un délai de 4 secondes, le libellé se transformant en « Confirmer la réinitialisation » - un geste que rien n'annonce, invisible pour qui ne relit pas le bouton, et perdu si l'utilisateur hésite trop longtemps. La modale énonce maintenant ce qui sera effacé (les réponses ET le brouillon conservé dans le navigateur), précise que les prompts déjà enregistrés dans le compte ne sont pas touchés, et place « Annuler » avant l'action destructrice.
+- **Constructeur de prompts : la confirmation du bouton « Recommencer » passe en modale centrée.** L'ancien mécanisme demandait de cliquer une seconde fois sur le bouton dans un délai de 4 secondes, le libellé se transformant en « Confirmer la réinitialisation » - un geste que rien n'annonce, invisible pour qui ne relit pas le bouton, et perdu si l'utilisateur hésite trop longtemps. La modale énonce maintenant ce qui sera effacé (les réponses ET le brouillon conservé dans le navigateur), précise que les prompts déjà enregistrés dans le compte ne sont pas touchés, et place « Annuler » avant l'action destructrice.
 - Détail d'implémentation à connaître avant toute retouche : les modales Bootstrap de cette page vivent **hors** du composant Alpine. Le bouton de confirmation ne peut donc pas appeler `resetAll()` directement ; il émet l'évènement `cp-reset-confirmed` sur `window`, capté par `@cp-reset-confirmed.window` sur le div porteur de `x-data`. Ce pont est verrouillé par un test.
 
 ## [1.167.0] - 2026-08-12
 
 ### Ajouté
-- **Constructeur de prompts : trois verbes d'action orientés recherche** dans le champ « Verbe d'action » de l'étape 2 - « Recherche », « Recherche sur Internet, en priorisant les sites officiels et pertinents », « Recherche en profondeur, Internet inclus ».
+- **Constructeur de prompts : trois verbes d'action orientés recherche** dans le champ « Verbe d'action » de l'étape 2 - « Recherche », « Recherche sur Internet, en priorisant les sites officiels et pertinents », « Recherche en profondeur, Internet inclus ».
 - **La date du jour est inscrite dans le prompt** pour les deux verbes « Internet » : « Nous sommes le 12 août 2026 (2026-08-12). Utilise les informations les plus récentes disponibles à cette date et signale explicitement si une source te semble périmée. » Raison : les modèles ont une date de coupure et répondent volontiers avec des données périmées en croyant être à jour ; l'inscrire noir sur blanc force la fraîcheur. Date rendue par le SERVEUR (`format_date()`, America/Toronto) plutôt que lue sur l'horloge du poste, et **recalculée à chaque génération** - jamais figée dans l'état sauvegardé, sans quoi un prompt rouvert des mois plus tard porterait la date de sa création.
 - **Champ « Zones géographiques à couvrir » conditionnel** : n'apparaît que pour un verbe de recherche. Saisie par champ texte + bouton « Ajouter » visible (mode principal), touche Entrée acceptée en raccourci avec neutralisation de la soumission du formulaire, et collage d'une liste séparée par virgules découpé automatiquement. Chaque zone devient une pastille amovible, en réutilisant le composant déjà en place pour « Format de sortie » et « Qui va lire ça ». Plafond de 5 zones, dédoublonnage insensible à la casse et aux accents, libellé conservé tel que saisi.
 - **Phrase multi-zones en sections distinctes** : au-delà d'une zone, le prompt demande explicitement une section par zone plutôt qu'un traitement global, ce qui évite que le modèle mélange les contextes juridiques et culturels et réponde de façon générique.
@@ -6490,7 +6495,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 ## [1.165.0] - 2026-08-11
 
 ### Modifié
-- Constructeur de prompts : les trois boutons de la barre d'action (plein écran, partage, aide) avaient trois tailles et trois styles différents - une icône nue, un gros cercle plein, un petit cercle à contour. Ils partagent maintenant le même gabarit : cercles de 44 px, même épaisseur de bordure, mêmes couleurs de la charte. Le partage reste l'action mise en avant (cercle plein), mais au même diamètre que les autres, pour garder la hiérarchie sans casser l'alignement.
+- Constructeur de prompts : les trois boutons de la barre d'action (plein écran, partage, aide) avaient trois tailles et trois styles différents - une icône nue, un gros cercle plein, un petit cercle à contour. Ils partagent maintenant le même gabarit : cercles de 44 px, même épaisseur de bordure, mêmes couleurs de la charte. Le partage reste l'action mise en avant (cercle plein), mais au même diamètre que les autres, pour garder la hiérarchie sans casser l'alignement.
 
 ### Nettoyé
 - Le style du bouton d'aide était défini en double, dans deux composants différents, avec un risque de divergence sur toute page combinant les deux. Il n'existe désormais qu'une seule définition, centralisée dans la charte et paramétrable en taille - aucune copie à maintenir. Le rendu retenu est celui qui gagnait déjà l'affichage en production : les écrans qui utilisent ce bouton (minuteur, calculatrice de taxes, mots croisés...) sont inchangés.
@@ -6499,29 +6504,29 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 ## [1.164.4] - 2026-08-11
 
 ### Corrigé
-- Constructeur de prompts : rafraîchir une page ouverte sur une étape précise (adresse terminée par #etape-2, #etape-3 ou #etape-4) ramenait à l'étape 1. Régression introduite le jour même par la v1.164.2 : la restauration de l'étape vérifie que les étapes précédentes sont remplies, or les champs du brouillon n'étaient plus appliqués qu'après le premier rendu - au moment du contrôle, le formulaire semblait encore vierge et l'étape était refusée. L'étape est désormais appliquée une seconde fois, après la restauration des champs. La règle d'origine reste intacte : sans les prérequis, aucun saut d'étape n'est autorisé.
+- Constructeur de prompts : rafraîchir une page ouverte sur une étape précise (adresse terminée par #etape-2, #etape-3 ou #etape-4) ramenait à l'étape 1. Régression introduite le jour même par la v1.164.2 : la restauration de l'étape vérifie que les étapes précédentes sont remplies, or les champs du brouillon n'étaient plus appliqués qu'après le premier rendu - au moment du contrôle, le formulaire semblait encore vierge et l'étape était refusée. L'étape est désormais appliquée une seconde fois, après la restauration des champs. La règle d'origine reste intacte : sans les prérequis, aucun saut d'étape n'est autorisé.
 
 ## [1.164.3] - 2026-08-11
 
 ### Corrigé
-- Constructeur de prompts : le bouton « Recommencer » ne remettait rien à zéro - le formulaire revenait intact, brouillon compris. Deux causes cumulées, découvertes en vérifiant le bouton en production : (1) la page n'était pas rechargée du tout, parce que réaffecter l'adresse sans son repère d'étape (#etape-N) ne provoque qu'un changement d'ancre, jamais un rechargement ; (2) la sauvegarde différée restait armée et réécrivait le brouillon dans la seconde suivante, avec l'état inchangé. Le bouton désarme désormais la sauvegarde, purge le brouillon, nettoie le repère d'étape et force un vrai rechargement.
+- Constructeur de prompts : le bouton « Recommencer » ne remettait rien à zéro - le formulaire revenait intact, brouillon compris. Deux causes cumulées, découvertes en vérifiant le bouton en production : (1) la page n'était pas rechargée du tout, parce que réaffecter l'adresse sans son repère d'étape (#etape-N) ne provoque qu'un changement d'ancre, jamais un rechargement ; (2) la sauvegarde différée restait armée et réécrivait le brouillon dans la seconde suivante, avec l'état inchangé. Le bouton désarme désormais la sauvegarde, purge le brouillon, nettoie le repère d'étape et force un vrai rechargement.
 
 ## [1.164.2] - 2026-08-11
 
 ### Corrigé
-- Constructeur de prompts : le brouillon était bien relu, mais les menus déroulants restaient vides à l'écran (« Sélectionnez un rôle » alors qu'un rôle était mémorisé) - pour la personne devant l'écran, indiscernable d'une absence de sauvegarde. Cause : la restauration s'exécutait pendant l'initialisation d'Alpine, avant que la liste des options ne soit insérée dans la page ; l'affectation échouait alors en silence, et l'affichage n'était jamais resynchronisé ensuite. La restauration est désormais reportée après le premier rendu complet.
+- Constructeur de prompts : le brouillon était bien relu, mais les menus déroulants restaient vides à l'écran (« Sélectionnez un rôle » alors qu'un rôle était mémorisé) - pour la personne devant l'écran, indiscernable d'une absence de sauvegarde. Cause : la restauration s'exécutait pendant l'initialisation d'Alpine, avant que la liste des options ne soit insérée dans la page ; l'affectation échouait alors en silence, et l'affichage n'était jamais resynchronisé ensuite. La restauration est désormais reportée après le premier rendu complet.
 - L'étape indiquée dans l'adresse (#etape-N) continue de primer sur celle du brouillon : ce point n'a pas été déplacé et reste couvert par les tests existants.
 
 ## [1.164.1] - 2026-08-11
 
 ### Corrigé
-- Constructeur de prompts : le brouillon ne se sauvegardait pas quand l'utilisateur faisait uniquement des choix dans les menus déroulants (rôle, verbe, audience, format, longueur, ton, méthode) ou cochait des cases. Le test « le formulaire est-il vide ? » n'inspectait que les champs de texte libre, si bien que choisir un rôle à l'étape 1 - le geste le plus courant - ne déclenchait aucune sauvegarde. Signalé en production.
+- Constructeur de prompts : le brouillon ne se sauvegardait pas quand l'utilisateur faisait uniquement des choix dans les menus déroulants (rôle, verbe, audience, format, longueur, ton, méthode) ou cochait des cases. Le test « le formulaire est-il vide ? » n'inspectait que les champs de texte libre, si bien que choisir un rôle à l'étape 1 - le geste le plus courant - ne déclenchait aucune sauvegarde. Signalé en production.
 - Le critère repose désormais sur une comparaison avec l'état du formulaire à son ouverture : toute différence, saisie ou sélection, déclenche la sauvegarde. Cette approche couvre aussi les champs qui seront ajoutés plus tard, là où une liste codée en dur laissait passer les oublis (quatre incidents de ce type sont déjà documentés dans ce fichier).
 
 ## [1.164.0] - 2026-08-11
 
 ### Ajouté
-- Constructeur de prompts : le formulaire en cours est désormais conservé dans le navigateur (clé `cpDraft_v1`) et repris automatiquement après un rafraîchissement ou une fermeture d'onglet. Durée de vie de 24 heures, aucune écriture si le formulaire est vierge, bannière discrète annonçant la reprise. Motif : chaque rechargement faisait perdre le travail en cours.
+- Constructeur de prompts : le formulaire en cours est désormais conservé dans le navigateur (clé `cpDraft_v1`) et repris automatiquement après un rafraîchissement ou une fermeture d'onglet. Durée de vie de 24 heures, aucune écriture si le formulaire est vierge, bannière discrète annonçant la reprise. Motif : chaque rechargement faisait perdre le travail en cours.
 
 ### Modifié
 - Constructeur : extraction de `_applyWizardParams()`, brique commune aux quatre chemins de restauration de l'état du wizard (ouverture d'un prompt enregistré, remix, historique invité, brouillon local). Les trois chemins existants appliquaient déjà les mêmes 35 champs ; le drapeau `legacy` préserve à l'identique les filets de rétrocompatibilité réservés aux données serveur anciennes.
@@ -6540,7 +6545,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 ## [1.162.0] - 2026-08-11
 
 ### Ajouté
-- **Constructeur de prompts : modale éducative des techniques de prompting**. Un bouton « ? » à côté de « Comment l'IA doit-elle s'y prendre ? » ouvre une vue d'ensemble pédagogique des 8 choix du sélecteur : chaque choix y est présenté avec le nom de la technique reconnue (zero-shot, chaîne de pensée, few-shot, few-shot + chaîne de pensée, décomposition guidée, reformulation, auto-vérification, variantes comparées), une explication en langage simple et un exemple concret « Quand l'utiliser » ancré dans le quotidien d'un enseignant, plus une note reliant le champ « Exemples (2-3 recommandés) » à la technique few-shot. Réutilise le composant d'aide et le gabarit de modale existants (aucun nouveau composant), textes traduits fr/en.
+- **Constructeur de prompts : modale éducative des techniques de prompting**. Un bouton « ? » à côté de « Comment l'IA doit-elle s'y prendre ? » ouvre une vue d'ensemble pédagogique des 8 choix du sélecteur : chaque choix y est présenté avec le nom de la technique reconnue (zero-shot, chaîne de pensée, few-shot, few-shot + chaîne de pensée, décomposition guidée, reformulation, auto-vérification, variantes comparées), une explication en langage simple et un exemple concret « Quand l'utiliser » ancré dans le quotidien d'un enseignant, plus une note reliant le champ « Exemples (2-3 recommandés) » à la technique few-shot. Réutilise le composant d'aide et le gabarit de modale existants (aucun nouveau composant), textes traduits fr/en.
 
 ### Corrigé
 - Constructeur : le bouton principal « Ouvrir dans ChatGPT » flottait plus haut que la rangée « Autres choix » (Claude, Perplexity, Gemini, Mistral). Cause : le centrage vertical se faisait contre un bloc dépliable dont la hauteur change une fois ouvert. Les bas des boutons sont maintenant alignés sur une même ligne, le libellé « Autres choix » restant au-dessus de sa rangée (vérifié fermé, ouvert et en mobile).
@@ -6594,37 +6599,37 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 ## [1.157.0] - 2026-08-09
 
 ### Ajouté
-- **Constructeur de prompts : enveloppe visuelle des groupes de l'étape « Options » (« quoi va avec quoi »)** (demande du fondateur, convergente avec les propositions spontanées de Gemini et DeepSeek au panel intuitivité ; option A retenue à 94-95/100 par le club des sages contre barre d'accent, carte par groupe, espacement seul et code couleur). Chaque groupe (« Apparence de la réponse », « Voix et niveau de langage », « Règles à respecter ») reçoit un fond teal très pâle (3,5 %) à coins arrondis qui englobe ses cartes blanches - la frontière entre thèmes devient visible d'un coup d'œil, sans rien cacher ni retirer, cibles tactiles intactes. Garde-fous appliqués : fond extrêmement pâle (pas d'air « désactivé »), un seul signal de délimitation, marge inter-groupes réduite en compensation (+3 % de hauteur seulement). Preuves : captures desktop et mobile, 30 tests Pest, 73/73 tests JS.
+- **Constructeur de prompts : enveloppe visuelle des groupes de l'étape « Options » (« quoi va avec quoi »)** (demande du fondateur, convergente avec les propositions spontanées de Gemini et DeepSeek au panel intuitivité ; option A retenue à 94-95/100 par le club des sages contre barre d'accent, carte par groupe, espacement seul et code couleur). Chaque groupe (« Apparence de la réponse », « Voix et niveau de langage », « Règles à respecter ») reçoit un fond teal très pâle (3,5 %) à coins arrondis qui englobe ses cartes blanches - la frontière entre thèmes devient visible d'un coup d'œil, sans rien cacher ni retirer, cibles tactiles intactes. Garde-fous appliqués : fond extrêmement pâle (pas d'air « désactivé »), un seul signal de délimitation, marge inter-groupes réduite en compensation (+3 % de hauteur seulement). Preuves : captures desktop et mobile, 30 tests Pest, 73/73 tests JS.
 
 ## [1.156.1] - 2026-08-09
 
 ### Modifié
-- **Constructeur de prompts : consigne « Facultatif : coche toutes les options utiles. » au-dessus de la grille des règles** (verdict de la consultation du club des sages sur l'intuitivité de la compaction, appuyé sur NN/g checkboxes-design-guidelines : pour des novices, expliciter la multi-sélection est la condition qui rend une grille de cases à cocher aussi claire qu'une colonne unique). Clé i18n ajoutée dans lang/en.json.
+- **Constructeur de prompts : consigne « Facultatif : coche toutes les options utiles. » au-dessus de la grille des règles** (verdict de la consultation du club des sages sur l'intuitivité de la compaction, appuyé sur NN/g checkboxes-design-guidelines : pour des novices, expliciter la multi-sélection est la condition qui rend une grille de cases à cocher aussi claire qu'une colonne unique). Clé i18n ajoutée dans lang/en.json.
 
 ## [1.156.0] - 2026-08-09
 
 ### Modifié
-- **Constructeur de prompts : l'étape « Options » est plus compacte, sans rien cacher ni retirer** (go du fondateur sur le verdict unanime de la boucle 3 rounds : compaction plutôt qu'accordéons, onglets ou 5e étape, tous rejetés). Sur ordinateur, les 6 cases à cocher des règles passent en 2 colonnes et les champs « Format de sortie » et « Longueur précise » partagent la largeur ; les marges entre blocs sont resserrées (l'espacement entre groupes reste supérieur à l'espacement interne, exigence du panel). Sur mobile, disposition inchangée (1 colonne). Cibles tactiles >= 44 px intactes, aucun texte du prompt touché. Mesure réelle : la carte passe de 2919 à 2579 px, la zone des trois groupes d'options de ~1960 à ~1622 px (-17 %). Preuves : captures desktop et mobile, 366 tests Pest, 73/73 tests JS.
+- **Constructeur de prompts : l'étape « Options » est plus compacte, sans rien cacher ni retirer** (go du fondateur sur le verdict unanime de la boucle 3 rounds : compaction plutôt qu'accordéons, onglets ou 5e étape, tous rejetés). Sur ordinateur, les 6 cases à cocher des règles passent en 2 colonnes et les champs « Format de sortie » et « Longueur précise » partagent la largeur ; les marges entre blocs sont resserrées (l'espacement entre groupes reste supérieur à l'espacement interne, exigence du panel). Sur mobile, disposition inchangée (1 colonne). Cibles tactiles >= 44 px intactes, aucun texte du prompt touché. Mesure réelle : la carte passe de 2919 à 2579 px, la zone des trois groupes d'options de ~1960 à ~1622 px (-17 %). Preuves : captures desktop et mobile, 366 tests Pest, 73/73 tests JS.
 
 ## [1.155.0] - 2026-08-09
 
 ### Ajouté
-- **Constructeur de prompts : l'étape courante est reflétée dans l'URL** (demande du 2026-08-09 : « quand on est à l'étape x dans l'outil, le mettre dans le slug pour si on rafraîchit »). L'URL porte maintenant `#etape-2` à `#etape-4` selon l'étape active (via `history.replaceState` : zéro pollution de l'historique de navigation, zéro impact serveur ou cache) ; à l'étape 1 le hash est retiré. Au chargement, l'étape du hash est restaurée SEULEMENT si les prérequis des étapes précédentes sont remplis - jamais de saut arbitraire vers un formulaire vide. Limite assumée : un rafraîchissement complet vide aussi les champs (aucun brouillon automatique n'existe), la restauration bénéficie donc surtout aux parcours où l'état persiste (retour arrière, partage d'un lien pendant la session). Preuves : 3 assertions JS dédiées (73/73), 366 Pest Tools, navigateur réel (étape 2 → `#etape-2`, retour étape 1 → hash retiré).
+- **Constructeur de prompts : l'étape courante est reflétée dans l'URL** (demande du 2026-08-09 : « quand on est à l'étape x dans l'outil, le mettre dans le slug pour si on rafraîchit »). L'URL porte maintenant `#etape-2` à `#etape-4` selon l'étape active (via `history.replaceState` : zéro pollution de l'historique de navigation, zéro impact serveur ou cache) ; à l'étape 1 le hash est retiré. Au chargement, l'étape du hash est restaurée SEULEMENT si les prérequis des étapes précédentes sont remplis - jamais de saut arbitraire vers un formulaire vide. Limite assumée : un rafraîchissement complet vide aussi les champs (aucun brouillon automatique n'existe), la restauration bénéficie donc surtout aux parcours où l'état persiste (retour arrière, partage d'un lien pendant la session). Preuves : 3 assertions JS dédiées (73/73), 366 Pest Tools, navigateur réel (étape 2 → `#etape-2`, retour étape 1 → hash retiré).
 
 ## [1.154.4] - 2026-08-09
 
 ### Ajouté
-- **Constructeur de prompts : avis à la création d'un espace dont le texte apparaît plusieurs fois** (question du 2026-08-09 : « "Mon nom" sera toujours remplacé partout ? »). Le remplacement global (publipostage) est le comportement voulu et conservé ; l'outil affiche désormais un toast informatif au moment de créer l'espace : « Ce texte apparaît N fois : chaque endroit sera remplacé par ta réponse. » - information, jamais un blocage. Réutilise le comptage borné existant (`_countBoundedOccurrences`). Preuves : capture navigateur du toast (2 occurrences), 70/70 tests JS espaces, 366 Pest Tools, TranslationTest 28/28.
+- **Constructeur de prompts : avis à la création d'un espace dont le texte apparaît plusieurs fois** (question du 2026-08-09 : « "Mon nom" sera toujours remplacé partout ? »). Le remplacement global (publipostage) est le comportement voulu et conservé ; l'outil affiche désormais un toast informatif au moment de créer l'espace : « Ce texte apparaît N fois : chaque endroit sera remplacé par ta réponse. » - information, jamais un blocage. Réutilise le comptage borné existant (`_countBoundedOccurrences`). Preuves : capture navigateur du toast (2 occurrences), 70/70 tests JS espaces, 366 Pest Tools, TranslationTest 28/28.
 
 ## [1.154.3] - 2026-08-09
 
 ### Corrigé
-- **Constructeur de prompts : l'aperçu « Voici ce qui sera envoyé à l'IA » ignorait les valeurs remplies des espaces** (signalement avec capture) - la tâche affichait toujours le mot de départ (« Mon nom ») même après avoir rempli l'espace (« Stéphane »), alors que le prompt copié était, lui, correct. L'aperçu résumé passe maintenant par les mêmes règles de remplacement que le prompt final (frontières de mots, priorité aux textes longs) : nouvelle méthode `_fillSpacesInText()` branchée sur les deux branches de `promptSummary`. Preuves : 3 assertions JS dédiées (70/70 vertes), 366 tests Pest du module Tools verts, capture navigateur montrant « Stéphane » dans l'aperçu.
+- **Constructeur de prompts : l'aperçu « Voici ce qui sera envoyé à l'IA » ignorait les valeurs remplies des espaces** (signalement avec capture) - la tâche affichait toujours le mot de départ (« Mon nom ») même après avoir rempli l'espace (« Stéphane »), alors que le prompt copié était, lui, correct. L'aperçu résumé passe maintenant par les mêmes règles de remplacement que le prompt final (frontières de mots, priorité aux textes longs) : nouvelle méthode `_fillSpacesInText()` branchée sur les deux branches de `promptSummary`. Preuves : 3 assertions JS dédiées (70/70 vertes), 366 tests Pest du module Tools verts, capture navigateur montrant « Stéphane » dans l'aperçu.
 
 ## [1.154.2] - 2026-08-09
 
 ### Corrigé
-- **Constructeur de prompts : le panneau « Voir le texte exact envoyé à l'IA » affichait des espaces parasites** - un grand vide avant la première phrase et des décalages entre les segments (signalement avec capture). Le prompt réel copié et envoyé à l'IA a toujours été propre (le compteur de caractères était le bon) : le panneau, qui préserve les espaces pour afficher fidèlement le texte, rendait aussi l'indentation de son propre gabarit. Le balisage interne du panneau est maintenant compact : le texte affiché est identique caractère pour caractère au prompt réel (prouvé en navigateur : 1024 = 1024 caractères).
+- **Constructeur de prompts : le panneau « Voir le texte exact envoyé à l'IA » affichait des espaces parasites** - un grand vide avant la première phrase et des décalages entre les segments (signalement avec capture). Le prompt réel copié et envoyé à l'IA a toujours été propre (le compteur de caractères était le bon) : le panneau, qui préserve les espaces pour afficher fidèlement le texte, rendait aussi l'indentation de son propre gabarit. Le balisage interne du panneau est maintenant compact : le texte affiché est identique caractère pour caractère au prompt réel (prouvé en navigateur : 1024 = 1024 caractères).
 
 ## [1.154.1] - 2026-08-09
 
@@ -6634,7 +6639,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 ## [1.154.0] - 2026-08-09
 
 ### Ajouté
-- **Constructeur de prompts : espaces à remplir rendus robustes et plus intuitifs (boucle de 5 IA en 3 rounds - la question « faut-il un identifiant caché sans accents ? » a été tranchée : non, à l'unanimité ; le vrai risque était la forme invisible des caractères, pas les accents)** :
+- **Constructeur de prompts : espaces à remplir rendus robustes et plus intuitifs (boucle de 5 IA en 3 rounds - la question « faut-il un identifiant caché sans accents ? » a été tranchée : non, à l'unanimité ; le vrai risque était la forme invisible des caractères, pas les accents)** :
   - normalisation des comparaisons - un texte collé depuis Word avec une apostrophe courbe, un espace insécable ou un accent encodé différemment est maintenant reconnu comme identique au texte tapé : les pastilles ne deviennent plus « introuvables » pour une différence invisible à l'œil (le texte tapé et le prompt copié restent intacts au caractère près - seule la comparaison est tolérante) ; les valeurs déjà mémorisées migrent sans perte (en cas de doublon entre deux formes du même texte, la forme encore présente dans la demande gagne, sinon la plus récente - rien n'est écrasé) ;
   - garde-fou à la fusion - renommer une pastille vers un texte déjà présent ailleurs dans la demande affiche une confirmation claire (« Ce texte apparaît déjà N fois - toutes les occurrences seront remplies ensemble ») au lieu de fusionner en silence ; le compte respecte les mots entiers (« client » ne compte pas « clientèle ») ;
   - avis au moment de copier - si un espace à remplir n'existe plus dans le texte (parce que la phrase a été retouchée), une ligne discrète le signale près du bouton Copier, sans rien bloquer ;
@@ -6644,7 +6649,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 ## [1.153.0] - 2026-08-07
 
 ### Ajouté
-- **Constructeur de prompts : vague 1 de bonifications (boucle de 5 IA en 3 rounds, zéro coût récurrent - tout est texte statique et mémoire locale du navigateur)** :
+- **Constructeur de prompts : vague 1 de bonifications (boucle de 5 IA en 3 rounds, zéro coût récurrent - tout est texte statique et mémoire locale du navigateur)** :
   - case « Laisser l'IA me proposer des choix avant de répondre » - le prompt demande à l'IA de présenter 3 pistes numérotées et d'attendre un choix avant de rédiger (consigne placée en fin de prompt, position documentée comme la plus fiable) ;
   - case « Répéter pour chaque élément de ma liste » - l'IA traite chaque élément de la liste collée séparément ;
   - bouton « Ouvrir dans mon IA habituelle » - la destination préférée est mémorisée localement, les autres se replient sous « Autres choix » ;
@@ -6677,38 +6682,38 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 ## [1.150.0] - 2026-08-07
 
 ### Ajouté
-- **Constructeur de prompts : « Espaces à remplir » sans aucune syntaxe** - conçu en 5 rounds de panel multi-IA (Perplexity, Codex, claude.ai, Gemini, DeepSeek) pour remplacer l'astuce `{{sujet}}` jugée trop technique. Deux gestes en français normal, zéro symbole : sélectionner un mot de sa phrase et cliquer « En faire un espace à remplir », ou insérer « information à préciser » au curseur avec le bouton « + Ajouter un espace à remplir ». Chaque espace apparaît en pastille sous le champ (« Tu pourras changer : »), se renomme en place (le mot est remplacé partout dans le texte), et se remplit dans le bloc « Remplis tes espaces » sous l'aperçu - l'aperçu se met à jour en direct, la copie et « Ouvrir dans [IA] » utilisent la valeur saisie, et un espace laissé vide garde simplement le mot de départ (le prompt reste toujours grammatical). Un mot disparu du texte devient une pastille grise « non retrouvé », jamais une corruption. Les espaces sont conservés dans les prompts sauvegardés et l'historique, et les dernières valeurs saisies sont proposées en un clic à la réutilisation. Les variables `{{...}}` existantes continuent de fonctionner.
+- **Constructeur de prompts : « Espaces à remplir » sans aucune syntaxe** - conçu en 5 rounds de panel multi-IA (Perplexity, Codex, claude.ai, Gemini, DeepSeek) pour remplacer l'astuce `{{sujet}}` jugée trop technique. Deux gestes en français normal, zéro symbole : sélectionner un mot de sa phrase et cliquer « En faire un espace à remplir », ou insérer « information à préciser » au curseur avec le bouton « + Ajouter un espace à remplir ». Chaque espace apparaît en pastille sous le champ (« Tu pourras changer : »), se renomme en place (le mot est remplacé partout dans le texte), et se remplit dans le bloc « Remplis tes espaces » sous l'aperçu - l'aperçu se met à jour en direct, la copie et « Ouvrir dans [IA] » utilisent la valeur saisie, et un espace laissé vide garde simplement le mot de départ (le prompt reste toujours grammatical). Un mot disparu du texte devient une pastille grise « non retrouvé », jamais une corruption. Les espaces sont conservés dans les prompts sauvegardés et l'historique, et les dernières valeurs saisies sont proposées en un clic à la réutilisation. Les variables `{{...}}` existantes continuent de fonctionner.
 
 ### Corrigé
-- **Constructeur de prompts : l'infobulle « ce mot n'a pas été retrouvé » ne se rendait pas** - l'apostrophe française cassait l'expression du gabarit (erreur console à chaque visite de la page) ; échappement corrigé.
+- **Constructeur de prompts : l'infobulle « ce mot n'a pas été retrouvé » ne se rendait pas** - l'apostrophe française cassait l'expression du gabarit (erreur console à chaque visite de la page) ; échappement corrigé.
 
 ## [1.149.0] - 2026-08-07
 
 ### Amélioré
-- **Constructeur de prompts : le prompt généré passe aux gabarits v2**, conçus avec un panel de 5 IA (Perplexity, Codex, claude.ai, Gemini, DeepSeek) contre les meilleures pratiques d'août 2026. Chaque choix de l'utilisateur produit maintenant un fragment plus performant : critères de réussite observables dérivés des réglages (« La réponse est réussie si... »), ancrage final qui rappelle le livrable exact (« Produis maintenant : ... »), contexte balisé comme données (""") avec consigne de signaler les conflits, rôle en une phrase utile au lieu du boilerplate, consigne d'écriture naturelle concrète (sans l'exemple négatif qui amorçait la formule interdite), héritage explicite de la 2e tâche, vérification silencieuse contre les critères. Deux verrous logiques empêchent désormais les combinaisons contradictoires : chaîne de pensée montrée ET cachée (une seule instruction fusionnée), et « pose des questions » ET « réponds maintenant » (clôture conditionnelle).
+- **Constructeur de prompts : le prompt généré passe aux gabarits v2**, conçus avec un panel de 5 IA (Perplexity, Codex, claude.ai, Gemini, DeepSeek) contre les meilleures pratiques d'août 2026. Chaque choix de l'utilisateur produit maintenant un fragment plus performant : critères de réussite observables dérivés des réglages (« La réponse est réussie si... »), ancrage final qui rappelle le livrable exact (« Produis maintenant : ... »), contexte balisé comme données (""") avec consigne de signaler les conflits, rôle en une phrase utile au lieu du boilerplate, consigne d'écriture naturelle concrète (sans l'exemple négatif qui amorçait la formule interdite), héritage explicite de la 2e tâche, vérification silencieuse contre les critères. Deux verrous logiques empêchent désormais les combinaisons contradictoires : chaîne de pensée montrée ET cachée (une seule instruction fusionnée), et « pose des questions » ET « réponds maintenant » (clôture conditionnelle).
 - **Aides des variables {{sujet}} réécrites avec un exemple concret** (courriel aux parents dont seul le sujet change à chaque réutilisation) - la formule abstraite « espace à remplir plus tard » n'était pas comprise ; traductions anglaises ajoutées (elles manquaient).
 
 ## [1.148.3] - 2026-08-07
 
 ### Corrigé
-- **Constructeur de prompts : l'aide du champ « rôle » (persona) ne surpromet plus** - vérification par un panel de 5 IA (Perplexity, Codex, claude.ai, Gemini, DeepSeek), verdict unanime appuyé sur les recherches 2024-2026 (EMNLP 2024, Wharton 2025) : donner un rôle à l'IA oriente le ton, le style et le vocabulaire, mais n'améliore ni l'expertise ni l'exactitude des faits. L'ancien texte (« donnera des réponses plus stratégiques ») laissait croire le contraire ; le nouveau le dit clairement et conseille de miser sur le contexte et des consignes précises pour la justesse. Français et anglais alignés.
+- **Constructeur de prompts : l'aide du champ « rôle » (persona) ne surpromet plus** - vérification par un panel de 5 IA (Perplexity, Codex, claude.ai, Gemini, DeepSeek), verdict unanime appuyé sur les recherches 2024-2026 (EMNLP 2024, Wharton 2025) : donner un rôle à l'IA oriente le ton, le style et le vocabulaire, mais n'améliore ni l'expertise ni l'exactitude des faits. L'ancien texte (« donnera des réponses plus stratégiques ») laissait croire le contraire ; le nouveau le dit clairement et conseille de miser sur le contexte et des consignes précises pour la justesse. Français et anglais alignés.
 
 ## [1.148.2] - 2026-08-07
 
 ### Corrigé
-- **Constructeur de prompts : le « ? » des boutons d'aide est enfin optiquement centré** - deux causes mesurées : la taille du texte du composant était écrasée par un style du thème (glyphe rendu trop petit), et le « ? » de la police DM Sans, sans jambage, se perchait dans le haut de sa boîte de ligne. Taille passée en style direct et correction optique proportionnelle ; centrage vérifié au pixel (écart nul sur les deux axes).
+- **Constructeur de prompts : le « ? » des boutons d'aide est enfin optiquement centré** - deux causes mesurées : la taille du texte du composant était écrasée par un style du thème (glyphe rendu trop petit), et le « ? » de la police DM Sans, sans jambage, se perchait dans le haut de sa boîte de ligne. Taille passée en style direct et correction optique proportionnelle ; centrage vérifié au pixel (écart nul sur les deux axes).
 
 ## [1.148.1] - 2026-08-07
 
 ### Corrigé
-- **Constructeur de prompts : erreurs console au chargement** - l'objet Alpine `showHelp` était déclaré vide alors que la vue référence trois clés (persona, contexte additionnel, cadre strict), ce qui levait trois TypeError à chaque visite (deux préexistants, un introduit par le champ contexte) ; les clés sont désormais initialisées.
+- **Constructeur de prompts : erreurs console au chargement** - l'objet Alpine `showHelp` était déclaré vide alors que la vue référence trois clés (persona, contexte additionnel, cadre strict), ce qui levait trois TypeError à chaque visite (deux préexistants, un introduit par le champ contexte) ; les clés sont désormais initialisées.
 
 ## [1.148.0] - 2026-08-07
 
 ### Ajouté
-- **Constructeur de prompts : champ « Contexte additionnel »** - un espace facultatif pour donner à l'IA les informations de fond (ce qui a déjà été essayé, contraintes, contexte du projet), distinct de la tâche, intégré au prompt final, aux sauvegardes, au permalien et au remix.
-- **Constructeur de prompts : variables réutilisables** - écrire `{{sujet}}` dans un champ crée automatiquement une zone « Remplis tes variables » sous l'aperçu ; la copie et « Ouvrir dans [IA] » utilisent le texte complété, et les prompts sauvegardés conservent leurs variables pour réutilisation.
-- **Constructeur de prompts : historique local pour les visiteurs non connectés** - les 10 derniers prompts générés sont conservés uniquement dans le navigateur (jamais envoyés au serveur), rechargeables et effaçables en un clic.
+- **Constructeur de prompts : champ « Contexte additionnel »** - un espace facultatif pour donner à l'IA les informations de fond (ce qui a déjà été essayé, contraintes, contexte du projet), distinct de la tâche, intégré au prompt final, aux sauvegardes, au permalien et au remix.
+- **Constructeur de prompts : variables réutilisables** - écrire `{{sujet}}` dans un champ crée automatiquement une zone « Remplis tes variables » sous l'aperçu ; la copie et « Ouvrir dans [IA] » utilisent le texte complété, et les prompts sauvegardés conservent leurs variables pour réutilisation.
+- **Constructeur de prompts : historique local pour les visiteurs non connectés** - les 10 derniers prompts générés sont conservés uniquement dans le navigateur (jamais envoyés au serveur), rechargeables et effaçables en un clic.
 - **Rétention des prompts supprimés** - les prompts mis à la corbeille par leur propriétaire sont désormais définitivement effacés après 30 jours (réglable dans l'écran admin « Rétention des données », mentionné dans la politique de confidentialité). Auparavant, la suppression laissait la donnée en base indéfiniment.
 
 ### Corrigé
@@ -6774,7 +6779,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 
 ### Ajouté
 
-- **Constructeur de prompts : format de sortie multi-sélection avec garde-fous (#1618).** Cartes à
+- **Constructeur de prompts : format de sortie multi-sélection avec garde-fous (#1618).** Cartes à
   cocher (même pattern que l'audience), maximum 3 formats, JSON et Mermaid utilisables seuls (raison
   affichée), prompt composé intelligemment (« Structure principale : X. En complément, intègre : Y » ;
   livrables multiples produits en sections numérotées). Migration transparente des prompts déjà
@@ -6800,7 +6805,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 
 ### Corrigé
 
-- **Constructeur de prompts : les Vérifications ne reprochent plus des étapes pas encore atteintes
+- **Constructeur de prompts : les Vérifications ne reprochent plus des étapes pas encore atteintes
   (#1616).** Le panneau signalait l'audience (étape 3) et le format/contraintes (étape 4) dès
   l'étape 2 - un premier utilisateur croyait avoir mal fait. Chaque suggestion n'apparaît plus
   qu'à partir de l'étape de son champ ; le panneau reste masqué tant qu'il n'a rien d'utile à dire,
@@ -6815,7 +6820,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 
 ### Corrigé
 
-- **Constructeur de prompts : le panneau « Vérifications » parlait en jargon (#1615).** Signalement
+- **Constructeur de prompts : le panneau « Vérifications » parlait en jargon (#1615).** Signalement
   utilisateur : « Aucun contexte ni audience précisé(e) pour qui recevra la réponse. Compléter »
   était incompréhensible. Les 3 messages de diagnostic, le sous-titre et le bouton sont réécrits en
   langage néophyte, orienté action avec exemples concrets (« Tu n'as pas indiqué à qui s'adresse la
@@ -6860,7 +6865,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 
 ### Ajouté
 
-- **Constructeur de prompts : 6 correctifs du document de rétroaction « Modifications à faire - 001 » (#1594-#1599).**
+- **Constructeur de prompts : 6 correctifs du document de rétroaction « Modifications à faire - 001 » (#1594-#1599).**
   Évolution incrémentale du wizard 4 étapes (jamais de refonte structurelle), prouvée par Playwright
   (contraste stepper 8,2:1 AAA, cibles 44 px) et 63 tests / 284 assertions :
   1. Espacement des boutons de navigation d'étapes (`.ct-step-nav`).
@@ -6882,7 +6887,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 
 ### Corrigé
 
-- **Constructeur de prompts : 5 correctifs issus d'un audit UX/qualité dédié (#1590/#1591).**
+- **Constructeur de prompts : 5 correctifs issus d'un audit UX/qualité dédié (#1590/#1591).**
   Vérifiés un à un par Playwright après le fix :
   1. Message d'erreur d'étape 1/2 figé - l'alerte de validation ne se cachait qu'au prochain clic
      sur « Suivant », jamais quand le champ redevenait valide entre-temps (ex. sélection d'un
@@ -6907,7 +6912,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 
 ### Corrigé
 
-- **Constructeur de prompts : aide périmée.** La modale « Comment créer un bon prompt » et
+- **Constructeur de prompts : aide périmée.** La modale « Comment créer un bon prompt » et
   l'indice de validité du formulaire référençaient encore une « carte de démarrage » et un bouton
   « Affiner » retirés lors de refontes antérieures (les réglages rôle de l'IA/verbe/format/
   contraintes sont désormais des blocs toujours visibles, pas un panneau replié derrière un
@@ -6919,7 +6924,7 @@ Les deux correctifs passent au ROUGE si on les retire, vérifié en les retirant
 
 ### Ajouté
 
-- **Constructeur de prompts : permalien public + bouton « Remixer » (Phase 1 du plan de croissance/popularité).**
+- **Constructeur de prompts : permalien public + bouton « Remixer » (Phase 1 du plan de croissance/popularité).**
   Nouveau plan approuvé après un club des sages relancé (4/5 oracles - Perplexity, Codex,
   DeepSeek, claude.ai ; Gemini indisponible ce round, quota `agy` épuisé + session navigateur
   déconnectée, signalé explicitement plutôt que de prétendre à l'unanimité). Nouvelle route
@@ -6974,7 +6979,7 @@ son propre cycle veille→club des sages avant implémentation - pas de gros-ban
 
 ### Ajouté
 
-- **Constructeur de prompts : bouton « Inverser l'ordre » pour la séquence à deux tâches.** Suite
+- **Constructeur de prompts : bouton « Inverser l'ordre » pour la séquence à deux tâches.** Suite
   d'un round 2 de consultation du club des sages (5 IA - unanimité) sur des pills réordonnables par
   glisser-déposer : rejetées pour non-conformité WCAG AAA (2.1.1 Clavier + 2.5.7 Mouvements de
   glissement, aucun équivalent clavier/pointeur simple sans reconstruire tout le pattern). La
@@ -7003,7 +7008,7 @@ résidu visuel).
 
 ### Ajouté
 
-- **Constructeur de prompts : option « deuxième tâche » bornée à 2, en séquence explicite.**
+- **Constructeur de prompts : option « deuxième tâche » bornée à 2, en séquence explicite.**
   Remplace un multi-select libre écarté après consultation du club des sages (5 IA - Perplexity,
   Codex, DeepSeek, Gemini, claude.ai - unanimité). Sur l'étape Tâche, un lien discret « + Ajouter
   une deuxième tâche (optionnel) » révèle un second menu déroulant verbe. Le prompt généré exprime
@@ -7037,7 +7042,7 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 ### Retiré
 
-- **Constructeur de prompts : panneau d'anonymisation intégré retiré, sur demande explicite de
+- **Constructeur de prompts : panneau d'anonymisation intégré retiré, sur demande explicite de
   l'utilisateur.** Le bouton « Masquer mes informations personnelles » et l'éditeur riche embarqué
   (`<x-tools::anonymizer-editor>`) sont retirés de `constructeur-prompts.blade.php` : les deux
   outils doivent rester séparés, l'anonymisation ne vivant plus QUE dans l'outil dédié
@@ -7059,7 +7064,7 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 ### Corrigé
 
-- **Constructeur de prompts : le vrai menu déroulant restauré pour le rôle/persona et 6 autres
+- **Constructeur de prompts : le vrai menu déroulant restauré pour le rôle/persona et 6 autres
   champs.** Le 1.139.20 restait un malentendu : le wizard 4 étapes « fidèle à mi-juin » utilisait
   des cartes cliquables pour le rôle, jamais le vrai `<select>` HTML décrit explicitement par
   l'utilisateur (« menu déroulant pour le persona ou personnalisé... on pouvait aussi changer les
@@ -7077,7 +7082,7 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 ### Modifié
 
-- **Constructeur de prompts : 2e retour à l'assistant 4 étapes (Persona/Tâche/Audience/Options),
+- **Constructeur de prompts : 2e retour à l'assistant 4 étapes (Persona/Tâche/Audience/Options),
   sur confirmation explicite via question posée directement à l'utilisateur.** L'assistant 4
   étapes (v1.139.16) avait déjà été essayé puis reverté le 2026-08-03 (v1.139.17, retour au
   formulaire 3 écrans). Avant de relancer ce cycle, l'historique complet a été présenté à
@@ -7106,7 +7111,7 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 - **6 bugs trouvés durant la vague GUEST de la simulation E2E complète du site.** Décido : copie
   marketing trompeuse « sans compte requis » corrigée (voter est bien sans compte, mais créer un
-  sondage exige un compte gratuit). Constructeur de prompts : point final double dans le prompt
+  sondage exige un compte gratuit). Constructeur de prompts : point final double dans le prompt
   généré corrigé (le verbe est déjà à l'impératif) ; accord fautif type « Elle va rédige »
   corrigé en renommant la clé i18n vers un libellé qui n'exige plus de conjuguer le verbe choisi
   par l'utilisateur. Oscilloscope RLC : la sidebar de partage fixe chevauchait le panneau gauche
@@ -7119,7 +7124,7 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 ### Modifié
 
-- **Constructeur de prompts : retour au formulaire à 3 écrans, sur nouvelle demande explicite de
+- **Constructeur de prompts : retour au formulaire à 3 écrans, sur nouvelle demande explicite de
   l'utilisateur.** L'assistant 4 étapes fidèle à mi-juin (livré au 1.139.16) n'était finalement
   pas non plus la version recherchée. Revert propre du commit du 1.139.16 - aucun autre commit
   n'avait touché ces fichiers entretemps, donc aucun conflit et aucune perte du travail de
@@ -7130,7 +7135,7 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 ### Corrigé
 
-- **Constructeur de prompts : retour à l'assistant 4 étapes (Persona/Tâche/Audience/Options),
+- **Constructeur de prompts : retour à l'assistant 4 étapes (Persona/Tâche/Audience/Options),
   fidèle à la version de mi-juin, sur demande explicite de l'utilisateur.** Le formulaire à 3
   écrans restauré au 1.139.14/15 n'était toujours pas ce qui était attendu - l'utilisateur voulait
   retrouver précisément l'assistant avec le sélecteur de technique de prompting (zero-shot,
@@ -7148,7 +7153,7 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 ### Corrigé
 
-- **Constructeur de prompts : le formulaire restauré (v1.139.14) était invisible pour tout
+- **Constructeur de prompts : le formulaire restauré (v1.139.14) était invisible pour tout
   visiteur non-superadmin.** Le drapeau « en révision » activé pendant la refonte cassée était
   resté actif en base après le retour à la version stable - un vrai visiteur recevait encore la
   page « fait peau neuve » au lieu du formulaire à 3 écrans. Drapeau levé, cache applicatif vidé,
@@ -7159,7 +7164,7 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 ### Modifié
 
-- **Constructeur de prompts : retour au formulaire à 3 écrans, sur demande explicite de
+- **Constructeur de prompts : retour au formulaire à 3 écrans, sur demande explicite de
   l'utilisateur.** La réécriture en cartes visuelles + phrase à trous (livrée hier) s'est révélée
   plus difficile à utiliser en pratique que l'ancien formulaire. L'outil revient à sa version
   précédente : écran 1 (objectif en texte libre), écran 2 (réglages en blocs dépliés), écran 3
@@ -7169,11 +7174,11 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 ### Corrigé
 
-- **Constructeur de prompts : triple anneau de focus sur les champs Sujet/Ton/Longueur/Destiné à.**
+- **Constructeur de prompts : triple anneau de focus sur les champs Sujet/Ton/Longueur/Destiné à.**
   Trouvé en simulant réellement un usage humain sur le site : le correctif précédent (v1.139.12)
   avait bien réglé le problème global du site, mais un style propre à cet outil rajoutait encore
   son propre anneau par-dessus - trois contours superposés au lieu d'un. Un seul contour maintenant.
-- **Constructeur de prompts : le bouton "Ouvrir dans ChatGPT/Claude/Gemini/Perplexity" ne
+- **Constructeur de prompts : le bouton "Ouvrir dans ChatGPT/Claude/Gemini/Perplexity" ne
   fonctionnait jamais réellement.** À chaque clic, un message trompeur "la fenêtre a été bloquée"
   s'affichait et un onglet vide restait ouvert, alors que rien n'avait vraiment été bloqué - un
   détail technique de l'appel d'ouverture de fenêtre empêchait systématiquement la navigation
@@ -7183,7 +7188,7 @@ déroulants natifs et les cartes Audience (multi-sélection) restent visuellemen
 
 ### Corrigé
 
-- **Constructeur de prompts : la barre de défilement horizontale des 9 cartes n'avait jamais
+- **Constructeur de prompts : la barre de défilement horizontale des 9 cartes n'avait jamais
   vraiment disparu.** Les correctifs précédents (v1.139.8/1.139.9) n'avaient retouché que
   l'apparence de la rangée défilante, sans jamais la retirer - une fois une carte choisie, le
   fieldset des 9 cartes se transforme maintenant en une seule pastille (comme prévu à l'origine),
