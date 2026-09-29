@@ -389,15 +389,20 @@
                      formulaire (verdict de 2 oracles, familles différentes : barre collante plutôt que
                      duplication haut+bas, qui créerait deux « Suivant » redondants pour les lecteurs
                      d'écran). Reste toujours atteignable sans défiler jusqu'au bas de l'étape.
-                     Après le formulaire dans le DOM ; scroll-padding-bottom sur #sig-wizard-steps
-                     (signature.css) empêche la barre de recouvrir le champ actif ni ses erreurs
-                     (WCAG 2.4.11) ; cibles ≥ 44 px ; env(safe-area-inset-bottom) sur mobile. --}}
-                <div class="sig-wizard-nav" role="group" aria-label="{{ __('Navigation entre les étapes') }}">
-                    <div class="sig-wizard-nav__side sig-wizard-nav__side--start">
+                     Après le formulaire dans le DOM ; scroll-padding-bottom (global, voir le fichier
+                     partagé ci-dessous) empêche la barre de recouvrir le champ actif ni ses erreurs
+                     (WCAG 2.4.11) ; cibles ≥ 44 px ; env(safe-area-inset-bottom) sur mobile.
+                     Mécanique COMMUNE avec le constructeur de prompts, factorisée le 2026-09-29
+                     (#2843) dans public/assets/tools/shared/sticky-wizard-nav.css : cette page cumule
+                     .tool-wizard-nav (conteneur collant) ET .tool-wizard-nav__row (rangée flex) sur le
+                     MÊME <div>, n'ayant rien d'autre à loger dans la boîte collante - .sig-wizard-nav
+                     ne reste qu'un accroche-marge locale (signature.css). --}}
+                <div class="tool-wizard-nav tool-wizard-nav__row sig-wizard-nav" role="group" aria-label="{{ __('Navigation entre les étapes') }}">
+                    <div class="tool-wizard-nav__side tool-wizard-nav__side--start">
                         <button type="button" class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1">← {{ __('Précédent') }}</button>
                     </div>
-                    <span class="sig-wizard-nav__status">{{ __('Étape') }} <span x-text="step"></span> {{ __('sur') }} 5</span>
-                    <div class="sig-wizard-nav__side sig-wizard-nav__side--end">
+                    <span class="tool-wizard-nav__status">{{ __('Étape') }} <span x-text="step"></span> {{ __('sur') }} 5</span>
+                    <div class="tool-wizard-nav__side tool-wizard-nav__side--end">
                         <button type="button" class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 5">{{ __('Suivant') }} →</button>
                     </div>
                 </div>

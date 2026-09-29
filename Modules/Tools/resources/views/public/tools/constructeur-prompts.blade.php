@@ -279,19 +279,17 @@
                         {{-- Barre de navigation COLLANTE en bas (2026-09-26, même patron que l'outil de
                              signature, demande du fondateur) : .ct-step-nav est un enfant direct de
                              #cpWizard (haut), donc bottom:0 la garde ancrée en bas de l'écran pendant
-                             tout le défilement du wizard. Le correctif .page-wrapper (overflow:hidden du
-                             thème neutralise position:sticky) est OBLIGATOIRE ici comme pour la signature,
-                             sinon la barre ne suit pas. Cibles 44 px, env(safe-area-inset-bottom) mobile,
-                             scroll-padding-bottom pour ne pas recouvrir le champ actif (WCAG 2.4.11). --}}
-                        .ct-step-nav{position:sticky;bottom:0;z-index:1010;margin-top:1.5rem;padding:10px 4px calc(10px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--sys-border-default,#D1D5DB);}
-                        .cp-wizard-nav__row{display:flex;align-items:center;gap:8px;}
-                        .cp-wizard-nav__side{flex:1 1 0;display:flex;}
-                        .cp-wizard-nav__side--start{justify-content:flex-start;}
-                        .cp-wizard-nav__side--end{justify-content:flex-end;}
-                        .cp-wizard-nav__status{flex:0 0 auto;text-align:center;font-size:14px;font-weight:600;color:var(--c-text-secondary,#4B5563);white-space:nowrap;}
-                        .cp-wizard-nav__row .ct-btn{min-height:44px;}
-                        body .page-wrapper{overflow-x:clip;overflow-y:visible;}
-                        html{scroll-padding-bottom:96px;}
+                             tout le défilement du wizard. Mécanique COMMUNE (position sticky, fond,
+                             bordure, rangée flex, cibles 44px, correctif .page-wrapper/scroll-padding)
+                             FACTORISÉE le 2026-09-29 (#2843) dans
+                             public/assets/tools/shared/sticky-wizard-nav.css (.tool-wizard-nav /
+                             .tool-wizard-nav__row, chargée via @push('head') plus bas) - jamais
+                             dupliquée ici. .ct-step-nav ne reste qu'un accroche-marge locale, car cette
+                             page (contrairement à la signature) doit aussi loger 2 alertes de validation
+                             DANS la boîte collante, au-dessus de la rangée de boutons : la boîte
+                             collante (.tool-wizard-nav) et la rangée flex (.tool-wizard-nav__row) ne
+                             peuvent donc pas être le même élément ici. --}}
+                        .ct-step-nav{margin-top:1.5rem;}
 
                         {{-- #2 + #4 stepper visuel 2026 : cercles numérotés + connecteur + coche de
                              complétion. Conserve exactement role="tablist"/role="tab" (test
@@ -1115,20 +1113,24 @@
 
                         {{-- Navigation du wizard 4 étapes (restauré 2026-08-03). Correctif #1
                              (2026-08-05) : .ct-step-nav ajoute l'espacement vertical manquant entre le
-                             dernier champ de l'étape active et cette zone (0px mesuré avant fix). --}}
-                        <div class="ct-step-nav">
+                             dernier champ de l'étape active et cette zone (0px mesuré avant fix).
+                             .tool-wizard-nav (boîte collante, partagée avec la signature - voir plus
+                             haut) enveloppe aussi les 2 alertes ci-dessous, pour qu'elles restent
+                             visibles DANS la boîte blanche opaque plutôt que sous le contenu qui
+                             défile. --}}
+                        <div class="ct-step-nav tool-wizard-nav" role="group" aria-label="{{ __('Navigation entre les étapes') }}">
                         <div x-show="showValidation && step === 1 && !personaText" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
                             {{ __('Choisissez un rôle (ou saisissez-en un personnalisé) avant de continuer.') }}
                         </div>
                         <div x-show="showValidation && step === 2 && (!(verbType === 'custom' ? verbCustom : verb) || !taskObject)" x-transition class="alert alert-danger small p-2 mb-2" style="font-size: 0.85rem;" role="alert" aria-live="assertive">
                             {{ __('Le verbe d\'action et la description de votre demande sont requis avant de continuer.') }}
                         </div>
-                        <div class="cp-wizard-nav__row">
-                            <div class="cp-wizard-nav__side cp-wizard-nav__side--start">
+                        <div class="tool-wizard-nav__row">
+                            <div class="tool-wizard-nav__side tool-wizard-nav__side--start">
                                 <button class="ct-btn ct-btn-outline" @click="prevStep()" x-show="step > 1" style="min-height:44px;">← {{ __('Précédent') }}</button>
                             </div>
-                            <span class="cp-wizard-nav__status">{{ __('Étape') }} <span x-text="step"></span> {{ __('sur') }} 4</span>
-                            <div class="cp-wizard-nav__side cp-wizard-nav__side--end">
+                            <span class="tool-wizard-nav__status">{{ __('Étape') }} <span x-text="step"></span> {{ __('sur') }} 4</span>
+                            <div class="tool-wizard-nav__side tool-wizard-nav__side--end">
                                 <button class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 4" style="min-height:44px;">{{ __('Suivant') }} →</button>
                             </div>
                         </div>
@@ -1812,6 +1814,9 @@ window.addEventListener('load', function () {
 @endsection
 
 @push('head')
+{{-- Barre de navigation collante, mécanique partagée avec l'outil de signature (#2843, 2026-09-29)
+     - voir public/assets/tools/shared/sticky-wizard-nav.css. --}}
+<link rel="stylesheet" href="{{ asset('assets/tools/shared/sticky-wizard-nav.css') }}?v={{ config('version.semver') }}">
 {{-- 2026-05-27 #310 : Schema.org SoftwareApplication pour AEO/GEO. Outil top page 403 PV /30j. --}}
 @php
     $_swApp = [

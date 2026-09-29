@@ -135,30 +135,13 @@
 
 /* LOT 7 (2026-09-26) - barre de navigation COLLANTE en bas de la colonne du formulaire (verdict de
    2 oracles : barre collante plutot que duplication haut+bas). Toujours atteignable sans defiler
-   jusqu'au bas de l'etape. Fond opaque (masque le contenu qui defile dessous), cibles >= 44 px,
-   env(safe-area-inset-bottom) pour ne pas etre coupee par la barre systeme sur mobile. */
-.sig-wizard-nav { position: sticky; bottom: 0; z-index: 1010; display: flex; align-items: center; gap: 8px; margin-top: 24px; padding: 10px 4px calc(10px + env(safe-area-inset-bottom, 0px)); background: #ffffff; border-top: 1px solid var(--sys-border-default, #d1d5db); }
-.sig-wizard-nav__side { flex: 1 1 0; display: flex; }
-.sig-wizard-nav__side--start { justify-content: flex-start; }
-.sig-wizard-nav__side--end { justify-content: flex-end; }
-.sig-wizard-nav__status { flex: 0 0 auto; text-align: center; font-size: 14px; font-weight: 600; color: var(--c-text-secondary, #4b5563); white-space: nowrap; }
-.sig-wizard-nav .ct-btn { min-height: 44px; }
-
-/* La barre collante ne doit jamais recouvrir le champ actif quand le navigateur le fait defiler a
-   l'ecran (WCAG 2.4.11) : on reserve sa hauteur au bas du conteneur de defilement. signature.css
-   n'est charge que sur les 2 pages de l'editeur, donc cette regle sur html n'a aucun effet ailleurs. */
-html { scroll-padding-bottom: 96px; }
+   jusqu'au bas de l'etape. Mecanique COMMUNE (position sticky, fond, bordure, rangee flex, cibles
+   44px, zone sure mobile, page-wrapper, scroll-padding) FACTORISEE le 2026-09-29 (#2843) dans
+   public/assets/tools/shared/sticky-wizard-nav.css (.tool-wizard-nav / .tool-wizard-nav__row),
+   chargee par assistant.blade.php et manage.blade.php - jamais dupliquee ici. Cette page cumule
+   les classes .tool-wizard-nav.tool-wizard-nav__row sur le MEME <div> (elle n'a rien d'autre a
+   loger dans la boite collante), .sig-wizard-nav ne restant qu'un accroche-marge locale : */
+.sig-wizard-nav { margin-top: 24px; }
 
 /* Modale de confirmation « Remise a zero » (meme fond que sig-modal-overlay, boite compacte). */
 .sig-reset-modal { background: #fff; border-radius: var(--r-base, 0.75rem); max-width: 480px; width: 96%; padding: 20px; box-shadow: 0 1rem 3rem rgba(0,0,0,.2); }
-
-/* LOT 8 (2026-09-26) - l'apercu en direct ne SUIVAIT PAS au defilement : mesure du 2026-09-26,
-   l'apercu quittait le viewport (top -697 px a 1400 px de defilement) au lieu de rester colle.
-   CAUSE RACINE : l'ancetre .page-wrapper du theme porte overflow:hidden, ce qui en fait un
-   conteneur de defilement inerte et NEUTRALISE tout position:sticky descendant. La charte a deja
-   fait ce choix pour body (overflow-x:clip, "ne casse pas position:sticky"), mais pas pour
-   .page-wrapper. On le corrige ICI, scope aux 2 pages de l'editeur (signature.css n'est chargee
-   que la) : overflow-x:clip garde l'anti-defilement horizontal voulu, overflow-y:visible rend le
-   sticky de l'apercu operant. Selecteur "body .page-wrapper" pour l'emporter a coup sur sur la
-   regle .page-wrapper du theme, quel que soit l'ordre de chargement. */
-body .page-wrapper { overflow-x: clip; overflow-y: visible; }

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.305.4] - 2026-09-29
+
+### Corrigé
+- **Duplication de la barre de navigation collante entre l'outil de signatures et le constructeur de prompts (#2843).** La barre livrée en v1.305.3 pour le constructeur reproduisait, sous des noms de classes différents, exactement la même mécanique CSS que celle de l'outil de signatures (v1.305.0/.1) - preuve que les deux copies évoluaient déjà ensemble (le même correctif `.page-wrapper` avait dû être appliqué séparément aux deux). Factorisée dans un fichier unique partagé, `public/assets/tools/shared/sticky-wizard-nav.css` (classes `.tool-wizard-nav` / `.tool-wizard-nav__row`), chargé par les deux outils - aucune duplication de code restante. Comportement visuel et fonctionnel identique sur les deux pages (vérifié par la suite de tests des deux modules); ajout au passage d'une région `role="group"` avec libellé sur la barre du constructeur, cohérente avec celle de la signature (amélioration d'accessibilité mineure, aucune capacité nouvelle).
+
 ## [1.305.3] - 2026-09-28
 
 ### Corrigé

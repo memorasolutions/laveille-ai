@@ -1,0 +1,49 @@
+/* Author: MEMORA solutions, https://memora.solutions ; info@memora.ca */
+
+/* Barre de navigation « Précédent/Suivant » COLLANTE en bas de la colonne du formulaire, PARTAGÉE
+   par tous les outils en plusieurs étapes du site (#2843, 2026-09-29). Extraite de deux copies
+   quasi identiques : signature.css (LOT 7/8, 2026-09-26) et le <style> propre à
+   constructeur-prompts.blade.php (v1.305.3, 2026-09-28). Les deux avaient déjà reçu EXACTEMENT
+   le même correctif overflow/page-wrapper séparément - preuve qu'elles évoluent ensemble, donc le
+   seuil DRY du projet est atteint dès la 2e occurrence (règle du fondateur : copier-coller ce
+   bloc est interdit).
+
+   Toujours atteignable sans défiler jusqu'au bas de l'étape ; cibles tactiles >= 44 px ;
+   env(safe-area-inset-bottom) pour ne pas être coupée par la barre système sur mobile ;
+   scroll-padding-bottom pour ne jamais recouvrir le champ actif (WCAG 2.4.11).
+
+   Composition volontairement en 2 classes plutôt qu'une seule, pour s'adapter aux deux
+   structures de marquage existantes SANS toucher leur DOM :
+   - .tool-wizard-nav       = le conteneur collant (position, fond, bordure, zone sûre mobile).
+     Signature l'applique SEUL sur son unique <div> (qui est à la fois le conteneur collant ET
+     la rangée de boutons - rien d'autre à y loger).
+     Constructeur de prompts l'applique sur son <div class="ct-step-nav"> EXTÉRIEUR, qui enveloppe
+     aussi ses 2 alertes de validation par étape - elles doivent rester DANS la boîte blanche
+     collante, mais AU-DESSUS de la rangée de boutons, jamais à côté (voir .tool-wizard-nav__row).
+   - .tool-wizard-nav__row  = la rangée flex (Précédent / statut / Suivant) proprement dite.
+     Signature cumule les deux classes sur le même élément (class="tool-wizard-nav
+     tool-wizard-nav__row") ; Constructeur de prompts l'utilise sur un <div> imbriqué DANS
+     .ct-step-nav, après ses alertes. */
+.tool-wizard-nav { position: sticky; bottom: 0; z-index: 1010; padding: 10px 4px calc(10px + env(safe-area-inset-bottom, 0px)); background: #ffffff; border-top: 1px solid var(--sys-border-default, #d1d5db); }
+.tool-wizard-nav__row { display: flex; align-items: center; gap: 8px; }
+.tool-wizard-nav__side { flex: 1 1 0; display: flex; }
+.tool-wizard-nav__side--start { justify-content: flex-start; }
+.tool-wizard-nav__side--end { justify-content: flex-end; }
+.tool-wizard-nav__status { flex: 0 0 auto; text-align: center; font-size: 14px; font-weight: 600; color: var(--c-text-secondary, #4b5563); white-space: nowrap; }
+.tool-wizard-nav .ct-btn { min-height: 44px; }
+
+/* La barre collante ne doit jamais recouvrir le champ actif quand le navigateur le fait défiler à
+   l'écran (WCAG 2.4.11) : on réserve sa hauteur au bas du conteneur de défilement. Ce fichier
+   n'est chargé que sur les pages qui embarquent un assistant à navigation collante, donc cette
+   règle globale sur html n'a aucun effet ailleurs sur le site. */
+html { scroll-padding-bottom: 96px; }
+
+/* CAUSE RACINE (mesurée le 2026-09-26 sur l'outil de signature, reproduite à l'identique le
+   2026-09-28 sur le constructeur de prompts avant ce correctif partagé) : l'ancêtre .page-wrapper
+   du thème porte overflow:hidden, ce qui en fait un conteneur de défilement inerte et NEUTRALISE
+   tout position:sticky descendant. La charte avait déjà fait ce choix pour body (overflow-x:clip,
+   « ne casse pas position:sticky »), mais pas pour .page-wrapper. Corrigé ici, scopé aux pages qui
+   chargent ce fichier : overflow-x:clip conserve l'anti-défilement horizontal voulu,
+   overflow-y:visible rend le sticky opérant. Sélecteur "body .page-wrapper" pour l'emporter à
+   coup sûr sur la règle .page-wrapper du thème, quel que soit l'ordre de chargement. */
+body .page-wrapper { overflow-x: clip; overflow-y: visible; }

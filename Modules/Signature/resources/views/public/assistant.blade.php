@@ -9,6 +9,9 @@
 @endsection
 
 @push('head')
+{{-- Barre de navigation collante, mécanique partagée avec le constructeur de prompts (#2843,
+     2026-09-29) - voir public/assets/tools/shared/sticky-wizard-nav.css. --}}
+<link rel="stylesheet" href="{{ asset('assets/tools/shared/sticky-wizard-nav.css') }}?v={{ config('version.semver') }}">
 <link rel="stylesheet" href="{{ asset('assets/tools/signature-courriel/signature.css') }}?v={{ config('version.semver') }}">
 <link rel="canonical" href="{{ url('/outils/signature-courriel') }}">
 @php
