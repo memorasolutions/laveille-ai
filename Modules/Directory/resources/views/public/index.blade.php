@@ -431,6 +431,11 @@
         const f = this.listSortField, d = this.listSortDir === 'asc' ? 1 : -1;
         const t = [...this.filteredTools];
         t.sort((a, b) => {
+            // Emplacement sponsorisé (en vedette) TOUJOURS en tête, comme en mode carte. C'est
+            // une place vendue, elle reste première quel que soit le tri de colonne choisi.
+            const fa = (a.isFeatured && !a.isLifecycleDown) ? 0 : 1;
+            const fb = (b.isFeatured && !b.isLifecycleDown) ? 0 : 1;
+            if (fa !== fb) return fa - fb;
             let va = a[f], vb = b[f];
             if (f === 'name' || f === 'pricingLabel' || f === 'lifecycleLabel') { va = (va || '').toString().toLowerCase(); vb = (vb || '').toString().toLowerCase(); }
             if (va < vb) return -1 * d;
@@ -1266,7 +1271,8 @@
                             </td>
                             <td style="padding:8px 12px;font-weight:600;">
                                 <a :href="tool.showUrl" x-text="tool.name" style="color:var(--c-primary, #064E5A);text-decoration:none;"></a>
-                                <template x-if="tool.isFeatured"><span style="margin-left:6px;font-size:0.7rem;background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:4px;">★</span></template>
+                                {{-- Marqueur « Sponsorisé » (parité avec le mode carte) pour la place vendue, mêmes couleurs AAA. --}}
+                                <template x-if="tool.isFeatured && !tool.isLifecycleDown"><span style="margin-left:6px;font-size:0.68rem;font-weight:500;background:#F1F5F9;color:#334155;padding:1px 7px;border-radius:4px;">{{ __('Sponsorisé') }}</span></template>
                             </td>
                             <td style="padding:8px 12px;color:var(--c-text-muted, #52586a);max-width:380px;">
                                 <span x-text="tool.shortDesc" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"></span>

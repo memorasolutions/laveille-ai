@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.312.0] - 2026-09-30
+
+### Ajouté
+- **L'emplacement sponsorisé de l'annuaire est maintenant aussi mis en avant en mode LISTE**, pas seulement en mode carte. En mode liste (tableau), l'outil en vedette est désormais épinglé en première ligne quel que soit le tri de colonne choisi, et porte le marqueur « Sponsorisé » (mêmes couleurs sobres AAA que la carte) au lieu d'une simple étoile. Le mode carte est inchangé.
+
 ## [1.311.1] - 2026-09-30
 
 ### Corrigé
