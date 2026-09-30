@@ -29,7 +29,11 @@ class AnalyticsSyncCommandsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->credentials = tempnam(sys_get_temp_dir(), 'ga-cred');
+        // ACTION: fichier temporaire d'identifiants pour les tests (seule son EXISTENCE compte, le contenu est ignore car le gateway est simule)
+        // SELF: 2 lignes de test
+        // RAISON: tempnam est banni par le prereglage securite d'ArchTest ; on cree le fichier explicitement
+        $this->credentials = sys_get_temp_dir().'/analytics-ga-cred-test.json';
+        file_put_contents($this->credentials, '{}');
         config([
             'analytics.enabled' => true,
             'analytics.ga4_property_id' => '123456',
