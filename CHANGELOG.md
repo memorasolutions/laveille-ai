@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.306.0] - 2026-09-29
+
+### Ajouté
+- **Module « Analytics » : historique du contenu recoupé avec le trafic réel (#2686).** Nouveau module nwidart désactivable et exportable vers d'autres projets Laravel. Il enregistre, par page et par jour, les métriques de Google Analytics 4 (sessions, utilisateurs, pages vues, temps d'engagement) et de Search Console (clics, impressions, position), chaque ligne étant rattachée au contenu correspondant du site au moment de la collecte (actualité, terme de glossaire, article, outil, fiche d'annuaire) - pour mesurer ce qui attire les visiteurs et les retient. Un écran d'administration `/admin/mesure-contenu` (entrée de menu « Mesure de contenu ») présente les pages qui attirent, celles trouvées sur Google, l'historique de publication et l'état des collectes. Deux commandes quotidiennes (`analytics:sync-ga4`, `analytics:sync-gsc`) alimentent les données de façon idempotente, sans jamais re-résoudre le passé. **Le module est INERTE tant que trois identifiants de production ne sont pas fournis** (compte de service Google, identifiant de propriété GA4, site Search Console) : il se contente alors de journaliser « ignoré », sans rien casser ni modifier aucune page publique. Aucune dépendance ajoutée (client `google/apiclient` déjà présent). Architecture 80/20 tranchée par le panel (2 tables au grain (date, url) plus un journal de collecte). Couvert par 37 tests.
+
 ## [1.305.4] - 2026-09-29
 
 ### Corrigé

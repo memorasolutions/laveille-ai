@@ -1,0 +1,11 @@
+{
+    "name": "modules/analytics",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Analytics\\": "app/",
+            "Modules\\Analytics\\Database\\Factories\\": "database/factories/",
+            "Modules\\Analytics\\Database\\Seeders\\": "database/seeders/",
+            "Modules\\Analytics\\Tests\\": "tests/"
+        }
+    }
+}

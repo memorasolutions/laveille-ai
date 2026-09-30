@@ -40,6 +40,17 @@
             </li>
             @endcan
             @endif
+            {{-- Mesure de contenu : trafic GA4 + Search Console par page (module Analytics) --}}
+            @if(Route::has('admin.mesure_contenu.dashboard'))
+            @can('view_admin_panel')
+            <li class="nav-item {{ request()->routeIs('admin.mesure_contenu.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.mesure_contenu.dashboard') }}" class="nav-link" {{ request()->routeIs('admin.mesure_contenu.*') ? 'aria-current=page' : '' }}>
+                    <i class="link-icon" data-lucide="line-chart"></i>
+                    <span class="link-title">{{ __('Mesure de contenu') }}</span>
+                </a>
+            </li>
+            @endcan
+            @endif
 
             {{-- ===== 2. CONTENU (Contenu + Marketing) ===== --}}
             @canany(['view_articles', 'view_pages', 'view_categories', 'view_media', 'view_faqs', 'view_menus', 'view_comments', 'view_testimonials', 'view_widgets', 'view_shortcodes', 'view_forms', 'view_newsletter', 'view_workflows'])

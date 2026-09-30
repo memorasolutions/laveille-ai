@@ -54,5 +54,6 @@
     "Books": true,
     "Journal": true,
     "Decido": true,
-    "Signature": true
+    "Signature": true,
+    "Analytics": true
 }
