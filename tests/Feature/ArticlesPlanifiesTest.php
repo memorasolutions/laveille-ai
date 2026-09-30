@@ -10,8 +10,8 @@ declare(strict_types=1);
  * Couvre deux points d'entrée modifiés le 2026-09-25 :
  *   A. Modules/Backoffice/resources/views/themes/backend/livewire/articles-table.blade.php -
  *      un article « published » dont published_at est futur affiche « Planifié » (au lieu de
- *      « Publié ») dans le sélecteur de statut, et un badge « Prévue » dans la colonne
- *      Publication ; un article publié dans le passé affiche « Publié » et aucun badge.
+ *      « Publié ») dans le sélecteur de statut, et un badge « Planifiée » dans la colonne
+ *      Publication ; un article publié dans le passé affiche « Publié » et le badge « Publiée ».
  *   B. Modules/FrontTheme/resources/views/partials/series-nav.blade.php - dans une série
  *      détectée par le slug « -partie-N », une partie publiée mais planifiée (published_at
  *      futur) est annoncée « À paraître le <date> » avec un lien vers sa propre adresse (page
@@ -39,9 +39,9 @@ beforeEach(function () {
     config(['responsecache.enabled' => false]);
 });
 
-// ── A. Tableau admin : Planifié / Prévue vs Publié ──────────────────────────────────────
+// ── A. Tableau admin : Planifié / Planifiée vs Publié ──────────────────────────────────────
 
-test('un article publié à date future affiche Planifié et le badge Prévue dans le tableau admin', function () {
+test('un article publié à date future affiche Planifié et le badge Planifiée dans le tableau admin', function () {
     $admin = User::factory()->create();
     $admin->assignRole('super_admin');
 
@@ -53,10 +53,10 @@ test('un article publié à date future affiche Planifié et le badge Prévue da
     Livewire::actingAs($admin)->test(ArticlesTable::class)
         ->assertOk()
         ->assertSee('Planifié')
-        ->assertSee('Prévue');
+        ->assertSee('Planifiée');
 });
 
-test('un article publié à date passée affiche Publié sans badge Prévue dans le tableau admin', function () {
+test('un article publié à date passée affiche Publié sans badge Planifiée dans le tableau admin', function () {
     $admin = User::factory()->create();
     $admin->assignRole('super_admin');
 
@@ -68,7 +68,7 @@ test('un article publié à date passée affiche Publié sans badge Prévue dans
     Livewire::actingAs($admin)->test(ArticlesTable::class)
         ->assertOk()
         ->assertSee('Publié')
-        ->assertDontSee('Prévue');
+        ->assertDontSee('Planifiée');
 });
 
 // ── B. Navigation de série : partie planifiée annoncée avec son lien ───────────────────
