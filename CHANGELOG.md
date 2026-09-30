@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.306.2] - 2026-09-30
+
+### Corrigé
+- **AdSense découplé de Google Analytics : les publicités se chargent au consentement même si GA est désactivé (défaut latent trouvé par la passe adversariale /100).** En v1.306.1, le seul appelant de `window.__lvLoadAdsense` était `updateGtagConsent`, définie uniquement dans le bloc conditionné à Google Analytics (`GA_MEASUREMENT_ID` présent ET `PRIVACY_GA_ENABLED` vrai ET page hors `@section('no_analytics')`). Si l'une de ces conditions manquait, un visiteur qui consent n'obtenait jamais le script AdSense - revenu publicitaire nul, sans aucune erreur. Introduction d'un point d'entrée UNIQUE et toujours présent, `window.__lvOnAnalyticsConsent(granted)` (module FrontTheme), que le bandeau de consentement (module Privacy) appelle à l'acceptation comme au retour d'un visiteur déjà consentant : il met à jour GA4 (Consent Mode v2) SI GA est actif, et charge AdSense SI le consentement analytique est accordé - les deux effets indépendants l'un de l'autre. Aucune régression Loi 25 : AdSense ne se charge toujours QUE sur consentement accordé, l'idempotence est conservée. Aucun changement de comportement pour les visiteurs actuels (GA actif en production).
+
 ## [1.306.1] - 2026-09-30
 
 ### Corrigé

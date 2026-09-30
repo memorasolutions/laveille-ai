@@ -17,13 +17,24 @@
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     @endif
     <style>[x-cloak] { display: none !important; }</style>
+    <script>
+    {{-- Point d'entrée UNIQUE du consentement analytique, toujours présent (indépendant de GA et
+         d'AdSense). Le bandeau de consentement l'appelle avec true/false ; chaque effet n'est
+         déclenché que si son module est actif, et AdSense uniquement si le consentement est
+         accordé (Loi 25). Découple AdSense de GA : les publicités se chargent au consentement même
+         si Google Analytics est désactivé sur la page. --}}
+    window.__lvOnAnalyticsConsent = function(granted){
+      if (typeof window.updateGtagConsent === 'function') { window.updateGtagConsent(granted); }
+      if (granted && typeof window.__lvLoadAdsense === 'function') { window.__lvLoadAdsense(); }
+    };
+    </script>
     {{-- AdSense désactivé sur les pages déclarant @section('no_ads') (outils traitant des PII — posture Loi 25) --}}
     @if(config('services.adsense.client_id') && ! \Illuminate\Support\Facades\View::hasSection('no_ads'))
     <script>
-    {{-- Loi 25 : le script tiers AdSense ne se charge JAMAIS avant le consentement (ad_storage
-         accordé). C'est updateGtagConsent(true) qui l'appelle - à l'acceptation comme au retour
-         d'un visiteur déjà consentant (voir Privacy::partials.cookie-consent). Idempotent : le
-         script n'est ajouté qu'une seule fois. --}}
+    {{-- Loi 25 : le script tiers AdSense ne se charge JAMAIS avant le consentement analytique.
+         C'est __lvOnAnalyticsConsent(true) qui l'appelle - à l'acceptation comme au retour d'un
+         visiteur déjà consentant (voir Privacy::partials.cookie-consent). Idempotent : le script
+         n'est ajouté qu'une seule fois. --}}
     window.__lvLoadAdsense = window.__lvLoadAdsense || function(){
       if (window.__lvAdsenseLoaded) { return; }
       window.__lvAdsenseLoaded = true;
@@ -68,8 +79,8 @@
           'ad_user_data': status,
           'ad_personalization': status
         });
-        {{-- Loi 25 : ne charger le script tiers AdSense qu'une fois le consentement accordé. --}}
-        if (granted && typeof window.__lvLoadAdsense === 'function') { window.__lvLoadAdsense(); }
+        {{-- AdSense est déclenché par __lvOnAnalyticsConsent (défini plus haut), pas ici : cela
+             découple le chargement des publicités de l'activation de Google Analytics. --}}
       }
     </script>
     @endif

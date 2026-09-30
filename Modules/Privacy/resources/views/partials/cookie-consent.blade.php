@@ -333,9 +333,9 @@
             })
         }).catch(function() {});
 
-        // 3. GA4 Consent Mode v2 update
-        if (typeof updateGtagConsent === 'function') {
-            updateGtagConsent(!!choices.analytics);
+        // 3. Consentement analytique - met a jour GA4 (Consent Mode v2) ET charge AdSense si accorde
+        if (typeof window.__lvOnAnalyticsConsent === 'function') {
+            window.__lvOnAnalyticsConsent(!!choices.analytics);
         }
 
         // 4. Scripts tiers + fermer
@@ -396,9 +396,9 @@
                 if (inp && !inp.disabled) inp.checked = !!existing[k];
             }
             injectScripts(existing);
-            // GA4 Consent Mode v2 : restaurer le consentement existant
-            if (typeof updateGtagConsent === 'function') {
-                updateGtagConsent(!!existing.analytics);
+            // Consentement analytique restaure (GA4 Consent Mode v2 + AdSense si accorde)
+            if (typeof window.__lvOnAnalyticsConsent === 'function') {
+                window.__lvOnAnalyticsConsent(!!existing.analytics);
             }
         } else {
             // Consentement expire ou politique mise a jour : re-prompt
