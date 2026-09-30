@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.307.0] - 2026-09-30
+
+### Ajouté
+- **Fiche LucidNest dans l'annuaire, en première position de « En vedette ».** Application web d'organisation et de gestion de projets pensée pour les personnes TDAH (palier gratuit sans carte de crédit, rabais éducation de 50 %), éditée par MEMORA solutions. Migration réversible : les vedettes existantes sont décalées d'un rang, et `down()` rétablit l'ordre.
+- **Le bloc « En vedette / Sponsorisé » remonte en haut de l'annuaire**, au-dessus des sections « Ajoutés récemment » et « Les plus populaires ». Conditions d'affichage inchangées (masqué pendant une recherche et hors contexte éducation).
+- **Filtre de prix inclusif pour les outils freemium** : un outil freemium apparaît désormais sous « Gratuit » ET sous « Payant » (il a un vrai palier gratuit et des paliers payants), côté navigateur comme côté serveur. Le filtre « Freemium » reste distinct.
+
 ## [1.306.2] - 2026-09-30
 
 ### Corrigé

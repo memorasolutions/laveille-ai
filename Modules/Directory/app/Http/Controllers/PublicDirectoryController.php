@@ -576,7 +576,9 @@ class PublicDirectoryController extends Controller
             if ($request->pricing === 'education') {
                 $query->where('has_education_pricing', true);
             } else {
-                $query->where('pricing', $request->pricing);
+                // Un outil freemium ressort sous « free » ET « paid » (palier gratuit + paliers payants).
+                $pricingGroups = ['free' => ['free', 'freemium'], 'paid' => ['paid', 'freemium']];
+                $query->whereIn('pricing', $pricingGroups[$request->pricing] ?? [$request->pricing]);
             }
         }
 
