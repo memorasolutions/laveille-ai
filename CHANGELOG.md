@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.312.1] - 2026-09-30
+
+### Corrigé
+- **Beaucoup moins d'outils marqués « À revérifier » dans l'annuaire, sans aucun coût d'IA.** Le badge de fraîcheur tenait seulement compte de la dernière relecture éditoriale (enrichissement), jamais du contrôle de lien hebdomadaire `directory:check-links` (qui vérifie déjà, gratuitement, que l'adresse de chaque outil répond). Désormais, un outil dont le lien a été confirmé vivant récemment affiche « Vérifié » (neutre) au lieu de « À revérifier ». Il reste honnête, car ce « Vérifié » neutre ne prétend pas que le contenu a été relu (jamais le vert « Vérifié récemment », réservé à une vraie relecture), et un outil dont le lien est mort ou jamais contrôlé garde « À revérifier ».
+
 ## [1.312.0] - 2026-09-30
 
 ### Ajouté

@@ -31,20 +31,33 @@
 
     $verifiedAt = $tool->education_last_checked_at ?? $tool->last_enriched_at ?? $tool->updated_at ?? null;
 
+    // Un contrôle de lien récent et VIVANT (commande directory:check-links, hebdomadaire, sans IA)
+    // vaut vérification de DISPONIBILITÉ : on a confirmé que l'outil existe toujours. On ne le
+    // compte que si l'adresse a répondu sans être « disparue » (url_failure_streak est remis à 0
+    // par la commande dès qu'elle obtient une réponse, incrémenté seulement sur un 404/410).
+    $linkAlive = $tool->url_last_checked_at && (int) ($tool->url_failure_streak ?? 0) === 0;
+
     $variant = null;
     $diffStr = null;
     if ($changeType && isset($changeMap[$changeType]) && $changeAt) {
         $variant = $changeMap[$changeType];
         $diffStr = $changeAt->diffForHumans(['parts' => 1, 'short' => true]);
-    } elseif ($verifiedAt && $verifiedAt->diffInDays(now()) <= 365) {
+    } elseif ($verifiedAt && $verifiedAt->diffInDays(now()) <= 90) {
+        // Contenu revu récemment (enrichissement/relecture) : vert si tout frais, sinon neutre.
         $days = (int) $verifiedAt->diffInDays(now());
-        if ($days <= 7) {
-            $variant = ['icon' => '✓', 'label' => __('Vérifié récemment'), 'class' => 'lv-badge-fresh-good'];
-        } elseif ($days <= 90) {
-            $variant = ['icon' => '✓', 'label' => __('Vérifié'), 'class' => 'lv-badge-fresh-neutral'];
-        } else {
-            $variant = ['icon' => '🕒', 'label' => __('À revérifier'), 'class' => 'lv-badge-fresh-stale'];
-        }
+        $variant = $days <= 7
+            ? ['icon' => '✓', 'label' => __('Vérifié récemment'), 'class' => 'lv-badge-fresh-good']
+            : ['icon' => '✓', 'label' => __('Vérifié'), 'class' => 'lv-badge-fresh-neutral'];
+        $diffStr = $verifiedAt->diffForHumans(['parts' => 1, 'short' => true]);
+    } elseif ($linkAlive) {
+        // Contenu ancien MAIS lien confirmé vivant récemment : « Vérifié » NEUTRE (jamais le vert
+        // « récemment », qui sous-entendrait une relecture du contenu). On n'affiche plus « À
+        // revérifier » : l'outil existe bel et bien, son adresse répond.
+        $variant = ['icon' => '✓', 'label' => __('Vérifié'), 'class' => 'lv-badge-fresh-neutral'];
+        $diffStr = $tool->url_last_checked_at->diffForHumans(['parts' => 1, 'short' => true]);
+    } elseif ($verifiedAt && $verifiedAt->diffInDays(now()) <= 365) {
+        // Ni contenu récent, ni lien vérifié vivant : badge honnête « À revérifier ».
+        $variant = ['icon' => '🕒', 'label' => __('À revérifier'), 'class' => 'lv-badge-fresh-stale'];
         $diffStr = $verifiedAt->diffForHumans(['parts' => 1, 'short' => true]);
     }
 @endphp
