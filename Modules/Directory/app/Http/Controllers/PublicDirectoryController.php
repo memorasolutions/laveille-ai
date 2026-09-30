@@ -83,9 +83,17 @@ class PublicDirectoryController extends Controller
             ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
             ->orderByDesc('created_at')->distinct()->limit((int) Settings::get('directory.recent_tools_limit', 6))->get();
         $recentIds = $recentTools->pluck('id')->toArray();
+        // 2026-09-30 : emplacement SPONSORISÉ réservé en 1re position du carrousel « Les plus populaires »
+        // (une seule place, décision fondateur). v1 = l'outil is_featured ; exclu du top organique
+        // ci-dessous pour ne pas apparaître deux fois.
+        $sponsoredTool = Tool::published()->featured()->with('categories')
+            ->when(! $showArchived, fn ($q) => $q->notArchived())
+            ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
+            ->orderBy('sort_order')->first();
         $popularTools = Tool::published()->with('categories')
             ->when(! $showArchived, fn ($q) => $q->notArchived())
             ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
+            ->when($sponsoredTool, fn ($q) => $q->where('id', '!=', $sponsoredTool->id))
             ->whereNotIn('id', $recentIds)->orderByDesc('clicks_count')->distinct()->limit((int) Settings::get('directory.popular_tools_limit', 6))->get();
 
         // 2026-05-05 #137 : count des outils archived pour afficher dans le toggle.
@@ -124,7 +132,7 @@ class PublicDirectoryController extends Controller
                 ->get(['id', 'name', 'slug', 'is_public']);
         }
 
-        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'recentTools', 'popularTools', 'topVoted', 'userCollections', 'showArchived', 'archivedCount', 'ecosystemCounts', 'ecosystemLabels'));
+        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'recentTools', 'popularTools', 'sponsoredTool', 'topVoted', 'userCollections', 'showArchived', 'archivedCount', 'ecosystemCounts', 'ecosystemLabels'));
     }
 
     public function educationPricing(Request $request): View

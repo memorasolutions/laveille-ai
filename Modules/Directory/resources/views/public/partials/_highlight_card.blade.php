@@ -2,6 +2,7 @@
 {{-- Carte compacte pour la section Highlights --}}
 
 @php
+    $sponsored = $sponsored ?? false;
     $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : '';
     $screenshotSrc = $tool->screenshot
         ? (str_starts_with($tool->screenshot, 'http') ? $tool->screenshot : asset($tool->screenshot).'?v='.($tool->updated_at?->timestamp ?? '0'))
@@ -29,6 +30,10 @@
             <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
             <span>{{ $tool->tutorials_count }}</span>
         </span>
+    @endif
+    @if($sponsored)
+        {{-- 2026-09-30 : marqueur « Sponsorisé » sobre (même palette que le bandeau de la grille), en superposition pour ne pas changer la hauteur de la carte --}}
+        <span style="position:absolute;top:0;left:0;z-index:3;height:22px;line-height:22px;padding:0 10px;font-size:12px;font-weight:500;background:#F1F5F9;color:#334155;border-radius:0 0 6px 0;box-sizing:border-box;">{{ __('Sponsorisé') }}</span>
     @endif
     <div class="rt-hl-img" style="{{ $screenshotSrc ? '' : 'background: linear-gradient(135deg, ' . $gradientColors[$gIdx] . ', ' . $gradientColors[($gIdx + 1) % count($gradientColors)] . ');' }}">
         @if($screenshotSrc)

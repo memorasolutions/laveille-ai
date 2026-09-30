@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.310.0] - 2026-09-30
+
+### Ajouté
+- **Emplacement sponsorisé dans le carrousel « Les plus populaires » de l'annuaire** : une seule carte, toujours en première position et marquée « Sponsorisé », est réservée à l'outil en vedette. Le reste du carrousel demeure organique (classement par consultations réelles) et le bloc « Ajoutés récemment » n'est pas touché.
+
 ## [1.309.0] - 2026-09-30
 
 ### Modifié

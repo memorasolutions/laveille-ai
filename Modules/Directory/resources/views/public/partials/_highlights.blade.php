@@ -18,12 +18,14 @@
     </div>
 
     {{-- Les plus populaires --}}
-    @if(isset($popularTools) && $popularTools->count() > 0)
+    @if((isset($popularTools) && $popularTools->count() > 0) || (isset($sponsoredTool) && $sponsoredTool))
     <div class="rt-hl-section" style="margin-top: 24px;">
         <h3 class="rt-hl-title">🔥 {{ __('Les plus populaires') }}</h3>
         <div class="rt-hl-slider" x-data="{ sl: 0 }">
             <button type="button" class="rt-hl-arrow left" aria-label="{{ __('Défiler vers la gauche') }}" x-show="sl > 0" x-cloak @click="$refs.popTrack.scrollBy({ left: -400, behavior: 'smooth' })"><i class="ti-angle-left" aria-hidden="true"></i></button>
             <div class="rt-hl-track" x-ref="popTrack" @scroll="sl = $refs.popTrack.scrollLeft">
+                {{-- 2026-09-30 : emplacement sponsorisé (1 seule carte, toujours en tête) --}}
+                @if(isset($sponsoredTool) && $sponsoredTool)@include('directory::public.partials._highlight_card', ['tool' => $sponsoredTool, 'sponsored' => true])@endif
                 @foreach($popularTools as $tool)
                     @include('directory::public.partials._highlight_card', ['tool' => $tool])
                 @endforeach
