@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Directory\Models\Tool;
 use Modules\Directory\Models\ToolCollection;
+use Modules\Directory\Support\PricingCategories;
 
 /**
  * S90 #43 — API publique JSON lecture seule pour outils + collections.
@@ -37,7 +38,7 @@ class PublicToolsController
 
         // Filtres
         if ($pricing = $request->query('pricing')) {
-            $query->where('pricing', $pricing);
+            $query->whereIn('pricing', PricingCategories::groupFor($pricing));
         }
 
         if ($request->boolean('has_education_pricing')) {

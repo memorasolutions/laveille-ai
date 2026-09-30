@@ -63,6 +63,20 @@ final class PricingCategories
         ];
     }
 
+    /**
+     * Groupe de valeurs de prix couvert par un filtre de tarification.
+     * Un outil freemium a un vrai palier gratuit ET des paliers payants : il ressort
+     * donc sous « gratuit » ET sous « payant ». Source unique de cette règle métier
+     * (miroir côté client dans index.blade.php, getter filteredTools).
+     */
+    public static function groupFor(string $pricing): array
+    {
+        return [
+            self::FREE => [self::FREE, self::FREEMIUM],
+            self::PAID => [self::PAID, self::FREEMIUM],
+        ][$pricing] ?? [$pricing];
+    }
+
     public static function optionsWithEducation(): array
     {
         return array_merge(self::labels(), [

@@ -124,6 +124,8 @@
     .rt-sort-active { color: var(--c-primary) !important; border-bottom-color: var(--c-primary) !important; }
 
     .rt-card { background: #fff; border-radius: var(--r-base); padding: 24px; height: 100%; display: flex; flex-direction: column; border: 1px solid #E5E7EB; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.25s, box-shadow 0.25s; position: relative; }
+    /* Carte sponsorisée : l'image perd son coin arrondi du haut et son débordement vers le haut (le bandeau les porte). Classe plutôt que :style, car :style d'Alpine REMPLACE l'attribut style sur ce thème. */
+    .rt-media-sponsored { margin-top: 0 !important; border-radius: 0 !important; }
     .rt-card:hover { transform: translateY(-4px); box-shadow: 0 12px 25px -5px rgba(0,0,0,0.1); }
     .rt-logo { width: 48px; height: 48px; border-radius: 12px; background: #f9fafb; padding: 3px; border: 1px solid #e5e7eb; flex-shrink: 0; }
     .rt-card-name { font-family: var(--f-heading); font-size: 1.1rem; font-weight: 700; color: var(--c-dark); margin: 0 0 4px; }
@@ -384,6 +386,7 @@
         let t = this.tools.filter(t => {
             const matchSearch = !s || norm(t.name).includes(s) || norm(t.shortDesc).includes(s);
             // Un outil freemium a un vrai palier gratuit ET des paliers payants : il ressort sous les deux filtres.
+            // Miroir CLIENT de \Modules\Directory\Support\PricingCategories::groupFor() (source unique côté PHP) : à garder synchronisé.
             const pricingMatches = { free: ['free', 'freemium'], paid: ['paid', 'freemium'] };
             const matchPricing = !this.activePricing || (this.activePricing === 'education' ? t.hasEduPricing : (pricingMatches[this.activePricing] || [this.activePricing]).includes(t.pricing));
             const matchCat = !this.activeCategory || t.categorySlugs.includes(this.activeCategory);
@@ -846,43 +849,6 @@
             <button type="button" @click="wStep = 2; authError = ''" style="background: none; border: none; color: #374151; cursor: pointer; font-size: 12px;">← {{ __('Retour au formulaire') }}</button>
         </div>
     </div>
-    </div>
-
-    {{-- Section mise de l'avant : affichée EN PREMIER, avant les highlights (masqué quand recherche active) --}}
-    <div class="container">
-    @if(isset($featuredTools) && $featuredTools->isNotEmpty())
-    @php
-        $hasFeaturedEdu = $featuredTools->contains(fn($t) => $t->has_education_pricing || $t->pricing === 'education');
-    @endphp
-    <div x-show="!search && (!isEducationContext || {{ $hasFeaturedEdu ? 'true' : 'false' }})" x-transition style="background:linear-gradient(135deg,#f0fafb 0%,#e0f4f7 100%);border:1px solid #b2e0e6;border-radius:14px;padding:20px;margin:24px 0;">
-        <div style="display:flex!important;justify-content:space-between!important;align-items:center!important;margin-bottom:14px;">
-            <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">{{ __('En vedette') }}</h3>
-            <span style="font-size:12px;color:#0B7285;font-weight:600;">{{ __('Sponsorisé') }}</span>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
-            @foreach($featuredTools as $ft)
-            @php $ftHost = $ft->url ? parse_url($ft->url, PHP_URL_HOST) : ''; @endphp
-            <a href="{{ $ft->getPublicUrl() }}" x-show="!isEducationContext || {{ $ft->has_education_pricing || $ft->pricing === 'education' ? 'true' : 'false' }}" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;text-decoration:none!important;color:inherit;transition:transform .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;">
-                {{-- 2026-05-05 #135 : badge YouTube rouge avec count tutos (visible coin haut-droit) --}}
-                @if(($ft->tutorials_count ?? 0) > 0)
-                    <span style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;background:#0B7285;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;line-height:1.3;box-shadow:0 1px 3px rgba(0,0,0,.15);" title="{{ $ft->tutorials_count }} {{ $ft->tutorials_count > 1 ? __('tutoriels disponibles') : __('tutoriel disponible') }}">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                        <span>{{ $ft->tutorials_count }} {{ $ft->tutorials_count > 1 ? __('tutos') : __('tuto') }}</span>
-                    </span>
-                @endif
-                <div style="display:flex!important;align-items:center!important;gap:10px;margin-bottom:10px;">
-                    @if($ftHost)<img src="https://www.google.com/s2/favicons?domain={{ $ftHost }}&sz=32" alt="" width="24" height="24" loading="lazy" style="border-radius:4px;" onerror="this.style.display='none'">@endif
-                    <span style="font-weight:700;font-size:15px;">{{ $ft->name }}</span>
-                </div>
-                <p style="font-size:12px;color:#374151;margin:0 0 8px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ Str::limit($ft->short_description, 70) }}</p>
-                @if($ft->categories->isNotEmpty())
-                    <span style="display:inline-block;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">{{ $ft->categories->first()->name }}</span>
-                @endif
-            </a>
-            @endforeach
-        </div>
-    </div>
-    @endif
     </div>
 
     {{-- Highlights : recents + populaires (masqué quand recherche active) --}}
@@ -1372,7 +1338,9 @@
                             </div>
                         </template>
 
-                        <template x-if="tool.isFeatured && !tool.isLifecycleDown"><span class="rt-featured">{{ __('En vedette') }}</span></template>
+                        <template x-if="tool.isFeatured && !tool.isLifecycleDown">
+                            <div style="margin: -24px -24px 0; height: 26px; line-height: 26px; padding-left: 14px; font-size: 12px; font-weight: 500; background: #F1F5F9; color: #334155; border-radius: var(--r-base) var(--r-base) 0 0; text-align: left; box-sizing: border-box;">{{ __('Sponsorisé') }}</div>
+                        </template>
 
                         <template x-if="!tool.isLifecycleActive && !tool.isLifecycleDown">
                             <span :style="'position:absolute;top:12px;right:12px;z-index:4;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;font-size:11px;font-weight:600;color:#fff;border-radius:999px;white-space:nowrap;line-height:1.3;box-shadow:0 2px 6px rgba(0,0,0,.25);background-color:' + tool.lifecycleColor + 'F2;'"
@@ -1382,7 +1350,7 @@
                                 <span x-text="tool.lifecycleLabel"></span>
                             </span>
                         </template>
-                        <a :href="tool.showUrl" aria-hidden="true" tabindex="-1" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px; border-bottom: 1px solid #E5E7EB; position: relative;">
+                        <a :href="tool.showUrl" aria-hidden="true" tabindex="-1" :class="{ 'rt-media-sponsored': tool.isFeatured && !tool.isLifecycleDown }" style="display: block; margin: -24px -24px 12px; overflow: hidden; border-radius: var(--r-base) var(--r-base) 0 0; height: 140px; border-bottom: 1px solid #E5E7EB; position: relative;">
                             <template x-if="tool.screenshot">
                                 <div style="position: relative; height: 140px;">
                                     <img :src="tool.screenshot" :alt="tool.name" loading="lazy" style="width: 100%; height: 140px; object-fit: cover; display: block;"

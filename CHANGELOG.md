@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.308.0] - 2026-09-30
+
+### Modifié
+- **Fiche LucidNest repensée : carte normale dans la grille de l'annuaire, avec un léger bandeau « Sponsorisé » en haut de la carte, épinglée en première position.** La grande bande « En vedette » pleine largeur en haut de la page est retirée (une seule carte dans une grande bande vide allongeait inutilement la page). Les fiches en vedette sortent désormais en premier quel que soit le tri.
+- **Filtre de prix freemium unifié côté API publique** : `?pricing=free` et `?pricing=paid` incluent maintenant les outils freemium, comme sur le site, via la règle unique `PricingCategories::groupFor()`.
+
+### Corrigé
+- **Retrait d'une mention d'édition factuellement fausse sur la fiche LucidNest** (migration de correction idempotente pour la ligne déjà en base).
+
 ## [1.307.1] - 2026-09-30
 
 ### Corrigé

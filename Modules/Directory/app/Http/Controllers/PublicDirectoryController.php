@@ -53,6 +53,9 @@ class PublicDirectoryController extends Controller
                   ->whereIn('type', ['youtube', 'video', 'tutorial', 'formation']);
             }]);
 
+        // Les fiches en vedette (sponsorisées) sortent en premier, quel que soit le tri choisi.
+        $query = $query->orderByDesc('is_featured');
+
         $query = match (\Modules\Settings\Facades\Settings::get('directory.default_sort', 'random')) {
             'popular' => $query->orderByDesc('clicks_count'),
             'recent' => $query->orderByDesc('created_at'),
@@ -75,11 +78,6 @@ class PublicDirectoryController extends Controller
         // 2026-05-05 #135 : eager-load tutorials_count pour featured + topVoted + recent + popular (DRY closure)
         $tutorialsCountClosure = fn ($q) => $q->where('is_approved', 1)->whereIn('type', ['youtube', 'video', 'tutorial', 'formation']);
 
-        $featuredQuery = Tool::published()->featured()->with('categories')
-            ->when(! $showArchived, fn ($q) => $q->notArchived())
-            ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
-            ->orderBy('sort_order');
-        $featuredTools = $this->applyDirectoryFilters($featuredQuery, $request)->get();
         $recentTools = Tool::published()->with('categories')
             ->when(! $showArchived, fn ($q) => $q->notArchived())
             ->withCount(['resources as tutorials_count' => $tutorialsCountClosure])
@@ -126,7 +124,7 @@ class PublicDirectoryController extends Controller
                 ->get(['id', 'name', 'slug', 'is_public']);
         }
 
-        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'featuredTools', 'recentTools', 'popularTools', 'topVoted', 'userCollections', 'showArchived', 'archivedCount', 'ecosystemCounts', 'ecosystemLabels'));
+        return view('directory::public.index', compact('tools', 'categories', 'pricingOptions', 'recentTools', 'popularTools', 'topVoted', 'userCollections', 'showArchived', 'archivedCount', 'ecosystemCounts', 'ecosystemLabels'));
     }
 
     public function educationPricing(Request $request): View
@@ -577,8 +575,7 @@ class PublicDirectoryController extends Controller
                 $query->where('has_education_pricing', true);
             } else {
                 // Un outil freemium ressort sous « free » ET « paid » (palier gratuit + paliers payants).
-                $pricingGroups = ['free' => ['free', 'freemium'], 'paid' => ['paid', 'freemium']];
-                $query->whereIn('pricing', $pricingGroups[$request->pricing] ?? [$request->pricing]);
+                $query->whereIn('pricing', \Modules\Directory\Support\PricingCategories::groupFor($request->pricing));
             }
         }
 
