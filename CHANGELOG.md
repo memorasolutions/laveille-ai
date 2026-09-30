@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.312.2] - 2026-09-30
+
+### Corrigé
+- **Formulaire de contact durci contre les robots qui postent en direct, sans aucun faux positif pour une vraie personne.** Un pourriel de rencontre reçu le 2026-09-30 a révélé une faille : le piège temporel (`time-trap`) ne se déclenchait que lorsque le champ caché `form_ts` était présent ET récent. Un robot qui poste directement sur la route de contact (sans charger la page) n'envoie aucun `form_ts` - et passait donc à travers ce contrôle. Désormais, l'absence ou une valeur non numérique de `form_ts` est traitée comme un signal fort de robot (mise en quarantaine silencieuse, aucun courriel). La seule vue du formulaire (`contact.blade.php`) porte toujours ce jeton, donc une vraie soumission le contient toujours ; un `form_ts` simplement ANCIEN (page servie depuis un cache) reste accepté sans faux positif. La quarantaine reste consultable dans l'admin pour vérifier l'absence de faux positif. (Le nom contenant une URL - cas exact du pourriel reçu - était déjà bloqué depuis v1.311.0.)
+
 ## [1.312.1] - 2026-09-30
 
 ### Corrigé

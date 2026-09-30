@@ -178,6 +178,41 @@ it('met en quarantaine (status spam) une soumission trop rapide (time-trap), san
     expect($msg->spam_reason)->toContain('timetrap');
 });
 
+it('met en quarantaine (time-trap) une soumission SANS jeton form_ts (robot postant en direct), sans courriel', function () {
+    // Un robot qui poste directement sur la route ne charge pas la page et n'envoie donc
+    // aucun form_ts. La vraie vue du formulaire le porte toujours -> son absence = robot.
+    $payload = contactPayload();
+    unset($payload['form_ts']);
+
+    $response = submitContact($payload);
+
+    expect($response->getSession()->get('success'))->not->toBeNull();
+    expect(sentSubjects())->toBeEmpty();
+
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('spam');
+    expect($msg->spam_reason)->toContain('timetrap');
+});
+
+it('accepte une soumission au form_ts ANCIEN (page en cache) sans faux positif time-trap', function () {
+    // Garde-fou anti-faux-positif : un visiteur légitime dont la page est servie depuis un
+    // cache soumet un form_ts vieux de plusieurs heures. Ce délai long doit rester valide.
+    $response = submitContact(contactPayload([
+        'form_ts' => time() - 7200,
+    ]));
+
+    expect($response->getSession()->get('success'))->not->toBeNull();
+
+    $subjects = sentSubjects();
+    expect($subjects)->toHaveCount(1);
+    expect(str_starts_with($subjects[0], '[Spam probable]'))->toBeFalse();
+
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg->status)->toBe('new');
+    expect((string) $msg->spam_reason)->not->toContain('timetrap');
+});
+
 it('envoie en « new », trace la raison et préfixe « [Spam probable] » pour un seul signal faible', function () {
     $response = submitContact(contactPayload([
         'subject' => 'Une ressource à partager',

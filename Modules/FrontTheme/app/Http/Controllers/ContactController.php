@@ -234,9 +234,16 @@ class ContactController extends Controller
             $signals[] = 'allcaps';
         }
 
-        // 4) Time-trap : formulaire soumis trop vite (< 3 s). Permissif si le champ est absent/incohérent.
+        // 4) Time-trap : soumission trop rapide (<= 3 s) OU sans jeton temporel du tout.
+        //    Le champ caché form_ts est rendu par la SEULE vue du formulaire (contact.blade.php),
+        //    donc une vraie soumission le porte toujours. Son absence ou une valeur non numérique
+        //    = robot qui poste directement sur la route sans charger la page. Un form_ts ANCIEN
+        //    (page servie depuis un cache) reste valide : on ne pénalise QUE l'absence/l'illisible,
+        //    jamais un délai long, pour ne créer aucun faux positif sur un visiteur légitime.
         $ts = $request->input('form_ts');
-        if ($ts !== null && is_numeric($ts)) {
+        if ($ts === null || $ts === '' || ! is_numeric($ts)) {
+            $signals[] = 'timetrap';
+        } else {
             $elapsed = time() - (int) $ts;
             if ($elapsed >= 0 && $elapsed <= 3) {
                 $signals[] = 'timetrap';
