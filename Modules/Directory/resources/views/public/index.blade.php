@@ -857,7 +857,7 @@
     <div x-show="!search && (!isEducationContext || {{ $hasFeaturedEdu ? 'true' : 'false' }})" x-transition style="background:linear-gradient(135deg,#f0fafb 0%,#e0f4f7 100%);border:1px solid #b2e0e6;border-radius:14px;padding:20px;margin:24px 0;">
         <div style="display:flex!important;justify-content:space-between!important;align-items:center!important;margin-bottom:14px;">
             <h3 style="font-family:var(--f-heading);font-weight:700;font-size:1.1rem;color:var(--c-dark);margin:0;">{{ __('En vedette') }}</h3>
-            <span style="font-size:12px;color:#0B7285;font-weight:600;">{{ __('Sponsorise') }}</span>
+            <span style="font-size:12px;color:#0B7285;font-weight:600;">{{ __('Sponsorisé') }}</span>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
             @foreach($featuredTools as $ft)

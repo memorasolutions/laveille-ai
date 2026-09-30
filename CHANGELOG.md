@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.307.1] - 2026-09-30
+
+### Corrigé
+- **Accent : le libellé du bloc « En vedette » affiche « Sponsorisé » (et non « Sponsorise »)**, corrigé après contrôle visuel en production.
+
 ## [1.307.0] - 2026-09-30
 
 ### Ajouté
