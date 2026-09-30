@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.306.1] - 2026-09-30
+
+### Corrigé
+- **Loi 25 : le script publicitaire tiers AdSense ne se charge plus AVANT le consentement.** Il était injecté inconditionnellement environ 2,5 secondes après le chargement de chaque page (via `requestIdleCallback`), avant tout choix du visiteur - une requête vers `pagead2.googlesyndication.com` partait donc sans consentement, même si le Consent Mode v2 posait déjà `ad_storage: denied` par défaut. Le chargement du script est désormais idempotent (`window.__lvLoadAdsense`) et déclenché UNIQUEMENT par `updateGtagConsent(true)`, c'est-à-dire à l'acceptation des témoins comme au retour d'un visiteur déjà consentant (module Privacy). Aucun changement pour les pages `@section('no_ads')`, déjà exclues. Correction réversible, sans effet sur le reste : le compte AdSense étant inactif, aucune publicité n'était de toute façon servie. Stratégie tranchée en parallèle (Codex + ChatGPT) : à ce niveau de trafic, AdSense reste un revenu secondaire opportuniste, le vrai levier étant le sponsoring B2B des outils - aucun MCP AdSense construit.
+
 ## [1.306.0] - 2026-09-29
 
 ### Ajouté

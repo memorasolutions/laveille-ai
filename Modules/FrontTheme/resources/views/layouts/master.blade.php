@@ -20,20 +20,19 @@
     {{-- AdSense désactivé sur les pages déclarant @section('no_ads') (outils traitant des PII — posture Loi 25) --}}
     @if(config('services.adsense.client_id') && ! \Illuminate\Support\Facades\View::hasSection('no_ads'))
     <script>
-    (function(){
-      var loadAdsense = function() {
-        var s = document.createElement('script');
-        s.async = true;
-        s.crossOrigin = 'anonymous';
-        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('services.adsense.client_id') }}';
-        document.head.appendChild(s);
-      };
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(loadAdsense, { timeout: 3000 });
-      } else {
-        setTimeout(loadAdsense, 2500);
-      }
-    })();
+    {{-- Loi 25 : le script tiers AdSense ne se charge JAMAIS avant le consentement (ad_storage
+         accordé). C'est updateGtagConsent(true) qui l'appelle - à l'acceptation comme au retour
+         d'un visiteur déjà consentant (voir Privacy::partials.cookie-consent). Idempotent : le
+         script n'est ajouté qu'une seule fois. --}}
+    window.__lvLoadAdsense = window.__lvLoadAdsense || function(){
+      if (window.__lvAdsenseLoaded) { return; }
+      window.__lvAdsenseLoaded = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.crossOrigin = 'anonymous';
+      s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('services.adsense.client_id') }}';
+      document.head.appendChild(s);
+    };
     </script>
     @endif
     @if(config('services.ga.measurement_id') && config('services.ga.privacy_enabled', false) && ! \Illuminate\Support\Facades\View::hasSection('no_analytics'))
@@ -69,6 +68,8 @@
           'ad_user_data': status,
           'ad_personalization': status
         });
+        {{-- Loi 25 : ne charger le script tiers AdSense qu'une fois le consentement accordé. --}}
+        if (granted && typeof window.__lvLoadAdsense === 'function') { window.__lvLoadAdsense(); }
       }
     </script>
     @endif
