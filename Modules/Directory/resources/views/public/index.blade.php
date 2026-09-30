@@ -58,7 +58,10 @@
             'websiteType' => $tool->website_type ?? 'website',
             'launchYear' => $tool->launch_year ?? 0,
             'createdTs' => $tool->created_at ? $tool->created_at->timestamp : 0,
-            'avgRating' => round($tool->averageRating(), 1),
+            // Note moyenne lue depuis l'agrégat eager-loaded reviews_avg_rating (withAvg + scope
+            // approved() au contrôleur) plutôt que $tool->averageRating(), qui déclenchait une
+            // requête SQL par outil (N+1 sur ~2300 outils). Valeur identique, 0 quand aucun avis.
+            'avgRating' => round((float) ($tool->reviews_avg_rating ?? 0), 1),
             // Couleurs assombries pour contraste AAA (7:1+) avec le texte blanc superposé (WCAG 1.4.6) : audit 2026-07-03
             'gradientFrom' => ['#0B7285','#1a365d','#8E44AD','#854914','#176638','#9F3429','#205D86','#794E09'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],
             'gradientTo' => ['#1a365d','#0B7285','#2C3E50','#983C00','#0E6352','#8E44AD','#1E5D87','#983C00'][crc32($tool->name) % 8 < 0 ? (crc32($tool->name) % 8) + 8 : crc32($tool->name) % 8],

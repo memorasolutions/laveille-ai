@@ -51,7 +51,16 @@ class PublicDirectoryController extends Controller
             ->withCount(['resources as tutorials_count' => function ($q) {
                 $q->where('is_approved', 1)
                   ->whereIn('type', ['youtube', 'video', 'tutorial', 'formation']);
-            }]);
+            }])
+            // ACTION: note moyenne chargée en AGRÉGAT (une sous-requête) au lieu de $tool->averageRating()
+            //   appelée par outil dans le mapping de la vue = une requête SQL PAR outil, soit ~2300
+            //   requêtes sur /annuaire. C'est la cause réelle du TTFB ~2,6 s au rendu frais, payé à
+            //   chaque chargement par les admins (SkipAuthenticatedCacheProfile saute le cache pleine
+            //   page) et par le premier visiteur public après chaque cold-miss (cacheResponse:600).
+            // MCP: SELF (<5 lignes utiles, correction de performance ciblée, zéro changement de sortie)
+            // RAISON: withAvg contraint au MÊME scope approved() que averageRating() (valeur identique,
+            //   0 quand aucun avis), exposé en $tool->reviews_avg_rating et consommé dans la vue.
+            ->withAvg(['reviews' => fn ($q) => $q->approved()], 'rating');
 
         // Les fiches en vedette (sponsorisées) sortent en premier dans l'ordre par défaut ; un tri explicite du visiteur reprend la main.
         $query = $query->orderByDesc('is_featured');

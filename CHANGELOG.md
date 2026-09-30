@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.311.1] - 2026-09-30
+
+### Corrigé
+- **/annuaire beaucoup plus rapide grâce à l'élimination d'un N+1 sur la note moyenne des outils.** La note moyenne de chaque carte était calculée par un appel `averageRating()` dans la vue, soit une requête SQL par outil (~2300 requêtes par rendu frais en production). Elle est désormais chargée en un seul agrégat (`withAvg` contraint aux avis approuvés). Le résultat affiché est identique. Le gain profite surtout aux administrateurs connectés (qui ne bénéficient pas du cache pleine page) et au premier visiteur public après chaque expiration du cache.
+
 ## [1.311.0] - 2026-09-30
 
 ### Corrigé
