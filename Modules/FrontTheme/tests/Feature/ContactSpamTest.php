@@ -195,6 +195,26 @@ it('met en quarantaine (time-trap) une soumission SANS jeton form_ts (robot post
     expect($msg->spam_reason)->toContain('timetrap');
 });
 
+it('met en quarantaine (time-trap) un form_ts VIDE ou NON NUMÉRIQUE (robot bricolé), sans courriel', function (string $bad) {
+    // Un robot peut envoyer form_ts avec une valeur bidon (chaîne vide, texte). is_numeric la rejette
+    // -> même verdict que l'absence : quarantaine silencieuse. Un vrai humain n'atteint jamais ce cas
+    // (la vue rend toujours un entier). NB : « 1e10 » est is_numeric=vrai et se caste en 1 -> délai
+    // ancien -> ACCEPTÉ (compromis page en cache), donc absent de ce jeu, testé séparément ci-dessous.
+    $response = submitContact(contactPayload(['form_ts' => $bad]));
+
+    expect($response->getSession()->get('success'))->not->toBeNull();
+    expect(sentSubjects())->toBeEmpty();
+
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('spam');
+    expect((string) $msg->spam_reason)->toContain('timetrap');
+})->with([
+    'chaîne vide' => '',
+    'texte' => 'abc',
+    'NaN' => 'NaN',
+]);
+
 it('accepte une soumission au form_ts ANCIEN (page en cache) sans faux positif time-trap', function () {
     // Garde-fou anti-faux-positif : un visiteur légitime dont la page est servie depuis un
     // cache soumet un form_ts vieux de plusieurs heures. Ce délai long doit rester valide.
