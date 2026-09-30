@@ -137,7 +137,7 @@
                             </div>
                             <p style="color:#4B5563; font-size:13px; line-height:1.55; margin:0 0 12px 0; flex-grow:1;">{{ Str::limit($tool->short_description, 110) }}</p>
                             <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid #F3F4F6; font-size:12px; color:#6B7280;">
-                                @if($tool->clicks_count)
+                                @if($tool->clicks_count && (auth()->user()?->can('moderate_tools') ?? false))
                                     <span><i class="fa fa-mouse-pointer" style="margin-right:4px;"></i>{{ $tool->clicks_count }} {{ __('clics') }}</span>
                                 @else
                                     <span>&nbsp;</span>

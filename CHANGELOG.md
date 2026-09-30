@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.309.0] - 2026-09-30
+
+### Modifié
+- **Les compteurs de vues des fiches de l'annuaire sont désormais visibles uniquement par les administrateurs** (grille principale, cartes « Ajoutés récemment » et « Les plus populaires », fiche détail, collections) : le volume public est trop faible pour être montré. Les administrateurs voient le vrai nombre vérifié (`clicks_count_verified`) sans seuil d'affichage.
+
 ## [1.308.0] - 2026-09-30
 
 ### Modifié

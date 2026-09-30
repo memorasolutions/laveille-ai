@@ -14,10 +14,6 @@
     // ecosystems.labels) sont préparés par PublicDirectoryController::index() et reçus ici tels
     // quels — jamais recalculés en vue. Matchés en mémoire dans la boucle ci-dessous : jamais de
     // requête par carte (anti N+1) sur les 433+ outils.
-    // 2026-08-28 - seuil d'affichage du compteur de vues "propre" (voir plus bas, clicksCount) :
-    // calculé une seule fois hors boucle, même réglage que _highlight_card.blade.php (DRY sur la
-    // clé de config, pas sur l'appel - clé Settings identique aux deux endroits).
-    $viewsVerifiedMinDisplay = \Modules\Settings\Facades\Settings::get('directory.views_verified_min_display', 10);
     // Ticket #1868 - Cloudflare Turnstile sur le wizard "Proposer un outil" (étape 2 plus bas).
     // null tant que les clés Cloudflare sont absentes (état de ce projet au 2026-08-31) OU que
     // le coupe-circuit directory.turnstile.enabled est à false : le formulaire reste alors
@@ -34,17 +30,17 @@
     )
         ? \Modules\Authors\Services\TurnstileVerificationService::siteKey()
         : null;
-    $toolsJson = $tools->map(function($tool) use ($pricingOptions, $ecosystemCounts, $ecosystemLabels, $viewsVerifiedMinDisplay) {
+    // Compteur de vues réservé aux admins (radar produit) : le volume public est trop faible pour être
+    // affiché (décision fondateur 2026-09-30). Le public reçoit clicksCount=0, masqué par x-if="tool.clicksCount > 0".
+    $isAdmin = auth()->user()?->can('moderate_tools') ?? false;
+    $toolsJson = $tools->map(function($tool) use ($pricingOptions, $ecosystemCounts, $ecosystemLabels, $isAdmin) {
         $host = $tool->url ? parse_url($tool->url, PHP_URL_HOST) : '';
         $ecoTag = $tool->ecosystem_tag ?? null;
         $ecoCount = $ecoTag ? ($ecosystemCounts[$ecoTag] ?? 0) : 0;
         $ecoLabel = $ecoTag ? ($ecosystemLabels[$ecoTag] ?? ucfirst($ecoTag)) : null;
-        // Sous le seuil, la valeur RÉELLE de clicks_count_verified n'est transmise nulle part au
-        // client (même principe que _highlight_card.blade.php, qui ne calcule le nombre formaté
-        // que dans la branche @if) : les deux clés clicksCount/clicksCountFormatted retombent à 0.
-        $displayedClicksCount = (($tool->clicks_count_verified ?? 0) >= $viewsVerifiedMinDisplay)
-            ? (int) $tool->clicks_count_verified
-            : 0;
+        // Admin : vrai nombre vérifié, sans seuil. Public : la valeur RÉELLE n'est transmise nulle part
+        // au client, clicksCount/clicksCountFormatted valent 0.
+        $displayedClicksCount = $isAdmin ? (int) ($tool->clicks_count_verified ?? 0) : 0;
         return [
             'id' => $tool->id,
             'name' => $tool->name,
@@ -74,7 +70,7 @@
             // pour éviter toute divergence de séparateur de milliers avec le JS.
             // Corrigé 2026-08-28 : source basculée sur clicks_count_verified (compteur "propre",
             // filtré anti-robot + dédupliqué - clicks_count porte un historique pollué par les
-            // robots, voir migration 2026_08_28_100000_...). Sous le seuil, $displayedClicksCount
+            // robots, voir migration 2026_08_28_100000_...). Hors admin, $displayedClicksCount
             // vaut 0 : réutilise TEL QUEL le garde-fou x-if="tool.clicksCount > 0" déjà présent
             // dans le gabarit Alpine plus bas, sans dupliquer le seuil côté JS.
             'clicksCount' => $displayedClicksCount,

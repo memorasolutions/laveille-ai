@@ -53,7 +53,7 @@ class PublicDirectoryController extends Controller
                   ->whereIn('type', ['youtube', 'video', 'tutorial', 'formation']);
             }]);
 
-        // Les fiches en vedette (sponsorisées) sortent en premier, quel que soit le tri choisi.
+        // Les fiches en vedette (sponsorisées) sortent en premier dans l'ordre par défaut ; un tri explicite du visiteur reprend la main.
         $query = $query->orderByDesc('is_featured');
 
         $query = match (\Modules\Settings\Facades\Settings::get('directory.default_sort', 'random')) {

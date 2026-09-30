@@ -37,6 +37,16 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\View;
 use Modules\Directory\Models\Tool;
 
+/** Connecte un administrateur (rôle admin porte moderate_tools) pour le rendu direct de la vue. */
+function adminViewer(): void
+{
+    test()->seed(\Modules\RolesPermissions\Database\Seeders\RolesAndPermissionsSeeder::class);
+    test()->seed(\Modules\Directory\Database\Seeders\DirectoryModeratorRoleSeeder::class);
+    $user = \App\Models\User::factory()->create();
+    $user->assignRole('admin');
+    test()->actingAs($user);
+}
+
 uses(Tests\TestCase::class, Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 /**
@@ -88,7 +98,8 @@ function renderDirectoryIndexView($tools): string
     ])->render();
 }
 
-test('la carte principale affiche le compteur VÉRIFIÉ (clicks_count_verified), jamais l\'historique pollué (clicks_count), au-dessus du seuil', function () {
+test('ADMIN : la carte principale affiche le compteur VÉRIFIÉ (clicks_count_verified), jamais l\'historique pollué (clicks_count)', function () {
+    adminViewer();
     $tool = gridViewsCounterTool('avec-vues', clicksCountVerified: 1234, clicksCountLegacy: 999999);
 
     $html = html_entity_decode(renderDirectoryIndexView(collect([$tool])), ENT_QUOTES);
@@ -108,19 +119,28 @@ test('la carte principale affiche le compteur VÉRIFIÉ (clicks_count_verified),
     expect($html)->toContain("tool.clicksCountFormatted + ' vues'");
 });
 
-test('le badge reste masqué sous le seuil directory.views_verified_min_display, même avec un compteur vérifié non nul', function () {
+test('ADMIN : le vrai nombre vérifié est visible SANS seuil (même 5 vues)', function () {
+    adminViewer();
+    $tool = gridViewsCounterTool('sous-seuil-admin', clicksCountVerified: 5);
+
+    $html = html_entity_decode(renderDirectoryIndexView(collect([$tool])), ENT_QUOTES);
+
+    expect($html)->toContain('"clicksCount":5');
+});
+
+test('PUBLIC : le compteur est masqué (clicksCount=0) quel que soit le volume vérifié (décision 2026-09-30)', function () {
     // Seuil par défaut = 10 (SettingsDefaultsSeeder, non exécuté dans ce test -> valeur de repli
     // du Settings::get() dans index.blade.php). 5 vues vérifiées doit donc rester invisible :
     // un badge "5 vues" sur une fiche dont l'historique pollué affichait peut-être des milliers
     // de clics robots serait plus trompeur qu'aucun badge du tout.
-    $tool = gridViewsCounterTool('sous-seuil', clicksCountVerified: 5);
+    $tool = gridViewsCounterTool('sous-seuil', clicksCountVerified: 1234);
 
     $html = html_entity_decode(renderDirectoryIndexView(collect([$tool])), ENT_QUOTES);
 
     expect($html)->toContain('"clicksCount":0');
     expect($html)->toContain('"clicksCountFormatted":"0"');
     // Le chiffre réel (5) ne doit fuiter dans AUCUNE des deux clés transmises au client.
-    expect($html)->not->toContain('"clicksCount":5');
+    expect($html)->not->toContain('1234')->not->toContain('1 234');
 });
 
 test('le compteur reste transmis à zéro sans casser le gabarit (garde-fou évite un "0 vues" trompeur côté client)', function () {

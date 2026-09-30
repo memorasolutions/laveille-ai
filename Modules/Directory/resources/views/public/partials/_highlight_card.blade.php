@@ -18,7 +18,8 @@
     // rien ne s'affiche plutôt qu'un chiffre dérisoire ("2 vues") sur une fiche en réalité très
     // consultée mais dont le compteur propre est encore jeune - un badge absent n'induit personne
     // en erreur, un badge trompeur si.
-    $viewsVerifiedMinDisplay = \Modules\Settings\Facades\Settings::get('directory.views_verified_min_display', 10);
+    // 2026-09-30 - compteur réservé aux admins (radar produit), sans seuil : volume public trop faible
+    // pour être affiché (décision fondateur). Le seuil directory.views_verified_min_display n'est plus lu ici.
 @endphp
 
 <a href="{{ $tool->getPublicUrl() }}" class="rt-hl-card" title="{{ $tool->name }}" style="position:relative;">
@@ -41,7 +42,7 @@
         <div class="rt-hl-name">{{ $tool->name }}</div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;">
             <span class="rt-badge badge-{{ $tool->pricing }}">{{ $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing) }}</span>
-            @if(($tool->clicks_count_verified ?? 0) >= $viewsVerifiedMinDisplay)
+            @if((auth()->user()?->can('moderate_tools') ?? false) && ($tool->clicks_count_verified ?? 0) > 0)
                 <span style="display:inline-flex;align-items:center;gap:3px;color:var(--c-text-muted, #52586a);font-size:11px;font-weight:600;" title="{{ number_format($tool->clicks_count_verified, 0, ',', ' ') }} {{ __('vues') }}">
                     👁 {{ number_format($tool->clicks_count_verified, 0, ',', ' ') }}
                 </span>
