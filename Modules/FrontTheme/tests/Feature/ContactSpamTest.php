@@ -120,6 +120,35 @@ it('met en quarantaine (status spam) un spam clair, avec raison et sans courriel
     expect($msg->spam_reason)->not->toBeEmpty();
 });
 
+it('met en quarantaine (url_in_name) un nom contenant une URL, sans courriel', function () {
+    $response = submitContact(contactPayload([
+        'name' => 'Come see me ugy2mr2.gentlecouple.org/dkf8d6u?m=1',
+        'message' => 'Bonjour, je voulais simplement vous écrire un petit mot aujourd\'hui.',
+    ]));
+
+    expect($response->getSession()->get('success'))->not->toBeNull();
+    expect(sentSubjects())->toBeEmpty();
+
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('spam');
+    expect($msg->spam_reason)->toContain('url_in_name');
+});
+
+it('ne met pas en quarantaine un nom normal ou à initiale pointée (aucun faux positif url_in_name)', function () {
+    foreach (['Jean Tremblay', 'J.Robert Gagnon'] as $name) {
+        Mail::mailer('array')->getSymfonyTransport()->flush();
+
+        submitContact(contactPayload(['name' => $name]));
+
+        expect(sentSubjects())->toHaveCount(1);
+
+        $msg = ContactMessage::query()->latest('id')->first();
+        expect($msg->status)->toBe('new');
+        expect((string) $msg->spam_reason)->not->toContain('url_in_name');
+    }
+});
+
 it('met en quarantaine (status spam) quand le honeypot est rempli, sans courriel', function () {
     $response = submitContact(contactPayload([
         'hp_url' => 'http://bot.example/spam',

@@ -78,6 +78,13 @@ class ContactController extends Controller
             $reasons[] = 'liens>=4';
         }
 
+        // URL dans le champ NOM : un vrai nom n'en contient jamais (pourriel de rencontre/hameçonnage).
+        // Même motif que $urlCount (chemin exigé après le domaine : « J.Robert » ne déclenche pas).
+        $urlInName = preg_match('~(?:https?://|www\.|\b[a-z0-9][a-z0-9.-]*\.[a-z]{2,}/)\S*~i', (string) $validated['name']) === 1;
+        if ($urlInName) {
+            $reasons[] = 'url_in_name';
+        }
+
         // Anti-spam en couches (volontairement conservateur : on ne veut bloquer AUCUNE vraie personne).
         $signals = $this->spamSignals($validated, $request);
         foreach ($signals as $signal) {
@@ -88,9 +95,10 @@ class ContactController extends Controller
         $weakSignals = array_intersect(['shortener', 'keyword', 'allcaps'], $signals);
         $weakCount = count($weakSignals);
 
-        // Spam à haute confiance : honeypot (déjà traité), >=4 liens, time-trap (soumission
-        // quasi instantanée = robot), OU au moins 2 signaux « contenu » combinés.
-        $hardSpam = $urlCount >= 4
+        // Spam à haute confiance : honeypot (déjà traité), URL dans le nom, >=4 liens, time-trap
+        // (soumission quasi instantanée = robot), OU au moins 2 signaux « contenu » combinés.
+        $hardSpam = $urlInName
+            || $urlCount >= 4
             || in_array('timetrap', $signals, true)
             || $weakCount >= 2;
 

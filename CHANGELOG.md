@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.311.0] - 2026-09-30
+
+### Corrigé
+- **Le formulaire de contact met désormais en quarantaine les envois dont le champ nom contient une URL** (pourriel de rencontre ou d'hameçonnage : aucun courriel n'est transmis, succès silencieux, message consultable en quarantaine avec la raison `url_in_name`). Le motif exige un chemin après le domaine, donc un vrai nom comme « J.Robert » ne déclenche rien.
+
 ## [1.310.0] - 2026-09-30
 
 ### Ajouté
