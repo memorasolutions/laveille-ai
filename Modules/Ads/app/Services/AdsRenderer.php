@@ -74,11 +74,18 @@ class AdsRenderer
         // data-ad-layout="in-article" et un texte centré, et NON data-full-width-responsive
         // (réservé aux unités display responsive). Sans ce layout, l'unité ne se remplit pas.
         $isFluid = $format === 'fluid';
-        $insStyle = $isFluid
-            ? 'display:block;text-align:center;min-height:'.$height.'px'
-            : 'display:block;min-height:'.$height.'px';
 
-        $html = '<div class="ad-wrapper ad-external lv-adsense-wrap" style="min-height:'.$height.'px">'
+        // On NE réserve une hauteur (min-height anti-CLS) QUE pour les unités display, à hauteur
+        // prévisible. Une unité fluid (In-Article) se dimensionne SEULE : vide, elle s'effondre;
+        // remplie, elle prend exactement la hauteur de l'annonce servie. Lui imposer min-height
+        // laissait un espace VIDE sous une annonce plus courte que la réserve - défaut « autant
+        // d'espace » mesuré le 2026-10-01, Google recommande d'ailleurs de ne pas la figer.
+        $insStyle = $isFluid
+            ? 'display:block;text-align:center'
+            : 'display:block;min-height:'.$height.'px';
+        $wrapStyle = $isFluid ? '' : ' style="min-height:'.$height.'px"';
+
+        $html = '<div class="ad-wrapper ad-external lv-adsense-wrap"'.$wrapStyle.'>'
             .'<ins class="adsbygoogle lv-adsense" style="'.$insStyle.'"'
             .' data-ad-client="'.e($client).'"'
             .' data-ad-slot="'.e((string) $ad->ad_slot).'"'

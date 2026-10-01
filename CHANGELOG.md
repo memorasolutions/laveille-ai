@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.6] - 2026-10-01
+
+### Corrigé
+- **Les unités AdSense In-Article (« fluid ») ne laissent plus un grand espace vide sous l'annonce.** Un `min-height` (280 px par défaut) était imposé au conteneur ET à la balise `<ins>` de toutes les unités, y compris les unités fluid In-Article (emplacements `article-top` et `article-inline`). Or une unité fluid se dimensionne d'elle-même : quand Google sert une annonce plus courte que la réserve, le `min-height` gardait la boîte haute et laissait le reste en blanc sous l'annonce. Désormais, seule une unité **display** (hauteur prévisible, anti-CLS) conserve sa réserve de hauteur; une unité **fluid** n'en a aucune et colle exactement à la hauteur de l'annonce servie (ou disparaît si elle n'est pas remplie), conformément à la recommandation de Google. Les unités display (barre latérale, glossaire, annuaire, fin d'article) sont inchangées.
+
 ## [1.316.5] - 2026-10-01
 
 ### Modifié

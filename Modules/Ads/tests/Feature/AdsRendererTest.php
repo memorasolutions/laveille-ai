@@ -66,7 +66,10 @@ it('rend une unité In-Article (fluid) avec data-ad-layout et sans full-width-re
     expect($html)->toContain('data-ad-layout="in-article"')
         ->toContain('data-ad-format="fluid"')
         ->toContain('text-align:center')
-        ->not->toContain('data-full-width-responsive');
+        ->not->toContain('data-full-width-responsive')
+        // Une unité fluid se dimensionne seule : aucune hauteur imposée, sinon un espace vide
+        // reste sous une annonce plus courte que la réserve (défaut « autant d'espace » 2026-10-01).
+        ->not->toContain('min-height');
 });
 
 it('pousse immédiatement l\'unité AdSense quand le chargement différé est désactivé', function (): void {
