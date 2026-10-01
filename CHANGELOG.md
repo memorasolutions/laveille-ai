@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.9] - 2026-10-01
+
+### Corrigé
+- **Menu mobile : les sous-menus s'ouvrent enfin, et le menu ne se referme plus au premier clic.** Deux défauts combinés dans le script du thème. (1) Un gestionnaire global `body > click` retirait la classe d'ouverture du menu à CHAQUE clic sur la page; comme les déclencheurs des méga-menus (Outils, Annuaire, Apprendre) sont des `<button>` sans gestionnaire propre, leur clic remontait jusqu'au `body` et refermait tout le menu. Le gestionnaire ignore désormais les clics venant de l'intérieur du menu ou du bouton d'ouverture. (2) Le bascule de sous-menu mobile ne visait que `.menu-item-has-children > a`, donc jamais ces `<button>`; il vise maintenant aussi `> button.lv-mega-declencheur` et ouvre le sous-menu de repli (`ul.sub-menu`) sans toucher au panneau méga (caché en mobile). Correctif mobile uniquement (bascule bridée sous 992 px), aucun effet sur les méga-menus de bureau.
+
 ## [1.316.8] - 2026-10-01
 
 ### Modifié

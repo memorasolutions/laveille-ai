@@ -49,16 +49,19 @@
         var smallNav = $(".navigation-holder > .small-nav");
         var subMenu = smallNav.find(".sub-menu");
         var megamenu = smallNav.find(".mega-menu");
-        var menuItemWidthSubMenu = smallNav.find(".menu-item-has-children > a");
+        // Inclure aussi les declencheurs de mega-menu (des <button>, pas des <a>) : sans ca, les
+        // sous-menus Outils/Annuaire/Apprendre n'ouvraient jamais en mobile. On cible le sous-menu
+        // de repli (ul.sub-menu) et non siblings(), pour ne pas toucher le panneau mega (cache en mobile).
+        var menuItemWidthSubMenu = smallNav.find(".menu-item-has-children > a, .menu-item-has-children > button.lv-mega-declencheur");
 
         if (windowWidth <= 991) {
             subMenu.hide();
             megamenu.hide();
             menuItemWidthSubMenu.on("click", function (e) {
                 var $this = $(this);
-                $this.siblings().slideToggle();
                 e.preventDefault();
                 e.stopImmediatePropagation();
+                $this.closest("li").children("ul.sub-menu").slideToggle();
                 $this.toggleClass("rotate");
             })
         } else if (windowWidth > 991) {
@@ -69,7 +72,10 @@
 
     smallNavFunctionality();
 
-    $("body").on("click", function () {
+    $("body").on("click", function (e) {
+        // Ne PAS fermer le menu si le clic vient de l'interieur du menu ou du bouton d'ouverture :
+        // sinon cliquer un declencheur de sous-menu (un <button>) refermait tout le menu mobile.
+        if ($(e.target).closest('.navigation-holder, .mobail-menu, .open-btn').length) { return; }
         $('.navigation-holder').removeClass('slideInn');
         $('.open-btn').removeClass('x-close').attr("aria-expanded", "false");
     });
