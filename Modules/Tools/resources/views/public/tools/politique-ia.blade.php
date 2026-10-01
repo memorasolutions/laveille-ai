@@ -9,6 +9,7 @@
     attentif relèverait. Aucun appel réseau ici, et un test le vérifie.
 --}}
 @extends(fronttheme_layout())
+@section('no_ads', '1') {{-- Aucune pub : l'outil promet « tes réponses ne quittent jamais ton navigateur » et c'est un outil de conformité Loi 25. Charger AdSense (tiers Google) contredirait cette promesse, comme le dit déjà le docblock ci-dessus. --}}
 
 @section('title', $tool->name . ' - ' . config('app.name'))
 @section('meta_description', "Générateur gratuit de politique d'utilisation de l'IA pour les PME du Québec. Dix questions, un document prêt à adapter. Tes réponses ne quittent jamais ton navigateur.")

@@ -1,5 +1,6 @@
 <!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
 @extends(fronttheme_layout())
+@section('no_ads', '1') {{-- Aucune pub : l'outil promet « 100 % privé, aucune donnée chez nous » (posture Loi 25). Charger AdSense (tiers Google) contredirait cette promesse. --}}
 
 @section('title', 'Brain Dump 2026 : 10 min de papier + 30 sec d\'IA · La veille')
 @section('meta_description', 'Outil gratuit pour décharger ton mental en 10 minutes papier + IA. Validé par la science (Mueller & Oppenheimer 2014). 100% privé, aucune donnée chez nous.')

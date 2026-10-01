@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.2] - 2026-10-01
+
+### Corrigé
+- **Cohérence Loi 25 : retrait d'AdSense sur deux outils qui promettent la confidentialité.** Le « Brain Dump » (« 100 % privé, aucune donnée chez nous ») et le générateur de politique d'utilisation de l'IA (« tes réponses ne quittent jamais ton navigateur ») déclarent désormais `@section('no_ads')`, au même titre que l'anonymiseur et le constructeur de prompts. Charger le script AdSense de Google (un destinataire de données tiers) sur une page qui garantit que rien ne sort du navigateur aurait contredit sa propre promesse. Ces deux outils restent donc sans publicité ni chargeur AdSense.
+
 ## [1.316.1] - 2026-10-01
 
 ### Corrigé
