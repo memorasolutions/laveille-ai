@@ -616,6 +616,18 @@
                         </ul>
                         @endif
 
+                        {{-- Publicité In-Article (AdSense) à la première pause de lecture : après
+                             « À retenir », avant « Pourquoi ça compte » (~30-40 % du contenu, meilleure
+                             pratique oct. 2026 pour du contenu court : une seule unité, pas « après P3 »
+                             par réflexe). Format large fluid In-Article. Membres sans pub et alternance
+                             gérées par AdsRenderer. Espace réservé (min-height) = anti-CLS. Jamais en
+                             aperçu. Réutilise l'emplacement « article-inline » (DRY, même unité In-Article
+                             que le blogue) - un emplacement dédié « news-inline » pourra le remplacer si
+                             une mesure séparée devient nécessaire. --}}
+                        @if(! ($isPreview ?? false) && class_exists(\Modules\Ads\Services\AdsRenderer::class))
+                            {!! app(\Modules\Ads\Services\AdsRenderer::class)->render('article-inline') !!}
+                        @endif
+
                         {{-- 3. Pourquoi ça compte --}}
                         @if(!empty($ss['why_important']))
                         <h2 class="nw-section-heading">{{ __('Pourquoi ça compte') }}</h2>

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.314.0] - 2026-10-01
+
+### Ajouté
+- **AdSense dans les fiches d'actualité : une unité In-Article large à la première pause de lecture.** Jusqu'ici, les fiches d'actualité ne portaient AUCUNE publicité (seuls le blogue, le glossaire et l'annuaire en avaient). Une unité In-Article (format large, fluid) est désormais insérée après la section « À retenir » et avant « Pourquoi ça compte », soit à environ 30 à 40 % du contenu : la première pause de lecture naturelle d'une fiche courte, conformément aux meilleures pratiques AdSense d'octobre 2026 (une seule unité pour du contenu court, et non « après le 3e paragraphe » par réflexe). Les membres connectés ne voient aucune publicité (géré par `AdsRenderer`), l'espace est réservé pour éviter tout décalage de mise en page (anti-CLS), et l'unité réutilise l'emplacement « article-inline » déjà câblé (DRY). Un emplacement dédié « news-inline » pourra le remplacer si une mesure séparée devient nécessaire.
+
 ## [1.313.0] - 2026-10-01
 
 ### Ajouté
