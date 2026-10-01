@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.3] - 2026-10-01
+
+### Corrigé
+- **Bandeau « gratuit grâce à la publicité » : il ne recouvre plus rien sur mobile.** La carte fixe (environ 20 % de l'écran) masquait le contenu des outils, le haut de la barre de partage et un coin du bouton de retour en haut. Il devient une barre fine pleine largeur fixée en bas (une ligne sur écran large, deux à trois courtes en mobile étroit). Sa hauteur réelle est publiée dans `--lv-free-notice-h` : le contenu reçoit un `padding-bottom` équivalent, et la barre de partage, le bouton de retour en haut et l'onglet des témoins se placent au-dessus. Fermeture mémorisée, désactivation et contraste inchangés.
+
 ## [1.316.2] - 2026-10-01
 
 ### Corrigé
