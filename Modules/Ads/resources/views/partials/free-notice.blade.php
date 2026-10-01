@@ -12,11 +12,12 @@
        z-index 9991 : au-dessus de l'onglet des témoins (9990), sous le voile et la fenêtre des témoins. */
     .lv-fn { position: fixed; z-index: 9991; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 16px; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); background: #064E5A; color: #fff; box-shadow: 0 -2px 10px rgba(0, 0, 0, .2); font-size: 14px; line-height: 1.35; }
     .lv-fn[hidden] { display: none; }
-    .lv-fn p { margin: 0; flex: 1 1 auto; min-width: 0; color: #fff; }
-    .lv-fn button { flex: 0 0 auto; min-height: 44px; min-width: 44px; padding: 6px 14px; background: #fff; color: #064E5A; border: 2px solid #fff; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; }
+    #lv-free-notice p { margin: 0; flex: 1 1 auto; min-width: 0; color: #fff; font-size: inherit !important; line-height: inherit !important; }
+    .lv-fn button { flex: 0 0 auto; min-height: 44px; min-width: 44px; padding: 6px 12px; background: #fff; color: #064E5A; border: 2px solid #fff; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; }
     .lv-fn button:hover { background: #E6F2F4; }
     .lv-fn button:focus-visible { outline: 3px solid #FDE68A; outline-offset: 2px; }
-    @media (min-width: 768px) { .lv-fn { justify-content: center; font-size: 15px; } .lv-fn p { flex: 0 1 auto; } }
+    @media (max-width: 480px) { .lv-fn { font-size: 13px; gap: 10px; padding-left: 12px; padding-right: 12px; } .lv-fn button { font-size: 13px; } }
+    @media (min-width: 768px) { .lv-fn { justify-content: center; font-size: 15px; } #lv-free-notice p { flex: 0 1 auto; } }
     body.lv-fn-on { padding-bottom: var(--lv-free-notice-h, 0px); }
     body.lv-fn-on .share-bottom { bottom: var(--lv-free-notice-h, 0px) !important; }
     body.lv-fn-on .back-to-top { bottom: calc(15px + var(--lv-free-notice-h, 0px)) !important; }
