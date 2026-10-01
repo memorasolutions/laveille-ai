@@ -32,21 +32,24 @@ class AdsRenderer
             return null;
         }
 
-        $isMember = auth()->check();
+        // Interrupteur ADSENSE_MEMBERS_SEE_ADS : vrai (défaut) = les membres voient AdSense comme
+        // les anonymes; faux = ancien comportement (membres sans AdSense).
+        $membersSeeAds = (bool) config('services.adsense.members_see_ads');
+        $withheldFromUser = auth()->check() && ! $membersSeeAds;
         $hasAdsense = $ad->isAdsense() && (bool) config('services.adsense.client_id');
         $hasDirect = $ad->hasDirect();
 
         if ($hasAdsense && $hasDirect) {
             // Alternance quotidienne déterministe : jour pair = AdSense, impair = direct.
-            // Un membre reçoit TOUJOURS la pub directe, jamais AdSense.
-            $useAdsense = ! $isMember && $this->dayOfYear() % 2 === 0;
+            // Si les membres ne voient pas AdSense, un membre reçoit TOUJOURS la pub directe.
+            $useAdsense = ! $withheldFromUser && $this->dayOfYear() % 2 === 0;
 
             return $useAdsense ? $this->renderAdsense($ad) : $this->renderDirect($ad);
         }
 
         if ($hasAdsense) {
-            // AdSense seul : rien du tout pour un membre connecté.
-            return $isMember ? null : $this->renderAdsense($ad);
+            // AdSense seul : rien du tout pour un membre si l'interrupteur le retire aux membres.
+            return $withheldFromUser ? null : $this->renderAdsense($ad);
         }
 
         if ($hasDirect) {

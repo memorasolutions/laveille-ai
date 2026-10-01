@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.316.5] - 2026-10-01
+
+### Modifié
+- **AdSense est désormais visible pour tous sur les pages publiques : visiteurs, membres connectés et administrateurs.** Le chargeur AdSense et le rendu des emplacements (`AdsRenderer`) ne retirent plus la publicité aux membres. Les pages `no_ads` et le bandeau « gratuit grâce à la publicité » sont inchangés.
+- **Réversible** : l'interrupteur `ADSENSE_MEMBERS_SEE_ADS` (défaut `true`, `config('services.adsense.members_see_ads')`) conserve l'ancien comportement « membres sans publicité AdSense » comme option; le mettre à `false` le restaure (chargeur réservé aux visiteurs, membre servi par la pub directe ou rien).
+
 ## [1.316.4] - 2026-10-01
 
 ### Corrigé

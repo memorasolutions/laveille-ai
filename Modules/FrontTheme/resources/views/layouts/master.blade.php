@@ -29,10 +29,9 @@
     };
     </script>
     {{-- AdSense désactivé : (1) sur les pages déclarant @section('no_ads') (outils traitant des PII — posture Loi 25) ;
-         (2) pour les MEMBRES connectés (club des sages 2026-10-01, convergence des deux panels) — l'absence de pub
-         devient un avantage d'inscription, et ne pas charger adsbygoogle.js chez les membres est aussi le meilleur
-         gain INP. Les anonymes seuls voient AdSense. --}}
-    @if(config('services.adsense.client_id') && auth()->guest() && ! \Illuminate\Support\Facades\View::hasSection('no_ads'))
+         (2) pour les MEMBRES connectés SEULEMENT si ADSENSE_MEMBERS_SEE_ADS=false (décision 2026-10-01 : par défaut,
+         tout le monde voit AdSense; l'ancien « membres sans pub » reste disponible comme option). --}}
+    @if(config('services.adsense.client_id') && (config('services.adsense.members_see_ads') || auth()->guest()) && ! \Illuminate\Support\Facades\View::hasSection('no_ads'))
     <script>
     {{-- Loi 25 : le script tiers AdSense ne se charge JAMAIS avant le consentement analytique.
          C'est __lvOnAnalyticsConsent(true) qui l'appelle - à l'acceptation comme au retour d'un

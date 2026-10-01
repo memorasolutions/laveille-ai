@@ -79,7 +79,28 @@ it('pousse immédiatement l\'unité AdSense quand le chargement différé est d�
         ->toContain('min-height:280px');
 });
 
-it('ne rend rien pour un membre connecté quand l\'emplacement est AdSense seul', function (): void {
+it('rend AdSense à un membre connecté par défaut (members_see_ads vrai) quand l\'emplacement est AdSense seul', function (): void {
+    adsFake(['ad_slot' => '1234567890']);
+
+    $this->actingAs(User::factory()->create());
+
+    expect(config('services.adsense.members_see_ads'))->toBeTrue()
+        ->and(app(AdsRenderer::class)->render('test-slot'))->toContain('adsbygoogle');
+});
+
+it('rend AdSense à un anonyme que members_see_ads soit vrai ou faux', function (): void {
+    adsFake(['ad_slot' => '1234567890']);
+
+    foreach ([true, false] as $flag) {
+        config(['services.adsense.members_see_ads' => $flag]);
+        Cache::flush();
+
+        expect(app(AdsRenderer::class)->render('test-slot'))->toContain('adsbygoogle');
+    }
+});
+
+it('ne rend rien pour un membre connecté quand members_see_ads est faux et l\'emplacement AdSense seul', function (): void {
+    config(['services.adsense.members_see_ads' => false]);
     adsFake(['ad_slot' => '1234567890']);
 
     $this->actingAs(User::factory()->create());
@@ -99,7 +120,8 @@ it('rend la pub directe avec le label Publicité pour un anonyme ET pour un memb
     expect($member)->toContain('Promo maison')->toContain('<span class="ad-label">Publicité</span>');
 });
 
-it('donne toujours la pub directe à un membre quand les deux sont remplis, quel que soit le jour', function (): void {
+it('donne toujours la pub directe à un membre quand les deux sont remplis et members_see_ads est faux', function (): void {
+    config(['services.adsense.members_see_ads' => false]);
     adsFake(['ad_code' => '<p>Promo maison</p>', 'ad_slot' => '1234567890']);
     $this->actingAs(User::factory()->create());
 
@@ -132,7 +154,26 @@ it('alterne AdSense et pub directe d\'un jour à l\'autre pour un anonyme', func
     expect($seen)->toContain('adsense')->toContain('direct');
 });
 
-it('ne sert pas à un membre une version AdSense mise en cache pour un anonyme', function (): void {
+it('alterne AdSense et pub directe pour un membre quand members_see_ads est vrai', function (): void {
+    adsFake(['ad_code' => '<p>Promo maison</p>', 'ad_slot' => '1234567890']);
+    $this->actingAs(User::factory()->create());
+
+    $seen = [];
+    foreach ([1, 2] as $offset) {
+        $this->travelTo(now('America/Toronto')->startOfYear()->addDays($offset)->setHour(12));
+        Cache::flush();
+
+        $html = app(AdsRenderer::class)->render('test-slot');
+        $seen[] = str_contains((string) $html, 'adsbygoogle') ? 'adsense' : 'direct';
+    }
+
+    $this->travelBack();
+
+    expect($seen)->toContain('adsense')->toContain('direct');
+});
+
+it('ne sert pas à un membre une version AdSense mise en cache pour un anonyme (members_see_ads faux)', function (): void {
+    config(['services.adsense.members_see_ads' => false]);
     adsFake(['ad_slot' => '1234567890']);
 
     expect(app(AdsRenderer::class)->render('test-slot'))->toContain('adsbygoogle');

@@ -171,6 +171,9 @@ return [
         'client_id' => env('ADSENSE_CLIENT_ID'),
         // Bandeau « gratuit grâce à la pub » (Modules/Ads) : false = aucun bandeau.
         'free_notice' => (bool) env('ADSENSE_FREE_NOTICE', true),
+        // true (défaut) = AdSense visible pour tous (anonymes, membres, admins);
+        // false = ancien comportement, aucune pub AdSense pour les membres connectés.
+        'members_see_ads' => (bool) env('ADSENSE_MEMBERS_SEE_ADS', true),
     ],
 
     // Google Analytics (frontend — consent mode v2, gated privacy_enabled)
