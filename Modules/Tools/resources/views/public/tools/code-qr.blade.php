@@ -598,6 +598,8 @@ $lvDefaultDomainName = $lvDefaultDomain ? $lvDefaultDomain->domain : 'lurl.ca';
                             </div>
                         </div>
 
+                        @include('tools::public.partials.tool-ad')
+
                         {{-- Historique --}}
                         <template x-if="qrHistory.length > 0">
                             <div class="mt-3 pt-3 border-top">
@@ -680,7 +682,6 @@ $lvDefaultDomainName = $lvDefaultDomain ? $lvDefaultDomain->domain : 'lurl.ca';
     </div>
 </div>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'code-qr'])
-@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

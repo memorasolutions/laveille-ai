@@ -690,6 +690,9 @@
 
             </div>{{-- /tab-pane grille --}}
             </div>{{-- /tab-content --}}
+            <div class="no-print">
+                @include('tools::public.partials.tool-ad')
+            </div>
 
             {{-- Brouillon --}}
             <div class="mt-4 pt-3 border-top no-print">
@@ -1045,7 +1048,6 @@
 
 <div class="no-print">
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'mots-croises'])
-@include('tools::public.partials.tool-ad')
 </div>
 @endsection
 

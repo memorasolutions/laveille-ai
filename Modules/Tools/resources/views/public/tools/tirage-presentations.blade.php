@@ -310,6 +310,8 @@
                             </div>
                         </template>
 
+                        @include('tools::public.partials.tool-ad')
+
                         {{-- Loi 25 --}}
                         <details style="font-size: 0.75rem; color: #999;">
                             <summary style="cursor: pointer;">{{ __('Protection de vos données (Loi 25)') }}</summary>
@@ -327,7 +329,6 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'tirage-presentations'])
-@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

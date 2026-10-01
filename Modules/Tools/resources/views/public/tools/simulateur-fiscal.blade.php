@@ -525,6 +525,8 @@ function fiscalSim(cfg) {
                             </div>
                         </details>
 
+                        @include('tools::public.partials.tool-ad')
+
                         {{-- Concepts importants --}}
                         <details class="mb-4">
                             <summary style="cursor: pointer; font-family: var(--f-heading); font-weight: 600; color: var(--c-dark);">{{ __('Concepts importants à retenir') }}</summary>
@@ -644,5 +646,4 @@ function fiscalSim(cfg) {
     </div>
 </div>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'simulateur-fiscal'])
-@include('tools::public.partials.tool-ad')
 @endsection

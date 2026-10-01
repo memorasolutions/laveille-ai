@@ -513,8 +513,8 @@
         </div>
     </div>
 </section>
-@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'prompteur'])
 @include('tools::public.partials.tool-ad')
+@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'prompteur'])
 @endsection
 
 @push('scripts')

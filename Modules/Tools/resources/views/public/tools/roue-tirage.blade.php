@@ -350,6 +350,8 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
     </div>
 </section>
 
+@include('tools::public.partials.tool-ad')
+
 {{-- Modale aide --}}
 <div class="modal fade" id="roueTirageHelpModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
@@ -379,7 +381,6 @@ input[type=checkbox].rw-check { display: inline-block !important; width: 18px; h
     </div>
 </div>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'roue-tirage'])
-@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

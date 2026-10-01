@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.8] - 2026-10-01
+
+### Modifié
+- **Placement AdSense repensé outil par outil sur les pages d'outils.** L'unité publicitaire de chaque page d'outil est déplacée à l'endroit stratégique propre à cet outil, au lieu d'un emplacement uniforme en bas de page : sous le résultat pour les générateurs (code QR, mots de passe, équipes, tirage de présentations), entre le résultat et la section explicative pour les outils de contenu (taxes, simulateur fiscal, liens Google, mots-croisés), sous l'outil complet pour les outils interactifs (prompteur, minuteur, roue, oscilloscope). Jamais dans les contrôles interactifs ni dans un conteneur masqué. Les mots-croisés gardent la publicité hors impression (`no-print`). Les 4 outils à posture Loi 25 (anonymiseur, brain dump, constructeur de prompts, générateur de politique IA) restent sans publicité.
+
 ## [1.316.7] - 2026-10-01
 
 ### Corrigé

@@ -368,6 +368,8 @@
                             </template>
                         </div>
 
+                        @include('tools::public.partials.tool-ad')
+
                         {{-- Historique des recherches --}}
                         <template x-if="searchHistory.length > 0">
                             <div class="mt-4 pt-3 border-top">
@@ -437,7 +439,6 @@
     </div>
 </div>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'liens-google'])
-@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

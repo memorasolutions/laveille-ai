@@ -664,8 +664,8 @@
         </div>
     </div>
 </section>
-@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'minuteur-visuel'])
 @include('tools::public.partials.tool-ad')
+@include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'minuteur-visuel'])
 @endsection
 
 @push('scripts')

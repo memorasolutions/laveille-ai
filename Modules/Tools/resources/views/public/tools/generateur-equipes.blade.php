@@ -225,6 +225,8 @@
                             </div>
                         </template>
 
+                        @include('tools::public.partials.tool-ad')
+
                         <p class="text-muted mt-3 mb-0" style="font-size: 0.8rem;">
                             🔒 {{ __('Les équipes sont générées aléatoirement dans votre navigateur avec crypto.getRandomValues(). Glissez-déposez les noms entre les équipes pour ajuster.') }}
                         </p>
@@ -235,7 +237,6 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'generateur-equipes'])
-@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

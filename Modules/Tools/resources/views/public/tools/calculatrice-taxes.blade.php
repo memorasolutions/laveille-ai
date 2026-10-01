@@ -249,6 +249,7 @@
                         </div>
 
                         <p class="text-muted mt-3 mb-0" style="font-size: 0.8rem;">{{ __('Taux mis à jour en 2025. TVQ calculée sur le montant avant taxes. Cet outil est fourni à titre indicatif.') }}</p>
+                        @include('tools::public.partials.tool-ad')
                     </div>
                 </div>
             </div>
@@ -256,7 +257,6 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'calculatrice-taxes'])
-@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

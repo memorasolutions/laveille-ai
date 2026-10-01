@@ -837,6 +837,8 @@
         </main>
     </div>
 
+    @include('tools::public.partials.tool-ad')
+
     <!-- Modal sauvegarde -->
     <dialog id="modal-save" class="modal">
         <div class="modal-content">
@@ -873,7 +875,6 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'oscilloscope-rlc'])
-@include('tools::public.partials.tool-ad')
 @endsection
 @push('scripts')
 <script src="{{ asset('tools/oscilloscope-rlc/assets/js/storage.js') }}"></script>

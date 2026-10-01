@@ -199,6 +199,8 @@
                             </p>
                         </div>
 
+                        @include('tools::public.partials.tool-ad')
+
                         <p class="text-muted mt-3 mb-0" style="font-size: 0.75rem;">
                             🔒 {{ __('Généré localement avec crypto.getRandomValues(). Aucune donnée n\'est envoyée.') }}
                         </p>
@@ -209,7 +211,6 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'generateur-mots-passe'])
-@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')
