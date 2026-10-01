@@ -256,6 +256,7 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'calculatrice-taxes'])
+@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

@@ -209,6 +209,7 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'generateur-mots-passe'])
+@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

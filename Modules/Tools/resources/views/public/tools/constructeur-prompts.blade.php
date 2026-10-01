@@ -1811,6 +1811,7 @@ window.addEventListener('load', function () {
 <x-core::confirm-modal name="cp-rename-merge" :confirm-label="__('Confirmer la fusion')" variant="info" icon="🔗" />
 
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'constructeur-prompts'])
+@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('head')

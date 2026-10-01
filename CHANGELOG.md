@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.315.0] - 2026-10-01
+
+### Ajouté
+- **AdSense sur les pages d'outils, de façon non intrusive.** Nouvel emplacement « tool-page » (display responsive, hauteur réservée anti-CLS, chargement différé) rendu UNE fois APRÈS la sortie de l'outil et son encart infolettre, jamais dans les contrôles ni au-dessus. Gabarit commun : `tools::public.partials.tool-ad` (désactivable : module Ads absent ou emplacement inactif = rien n'est rendu). Branché sur le constructeur de prompts, la calculatrice de taxes et le générateur de mots de passe. Les membres connectés ne voient aucune publicité.
+
+### Modifié
+- **Articles de blogue et fiches d'actualité : AdSense pur.** Les emplacements `article-top`, `article-inline` et `article-bottom` n'alternent plus avec une pub directe maison (encart livre) : le visiteur voit toujours AdSense, le membre connecté ne voit plus rien. La migration journalise les anciennes valeurs d'`ad_code` avant de les retirer et est réversible (restauration de l'encart livre sur `article-inline`).
+
 ## [1.314.1] - 2026-10-01
 
 ### Corrigé
