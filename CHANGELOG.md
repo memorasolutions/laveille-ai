@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.314.1] - 2026-10-01
+
+### Corrigé
+- **Un placeholder de développement (« Emplacement publicitaire — haut d'article ») fuyait aux visiteurs un jour sur deux.** L'emplacement `article-top` portait en base de données un ancien `ad_code` DIRECT de remplissage, préservé lors de la mise en place d'AdSense. Conséquence : un admin le voyait en permanence (chemin pub directe réservé aux membres) et un visiteur anonyme le voyait un jour sur deux (alternance directe/AdSense), au lieu d'une vraie annonce. Une migration retire ce placeholder : les emplacements concernés redeviennent AdSense pur (l'admin ne voit plus rien, le visiteur voit toujours AdSense). Aucun `ad_code` direct légitime (encart livre) n'est touché, filtré par la signature texte du placeholder.
+
 ## [1.314.0] - 2026-10-01
 
 ### Ajouté
