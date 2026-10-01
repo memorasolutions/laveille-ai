@@ -12,7 +12,7 @@
     .lv-fn button { min-height: 44px; min-width: 44px; padding: 8px 18px; background: #fff; color: #064E5A; border: 2px solid #fff; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; }
     .lv-fn button:hover { background: #E6F2F4; }
     .lv-fn button:focus-visible { outline: 3px solid #FDE68A; outline-offset: 2px; }
-    @media (min-width: 768px) { .lv-fn { left: auto; right: 20px; max-width: 460px; } }
+    @media (min-width: 768px) { .lv-fn { right: auto; left: 20px; max-width: 440px; } }
     body.lv-fn-on { padding-bottom: 110px; }
 </style>
 <div class="lv-fn" id="lv-free-notice" role="region" aria-label="{{ __('Information sur la publicité') }}" hidden>

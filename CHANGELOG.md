@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.1] - 2026-10-01
+
+### Corrigé
+- **Le bandeau « gratuit grâce à la publicité » masquait le bouton de retour en haut de page** (coin inférieur droit). Sur ordinateur, il est désormais ancré en bas à gauche, au-dessus de l'onglet des témoins, et laisse libres le bouton de retour en haut et la barre de partage.
+
 ## [1.316.0] - 2026-10-01
 
 ### Ajouté
