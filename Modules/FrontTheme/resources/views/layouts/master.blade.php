@@ -543,6 +543,12 @@
         .share-sidebar{display:none!important;}
         .share-bottom{display:flex!important;position:fixed!important;bottom:0;left:0;right:0;z-index:999;background:#fff!important;border-top:1px solid #e5e7eb!important;padding:8px 0!important;justify-content:center!important;gap:16px;box-shadow:0 -2px 8px rgba(0,0,0,0.08)!important;}
         .share-bottom .share-btn{width:44px;height:44px;}
+        {{-- Dégagement du bas de page : la barre fixe (8 + 44 + 8 + 1 de bordure = 61px) recouvrait la fin
+             du contenu (mesuré sur /outils/roue-tirage : bas de la roue masqué). Sa hauteur est publiée
+             dans --lv-share-h pour que le bandeau « gratuit grâce à la pub » (module Ads) l'additionne
+             à la sienne au lieu de l'écraser. --}}
+        :root{--lv-share-h:61px;}
+        body{padding-bottom:var(--lv-share-h);}
     }
     </style>
     @endif

@@ -18,7 +18,7 @@
     .lv-fn button:focus-visible { outline: 3px solid #FDE68A; outline-offset: 2px; }
     @media (max-width: 480px) { .lv-fn { font-size: 13px; gap: 10px; padding-left: 12px; padding-right: 12px; } .lv-fn button { font-size: 13px; } }
     @media (min-width: 768px) { .lv-fn { justify-content: center; font-size: 15px; } #lv-free-notice p { flex: 0 1 auto; } }
-    body.lv-fn-on { padding-bottom: var(--lv-free-notice-h, 0px); }
+    body.lv-fn-on { padding-bottom: calc(var(--lv-share-h, 0px) + var(--lv-free-notice-h, 0px)); }
     body.lv-fn-on .share-bottom { bottom: var(--lv-free-notice-h, 0px) !important; }
     body.lv-fn-on .back-to-top { bottom: calc(15px + var(--lv-free-notice-h, 0px)) !important; }
     body.lv-fn-on .cc-fab { bottom: var(--lv-free-notice-h, 0px); }

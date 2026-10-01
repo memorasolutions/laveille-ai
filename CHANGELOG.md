@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.4] - 2026-10-01
+
+### Corrigé
+- **La barre de partage fixe en bas ne recouvre plus la fin des pages (mobile et tablette).** Fixe sous 1280 px (environ 61 px de haut), elle masquait le bas du contenu sur toutes les pages qui la portent, par exemple le bas de la roue sur /outils/roue-tirage. Le bas de page est désormais dégagé de la hauteur de la barre, et, quand le bandeau « gratuit grâce à la publicité » est affiché, de la barre plus le bandeau.
+
 ## [1.316.3] - 2026-10-01
 
 ### Corrigé
