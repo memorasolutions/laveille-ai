@@ -1,54 +1,34 @@
-# État de session - la-veille-de-stef-v2
+# État de session - La veille de Stef v2
 
-> Mis à jour le **2026-09-30 (Québec)**. Fichier réécrit, jamais empilé.
+> Fichier UNIQUE de reprise (réécrit, jamais empilé). Dernière mise à jour : 2026-10-01, ~17h00 Québec (21:00 UTC).
 
-## ✅ Fait et prouvé ce cycle (EN PROD)
+## 1. Où on en est (terminé et prouvé aujourd'hui)
 
-### #2915 - Formulaire de contact durci contre le spam - DÉPLOYÉ (v1.312.2 + v1.312.3)
-- **Ce qui a été corrigé** : le piège temporel (`time-trap`) de `ContactController::spamSignals()` ne se
-  déclenchait que si `form_ts` était présent ET récent. Un robot qui poste EN DIRECT sur la route
-  (sans charger la page) n'envoie aucun `form_ts` et passait à travers. Désormais, `form_ts` absent /
-  vide / non numérique = signal FORT -> quarantaine silencieuse (status='spam', aucun courriel; le
-  message reste conservé et consultable en admin, purgé automatiquement après 60 jours seulement).
-- **Zéro faux positif prouvé** : la seule vue du formulaire (`contact.blade.php:48`) rend toujours
-  `<input hidden name="form_ts">`, c'est un POST HTML classique (aucun JS n'intercepte, aucun fetch),
-  donc une vraie soumission porte toujours le jeton. Un `form_ts` ANCIEN (page en cache) reste ACCEPTÉ.
-  Vérifié en prod : `curl https://laveille.ai/contact` -> `name="form_ts" value="..."` + honeypot présents.
-- **Passe adversariale /100 (sous-agent frais, indépendant)** : verdict `faux_positif_possible: false`.
-  Il a lu le code réel (formulaire unique, route unique, aucune interception JS, `/contact` non caché)
-  et n'a trouvé AUCUN chemin de faux positif ni de contournement nouveau. Deux points mineurs relevés,
-  tous deux traités : (1) couverture de test des cas vide/non numérique -> test paramétré ajouté;
-  (2) mon affirmation « jamais supprimé » était fausse -> corrigée en « purgé après 60 jours ».
-- **Tests** : `ContactSpamTest` = 12 passent (63 assertions), dont 5 neufs ce cycle (form_ts absent,
-  vide, `abc`, `NaN` -> quarantaine; form_ts vieux de 7200 s -> accepté sans faux positif) +
-  non-régression du cas légitime.
-- **Défense en profondeur déjà en place** : honeypot + url_in_name (v1.311.0, qui attrapait déjà le
-  pourriel reçu) + >=4 liens + mots-clés + tout-majuscules + time-trap (renforcé ici).
-- **Livraison** : commit dd43a1a2d (fix, v1.312.2) puis le lot de tests (v1.312.3), poussés origin +
-  forge, CI verte, déploiement cPanel vert, Cloudflare purgé.
+**Chantier AdSense complet (v1.314.0 → v1.316.8), tout prouvé en prod :**
+- ✅ Pub dans le contenu (actus + articles) = AdSense pur, encart livre retiré. (#2932, #2933)
+- ✅ Pub visible pour TOUS (visiteurs, membres, admins), interrupteur `ADSENSE_MEMBERS_SEE_ADS` réversible. (#2936, v1.316.5)
+- ✅ **Espace vide sous les pubs de contenu RÉGLÉ (#2937, v1.316.6 puis v1.316.7).** Cause en deux temps : retirer notre `min-height` (nécessaire) ne suffisait pas, Google pose lui-même `height:280` sur une unité In-Article (fluid) et y aligne en haut une création courte → blanc. Bascule `article-top` + `article-inline` de fluid vers display responsive (auto), qui remplit son cadre. Preuve navigateur. Leçon en mémoire (`adsense-in-article-reserve-un-cadre-display-le-remplit`).
+- ✅ **Placement AdSense stratégique par outil (#2938, v1.316.8).** 12 emplacements déplacés à l'ancre propre à chaque outil (sous le résultat / entre résultat et explication / sous l'outil complet), jamais dans les contrôles, mots-croisés en `no-print`. QC navigateur sur 4 types : pub largeur 635-658 px, jamais masquée, outil intact. 4 outils Loi 25 restent sans pub.
+- ✅ Bandeau « gratuit grâce à la pub » (module Ads, fermable, désactivable), barre fine mobile. (#2929)
+- ✅ Barre de partage fixe mobile qui masquait le bas des pages : corrigée. (#2935, v1.316.4)
 
-### #2919 - Article de blogue « Gemini skills / Opal » (cycle précédent, en prod)
-- En ligne : https://laveille.ai/blog/gemini-skills-c-est-quoi-pourquoi-google-ferme-opal (id 76,
-  catégorie intelligence-artificielle). Faits vérifiés aux sources primaires Google, image validée par
-  2 familles d'oracles, one-shot auto-supprimé, Cloudflare purgé.
+**Veille /actu2 du 2026-10-01 (#2926) :** 2 fiches publiées + prouvées (63402, 63403), 1 en hold (63060 Reddit). Lanceur neutralisé, crons propres.
 
-## 🔄 En cours / à faire
-- **Turnstile (#2368)** : protection ANTI-SPAM SUPPLÉMENTAIRE au formulaire. Le code est prêt et testé;
-  il MANQUE la clé secrète. Le MCP Cloudflare N'EXPOSE PAS d'outil de création de widget Turnstile ->
-  le widget se crée dans le tableau de bord Cloudflare (par le fondateur), et la clé secrète va dans
-  1Password (règle 15 : Claude ne reçoit jamais un secret en clair). DÉCISION/ACTION DU FONDATEUR.
-  À noter : le formulaire est DÉJÀ protégé en profondeur sans Turnstile - c'est un renfort, pas un manque.
-- **#2798** rapport GA4 « ce qui amène des visiteurs » : relancer après le 7 oct (publications balisées).
-- **#2919 suite optionnelle** : promo sociale (FB/LinkedIn/GMB) de l'article Gemini skills - actu chaude.
-  NON faite (non demandée); à préparer sur signal, le fondateur voit le texte exact avant tout envoi.
+## 2. Ce qui est en cours / prochaine action non bloquée
 
-## ⏸️ Décisions / actions du fondateur
-- **Turnstile** : créer le widget au tableau de bord Cloudflare + déposer la clé secrète dans 1Password
-  (coffre AI-Claude, étiquette projet:laveille), OU dire qu'on s'en tient à la défense actuelle.
-- **AdSense (#2907)** : verdict d'examen (humain, Google), en attente.
-- **Promo sociale de l'article Gemini skills** : à faire ou non?
+- **RIEN en cours** : le chantier AdSense demandé aujourd'hui est livré et prouvé de bout en bout. Le reste (section 3) dépend de toi ou de l'extérieur.
 
-## Prochaine action (au retour)
-#2915 est clos (déployé, prouvé, adversaire /100 revenu propre). Les items restants dépendent du
-fondateur (clé Turnstile, verdict AdSense) ou d'une date (#2798, après le 7 oct). Sur ton signal :
-préparer la promo sociale de l'article Gemini skills.
+## 3. Ce qui BLOQUE (sur le fondateur ou l'extérieur)
+
+- **#2799 mesure de contenu tous projets** : exige le club des sages 3 rounds → Gemini et Perplexity NAVIGATEUR déconnectés → `ia-sync` (fermer le navigateur avant) / reconnexion par toi.
+- **#2798** : décision à toi (baliser les liens sociaux, ROI faible, vs prioriser SEO/AEO - je recommande SEO/AEO).
+- **#2927 LucidNest** : correctif MCP dans la session LucidNest.
+- **#2931 Reddit** : primaire illisible → le 15 oct.
+- **#2924 FTC** : hold jusqu'au 14 oct.
+- **#2276, #2638** : prompts déjà livrés, action dans d'AUTRES sessions.
+
+## 4. Prochaine action proposée
+
+1. Si tu reconnectes Gemini/Perplexité navigateur : reprendre #2799 (club des sages mesure de contenu).
+2. #2798 : me dire si on investit dans le balisage social ou si on priorise SEO/AEO.
+3. Sinon, j'attends tes prochains signalements (visuels, défauts, nouvelles demandes).
