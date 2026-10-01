@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.313.0] - 2026-10-01
+
+### Ajouté
+- **AdSense installé intelligemment sur laveille.ai, avec placement informé par les oracles (module Ads, désactivable et exportable).** Le compte AdSense « 9307-6719 Québec inc. » (éditeur pub-2358625447182467) est approuvé et le site est « Prêt ». Sept unités d'annonce ont été créées et câblées sur sept emplacements nommés déjà présents dans les gabarits : article après introduction, milieu d'article et fin d'article, barre latérale, glossaire, fiche d'outil de l'annuaire et bas de liste de l'annuaire. Rapport complet des emplacements et dimensions : `docs/specs/2026-10-01-ads-adsense-placement-design.md`.
+- **Membres connectés = zéro AdSense.** Le script `adsbygoogle.js` ne se charge plus du tout pour un membre (condition `auth()->guest()` au layout) et le renderer ne produit aucune balise AdSense pour un membre. L'absence de publicité devient un avantage d'inscription, et le gain est aussi un meilleur INP. Les visiteurs anonymes seuls voient AdSense, et uniquement après consentement analytique (Loi 25, mécanisme déjà en place).
+- **Alternance pub directe maison / AdSense par emplacement.** Un emplacement qui porte à la fois une pub directe (ex. encart livre) et un identifiant AdSense alterne chaque jour de façon déterministe. Un membre reçoit toujours la pub directe.
+- **Rendu AdSense anti-CLS et différé.** Chaque emplacement réserve sa hauteur (`min-height`) et se charge à l'approche du viewport (IntersectionObserver), pour ne pas provoquer de saut de page ni concurrencer le LCP. Prise en charge correcte des unités In-Article (`data-ad-layout="in-article"`).
+- Nouveaux champs d'emplacement dans l'admin : identifiant AdSense (`ad_slot`), format, hauteur réservée et chargement différé.
+
+### Corrigé
+- **Module Ads : `clearCache()` visait une clé de cache inexistante** (le suffixe du jour America/Toronto était oublié), ce qui retardait jusqu'à 600 s la prise en compte d'une modification d'emplacement. Les deux familles de clés (rendu direct compilé et ligne résolue) sont désormais purgées.
+- **Module Ads : impossible de créer un emplacement externe (AdSense) depuis l'admin.** Les interrupteurs `is_external`/`is_active`/`lazy` n'étaient pas lus de façon fiable (un interrupteur décoché n'est pas transmis par le formulaire); ils sont maintenant lus explicitement.
+
 ## [1.312.3] - 2026-09-30
 
 ### Ajouté (tests)

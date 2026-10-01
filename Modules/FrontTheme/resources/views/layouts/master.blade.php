@@ -28,8 +28,11 @@
       if (granted && typeof window.__lvLoadAdsense === 'function') { window.__lvLoadAdsense(); }
     };
     </script>
-    {{-- AdSense désactivé sur les pages déclarant @section('no_ads') (outils traitant des PII — posture Loi 25) --}}
-    @if(config('services.adsense.client_id') && ! \Illuminate\Support\Facades\View::hasSection('no_ads'))
+    {{-- AdSense désactivé : (1) sur les pages déclarant @section('no_ads') (outils traitant des PII — posture Loi 25) ;
+         (2) pour les MEMBRES connectés (club des sages 2026-10-01, convergence des deux panels) — l'absence de pub
+         devient un avantage d'inscription, et ne pas charger adsbygoogle.js chez les membres est aussi le meilleur
+         gain INP. Les anonymes seuls voient AdSense. --}}
+    @if(config('services.adsense.client_id') && auth()->guest() && ! \Illuminate\Support\Facades\View::hasSection('no_ads'))
     <script>
     {{-- Loi 25 : le script tiers AdSense ne se charge JAMAIS avant le consentement analytique.
          C'est __lvOnAnalyticsConsent(true) qui l'appelle - à l'acceptation comme au retour d'un
@@ -724,6 +727,8 @@
     window.__openLinkedIn=function(url,text){window.__openShare(url,text,'LinkedIn','#0A66C2');};
     </script>
     {{-- S134 dark-toggle DÉSACTIVÉ (décision user) — partial conservé pour réactivation future. --}}
+    {{-- Ads : chargement différé des unités AdSense (module désactivable : @includeIf ne casse rien s'il est absent). --}}
+    @includeIf('ads::partials.lazy-loader')
 </body>
 
 </html>

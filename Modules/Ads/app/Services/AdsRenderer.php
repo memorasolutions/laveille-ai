@@ -16,20 +16,93 @@ use Modules\Ads\Models\AdPlacement;
 
 class AdsRenderer
 {
+    /**
+     * Rend l'emplacement `$key`.
+     *
+     * Le choix de l'audience (membre ou anonyme) et l'alternance AdSense / pub directe se
+     * décident ICI, hors de tout cache : sinon une version mise en cache pour un anonyme
+     * serait servie à un membre (ou l'inverse). Seul le rendu DIRECT compilé (coût réel de la
+     * compilation Blade) reste mis en cache par clé et par jour.
+     */
     public function render(string $key): ?string
+    {
+        $ad = $this->resolveActive($key);
+
+        if (! $ad) {
+            return null;
+        }
+
+        $isMember = auth()->check();
+        $hasAdsense = $ad->isAdsense() && (bool) config('services.adsense.client_id');
+        $hasDirect = $ad->hasDirect();
+
+        if ($hasAdsense && $hasDirect) {
+            // Alternance quotidienne déterministe : jour pair = AdSense, impair = direct.
+            // Un membre reçoit TOUJOURS la pub directe, jamais AdSense.
+            $useAdsense = ! $isMember && $this->dayOfYear() % 2 === 0;
+
+            return $useAdsense ? $this->renderAdsense($ad) : $this->renderDirect($ad);
+        }
+
+        if ($hasAdsense) {
+            // AdSense seul : rien du tout pour un membre connecté.
+            return $isMember ? null : $this->renderAdsense($ad);
+        }
+
+        if ($hasDirect) {
+            return $this->renderDirect($ad);
+        }
+
+        return null;
+    }
+
+    /**
+     * Rendu de l'unité AdSense (balise `<ins>`). Jamais mis en cache : il dépend de l'audience.
+     * Le label « Publicité » est omis, AdSense s'auto-étiquette.
+     */
+    public function renderAdsense(AdPlacement $ad): string
+    {
+        $height = (int) ($ad->min_height ?: 280);
+        $format = (string) ($ad->ad_format ?: 'auto');
+        $client = (string) config('services.adsense.client_id');
+        $lazy = (bool) $ad->lazy;
+
+        // Une unité « fluid » d'AdSense est une annonce In-Article : elle exige
+        // data-ad-layout="in-article" et un texte centré, et NON data-full-width-responsive
+        // (réservé aux unités display responsive). Sans ce layout, l'unité ne se remplit pas.
+        $isFluid = $format === 'fluid';
+        $insStyle = $isFluid
+            ? 'display:block;text-align:center;min-height:'.$height.'px'
+            : 'display:block;min-height:'.$height.'px';
+
+        $html = '<div class="ad-wrapper ad-external lv-adsense-wrap" style="min-height:'.$height.'px">'
+            .'<ins class="adsbygoogle lv-adsense" style="'.$insStyle.'"'
+            .' data-ad-client="'.e($client).'"'
+            .' data-ad-slot="'.e((string) $ad->ad_slot).'"'
+            .($isFluid ? ' data-ad-layout="in-article"' : '')
+            .' data-ad-format="'.e($format).'"'
+            .($isFluid ? '' : ' data-full-width-responsive="true"')
+            .($lazy ? ' data-lv-lazy="1"' : '')
+            .'></ins>';
+
+        if (! $lazy) {
+            $html .= '<script>(adsbygoogle=window.adsbygoogle||[]).push({});</script>';
+        }
+
+        return $html.'</div>';
+    }
+
+    /**
+     * Rendu de la pub directe, compilé puis mis en cache par emplacement et par jour.
+     */
+    protected function renderDirect(AdPlacement $ad): string
     {
         // Le jour (America/Toronto) entre dans la clé de cache : sans lui, la rotation
         // des encarts livres serait figée par ce cache et n'avancerait jamais. Une
         // entrée par emplacement et par jour, ce qui reste négligeable.
-        $day = now()->timezone('America/Toronto')->format('Y-z');
+        $key = $ad->key;
 
-        return Cache::remember("ad_placement:{$key}:{$day}", 600, function () use ($key) {
-            $ad = AdPlacement::active()->byKey($key)->first();
-
-            if (! $ad) {
-                return null;
-            }
-
+        return (string) Cache::remember("ad_placement:{$key}:{$this->dayKey()}", 600, function () use ($ad, $key) {
             $html = $ad->ad_code;
 
             // #230 — Si ad_code contient une balise composant Blade (<x-namespace::name>),
@@ -70,6 +143,39 @@ class AdsRenderer
         });
     }
 
+    /**
+     * Ligne active de l'emplacement, avec un cache léger (le rendu, lui, n'est pas décidé ici).
+     * On met en cache les attributs bruts (tableau), pas le modèle, ce qui reste sûr à
+     * sérialiser; un tableau vide signifie « aucun emplacement actif » (évite de re-requêter).
+     */
+    protected function resolveActive(string $key): ?AdPlacement
+    {
+        $attributes = Cache::remember("ad_placement_row:{$key}:{$this->dayKey()}", 600, function () use ($key): array {
+            $row = AdPlacement::active()->byKey($key)->first();
+
+            return $row ? $row->getAttributes() : [];
+        });
+
+        if ($attributes === []) {
+            return null;
+        }
+
+        /** @var AdPlacement $ad */
+        $ad = (new AdPlacement)->newFromBuilder($attributes);
+
+        return $ad;
+    }
+
+    protected function dayKey(): string
+    {
+        return now()->timezone('America/Toronto')->format('Y-z');
+    }
+
+    protected function dayOfYear(): int
+    {
+        return now()->timezone('America/Toronto')->dayOfYear;
+    }
+
     public function renderShortcodes(string $content): string
     {
         return (string) preg_replace_callback('/\[ad key="([^"]+)"\]/', function ($matches) {
@@ -105,12 +211,22 @@ class AdsRenderer
 
     public function clearCache(?string $key = null): void
     {
+        // Les clés de cache réelles portent le suffixe du jour (America/Toronto) : sans lui,
+        // Cache::forget viserait une clé inexistante. On vide les DEUX familles : le rendu
+        // direct compilé et la ligne résolue.
+        $day = $this->dayKey();
+
+        $forget = function (string $adKey) use ($day): void {
+            Cache::forget("ad_placement:{$adKey}:{$day}");
+            Cache::forget("ad_placement_row:{$adKey}:{$day}");
+        };
+
         if ($key) {
-            Cache::forget("ad_placement:{$key}");
+            $forget($key);
 
             return;
         }
 
-        AdPlacement::all()->each(fn (AdPlacement $ad) => Cache::forget("ad_placement:{$ad->key}"));
+        AdPlacement::all()->each(fn (AdPlacement $ad) => $forget($ad->key));
     }
 }
