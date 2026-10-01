@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.7] - 2026-10-01
+
+### Corrigé
+- **Fin du blanc sous les annonces de contenu dans les articles et les actualités.** Même après le retrait de notre réserve (v1.316.6), un blanc restait sous l'annonce : mesuré au navigateur, Google rend un cadre de 280 px pour une unité In-Article (« fluid ») mais y sert parfois une création image plus courte, alignée en haut, laissant le bas du cadre vide. L'unité display responsive (« auto »), elle, remplit tout son cadre (création plus bandeau natif, bouton d'action compris) - vérifié par capture sur la même page, où l'annonce de bas d'article ne laisse aucun blanc. Les emplacements `article-top` et `article-inline` passent donc de « fluid » à « auto », hauteur inchangée (280 px). Migration réversible (`down()` restaure « fluid »).
+
 ## [1.316.6] - 2026-10-01
 
 ### Corrigé
