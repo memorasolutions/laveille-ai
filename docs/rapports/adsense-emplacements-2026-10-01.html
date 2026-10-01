@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapport AdSense - emplacements et dimensions</title>
+<style>
+  :root { --bg:#0f1b1e; --card:#13272b; --ink:#eaf3f2; --muted:#9db7b6; --accent:#f08a24; --teal:#064E5A; --line:#1f3b40; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:24px 16px 80px; }
+  .wrap { max-width:1040px; margin:0 auto; }
+  h1 { font-size:1.6rem; margin:0 0 4px; }
+  h2 { font-size:1.2rem; margin:32px 0 10px; color:var(--accent); border-bottom:1px solid var(--line); padding-bottom:6px; }
+  .sub { color:var(--muted); margin:0 0 18px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin:14px 0; }
+  table { width:100%; border-collapse:collapse; margin:10px 0; font-size:14px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--accent); font-weight:600; }
+  code { background:#0b1416; padding:1px 6px; border-radius:5px; color:#bfe3df; font-size:0.9em; }
+  .slot { font-variant-numeric:tabular-nums; font-weight:700; color:#bfe3df; }
+  ul { margin:8px 0 8px 2px; padding-left:20px; }
+  li { margin:4px 0; }
+  .ok { color:#5fd38a; } .warn { color:#f0c24a; }
+  .tag { display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; background:#0b1416; border:1px solid var(--line); color:var(--muted); }
+  footer { margin-top:30px; color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>AdSense sur laveille.ai - rapport des emplacements et dimensions</h1>
+<p class="sub">Version 1.313.0 - 2026-10-01 - compte « 9307-6719 Québec inc. » (éditeur pub-2358625447182467, site « Prêt »). Module <code>Modules/Ads</code>, désactivable et exportable.</p>
+
+<div class="card">
+<strong>En une phrase&nbsp;:</strong> 7 emplacements AdSense sont posés aux endroits où l'oeil s'arrête sans couper la lecture, les membres connectés ne voient aucune publicité, et chaque emplacement peut alterner avec une pub directe que tu vends toi-même.
+</div>
+
+<h2>Les 7 emplacements (où ils sont, dimensions)</h2>
+<table>
+<thead><tr><th>Emplacement</th><th>Page</th><th>Position</th><th>Slot AdSense</th><th>Type</th><th>Hauteur réservée</th><th>Dimension conseillée pour une pub directe</th></tr></thead>
+<tbody>
+<tr><td>article-top</td><td>Article de blogue</td><td>Après l'introduction</td><td class="slot">6448028197</td><td>In-Article (fluide)</td><td>280&nbsp;px</td><td>Responsive / 336&times;280</td></tr>
+<tr><td>article-inline</td><td>Article de blogue</td><td>Milieu (après le 3e paragraphe)</td><td class="slot">9999336950</td><td>In-Article (fluide)</td><td>280&nbsp;px</td><td>Responsive / 336&times;280 <span class="tag">alterne avec l'encart livre</span></td></tr>
+<tr><td>article-bottom</td><td>Article de blogue</td><td>Fin, avant « À lire aussi »</td><td class="slot">4523648998</td><td>Display responsive</td><td>280&nbsp;px</td><td>728&times;90 (bureau) / 300&times;250 (mobile)</td></tr>
+<tr><td>sidebar-rectangle</td><td>Barre latérale</td><td>Haut de la barre (collant bureau)</td><td class="slot">3210567329</td><td>Display responsive</td><td>600&nbsp;px</td><td>300&times;600 (demi-page) ou 300&times;250</td></tr>
+<tr><td>glossary-top</td><td>Glossaire (index)</td><td>Après la définition</td><td class="slot">3869042877</td><td>Display responsive</td><td>280&nbsp;px</td><td>728&times;90 / 336&times;280</td></tr>
+<tr><td>directory-tool-top</td><td>Annuaire (fiche d'outil)</td><td>Après la description</td><td class="slot">7401842201</td><td>Display responsive</td><td>280&nbsp;px</td><td>728&times;90 / 336&times;280</td></tr>
+<tr><td>directory-bottom</td><td>Annuaire (liste)</td><td>Bas de liste</td><td class="slot">5126284226</td><td>Display responsive</td><td>280&nbsp;px</td><td>728&times;90 / 300&times;250</td></tr>
+</tbody>
+</table>
+<p class="sub">Les unités AdSense sont « responsive » : elles s'ajustent à l'espace. La dimension conseillée sert surtout si tu déposes une pub directe à format fixe. La hauteur réservée empêche la page de sauter pendant le chargement (Core Web Vitals).</p>
+
+<h2>Densité réelle par page (jamais surchargée)</h2>
+<ul>
+<li><strong>Article long</strong>&nbsp;: jusqu'à 4 (après intro, milieu, fin, + barre latérale au bureau). 3 sur mobile (pas de barre latérale).</li>
+<li><strong>Glossaire</strong>&nbsp;: 1 (après la définition).</li>
+<li><strong>Annuaire</strong>&nbsp;: 1 à 2 (liste + fiche d'outil).</li>
+<li><strong>Jamais</strong>&nbsp;: dans l'en-tête, le pied de page, les menus, ni dans la zone de travail d'un outil interactif, ni entre un titre et sa première réponse. Ces choix viennent du club des sages (ChatGPT, claude.ai, DeepSeek).</li>
+</ul>
+
+<h2>Membres connectés = zéro publicité</h2>
+<p>Le script AdSense ne se charge pas du tout pour un membre connecté, et aucun bloc n'est rendu. L'absence de pub devient un avantage d'inscription, et le site reste plus rapide pour eux. Les visiteurs anonymes voient AdSense, et seulement après le consentement analytique (Loi 25).</p>
+
+<h2>Alternance pub Google / pub directe « internet » (ce que tu voulais)</h2>
+<p>Chaque emplacement se règle dans l'admin (<code>/admin/ads</code>)&nbsp;:</p>
+<ul>
+<li><strong>Pub Google seule</strong>&nbsp;: l'emplacement porte seulement son identifiant AdSense. (État actuel des 7, sauf article-inline.)</li>
+<li><strong>Pub directe seule</strong>&nbsp;: tu vides l'identifiant AdSense et tu colles ton code de bannière (HTML/image) dans « Code de pub directe ».</li>
+<li><strong>Alternance automatique</strong>&nbsp;: tu remplis LES DEUX (identifiant AdSense + code direct). L'emplacement montre alors la pub Google les jours pairs et ta pub directe les jours impairs. C'est déjà le cas de <code>article-inline</code>, qui alterne avec l'encart livre si celui-ci est présent.</li>
+</ul>
+<p class="sub">Un membre connecté, lui, reçoit toujours la pub directe (jamais Google), et un emplacement en pub directe garde son petit label « Publicité ».</p>
+
+<h2>Anti-bloqueur de pub - décision</h2>
+<p>Le club des sages (DeepSeek, ChatGPT, claude.ai, à l'unanimité) déconseille un mur anti-bloqueur dur&nbsp;: il ferait fuir les visiteurs, nuirait au référencement et heurterait la Loi 25. Recommandation retenue&nbsp;: activer le <strong>message de récupération natif d'AdSense</strong> (refermable, sans blocage), pour les anonymes seulement, orienté « crée un compte gratuit = sans pub ». <span class="warn">Activation au tableau de bord AdSense&nbsp;: en cours.</span></p>
+
+<h2>Comment ajuster ou tout couper</h2>
+<ul>
+<li><strong>Désactiver une seule zone</strong>&nbsp;: dans <code>/admin/ads</code>, basculer l'emplacement sur inactif.</li>
+<li><strong>Tout couper</strong>&nbsp;: désactiver le module Ads (<code>modules_statuses.json</code>). Aucune page ne casse.</li>
+<li><strong>Mesurer</strong>&nbsp;: chaque unité porte son propre nom dans AdSense, donc le revenu se lit par zone, par type de page.</li>
+</ul>
+
+<footer>
+MEMORA solutions - info@memora.ca - https://memora.solutions<br>
+Détail technique et carte complète&nbsp;: <code>docs/specs/2026-10-01-ads-adsense-placement-design.md</code>. Captures des unités&nbsp;: <code>storage/app/travaux-session-2026-10-01/adsense-unites/</code>.
+</footer>
+
+</div>
+</body>
+</html>
