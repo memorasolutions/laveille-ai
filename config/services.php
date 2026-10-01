@@ -169,6 +169,8 @@ return [
     // Google AdSense (frontend — désactivé sur pages PII via @section('no_ads'))
     'adsense' => [
         'client_id' => env('ADSENSE_CLIENT_ID'),
+        // Bandeau « gratuit grâce à la pub » (Modules/Ads) : false = aucun bandeau.
+        'free_notice' => (bool) env('ADSENSE_FREE_NOTICE', true),
     ],
 
     // Google Analytics (frontend — consent mode v2, gated privacy_enabled)

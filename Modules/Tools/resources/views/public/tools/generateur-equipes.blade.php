@@ -235,6 +235,7 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'generateur-equipes'])
+@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

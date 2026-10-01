@@ -814,4 +814,5 @@ function brainDumpPage() {
 </script>
 
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'brain-dump'])
+@include('tools::public.partials.tool-ad')
 @endsection

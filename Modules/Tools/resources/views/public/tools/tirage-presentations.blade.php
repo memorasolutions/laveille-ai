@@ -327,6 +327,7 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'tirage-presentations'])
+@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

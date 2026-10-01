@@ -437,6 +437,7 @@
     </div>
 </div>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'liens-google'])
+@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

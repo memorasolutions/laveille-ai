@@ -729,6 +729,8 @@
     {{-- S134 dark-toggle DÉSACTIVÉ (décision user) — partial conservé pour réactivation future. --}}
     {{-- Ads : chargement différé des unités AdSense (module désactivable : @includeIf ne casse rien s'il est absent). --}}
     @includeIf('ads::partials.lazy-loader')
+    {{-- Bandeau « gratuit grâce à la pub » : visiteurs, fermable, désactivable (ADSENSE_FREE_NOTICE=false). --}}
+    @includeIf('ads::partials.free-notice')
 </body>
 
 </html>

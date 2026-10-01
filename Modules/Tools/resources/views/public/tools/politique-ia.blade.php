@@ -269,6 +269,7 @@
         </div>
     </div>
 </div>
+@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

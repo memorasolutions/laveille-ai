@@ -37,6 +37,7 @@
             </div>
         </div>
     </section>
+@include('tools::public.partials.tool-ad')
 @endsection
 
 @can('view_admin_panel')

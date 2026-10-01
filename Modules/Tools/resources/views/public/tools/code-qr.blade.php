@@ -680,6 +680,7 @@ $lvDefaultDomainName = $lvDefaultDomain ? $lvDefaultDomain->domain : 'lurl.ca';
     </div>
 </div>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'code-qr'])
+@include('tools::public.partials.tool-ad')
 @endsection
 
 @push('scripts')

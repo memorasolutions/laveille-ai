@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.316.0] - 2026-10-01
+
+### Ajouté
+- **AdSense sur tous les outils publics.** Le gabarit commun `tools::public.partials.tool-ad` est branché sur 12 outils de plus (brain dump, code QR, générateur d'équipes, liens Google, minuteur visuel, mots croisés, oscilloscope RLC, politique IA, prompteur, roue de tirage, simulateur fiscal, tirage des présentations) et sur la vue générique des outils sans gabarit propre. Toujours en tout dernier, après la sortie de l'outil et l'infolettre, jamais dans une zone interactive.
+- **Bandeau discret « gratuit grâce à la publicité ».** Nouveau gabarit `ads::partials.free-notice` : carte fine fixée en bas, sans mur ni fenêtre bloquante, visible seulement pour les visiteurs anonymes, fermable (« J'ai compris », mémorisé dans le navigateur uniquement, aucune donnée sortante). Désactivable par `ADSENSE_FREE_NOTICE=false` (`services.adsense.free_notice`) ou en retirant le module Ads.
+
+### Corrigé
+- **Une page d'outil qui déclare `no_ads` (constructeur de prompts, posture Loi 25) réservait quand même un espace publicitaire vide**, puisque le chargeur AdSense y est volontairement absent. Le gabarit `tool-ad` respecte désormais `no_ads` : aucun emplacement n'y est rendu.
+
 ## [1.315.0] - 2026-10-01
 
 ### Ajouté

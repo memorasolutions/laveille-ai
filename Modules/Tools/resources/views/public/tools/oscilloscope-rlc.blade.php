@@ -873,6 +873,7 @@
     </div>
 </section>
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'oscilloscope-rlc'])
+@include('tools::public.partials.tool-ad')
 @endsection
 @push('scripts')
 <script src="{{ asset('tools/oscilloscope-rlc/assets/js/storage.js') }}"></script>

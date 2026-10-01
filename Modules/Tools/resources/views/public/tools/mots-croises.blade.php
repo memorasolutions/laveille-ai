@@ -1045,6 +1045,7 @@
 
 <div class="no-print">
 @include('fronttheme::partials.tools-newsletter-cta', ['toolSource' => 'mots-croises'])
+@include('tools::public.partials.tool-ad')
 </div>
 @endsection
 
