@@ -185,8 +185,8 @@ return [
             ],
         ],
         'marketing' => [
-            'label_fr' => 'Marketing',
-            'label_en' => 'Marketing',
+            'label_fr' => 'Marketing et publicité personnalisée (Google AdSense, Facebook)',
+            'label_en' => 'Marketing and personalized advertising (Google AdSense, Facebook)',
             'required' => false,
             'cookies' => [
                 [

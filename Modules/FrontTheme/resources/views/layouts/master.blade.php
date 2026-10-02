@@ -18,14 +18,39 @@
     @endif
     <style>[x-cloak] { display: none !important; }</style>
     <script>
-    {{-- Point d'entrée UNIQUE du consentement analytique, toujours présent (indépendant de GA et
-         d'AdSense). Le bandeau de consentement l'appelle avec true/false ; chaque effet n'est
-         déclenché que si son module est actif, et AdSense uniquement si le consentement est
-         accordé (Loi 25). Découple AdSense de GA : les publicités se chargent au consentement même
-         si Google Analytics est désactivé sur la page. --}}
-    window.__lvOnAnalyticsConsent = function(granted){
-      if (typeof window.updateGtagConsent === 'function') { window.updateGtagConsent(granted); }
-      if (granted && typeof window.__lvLoadAdsense === 'function') { window.__lvLoadAdsense(); }
+    {{-- ACTION: Consent Mode v2, état par défaut TOUJOURS posé en premier dans le <head>, hors du bloc GA.
+         RAISON: ce 'default' gouverne AUSSI AdSense, pas seulement Google Analytics. Même si GA est
+         désactivé ou non configuré, tout reste 'denied' tant qu'aucun consentement n'est donné
+         (Loi 25). dataLayer, gtag et updateGtagConsent ne sont définis qu'ICI, jamais ailleurs. --}}
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'analytics_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied'
+    });
+    {{-- Consent Mode v2 granulaire : analytics_storage suit le consentement ANALYTICS;
+         ad_storage / ad_user_data / ad_personalization suivent UNIQUEMENT le consentement MARKETING
+         (publicités personnalisées). Sans marketing, AdSense affiche des annonces non personnalisées. --}}
+    function updateGtagConsent(analyticsGranted, marketingGranted) {
+      var analytics = analyticsGranted ? 'granted' : 'denied';
+      var marketing = marketingGranted ? 'granted' : 'denied';
+      gtag('consent', 'update', {
+        'analytics_storage': analytics,
+        'ad_storage': marketing,
+        'ad_user_data': marketing,
+        'ad_personalization': marketing
+      });
+    }
+    {{-- Point d'entrée UNIQUE du consentement, toujours présent (indépendant de GA et d'AdSense).
+         Le bandeau l'appelle avec deux arguments : (analyticsGranted, marketingGranted), booléens.
+         Le 2e est optionnel et vaut false par défaut : jamais de profilage accordé par absence de
+         donnée (Loi 25, art. 8.1 - deux finalités, deux consentements). AdSense ne se charge que si
+         le consentement analytique est accordé, même si Google Analytics est désactivé sur la page. --}}
+    window.__lvOnAnalyticsConsent = function(analyticsGranted, marketingGranted){
+      if (typeof window.updateGtagConsent === 'function') { window.updateGtagConsent(!!analyticsGranted, !!marketingGranted); }
+      if (analyticsGranted && typeof window.__lvLoadAdsense === 'function') { window.__lvLoadAdsense(); }
     };
     </script>
     {{-- AdSense désactivé : (1) sur les pages déclarant @section('no_ads') (outils traitant des PII — posture Loi 25) ;
@@ -51,14 +76,7 @@
     @if(config('services.ga.measurement_id') && config('services.ga.privacy_enabled', false) && ! \Illuminate\Support\Facades\View::hasSection('no_analytics'))
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.ga.measurement_id') }}"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('consent', 'default', {
-        'ad_storage': 'denied',
-        'analytics_storage': 'denied',
-        'ad_user_data': 'denied',
-        'ad_personalization': 'denied'
-      });
+      {{-- gtag() et le Consent Mode 'default' sont définis plus haut (toujours présents). --}}
       gtag('js', new Date());
       {{-- 2026-09-15 (#2583) : marque le trafic de l'ÉQUIPE comme interne, mécanisme officiel de
            Google Analytics (`traffic_type`), que le filtre de données « Internal Traffic » exclut
@@ -73,17 +91,6 @@
         'send_page_view': true,
         'traffic_type': '{{ auth()->check() && auth()->user()->hasRole(['admin', 'super_admin']) ? 'internal' : 'external' }}'
       });
-      function updateGtagConsent(granted) {
-        var status = granted ? 'granted' : 'denied';
-        gtag('consent', 'update', {
-          'ad_storage': status,
-          'analytics_storage': status,
-          'ad_user_data': status,
-          'ad_personalization': status
-        });
-        {{-- AdSense est déclenché par __lvOnAnalyticsConsent (défini plus haut), pas ici : cela
-             découple le chargement des publicités de l'activation de Google Analytics. --}}
-      }
     </script>
     @endif
     {{-- cdn.jsdelivr.net est aussi utilisé par d'autres pages (mots-croisés, Journal, Académie,

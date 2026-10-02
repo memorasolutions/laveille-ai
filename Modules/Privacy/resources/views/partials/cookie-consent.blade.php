@@ -13,8 +13,8 @@
     $text = [
         'title' => $isFr ? 'Paramètres de confidentialité' : 'Privacy Settings',
         'intro' => $isFr
-            ? 'Nous utilisons des témoins (cookies) pour assurer le bon fonctionnement du site, analyser le trafic et personnaliser le contenu. Vous pouvez gérer vos préférences ci-dessous.'
-            : 'We use cookies to ensure the site works properly, analyze traffic, and personalize content. You can manage your preferences below.',
+            ? 'Nous utilisons des témoins (cookies) pour assurer le bon fonctionnement du site, analyser le trafic, personnaliser le contenu et, avec votre accord, afficher de la publicité personnalisée. Vous pouvez gérer vos préférences ci-dessous.'
+            : 'We use cookies to ensure the site works properly, analyze traffic, personalize content and, with your consent, show personalized ads. You can manage your preferences below.',
         'accept_all' => $isFr ? 'Tout accepter' : 'Accept all',
         'refuse_all' => $isFr ? 'Tout refuser' : 'Refuse all',
         'customize' => $isFr ? 'Personnaliser' : 'Customize',
@@ -333,9 +333,9 @@
             })
         }).catch(function() {});
 
-        // 3. Consentement analytique - met a jour GA4 (Consent Mode v2) ET charge AdSense si accorde
+        // 3. Consentements analytique ET marketing (distincts, Loi 25 art. 8.1) - met a jour Consent Mode v2 ET charge AdSense si analytique accorde
         if (typeof window.__lvOnAnalyticsConsent === 'function') {
-            window.__lvOnAnalyticsConsent(!!choices.analytics);
+            window.__lvOnAnalyticsConsent(!!choices.analytics, choices.marketing === true);
         }
 
         // 4. Scripts tiers + fermer
@@ -398,7 +398,8 @@
             injectScripts(existing);
             // Consentement analytique restaure (GA4 Consent Mode v2 + AdSense si accorde)
             if (typeof window.__lvOnAnalyticsConsent === 'function') {
-                window.__lvOnAnalyticsConsent(!!existing.analytics);
+                // Un cookie sans entrée marketing explicite = refus (jamais de profilage par absence de donnée)
+                window.__lvOnAnalyticsConsent(!!existing.analytics, existing.marketing === true);
             }
         } else {
             // Consentement expire ou politique mise a jour : re-prompt

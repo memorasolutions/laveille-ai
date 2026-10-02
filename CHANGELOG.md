@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.317.0] - 2026-10-02
+
+### Ajouté
+- **Consentement publicitaire distinct de la mesure d'audience (conformité Loi 25).** Jusqu'ici, accepter la catégorie « analytics » (mesure de trafic) accordait du même coup la personnalisation publicitaire : les signaux Google Consent Mode `ad_storage`, `ad_user_data` et `ad_personalization` suivaient le consentement analytique. Or la Loi 25 (art. 8.1) traite le profilage publicitaire et la mesure comme deux finalités distinctes. Désormais `analytics_storage` suit la catégorie « analytics », et les trois signaux publicitaires suivent la catégorie « marketing » (déjà existante, aucune nouvelle catégorie créée). Un visiteur peut donc consentir à la mesure sans consentir au profilage : il voit alors des annonces NON personnalisées (l'affichage reste préservé), et des annonces personnalisées seulement s'il accepte « marketing ».
+
+### Corrigé
+- **Consent Mode émis globalement, même sans Google Analytics.** L'état par défaut `gtag('consent','default', ... 'denied')` vivait dans le bloc conditionnel GA; une page sans GA laissait AdSense se charger sans aucun signal, donc en personnalisé par défaut de Google. L'amorce `dataLayer` + `gtag()` + l'état par défaut « tout refusé » sont maintenant émis en tête du `<head>`, toujours, puisqu'ils gouvernent aussi la publicité.
+- **Libellés de consentement clarifiés (fr et en)** : la catégorie « marketing » et le texte d'introduction de la bannière nomment désormais explicitement la publicité personnalisée, pour un consentement « éclairé » au sens de la Loi 25.
+
+Module Privacy (désactivable, exportable), aucune donnée utilisateur touchée, aucune nouvelle dépendance (règle 18).
+
 ## [1.316.14] - 2026-10-02
 
 ### Ajouté
