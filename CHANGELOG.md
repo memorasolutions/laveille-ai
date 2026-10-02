@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.10] - 2026-10-01
+
+### Corrigé
+- **Roue de tirage en plein écran : la personne retirée est désormais la bonne.** En mode plein écran, la roue affichait un canvas distinct (`canvasFs`) qui n'était redessiné qu'à l'ouverture du plein écran. Après chaque retrait (mode élimination ou retrait manuel), la liste raccourcissait et le gagnant suivant était bien calculé sur la liste à jour, mais l'écran continuait d'afficher les anciens segments : le nom annoncé et retiré ne correspondait donc plus au segment sous le pointeur. La méthode `drawWheel()` redessine maintenant AUSSI le canvas plein écran quand il est ouvert, ce qui corrige d'un seul geste le retrait, le brassage, le chargement d'une liste prédéfinie et l'import de fichier. Résidu connu, hors périmètre de ce correctif et identique dans les deux modes : les poids personnalisés sont indexés par position et se décalent après un retrait (à traiter seulement si quelqu'un utilise les poids). Audit des autres outils à plein écran (tirage de présentations, générateur d'équipes, minuteur visuel) : aucun ne duplique son affichage, aucun n'est touché par ce défaut.
+
 ## [1.316.9] - 2026-10-01
 
 ### Corrigé

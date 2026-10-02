@@ -469,7 +469,7 @@ document.addEventListener('alpine:init', function() {
                 }).sort(function(a, b) { return b.count - a.count; });
             },
 
-            drawWheel: function() { this.drawWheelOnCanvas(this.$refs.canvas, 400); },
+            drawWheel: function() { this.drawWheelOnCanvas(this.$refs.canvas, 400); if (this.isFullscreen && this.$refs.canvasFs) { this.drawWheelOnCanvas(this.$refs.canvasFs, 500); } },
 
             // Animation flapper — porté de la version WP qui fonctionne
             triggerFlapper: function() {
