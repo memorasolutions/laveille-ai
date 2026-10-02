@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.13] - 2026-10-02
+
+### Corrigé
+- **Code de connexion (OTP) : 2e dépendance du pont Postmark (`symfony/http-client`) + repli automatique vers Workspace.** Le transport Postmark « API » exige aussi `symfony/http-client`, qui n'était pas installé (`HttpClient component is not installed`). Ajouté aux dépendances (installé en prod par `composer install --no-dev` au déploiement). Et pour que la connexion ne tombe JAMAIS en panne même si Postmark est momentanément indisponible, l'OTP essaie Postmark, puis bascule automatiquement vers le SMTP Google Workspace en cas d'échec (`sendLink` et `sendLinkApi`); seul l'échec des DEUX voies renvoie une erreur à l'utilisateur. La tentative n'est toujours comptée qu'après un envoi réussi.
+
 ## [1.316.12] - 2026-10-02
 
 ### Corrigé

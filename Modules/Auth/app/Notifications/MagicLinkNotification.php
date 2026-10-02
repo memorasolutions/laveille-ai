@@ -15,7 +15,7 @@ use Modules\Core\Notifications\TemplatedNotification;
 
 class MagicLinkNotification extends TemplatedNotification
 {
-    public function __construct(private readonly string $token)
+    public function __construct(private readonly string $token, private readonly string $mailerName = 'postmark')
     {
         // Forcer l'envoi synchrone — le code OTP doit arriver immédiatement
         $this->onConnection('sync');
@@ -29,11 +29,11 @@ class MagicLinkNotification extends TemplatedNotification
 
     public function toMail(object $notifiable): MailMessage
     {
-        // Le code de connexion (OTP) DOIT partir par Postmark : service transactionnel payé
-        // spécifiquement pour les OTP (décision du fondateur, 2026-10-02), jamais par Brevo
-        // (réservé à l'infolettre, #255). Sans ce forçage, l'OTP partait par le mailer par
-        // défaut (Brevo en prod) et n'arrivait pas chez des destinataires Gmail - incident Marc.
-        return parent::toMail($notifiable)->mailer('postmark');
+        // Le code de connexion (OTP) part par Postmark : service transactionnel payé
+        // spécifiquement pour les OTP (décision du fondateur, 2026-10-02). Le mailer est
+        // paramétrable pour permettre un repli vers 'workspace' si Postmark est indisponible
+        // (voir MagicLinkController), afin que la connexion ne tombe jamais en panne.
+        return parent::toMail($notifiable)->mailer($this->mailerName);
     }
 
     protected function getTemplateSlug(): string

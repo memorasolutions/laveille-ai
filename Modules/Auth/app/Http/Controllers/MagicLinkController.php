@@ -69,16 +69,25 @@ class MagicLinkController extends Controller
 
         // Ne consommer une tentative qu'APRÈS un envoi réussi : compter avant l'envoi (ancien
         // comportement) bloquait l'utilisateur une heure même quand le courriel ne partait pas
-        // (code OTP mal routé vers Brevo) - incident Marc, 2026-10-02.
+        // - incident Marc, 2026-10-02. Postmark d'abord (transactionnel dédié), repli automatique
+        // vers Workspace si Postmark est indisponible : la connexion ne doit jamais tomber en panne.
         try {
             $user->notify(new MagicLinkNotification($result['token']));
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Magic link email failed', [
+            \Illuminate\Support\Facades\Log::warning('Magic link Postmark indisponible, repli Workspace', [
                 'email' => $request->email,
                 'error' => $e->getMessage(),
             ]);
+            try {
+                $user->notify(new MagicLinkNotification($result['token'], 'workspace'));
+            } catch (\Throwable $e2) {
+                \Illuminate\Support\Facades\Log::error('Magic link email failed (postmark + workspace)', [
+                    'email' => $request->email,
+                    'error' => $e2->getMessage(),
+                ]);
 
-            return back()->withErrors(['email' => "L'envoi du code a échoué. Veuillez réessayer dans un instant."]);
+                return back()->withErrors(['email' => "L'envoi du code a échoué. Veuillez réessayer dans un instant."]);
+            }
         }
 
         RateLimiter::hit($rateLimitKey, 3600);
@@ -223,16 +232,25 @@ class MagicLinkController extends Controller
 
         $result = $this->magicLink->generate($request->email);
 
-        // Ne consommer une tentative qu'APRÈS un envoi réussi (voir sendLink()).
+        // Ne consommer une tentative qu'APRÈS un envoi réussi (voir sendLink()). Postmark d'abord,
+        // repli automatique vers Workspace si Postmark est indisponible.
         try {
             $user->notify(new MagicLinkNotification($result['token']));
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Magic link email failed (api)', [
+            \Illuminate\Support\Facades\Log::warning('Magic link Postmark indisponible, repli Workspace (api)', [
                 'email' => $request->email,
                 'error' => $e->getMessage(),
             ]);
+            try {
+                $user->notify(new MagicLinkNotification($result['token'], 'workspace'));
+            } catch (\Throwable $e2) {
+                \Illuminate\Support\Facades\Log::error('Magic link email failed (api, postmark + workspace)', [
+                    'email' => $request->email,
+                    'error' => $e2->getMessage(),
+                ]);
 
-            return response()->json(['success' => false, 'message' => __("L'envoi du code a échoué. Veuillez réessayer.")], 500);
+                return response()->json(['success' => false, 'message' => __("L'envoi du code a échoué. Veuillez réessayer.")], 500);
+            }
         }
 
         RateLimiter::hit($rateLimitKey, 3600);
