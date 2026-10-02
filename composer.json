@@ -63,6 +63,7 @@
         "spatie/laravel-webhook-client": "^3.4",
         "spatie/laravel-webhook-server": "^3.9",
         "stancl/tenancy": "^3.9",
+        "symfony/postmark-mailer": "^7.4",
         "web-auth/webauthn-lib": "^5.3.5",
         "willvincent/feeds": "^2.7"
     },

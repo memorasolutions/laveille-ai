@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.12] - 2026-10-02
+
+### Corrigé
+- **Code de connexion (OTP) : ajout du pont `symfony/postmark-mailer`, sans quoi le transport Postmark ne pouvait pas s'instancier.** La v1.316.11 force l'envoi de l'OTP par le mailer `postmark`, mais le paquet pont n'était pas installé en production (`Class PostmarkTransportFactory not found`), donc l'envoi échouait et retombait dans le garde d'erreur. Le pont est ajouté aux dépendances; `vendor/` étant exclu du rsync, c'est le `composer install --no-dev` exécuté sur le serveur à chaque déploiement qui l'installe. La livraison Postmark elle-même (domaine laveille.ai authentifié DKIM/SPF/Return-Path) a été vérifiée par un envoi réel reçu en boîte de réception, Gmail et Google Workspace.
+
 ## [1.316.11] - 2026-10-02
 
 ### Corrigé
