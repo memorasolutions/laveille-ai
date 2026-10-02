@@ -23,7 +23,11 @@ return [
     */
 
     'postmark' => [
-        'key' => env('POSTMARK_API_KEY'),
+        // Jeton SERVEUR Postmark du serveur laveille.ai (OTP transactionnel). Le transport
+        // Postmark de Laravel lit 'token' (jamais 'key', qui etait inoperant). Valeur en prod
+        // via POSTMARK_TOKEN. Flux de messages transactionnel par defaut : 'outbound'.
+        'token' => env('POSTMARK_TOKEN'),
+        'message_stream_id' => env('POSTMARK_MESSAGE_STREAM_ID', 'outbound'),
     ],
 
     // Cloudflare API (purge cache, etc.)

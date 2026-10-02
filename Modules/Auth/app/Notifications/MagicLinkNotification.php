@@ -27,6 +27,15 @@ class MagicLinkNotification extends TemplatedNotification
         return ['mail'];
     }
 
+    public function toMail(object $notifiable): MailMessage
+    {
+        // Le code de connexion (OTP) DOIT partir par Postmark : service transactionnel payé
+        // spécifiquement pour les OTP (décision du fondateur, 2026-10-02), jamais par Brevo
+        // (réservé à l'infolettre, #255). Sans ce forçage, l'OTP partait par le mailer par
+        // défaut (Brevo en prod) et n'arrivait pas chez des destinataires Gmail - incident Marc.
+        return parent::toMail($notifiable)->mailer('postmark');
+    }
+
     protected function getTemplateSlug(): string
     {
         return 'magic_link';

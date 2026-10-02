@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.11] - 2026-10-02
+
+### Corrigé
+- **Code de connexion (OTP) par courriel : routé par Postmark et fiabilisé.** Deux défauts combinés empêchaient des utilisateurs (dont au moins un sur Gmail) de recevoir leur code de connexion. (1) La notification `MagicLinkNotification` ne fixait aucun mailer : le code partait par le mailer par défaut (SMTP Google Workspace) au lieu d'un service transactionnel dédié. Elle force désormais `->mailer('postmark')`; le domaine laveille.ai est authentifié dans Postmark (DKIM, SPF, Return-Path tous vérifiés), gage d'une livraison en boîte de réception, et un envoi test réel a été livré jusqu'à une adresse Gmail. (2) Le limiteur anti-abus incrémentait son compteur AVANT l'envoi : trois envois qui n'arrivaient pas bloquaient l'utilisateur une heure sans aucun message utile. La tentative n'est maintenant comptée qu'APRÈS un envoi réussi (dans `sendLink` et `sendLinkApi`), et un échec d'envoi renvoie une erreur claire au lieu d'un blocage silencieux. `config/services.php` lit enfin le bon champ (`token`, et non `key`) pour le transport Postmark. Flux de messages transactionnel `outbound` par défaut, configurable par `POSTMARK_MESSAGE_STREAM_ID`.
+
 ## [1.316.10] - 2026-10-01
 
 ### Corrigé

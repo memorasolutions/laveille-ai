@@ -48,8 +48,6 @@ class MagicLinkController extends Controller
             return back()->withErrors(['email' => "Trop de tentatives. Réessayez dans {$seconds} secondes."]);
         }
 
-        RateLimiter::hit($rateLimitKey, 3600);
-
         // Auto-créer le compte + assigner le rôle par défaut dans une transaction : une création
         // partielle (compte créé mais assignRole() en échec) laisserait sinon un compte orphelin
         // sans rôle de façon PERMANENTE (wasRecentlyCreated devient false dès le 2e essai, donc
@@ -68,7 +66,22 @@ class MagicLinkController extends Controller
         });
 
         $result = $this->magicLink->generate($request->email);
-        $user->notify(new MagicLinkNotification($result['token']));
+
+        // Ne consommer une tentative qu'APRÈS un envoi réussi : compter avant l'envoi (ancien
+        // comportement) bloquait l'utilisateur une heure même quand le courriel ne partait pas
+        // (code OTP mal routé vers Brevo) - incident Marc, 2026-10-02.
+        try {
+            $user->notify(new MagicLinkNotification($result['token']));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Magic link email failed', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors(['email' => "L'envoi du code a échoué. Veuillez réessayer dans un instant."]);
+        }
+
+        RateLimiter::hit($rateLimitKey, 3600);
 
         if (app()->environment('local')) {
             session(['dev_magic_code' => $result['token']]);
@@ -208,10 +221,21 @@ class MagicLinkController extends Controller
             return response()->json(['success' => false, 'message' => __('Trop de tentatives. Reessayez dans :seconds secondes.', ['seconds' => $seconds])], 429);
         }
 
-        RateLimiter::hit($rateLimitKey, 3600);
-
         $result = $this->magicLink->generate($request->email);
-        $user->notify(new MagicLinkNotification($result['token']));
+
+        // Ne consommer une tentative qu'APRÈS un envoi réussi (voir sendLink()).
+        try {
+            $user->notify(new MagicLinkNotification($result['token']));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Magic link email failed (api)', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['success' => false, 'message' => __("L'envoi du code a échoué. Veuillez réessayer.")], 500);
+        }
+
+        RateLimiter::hit($rateLimitKey, 3600);
 
         return response()->json(['success' => true, 'message' => __('Code de connexion envoyé par courriel.')]);
     }
