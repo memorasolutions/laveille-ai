@@ -27,6 +27,28 @@ class MagicLinkController extends Controller
 {
     public function __construct(private readonly MagicLinkService $magicLink) {}
 
+    /**
+     * Alerter le fondateur quand l'OTP a dû basculer de Postmark vers Workspace.
+     * La connexion est sauvée par le repli, mais la panne Postmark doit rester VISIBLE :
+     * sans cette alerte, le repli masquerait silencieusement la dégradation. Passe par le
+     * canal d'alerte existant (Mail::raw → mailer par défaut Workspace), jamais par Postmark.
+     */
+    private function alertPostmarkFallback(string $email, string $error): void
+    {
+        try {
+            if (class_exists(\Modules\Notifications\Services\AutomationAlertService::class)) {
+                \Modules\Notifications\Services\AutomationAlertService::fire(
+                    'otp-mailer',
+                    'OTP : repli Postmark vers Workspace',
+                    'Postmark a échoué pour l\'envoi du code de connexion; repli automatique vers le SMTP Workspace (la connexion fonctionne toujours). Erreur Postmark : '.$error,
+                    ['email' => $email]
+                );
+            }
+        } catch (\Throwable $alertErr) {
+            \Illuminate\Support\Facades\Log::error('Alerte repli OTP non envoyée', ['error' => $alertErr->getMessage()]);
+        }
+    }
+
     public function showRequestForm(): View
     {
         $frontView = 'fronttheme::auth.magic-link-request';
@@ -78,6 +100,7 @@ class MagicLinkController extends Controller
                 'email' => $request->email,
                 'error' => $e->getMessage(),
             ]);
+            $this->alertPostmarkFallback($request->email, $e->getMessage());
             try {
                 $user->notify(new MagicLinkNotification($result['token'], 'workspace'));
             } catch (\Throwable $e2) {
@@ -241,6 +264,7 @@ class MagicLinkController extends Controller
                 'email' => $request->email,
                 'error' => $e->getMessage(),
             ]);
+            $this->alertPostmarkFallback($request->email, $e->getMessage());
             try {
                 $user->notify(new MagicLinkNotification($result['token'], 'workspace'));
             } catch (\Throwable $e2) {

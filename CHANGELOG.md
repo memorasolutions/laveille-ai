@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.316.14] - 2026-10-02
+
+### Ajouté
+- **Alerte au fondateur quand l'OTP bascule de Postmark vers Workspace.** Le repli automatique (v1.316.13) garde la connexion fonctionnelle même si Postmark échoue, mais il masquait du coup la panne : l'exception étant rattrapée, l'ALERTE AUTOMATION des jobs en échec ne se déclenchait plus. Désormais, dès que l'envoi du code bascule sur Workspace, une alerte part au superadmin par le canal d'alerte existant (`AutomationAlertService`, régulateur anti-spam de 15 min, envoi par le mailer par défaut Workspace, donc jamais par Postmark qui est justement en panne). La connexion reste opérationnelle ET la dégradation Postmark redevient visible. Aucune nouvelle dépendance (règle 18).
+
 ## [1.316.13] - 2026-10-02
 
 ### Corrigé
