@@ -1,0 +1,21 @@
+{
+  "_note": "Paquet de publication - article de blogue laveille.ai. Corps = corps-cms.html (sans H1 ni bulle). Locale fr_CA (ecrire aussi fr).",
+  "slug": "ia-etat-quebec-permis-interdit",
+  "title": "IA dans l'État québécois : qu'est-ce qui est permis, qu'est-ce qui est interdit?",
+  "excerpt": "Ce que le personnel de l'État québécois a le droit de faire avec l'IA, et ce qui est interdit : DeepSeek, données confidentielles, reconnaissance Teams.",
+  "meta": { "title": "IA dans l'État québécois : permis ou interdit?" },
+  "answer_summary": "Dans l'administration publique québécoise, un outil d'IA générative grand public ne s'utilise que si l'organisme public l'a autorisé. On n'y met jamais de renseignements confidentiels ou personnels, DeepSeek est interdit, et l'organisme comme la personne qui s'en sert restent imputables du résultat.",
+  "answer_points": [
+    "Outil d'IA grand public : permis seulement si l'organisme l'a autorisé, jamais par défaut.",
+    "Jamais de renseignements confidentiels ni personnels dans un outil public.",
+    "DeepSeek et la reconnaissance vocale et faciale de Teams sont interdits.",
+    "L'organisme et la personne qui s'en sert restent imputables du résultat."
+  ],
+  "tags": ["intelligence artificielle", "gouvernement du Québec", "Loi 25", "conformité"],
+  "category_slug": "intelligence-artificielle",
+  "user_id": 1,
+  "featured_image": "images/blog/ia-etat-quebec-permis-interdit.jpg",
+  "status_initial": "draft",
+  "published_at_initial": null,
+  "sources_rendues_temoins": ["GU_bonnes_pratiques", "IA-interdictions_DeepSeek", "Indication_app_vocale_faciale"]
+}
