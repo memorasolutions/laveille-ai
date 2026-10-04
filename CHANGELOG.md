@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.318.0] - 2026-10-04
+
+### Ajouté
+- **Deux fiches au Glossaire Techno.** « Modèle de décision » (modèle d'IA qui répond à des questions typées par des choix et des probabilités plutôt que par du texte libre, à partir du lancement de Clef et Clef-flash par Cloudflare le 1er octobre 2026), reliée à « classification ». « Accès complet au disque » (permission macOS la plus large, au centre de l'annonce d'Apple du 2 octobre 2026 sur de nouveaux contrôles face aux agents d'IA), reliée à « tcc » et « macos »; la fiche « tcc » reçoit le nouveau terme dans ses termes plus précis. Chaque fiche livre sa paire d'illustrations WebP et JPEG (1200x669). Aucun alias « FDA » (collision avec l'agence du médicament) ni pluriel générique « modèles de décision » (collision avec la gestion). Migrations réversibles et idempotentes, aucune donnée utilisateur touchée, aucune nouvelle dépendance.
+
 ## [1.317.0] - 2026-10-02
 
 ### Ajouté
@@ -130,7 +135,7 @@ Module Privacy (désactivable, exportable), aucune donnée utilisateur touchée,
 ## [1.312.2] - 2026-09-30
 
 ### Corrigé
-- **Formulaire de contact durci contre les robots qui postent en direct, sans aucun faux positif pour une vraie personne.** Un pourriel de rencontre reçu le 2026-09-30 a révélé une faille : le piège temporel (`time-trap`) ne se déclenchait que lorsque le champ caché `form_ts` était présent ET récent. Un robot qui poste directement sur la route de contact (sans charger la page) n'envoie aucun `form_ts` - et passait donc à travers ce contrôle. Désormais, l'absence ou une valeur non numérique de `form_ts` est traitée comme un signal fort de robot (mise en quarantaine silencieuse, aucun courriel). La seule vue du formulaire (`contact.blade.php`) porte toujours ce jeton, donc une vraie soumission le contient toujours ; un `form_ts` simplement ANCIEN (page servie depuis un cache) reste accepté sans faux positif. La quarantaine reste consultable dans l'admin pour vérifier l'absence de faux positif. (Le nom contenant une URL - cas exact du pourriel reçu - était déjà bloqué depuis v1.311.0.)
+- **Formulaire de contact durci contre les robots qui postent en direct, sans aucun faux positif pour une vraie personne.** Un pourriel de rencontre reçu le 2026-09-30 a révélé une faille : le piège temporel (`time-trap`) ne se déclenchait que lorsque le champ caché `form_ts` était présent ET récent. Un robot qui poste directement sur la route de contact (sans charger la page) n'envoie aucun `form_ts` - et passait donc à travers ce contrôle. Désormais, l'absence ou une valeur non numérique de `form_ts` est traitée comme un signal fort de robot (mise en quarantaine silencieuse, aucun courriel). La seule vue du formulaire (`contact.blade.php`) porte toujours ce jeton, donc une vraie soumission le contient toujours; un `form_ts` simplement ANCIEN (page servie depuis un cache) reste accepté sans faux positif. La quarantaine reste consultable dans l'admin pour vérifier l'absence de faux positif. (Le nom contenant une URL - cas exact du pourriel reçu - était déjà bloqué depuis v1.311.0.)
 
 ## [1.312.1] - 2026-09-30
 
@@ -553,7 +558,7 @@ post-déploiement avait bien été faite, mais elle n'était écrite nulle part.
 
 ### Ajouté
 - **Les carrousels PDF sont désormais versionnés** dans `public/carrousels/`. Le carrousel de
-  l'anonymiseur y entre et part en production ; `plan-de-cours.pdf`, qui accompagne une
+  l'anonymiseur y entre et part en production; `plan-de-cours.pdf`, qui accompagne une
   publication LinkedIn DÉJÀ parue, est rapatrié depuis le serveur et versionné à son tour
   (empreintes vérifiées identiques). Ces fichiers ne tenaient jusqu'ici qu'à un dépôt manuel sur
   le serveur : un carrousel perdu aurait vidé une publication déjà publiée.
@@ -3741,7 +3746,7 @@ en dessous. **Septième fois de la journée que le mécanisme cherché existait 
 ### Corrigé
 - **Quatrième porte du garde-fou image : un membre de fusion héritait de `is_published` sans que
   SON crédit d'image soit contrôlé.** Le ticket #2244 avait fermé trois portes de publication en
-  exigeant `hasCuratedImage()` ; `attachFusionMember()` et `absorbFusionMember()` recopiaient
+  exigeant `hasCuratedImage()`; `attachFusionMember()` et `absorbFusionMember()` recopiaient
   l'état publié du digest sur chaque membre absorbé, sans jamais tester le crédit du membre.
   Un article sans crédit pouvait donc devenir public par la seule voie de la fusion.
   Les deux écritures exigent désormais `$digestPublished && $member->hasCuratedImage()`, avec le
@@ -3750,7 +3755,7 @@ en dessous. **Septième fois de la journée que le mécanisme cherché existait 
   sans contrôle propre. C'était vrai, et c'est la description du défaut : le commentaire est corrigé.
 - **Preuve rouge → vert :** la garde retirée de `attachFusionMember()`, le test
   « un membre de fusion SANS image_credit reste is_published=false » ÉCHOUE
-  (« Failed asserting that true is false », NewsFusionTest:264) ; restaurée, il passe.
+  (« Failed asserting that true is false », NewsFusionTest:264); restaurée, il passe.
   Régression : 48 tests, 169 assertions, sur NewsFusionTest + ActusZeroCopiePipelineTest +
   NewsAutopublishGateTest.
 
@@ -3759,7 +3764,7 @@ en dessous. **Septième fois de la journée que le mécanisme cherché existait 
   affichaient le même « publication suspendue » sans distinguer le drapeau éteint d'une image sans
   crédit. Nouvelle méthode DRY `draftReason()` : elle réévalue les deux causes INDÉPENDAMMENT
   (`resolvePublicationState()` court-circuite au premier obstacle et ne teste jamais l'image quand
-  le drapeau suffit), uniquement pour l'affichage ; aucune décision de publication n'en dépend.
+  le drapeau suffit), uniquement pour l'affichage; aucune décision de publication n'en dépend.
   Sortie : « publication suspendue : drapeau éteint + image sans crédit ».
 
 ## [1.255.0] - 2026-09-06
@@ -5398,7 +5403,7 @@ ignorés. `modules_statuses.json` et `.env` intacts après les six exécutions.
 - **Onze sources officielles peuplées, chacune VÉRIFIÉE PAR REQUÊTE RÉELLE** (code HTTP, nombre d'entrées, date de la plus récente), pas seulement trouvées par recherche. Deux des douze candidats sont tombés à cette mesure : EleutherAI répondait 404 sur l'adresse retenue (corrigée vers `/index.xml`, 52 entrées, publication à 3 jours), et le flux Qwen choisi renvoyait 200 avec ZÉRO entrée. Qwen est écartée : son blog Hugo répond, mais son dernier billet date de 340 jours. Un flux qui répond n'est pas un flux vivant, et en brancher un muet donnerait l'illusion d'une couverture. Les onze retenues avaient toutes publié dans les huit jours.
 
 ### Corrigé
-- **Deux faux auto-liens mesurés en production.** « CNN », le réseau de télévision, pointait quatre fois vers `/glossaire/reseau-convolutif` sur une fiche de journalisme ; « une requête en rejet », terme de procédure judiciaire, pointait vers `/glossaire/prompt`. Troisième cas du même motif après « Paragraph Composer » et l'« autonomie » de batterie : un alias court, légitime dans son domaine, capture un homographe qui le dépasse. Nouvelle liste `ALIAS_NEVER_AUTO`, même famille que `QUALIFIER_ORGANISATION` et `TOOL_NEVER_AUTO` déjà en place, appliquée aux cinq points d'insertion d'alias - jamais au nom principal d'une fiche, qui garde son lien. Un troisième alias au même risque a été trouvé au passage (« témoin », pour cookie) et fermé par précaution. Clé de cache incrémentée ; l'oubli du `v11` dans la purge du 28 août est comblé au passage.
+- **Deux faux auto-liens mesurés en production.** « CNN », le réseau de télévision, pointait quatre fois vers `/glossaire/reseau-convolutif` sur une fiche de journalisme; « une requête en rejet », terme de procédure judiciaire, pointait vers `/glossaire/prompt`. Troisième cas du même motif après « Paragraph Composer » et l'« autonomie » de batterie : un alias court, légitime dans son domaine, capture un homographe qui le dépasse. Nouvelle liste `ALIAS_NEVER_AUTO`, même famille que `QUALIFIER_ORGANISATION` et `TOOL_NEVER_AUTO` déjà en place, appliquée aux cinq points d'insertion d'alias - jamais au nom principal d'une fiche, qui garde son lien. Un troisième alias au même risque a été trouvé au passage (« témoin », pour cookie) et fermé par précaution. Clé de cache incrémentée; l'oubli du `v11` dans la purge du 28 août est comblé au passage.
 - Tests neufs incluant les cas LÉGITIMES : « réseau convolutif », le sigle GAN, « prompt » seul et « cookie » gardent tous leur auto-lien. Élargir une frontière casse silencieusement les termes voisins - mesuré sur ce projet le 27 août.
 
 ### Note de méthode
@@ -5435,7 +5440,7 @@ ignorés. `modules_statuses.json` et `.env` intacts après les six exécutions.
 ### Corrigé
 - **Sur une fiche dont la thèse entière est « LibreOffice 26.8 revendique l'absence d'IA générative », sa nouveauté phare - le *Paragraph Composer*, un moteur de composition typographique - était transformée en lien vers un outil d'intelligence artificielle homonyme.** Mesuré en production le 2026-08-28. Le même mot faisait aussi attacher cet outil au bloc « Outils mentionnés ».
 - **Les deux mécanismes étaient CONVERGENTS** : `NewsToolSyncAction::suggest()` consomme le résultat du même appel au linkifier (`getLastMatchedTerms()`). Une seule cause, un seul correctif - contrairement au défaut voisin fermé le même jour, qui lui venait de deux chemins séparés.
-- **Le problème n'était pas « Composer », c'était la classe des noms d'outils qui sont aussi des mots courants.** Nouveau mécanisme `TOOL_COMPOUND_EXCLUSIONS` : un nom dont la mention SEULE reste légitime, mais qui forme un faux composé avec un mot précis accolé devant, est rejeté par un lookbehind négatif posé dans le motif lui-même. « Paragraph Composer » ne produit plus de lien ; « Composer » employé seul continue d'en produire un.
+- **Le problème n'était pas « Composer », c'était la classe des noms d'outils qui sont aussi des mots courants.** Nouveau mécanisme `TOOL_COMPOUND_EXCLUSIONS` : un nom dont la mention SEULE reste légitime, mais qui forme un faux composé avec un mot précis accolé devant, est rejeté par un lookbehind négatif posé dans le motif lui-même. « Paragraph Composer » ne produit plus de lien; « Composer » employé seul continue d'en produire un.
 - **Le blocage total a été délibérément écarté.** « Composer » n'est pas un mot français courant en prose : l'interdire partout aurait privé le site d'auto-liens légitimes. Le mécanisme existant a été étendu plutôt qu'un second ajouté.
 - **Clé de cache montée en v12** : sans ce bump, une cache déjà chaude aurait servi une heure de plus des entrées dépourvues de la nouvelle garde.
 
