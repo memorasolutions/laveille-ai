@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.319.1] - 2026-10-05
+
+### Ajouté
+- **Veille /actu2 : 20 sources d'actualité de plus, après consultation des oracles (DeepSeek, ChatGPT, Gemini; claude.ai et Perplexity non disponibles ce jour-là, signalés).** Réactivation de Radio-Canada Sciences (flux re-testé vivant; Le Devoir Sciences reste en 403, laissé désactivé) et ajout de 19 flux RSS/Atom tous vérifiés vivants (HTTP 200 + RSS/Atom valide) avant intégration : laboratoires (Mistral, NVIDIA, Google Research, Apple ML, Microsoft Research, AWS ML), recherche québécoise et canadienne (IVADO, Vector Institute), revue (Nature Machine Intelligence), analyse spécialisée (SemiAnalysis, Import AI, Interconnects, Simon Willison, Latent Space), régional non américain (Sifted, ITmedia AI+, Pandaily, Rest of World) et francophone (ActuIA). Migration réversible et idempotente (insertion seulement si l'URL n'existe pas déjà), aucune donnée utilisateur touchée, aucune nouvelle dépendance. Les sources de qualité sans flux RSS public propre (Anthropic, Meta AI, Mila, OBVIA, LawZero, Jiqizhixin, régulateurs UE/CA/US, etc.) sont documentées dans le skill /actu2 comme sources à balayer; arXiv reste en recherche ciblée seulement (volume trop élevé pour un flux continu).
+
 ## [1.319.0] - 2026-10-05
 
 ### Ajouté
