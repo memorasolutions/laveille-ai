@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.319.0] - 2026-10-05
+
+### Ajouté
+- **Une fiche au Glossaire Techno : « Environnement d'exécution de confiance (TEE) ».** Zone protégée d'un processeur qui isole un programme et permet, par l'attestation à distance, à un tiers de vérifier quel code exact tourne sur des données sensibles avant de les lui confier - un atout pour une organisation qui doit démontrer ses pratiques de protection des renseignements personnels sous la Loi 25. Issue de la fiche d'actualité sur l'apprentissage fédéré vérifiable de Google (Gboard). La définition énonce explicitement les limites : un TEE réduit la confiance à accorder à l'opérateur mais ne l'élimine pas (fabricant du processeur, attaques par canaux auxiliaires, failles possibles du programme attesté). Reliée dans sa FAQ à « apprentissage fédéré » et « confidentialité différentielle », sans parenté hiérarchique fabriquée. Alias « TEE » en correspondance sensible à la casse (pour que « tee » en minuscules ne morde pas), mot nu « enclave » volontairement exclu (trop courant). Sources : RFC 9334 (IETF, 2023) et Confidential Computing Consortium (2024). Paire d'illustrations WebP et JPEG (1200x669). Migration réversible et idempotente, aucune donnée utilisateur touchée, aucune nouvelle dépendance (règle 18).
+
 ## [1.318.0] - 2026-10-04
 
 ### Ajouté
