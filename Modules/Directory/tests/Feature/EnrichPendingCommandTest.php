@@ -135,3 +135,49 @@ it('quand le modèle répond mais trop court, le message signale "trop courte" -
     expect($fresh->getTranslation('description', 'fr_CA', false))->toBe('Description initiale courte.')
         ->and($fresh->status)->toBe('pending');
 });
+
+// Règle d'auto-publication : seules les fiches sans soumetteur (veille/équipe) ou soumises par un
+// modérateur (permission moderate_tools) sont publiées ; une soumission de membre reste pending.
+it('une fiche soumise par un membre ordinaire est enrichie mais reste pending', function () {
+    $member = \App\Models\User::factory()->create();
+    $tool = makeEnrichPendingTestTool('membre');
+    $tool->submitted_by = $member->id;
+    $tool->save();
+
+    fakeEnrichPendingHttp(Http::response(['choices' => [['message' => ['content' => orscLongDescriptionBody()]]]], 200));
+
+    $this->artisan('tools:enrich-pending', ['--id' => $tool->id])
+        ->doesntExpectOutputToContain('Publié automatiquement')
+        ->assertExitCode(0);
+
+    $fresh = $tool->fresh();
+    expect($fresh->status)->toBe('pending')
+        ->and($fresh->last_enriched_at)->not->toBeNull()
+        ->and($fresh->getTranslation('description', 'fr_CA', false))->toContain('À propos de Outil Enrich Pending Test');
+});
+
+it('une fiche sans soumetteur (veille/équipe) est publiée après enrichissement', function () {
+    $tool = makeEnrichPendingTestTool('veille');
+    expect($tool->submitted_by)->toBeNull();
+
+    fakeEnrichPendingHttp(Http::response(['choices' => [['message' => ['content' => orscLongDescriptionBody()]]]], 200));
+
+    $this->artisan('tools:enrich-pending', ['--id' => $tool->id])->assertExitCode(0);
+
+    expect($tool->fresh()->status)->toBe('published');
+});
+
+it('une fiche soumise par un modérateur est publiée après enrichissement', function () {
+    \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'moderate_tools', 'guard_name' => 'web']);
+    $moderator = \App\Models\User::factory()->create();
+    $moderator->givePermissionTo('moderate_tools');
+    $tool = makeEnrichPendingTestTool('moderateur');
+    $tool->submitted_by = $moderator->id;
+    $tool->save();
+
+    fakeEnrichPendingHttp(Http::response(['choices' => [['message' => ['content' => orscLongDescriptionBody()]]]], 200));
+
+    $this->artisan('tools:enrich-pending', ['--id' => $tool->id])->assertExitCode(0);
+
+    expect($tool->fresh()->status)->toBe('published');
+});

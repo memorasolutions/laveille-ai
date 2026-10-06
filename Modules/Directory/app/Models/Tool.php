@@ -134,6 +134,22 @@ class Tool extends Model implements Searchable
         return $this->belongsTo(User::class, 'submitted_by');
     }
 
+    /**
+     * Auto-publication autorisée après enrichissement ? Fiche de veille/équipe (aucun soumetteur)
+     * ou soumise par un modérateur. Une soumission de membre ordinaire reste en pending.
+     */
+    // ACTION: décision unique d'auto-publication | MCP: SELF | RAISON: DRY, appelée par la commande d'enrichissement
+    public function isEligibleForAutoPublish(): bool
+    {
+        if ($this->submitted_by === null) {
+            return true;
+        }
+
+        $submitter = $this->submitter;
+
+        return $submitter !== null && $submitter->can('moderate_tools');
+    }
+
     public function parentTool(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_tool_id');

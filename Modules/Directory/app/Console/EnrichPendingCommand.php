@@ -122,9 +122,14 @@ class EnrichPendingCommand extends Command
 
                 // Auto-publier les outils pending enrichis avec succès, sauf --no-publish
                 // (2026-08-23 : laisse la relecture humaine possible avant mise en ligne)
+                // Une soumission de membre ordinaire reste pending (modération humaine requise).
                 if ($tool->status === 'pending' && ! $this->option('no-publish')) {
-                    $tool->status = 'published';
-                    $this->info("  Publié automatiquement (était pending)");
+                    if ($tool->isEligibleForAutoPublish()) {
+                        $tool->status = 'published';
+                        $this->info("  Publié automatiquement (était pending)");
+                    } else {
+                        $this->info("  Reste pending (soumission d'un membre, modération requise)");
+                    }
                 }
 
                 $tool->save();

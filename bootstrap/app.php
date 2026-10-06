@@ -60,8 +60,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 \Modules\Privacy\Http\Middleware\DetectPrivacyJurisdiction::class,
                 \Modules\Privacy\Http\Middleware\ResolveCookiePreferences::class,
                 \Modules\Core\Http\Middleware\SetBackofficeTheme::class,
+                // Garde unique des comptes désactivés/verrouillés (toutes voies, session déjà ouverte).
+                \Modules\Auth\Http\Middleware\EnsureAccountActive::class,
             ],
         );
+        $middleware->api(append: [
+            \Modules\Auth\Http\Middleware\EnsureAccountActive::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->reportable(function (\Throwable $e) {

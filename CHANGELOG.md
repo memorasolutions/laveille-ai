@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.319.2] - 2026-10-06
+
+### Sécurité
+- **Les soumissions d'outils d'un membre restent en modération au lieu d'être publiées automatiquement.** L'enrichissement planifié (`tools:enrich-pending`, toutes les 15 minutes) faisait passer toute fiche `pending` à `published`, ce qui contournait la modération : une soumission de membre se retrouvait en ligne à la passe suivante (le correctif v1.233.0 ne couvrait que le chemin direct de soumission, pas l'enrichissement). Désormais l'auto-publication après enrichissement n'a lieu que pour une fiche de veille ou d'équipe (aucun soumetteur) ou soumise par un modérateur (`Tool::isEligibleForAutoPublish()`, décision unique appelée par la commande). Une soumission de membre ordinaire est quand même enrichie, mais elle reste `pending` jusqu'à relecture humaine.
+- **Un compte désactivé ou verrouillé ne peut plus accéder à rien, quelle que soit la voie d'authentification.** La connexion par code (magic link) refuse désormais un compte `is_active=0` ou verrouillé, et un garde unique (middleware `EnsureAccountActive`, groupes web et api) éjecte un tel compte même s'il s'est authentifié par Google/OAuth, par mot de passe, par jeton Sanctum, ou si sa session était déjà ouverte avant la désactivation. Auparavant, désactiver un compte n'empêchait aucune de ces voies de connexion. Révocation du jeton Sanctum et fermeture de session incluses; message public identique pour désactivé et verrouillé (aucune fuite d'état).
+
+Modules Auth et Directory (désactivables, exportables), aucune donnée utilisateur touchée, aucune nouvelle dépendance (règle 18).
+
 ## [1.319.1] - 2026-10-05
 
 ### Ajouté

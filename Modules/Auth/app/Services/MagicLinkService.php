@@ -54,7 +54,16 @@ class MagicLinkService
 
         DB::table('magic_login_tokens')->where('id', $record->id)->delete();
 
-        return User::where('email', $email)->first();
+        $user = User::where('email', $email)->first();
+
+        // ACTION: refuser la connexion par code d'un compte désactivé ou verrouillé
+        // MCP: SELF (< 5 lignes) | RAISON: point d'étranglement unique (web + API), même échec
+        // qu'un code invalide pour ne pas révéler l'état du compte.
+        if ($user !== null && (! $user->is_active || $user->isLocked())) {
+            return null;
+        }
+
+        return $user;
     }
 
     // Check if an email has a valid (unexpired) token
