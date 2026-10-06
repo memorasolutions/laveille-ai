@@ -88,34 +88,55 @@ class StripeService
         }
     }
 
-    /** @return bool false = signature refusée (le contrôleur répond 400 si le drapeau « zéro erreur » est ON). */
+    /**
+     * @return bool false = signature refusée (le contrôleur répond 400 si le drapeau « zéro erreur » est ON).
+     * @throws \Throwable drapeau ON seulement : erreur interne APRÈS signature valide -> remontée pour que le contrôleur
+     *                    réponde 5xx et que Stripe REJOUE l'événement (jamais un 200 qui masque un paiement non traité).
+     */
     public function handleWebhook(Request $request): bool
     {
-        try {
-            $payload = $request->getContent();
-            $sigHeader = $request->header('Stripe-Signature');
+        $payload = $request->getContent();
+        $sigHeader = $request->header('Stripe-Signature');
 
+        try {
             if (! $this->verifySignature($payload, $sigHeader)) {
                 Log::warning('Stripe webhook: signature invalide');
                 return false;
             }
+        } catch (\Exception $e) {
+            Log::error('Stripe webhook (signature): ' . $e->getMessage());
+            if (ZeroErreur::enabled()) {
+                return false;
+            }
+            return true;
+        }
 
+        try {
             $event = json_decode($payload, true);
 
             if (($event['type'] ?? '') === 'checkout.session.completed') {
                 $session = $event['data']['object'];
                 $order = Order::where('stripe_session_id', $session['id'])->first();
 
-                if ($order && $order->status === 'pending') {
-                    $order->update([
-                        'status' => 'paid',
-                        'stripe_payment_intent_id' => $session['payment_intent'] ?? null,
-                    ]);
+                // Rejeu sûr (drapeau ON) : une commande déjà « paid » sans commande Gelato ré-émet l'événement
+                // (l'écouteur est idempotent) - sinon un échec APRÈS la mise à jour du statut ne serait jamais repris.
+                $replay = ZeroErreur::enabled() && $order && $order->status === 'paid' && empty($order->gelato_order_id);
+
+                if ($order && ($order->status === 'pending' || $replay)) {
+                    if ($order->status === 'pending') {
+                        $order->update([
+                            'status' => 'paid',
+                            'stripe_payment_intent_id' => $session['payment_intent'] ?? null,
+                        ]);
+                    }
                     event(new ShopOrderPaid($order));
                 }
             }
         } catch (\Exception $e) {
             Log::error('Stripe webhook: ' . $e->getMessage());
+            if (ZeroErreur::enabled()) {
+                throw $e; // signature valide mais traitement en échec : 5xx pour rejeu
+            }
         }
 
         return true;

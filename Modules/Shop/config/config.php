@@ -28,6 +28,8 @@ return [
      * la commande Gelato, signatures webhooks Gelato et Stripe en fail-closed
      * (secrets GELATO_WEBHOOK_SECRET et STRIPE_SHOP_WEBHOOK_SECRET OBLIGATOIRES).
      */
+    // Minutes avant qu'un verrou de soumission Gelato sans gelato_order_id soit jugé orphelin (réconciliation + alerte).
+    'gelato_orphan_minutes' => (int) env('SHOP_GELATO_ORPHAN_MINUTES', 10),
     'gelato_zero_erreur' => (bool) env('SHOP_GELATO_ZERO_ERREUR', false),
 
     // Moteur « print-prep » (projet mcp_gelato) : HTTP local, repli CLI.

@@ -2,6 +2,7 @@
 
 namespace Modules\Shop\Services;
 
+use Modules\Shop\Gelato\GelatoSubmitException;
 use Modules\Shop\Models\Order;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -57,35 +58,11 @@ class GelatoService
     public function createOrder(Order $order, ?array $printFileUrls = null, ?string $idempotencyKey = null): ?string
     {
         try {
-            $address = $order->shipping_address ?? [];
-
-            $body = [
-                'orderReferenceId' => $order->order_number ?? (string) $order->id,
-                'customerReferenceId' => (string) ($order->user_id ?? $order->email),
-                'currency' => strtoupper(config('shop.currency', 'CAD')),
-                'items' => $order->items->map(function ($item) use ($printFileUrls) {
-                    return $printFileUrls !== null
-                        ? $this->buildPreparedItemPayload($item, $printFileUrls[$item->id])
-                        : $this->buildOrderItemPayload($item);
-                })->toArray(),
-                'shippingAddress' => [
-                    'firstName' => $address['first_name'] ?? '',
-                    'lastName' => $address['last_name'] ?? '',
-                    'addressLine1' => $address['address_line1'] ?? '',
-                    'addressLine2' => $address['address_line2'] ?? '',
-                    'city' => $address['city'] ?? '',
-                    'state' => $address['state'] ?? '',
-                    'postCode' => $address['postal_code'] ?? '',
-                    'country' => $address['country'] ?? 'CA',
-                    'email' => $order->email,
-                ],
-            ];
-
             $client = $this->orderClient();
             if ($idempotencyKey !== null) {
                 $client = $client->withHeaders(['Idempotency-Key' => $idempotencyKey]);
             }
-            $response = $client->post('/v4/orders', $body);
+            $response = $client->post('/v4/orders', $this->buildOrderBody($order, $printFileUrls));
 
             if ($response->successful()) {
                 return $response->json('id');
@@ -97,6 +74,100 @@ class GelatoService
             Log::error('Gelato createOrder: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Soumission « zéro erreur » : ne masque JAMAIS l'issue. Retourne l'id Gelato ou lève
+     * GelatoSubmitException (definitive=true seulement pour un rejet 4xx de validation).
+     *
+     * @param array<int|string,string> $printFileUrls
+     * @throws GelatoSubmitException
+     */
+    public function submitOrderStrict(Order $order, array $printFileUrls, string $idempotencyKey): string
+    {
+        try {
+            $response = $this->orderClient()
+                ->withHeaders(['Idempotency-Key' => $idempotencyKey])
+                ->post('/v4/orders', $this->buildOrderBody($order, $printFileUrls));
+        } catch (\Throwable $e) {
+            // Connexion coupée / timeout : la requête a pu partir, la commande peut exister.
+            throw new GelatoSubmitException('Réponse Gelato perdue : '.$e->getMessage(), false);
+        }
+
+        if ($response->successful()) {
+            $id = $response->json('id');
+            if (! is_string($id) || $id === '') {
+                throw new GelatoSubmitException('Gelato a répondu '.$response->status().' sans identifiant de commande', false, $response->status());
+            }
+
+            return $id;
+        }
+
+        $status = $response->status();
+        $detail = 'HTTP '.$status.' '.mb_substr($response->body(), 0, 300);
+        // 4xx = rejet de validation avant création, sauf délai (408), conflit (409) et limite de débit (429) : ambigus.
+        $definitive = $status >= 400 && $status < 500 && ! in_array($status, [408, 409, 429], true);
+
+        throw new GelatoSubmitException('Rejet Gelato : '.$detail, $definitive, $status);
+    }
+
+    /**
+     * Réconciliation : id de la commande Gelato portant cet orderReferenceId, null si AUCUNE (confirmé).
+     * TODO(vérifier en réel) : endpoint de recherche v4 `POST /v4/orders:search` (filtre `orderReferenceIds`),
+     * non éprouvé contre l'API live - toute réponse inattendue lève (jamais un « introuvable » deviné).
+     *
+     * @throws GelatoSubmitException si la recherche elle-même échoue (issue inconnue)
+     */
+    public function findOrderIdByReference(string $orderReferenceId): ?string
+    {
+        try {
+            $response = $this->orderClient()->post('/v4/orders:search', [
+                'orderReferenceIds' => [$orderReferenceId],
+                'limit' => 5,
+            ]);
+        } catch (\Throwable $e) {
+            throw new GelatoSubmitException('Recherche Gelato impossible : '.$e->getMessage(), false);
+        }
+
+        if (! $response->successful() || ! is_array($response->json('orders'))) {
+            throw new GelatoSubmitException('Recherche Gelato inexploitable (HTTP '.$response->status().')', false, $response->status());
+        }
+
+        foreach ($response->json('orders') as $found) {
+            if (($found['orderReferenceId'] ?? null) === $orderReferenceId && ! empty($found['id'])) {
+                return (string) $found['id'];
+            }
+        }
+
+        return null;
+    }
+
+    /** @param array<int|string,string>|null $printFileUrls */
+    private function buildOrderBody(Order $order, ?array $printFileUrls): array
+    {
+        $address = $order->shipping_address ?? [];
+
+        return [
+            'orderReferenceId' => $order->order_number ?? (string) $order->id,
+            'customerReferenceId' => (string) ($order->user_id ?? $order->email),
+            'currency' => strtoupper(config('shop.currency', 'CAD')),
+            'items' => $order->items->map(function ($item) use ($printFileUrls) {
+                return $printFileUrls !== null
+                    ? $this->buildPreparedItemPayload($item, $printFileUrls[$item->id])
+                    : $this->buildOrderItemPayload($item);
+            })->toArray(),
+            'shippingAddress' => [
+                'firstName' => $address['first_name'] ?? '',
+                'lastName' => $address['last_name'] ?? '',
+                'addressLine1' => $address['address_line1'] ?? '',
+                'addressLine2' => $address['address_line2'] ?? '',
+                'city' => $address['city'] ?? '',
+                'state' => $address['state'] ?? '',
+                'postCode' => $address['postal_code'] ?? '',
+                'country' => $address['country'] ?? 'CA',
+                'email' => $order->email,
+            ],
+        ];
     }
 
     /** Item « zéro erreur » : productUid + fichier d'impression préparé et approuvé (jamais un fichier brut). */

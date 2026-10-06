@@ -15,7 +15,13 @@ class WebhookController extends Controller
 {
     public function stripe(Request $request, StripeService $stripeService)
     {
-        $accepted = $stripeService->handleWebhook($request);
+        try {
+            $accepted = $stripeService->handleWebhook($request);
+        } catch (\Throwable $e) {
+            // Signature valide, erreur interne : 5xx pour que Stripe rejoue (jamais 200).
+            Log::error('Stripe webhook : erreur interne apres signature valide - '.$e->getMessage());
+            return response()->json(['error' => 'Internal error, retry'], 500);
+        }
 
         // Fail-closed (drapeau ON) : signature absente/invalide ou secret manquant -> refus 400.
         if (ZeroErreur::enabled() && $accepted === false) {
@@ -70,6 +76,10 @@ class WebhookController extends Controller
             return response()->json(['received' => true]);
         } catch (\Exception $e) {
             Log::error('Gelato webhook : erreur — ' . $e->getMessage());
+            if (ZeroErreur::enabled()) {
+                // Signature déjà validée plus haut : erreur interne -> 5xx pour que Gelato rejoue.
+                return response()->json(['error' => 'Internal error, retry'], 500);
+            }
             return response()->json(['received' => true]);
         }
     }
