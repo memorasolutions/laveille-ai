@@ -19,7 +19,7 @@ class Order extends Model
         'order_number', 'user_id', 'email', 'stripe_session_id', 'stripe_payment_intent_id',
         'gelato_order_id', 'status', 'subtotal', 'tax_amount', 'shipping_cost',
         'total', 'shipping_address', 'billing_address', 'tracking_number',
-        'tracking_url', 'notes',
+        'tracking_url', 'notes', 'gelato_submit_key',
     ];
 
     protected $casts = [

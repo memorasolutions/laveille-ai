@@ -49,7 +49,12 @@ class GelatoService
         }
     }
 
-    public function createOrder(Order $order): ?string
+    /**
+     * @param array<int|string,string>|null $printFileUrls  Mode « zéro erreur » : orderItemId => URL publique du print file APPROVED.
+     *                                                       Si fourni, ces fichiers préparés remplacent tout autre design.
+     * @param string|null $idempotencyKey                    Clé déterministe envoyée en en-tête (mode « zéro erreur »).
+     */
+    public function createOrder(Order $order, ?array $printFileUrls = null, ?string $idempotencyKey = null): ?string
     {
         try {
             $address = $order->shipping_address ?? [];
@@ -58,8 +63,10 @@ class GelatoService
                 'orderReferenceId' => $order->order_number ?? (string) $order->id,
                 'customerReferenceId' => (string) ($order->user_id ?? $order->email),
                 'currency' => strtoupper(config('shop.currency', 'CAD')),
-                'items' => $order->items->map(function ($item) {
-                    return $this->buildOrderItemPayload($item);
+                'items' => $order->items->map(function ($item) use ($printFileUrls) {
+                    return $printFileUrls !== null
+                        ? $this->buildPreparedItemPayload($item, $printFileUrls[$item->id])
+                        : $this->buildOrderItemPayload($item);
                 })->toArray(),
                 'shippingAddress' => [
                     'firstName' => $address['first_name'] ?? '',
@@ -74,7 +81,11 @@ class GelatoService
                 ],
             ];
 
-            $response = $this->orderClient()->post('/v4/orders', $body);
+            $client = $this->orderClient();
+            if ($idempotencyKey !== null) {
+                $client = $client->withHeaders(['Idempotency-Key' => $idempotencyKey]);
+            }
+            $response = $client->post('/v4/orders', $body);
 
             if ($response->successful()) {
                 return $response->json('id');
@@ -86,6 +97,17 @@ class GelatoService
             Log::error('Gelato createOrder: ' . $e->getMessage());
             return null;
         }
+    }
+
+    /** Item « zéro erreur » : productUid + fichier d'impression préparé et approuvé (jamais un fichier brut). */
+    private function buildPreparedItemPayload($item, string $printFileUrl): array
+    {
+        return [
+            'itemReferenceId' => (string) $item->id,
+            'productUid' => $item->gelato_variant_id,
+            'quantity' => $item->quantity,
+            'files' => [['type' => 'default', 'url' => $printFileUrl]],
+        ];
     }
 
     /**

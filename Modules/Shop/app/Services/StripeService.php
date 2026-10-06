@@ -2,6 +2,7 @@
 
 namespace Modules\Shop\Services;
 
+use Modules\Shop\Gelato\ZeroErreur;
 use Modules\Shop\Models\Order;
 use Modules\Shop\Models\Cart;
 use Modules\Shop\Models\Product;
@@ -87,7 +88,8 @@ class StripeService
         }
     }
 
-    public function handleWebhook(Request $request): void
+    /** @return bool false = signature refusée (le contrôleur répond 400 si le drapeau « zéro erreur » est ON). */
+    public function handleWebhook(Request $request): bool
     {
         try {
             $payload = $request->getContent();
@@ -95,7 +97,7 @@ class StripeService
 
             if (! $this->verifySignature($payload, $sigHeader)) {
                 Log::warning('Stripe webhook: signature invalide');
-                return;
+                return false;
             }
 
             $event = json_decode($payload, true);
@@ -115,6 +117,8 @@ class StripeService
         } catch (\Exception $e) {
             Log::error('Stripe webhook: ' . $e->getMessage());
         }
+
+        return true;
     }
 
     public function refund(string $paymentIntentId, ?int $amountCents = null): bool
@@ -142,6 +146,11 @@ class StripeService
         }
 
         $secret = config('shop.stripe.webhook_secret');
+
+        if (ZeroErreur::enabled()) {
+            return $this->verifySignatureStrict($payload, $sigHeader, (string) $secret);
+        }
+
         if (! $secret) {
             Log::warning('Stripe webhook: STRIPE_SHOP_WEBHOOK_SECRET non configuré — vérification désactivée');
 
@@ -162,5 +171,41 @@ class StripeService
         $expected = hash_hmac('sha256', $signedPayload, $secret);
 
         return hash_equals($expected, $signature);
+    }
+
+    /** Mode fail-closed : secret requis, horodatage dans la tolérance (300 s), comparaison à temps constant. */
+    private function verifySignatureStrict(string $payload, string $sigHeader, string $secret): bool
+    {
+        if ($secret === '') {
+            Log::error('Stripe webhook refuse (fail-closed) : STRIPE_SHOP_WEBHOOK_SECRET non configure');
+            return false;
+        }
+
+        $timestamp = '';
+        $signatures = [];
+        foreach (explode(',', $sigHeader) as $part) {
+            $kv = explode('=', trim($part), 2);
+            if (count($kv) !== 2) {
+                continue;
+            }
+            if ($kv[0] === 't') {
+                $timestamp = $kv[1];
+            } elseif ($kv[0] === 'v1') {
+                $signatures[] = $kv[1];
+            }
+        }
+
+        if (! ctype_digit($timestamp) || abs(time() - (int) $timestamp) > 300) {
+            return false;
+        }
+
+        $expected = hash_hmac('sha256', $timestamp.'.'.$payload, $secret);
+        foreach ($signatures as $signature) {
+            if (hash_equals($expected, $signature)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

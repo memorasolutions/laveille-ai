@@ -4,6 +4,7 @@ namespace Modules\Shop\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Shop\Gelato\ZeroErreur;
 use Modules\Shop\Models\Order;
 use Modules\Shop\Services\StripeService;
 use Modules\Shop\Events\ShopOrderFulfilled;
@@ -14,7 +15,13 @@ class WebhookController extends Controller
 {
     public function stripe(Request $request, StripeService $stripeService)
     {
-        $stripeService->handleWebhook($request);
+        $accepted = $stripeService->handleWebhook($request);
+
+        // Fail-closed (drapeau ON) : signature absente/invalide ou secret manquant -> refus 400.
+        if (ZeroErreur::enabled() && $accepted === false) {
+            return response()->json(['error' => 'Invalid signature'], 400);
+        }
+
         return response()->json(['received' => true]);
     }
 
@@ -22,7 +29,15 @@ class WebhookController extends Controller
     {
         try {
             $secret = config('shop.gelato_webhook_secret');
-            if ($secret && $request->header('X-Gelato-Secret') !== $secret) {
+
+            if (ZeroErreur::enabled()) {
+                // Fail-closed : secret absent OU en-tête invalide -> refus, rien n'est traité.
+                $given = (string) $request->header('X-Gelato-Secret');
+                if (! $secret || ! hash_equals((string) $secret, $given)) {
+                    Log::warning('Gelato webhook refuse (fail-closed) : '.($secret ? 'signature invalide' : 'GELATO_WEBHOOK_SECRET non configure'));
+                    return response()->json(['error' => 'Unauthorized'], 401);
+                }
+            } elseif ($secret && $request->header('X-Gelato-Secret') !== $secret) {
                 Log::warning('Gelato webhook : secret invalide');
                 return response()->json(['error' => 'Unauthorized'], 401);
             }

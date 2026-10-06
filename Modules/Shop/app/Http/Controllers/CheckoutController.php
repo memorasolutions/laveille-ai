@@ -4,6 +4,8 @@ namespace Modules\Shop\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Shop\Gelato\PrintFileService;
+use Modules\Shop\Gelato\ZeroErreur;
 use Modules\Shop\Models\Order;
 use Modules\Shop\Models\OrderItem;
 use Modules\Shop\Services\CartService;
@@ -39,6 +41,16 @@ class CheckoutController extends Controller
 
         if (empty($cartItems)) {
             return back()->with('error', __('Votre panier est vide.'));
+        }
+
+        // Drapeau « zéro erreur » : on n'encaisse jamais un article sans fichier d'impression approuvé.
+        if (ZeroErreur::enabled()) {
+            $printFiles = app(PrintFileService::class);
+            foreach ($cartItems as $cartItem) {
+                if (! $printFiles->findOrderable((int) $cartItem['product_id'], $cartItem['gelato_variant_id'] ?? null)) {
+                    return back()->with('error', __('Un article de votre panier n\'est pas disponible à la commande pour le moment.'));
+                }
+            }
         }
 
         $subtotal = $this->cartService->getSubtotal();

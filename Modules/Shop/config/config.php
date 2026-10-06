@@ -22,6 +22,24 @@ return [
         'webhook_secret' => env('STRIPE_SHOP_WEBHOOK_SECRET'),
     ],
 
+    /*
+     * DRAPEAU « Gelato zéro erreur » (défaut : désactivé, la prod ne change pas).
+     * ON = fichier d'impression préparé et approuvé obligatoire, idempotence de
+     * la commande Gelato, signatures webhooks Gelato et Stripe en fail-closed
+     * (secrets GELATO_WEBHOOK_SECRET et STRIPE_SHOP_WEBHOOK_SECRET OBLIGATOIRES).
+     */
+    'gelato_zero_erreur' => (bool) env('SHOP_GELATO_ZERO_ERREUR', false),
+
+    // Moteur « print-prep » (projet mcp_gelato) : HTTP local, repli CLI.
+    'print_prep' => [
+        'url' => env('GELATO_PREP_URL'),
+        'secret' => env('GELATO_PREP_SECRET'),
+        'cli_path' => env('GELATO_PREP_CLI'),   // ex. /chemin/mcp_gelato/dist/cli/prepare.js
+        'node_binary' => env('GELATO_PREP_NODE', 'node'),
+        'timeout' => (int) env('GELATO_PREP_TIMEOUT', 60),
+        'connect_timeout' => (int) env('GELATO_PREP_CONNECT_TIMEOUT', 5),
+    ],
+
     'currency' => env('SHOP_CURRENCY', 'CAD'),
 
     'tax' => [

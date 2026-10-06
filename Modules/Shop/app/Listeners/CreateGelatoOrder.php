@@ -6,6 +6,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Modules\Shop\Events\ShopOrderPaid;
+use Modules\Shop\Gelato\PrintFileNotApprovedException;
+use Modules\Shop\Gelato\PrintFileService;
+use Modules\Shop\Gelato\ZeroErreur;
 use Modules\Shop\Models\Order;
 use Modules\Shop\Services\GelatoService;
 
@@ -21,6 +24,11 @@ class CreateGelatoOrder implements ShouldQueue
 
         if (! $this->gelatoService->isConfigured()) {
             Log::warning("Gelato non configure - commande #{$order->id} ignoree");
+            return;
+        }
+
+        if (ZeroErreur::enabled()) {
+            $this->handleZeroErreur($order);
             return;
         }
 
@@ -62,6 +70,76 @@ class CreateGelatoOrder implements ShouldQueue
 
             $this->notifyAdminInvalidConfig($order, ["Exception API Gelato : " . mb_substr($e->getMessage(), 0, 200)]);
         }
+    }
+
+    /**
+     * Chemin « zéro erreur » (drapeau shop.gelato_zero_erreur ON) :
+     * 1. fichier d'impression APPROVED obligatoire pour chaque item (sinon refus, aucun envoi);
+     * 2. idempotence : un seul envoi Gelato par commande, même si ShopOrderPaid arrive deux fois.
+     */
+    private function handleZeroErreur(Order $order): void
+    {
+        $order->refresh();
+        if (! empty($order->gelato_order_id)) {
+            Log::info("Gelato idempotence : commande #{$order->id} deja soumise ({$order->gelato_order_id}), ignoree");
+            return;
+        }
+
+        $order->loadMissing('items.product');
+        try {
+            $urls = $this->approvedPrintFileUrls($order);
+        } catch (PrintFileNotApprovedException $e) {
+            Log::error("Commande #{$order->id} REFUSEE soumission Gelato : {$e->getMessage()}");
+            $order->update(['notes' => mb_substr("[PRINT-FILE] {$e->getMessage()}", 0, 500)]);
+            $this->notifyAdminInvalidConfig($order, [$e->getMessage()]);
+            return;
+        }
+
+        // Verrou atomique (compare-and-set) : un seul processus obtient la clé.
+        $key = 'laveille-shop-order-'.($order->order_number ?? $order->id);
+        $claimed = Order::whereKey($order->id)
+            ->whereNull('gelato_order_id')
+            ->whereNull('gelato_submit_key')
+            ->update(['gelato_submit_key' => $key]);
+
+        if ($claimed !== 1) {
+            Log::warning("Gelato idempotence : commande #{$order->id} deja en cours ou soumise, deuxieme evenement ignore");
+            return;
+        }
+
+        try {
+            $gelatoOrderId = $this->gelatoService->createOrder($order, $urls, $key);
+            if (! $gelatoOrderId) {
+                throw new \RuntimeException('Gelato createOrder a retourne null');
+            }
+
+            $order->update(['gelato_order_id' => $gelatoOrderId, 'status' => 'processing']);
+            Log::info("Commande Gelato creee : {$gelatoOrderId} pour commande #{$order->id}");
+        } catch (\Throwable $e) {
+            // Echec constate : on libere la cle pour permettre une reprise manuelle ou un retry de la file.
+            Order::whereKey($order->id)->whereNull('gelato_order_id')->update(['gelato_submit_key' => null]);
+            Log::error("Echec creation commande Gelato pour commande #{$order->id}: {$e->getMessage()}");
+            $order->update(['notes' => 'Echec Gelato : '.mb_substr($e->getMessage(), 0, 500)]);
+            $this->notifyAdminInvalidConfig($order, ['Exception API Gelato : '.mb_substr($e->getMessage(), 0, 200)]);
+        }
+    }
+
+    /**
+     * @return array<int,string> orderItemId => URL publique du print file approuvé
+     * @throws PrintFileNotApprovedException
+     */
+    private function approvedPrintFileUrls(Order $order): array
+    {
+        $service = app(PrintFileService::class);
+        $urls = [];
+        foreach ($order->items as $item) {
+            $urls[$item->id] = $service->assertOrderable((int) $item->product_id, $item->gelato_variant_id)->public_url;
+        }
+        if ($urls === []) {
+            throw new PrintFileNotApprovedException('Commande sans article.');
+        }
+
+        return $urls;
     }
 
     /**
