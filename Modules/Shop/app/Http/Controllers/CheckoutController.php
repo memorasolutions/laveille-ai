@@ -4,6 +4,7 @@ namespace Modules\Shop\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Shop\Gelato\PrintFileNotApprovedException;
 use Modules\Shop\Gelato\PrintFileService;
 use Modules\Shop\Gelato\ZeroErreur;
 use Modules\Shop\Models\Order;
@@ -47,7 +48,11 @@ class CheckoutController extends Controller
         if (ZeroErreur::enabled()) {
             $printFiles = app(PrintFileService::class);
             foreach ($cartItems as $cartItem) {
-                if (! $printFiles->findOrderable((int) $cartItem['product_id'], $cartItem['gelato_variant_id'] ?? null)) {
+                // Même contrôle qu'à la commande Gelato : le productUid de l'item doit égaler celui de la préparation.
+                $variant = $cartItem['gelato_variant_id'] ?? null;
+                try {
+                    $printFiles->assertOrderable((int) $cartItem['product_id'], $variant, $variant);
+                } catch (PrintFileNotApprovedException) {
                     return back()->with('error', __('Un article de votre panier n\'est pas disponible à la commande pour le moment.'));
                 }
             }

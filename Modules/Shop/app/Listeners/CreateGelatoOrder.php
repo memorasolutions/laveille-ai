@@ -6,6 +6,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Modules\Shop\Events\ShopOrderPaid;
+use Modules\Shop\Gelato\GelatoReconciler;
 use Modules\Shop\Gelato\GelatoSubmitException;
 use Modules\Shop\Gelato\PrintFileNotApprovedException;
 use Modules\Shop\Gelato\PrintFileService;
@@ -25,6 +26,18 @@ class CreateGelatoOrder implements ShouldQueue
 
         if (! $this->gelatoService->isConfigured()) {
             Log::warning("Gelato non configure - commande #{$order->id} ignoree");
+            if (ZeroErreur::enabled()) {
+                // Commande PAYÉE qui ne partira pas : jamais de retour muet.
+                $order->refresh();
+                if (empty($order->gelato_order_id)) {
+                    $order->update([
+                        'status' => 'awaiting_print_file',
+                        'gelato_issue' => mb_substr('['.now()->toIso8601String().'] Clé API Gelato absente : commande payée non transmise.', 0, 1000),
+                    ]);
+                    $this->notifyAdmin($order, 'payée, Gelato non configuré (clé API absente)', [
+                        'Aucun envoi effectué. Configurer la clé API Gelato puis relancer la soumission, ou rembourser (aucun remboursement automatique).']);
+                }
+            }
             return;
         }
 
@@ -117,7 +130,7 @@ class CreateGelatoOrder implements ShouldQueue
         $this->submit($order, $urls, $key);
     }
 
-    /** Clé déjà posée sans gelato_order_id : en cours, orphelin ou UNKNOWN. Jamais de création à l'aveugle. */
+    /** Clé déjà posée sans gelato_order_id : en cours, orphelin ou UNKNOWN. Jamais de création à l'aveugle ni sur résultat négatif. */
     private function handleExistingLock(Order $order, array $urls, string $key): void
     {
         $fresh = Order::find($order->id);
@@ -136,32 +149,13 @@ class CreateGelatoOrder implements ShouldQueue
             return; // clé libérée entre-temps (rejet confirmé) : reprise manuelle seulement
         }
 
-        // Verrou orphelin ou état UNKNOWN : réconcilier AVANT toute création.
+        // Verrou orphelin ou état UNKNOWN : on tente d'ADOPTER une commande existante, JAMAIS de recréer.
+        // Résultat négatif/vide/échec => reste unknown + alerte admin (voir GelatoReconciler).
+        // TODO : auto-retry possible seulement une fois l'en-tête Idempotency-Key confirmé honoré par Gelato en réel.
         $this->notifyAdmin($fresh, 'verrou de soumission orphelin', ["Clé {$fresh->gelato_submit_key} sans gelato_order_id depuis "
             .($startedAt?->toDateTimeString() ?? 'inconnu').' (état : '.($fresh->gelato_submit_state ?? 'inconnu').'). Réconciliation tentée.']);
 
-        try {
-            $existing = $this->gelatoService->findOrderIdByReference((string) ($fresh->order_number ?? $fresh->id));
-        } catch (\Throwable $e) {
-            Log::error("Reconciliation Gelato impossible pour commande #{$order->id} : {$e->getMessage()}");
-            $fresh->update(['gelato_submit_state' => 'unknown', 'gelato_issue' => mb_substr('Réconciliation impossible : '.$e->getMessage(), 0, 1000)]);
-            return; // état inconnu conservé : PAS de création (pas de double commande)
-        }
-
-        if ($existing !== null) {
-            $fresh->update(['gelato_order_id' => $existing, 'status' => 'processing', 'gelato_submit_state' => 'submitted',
-                'gelato_issue' => 'Commande Gelato retrouvée par réconciliation ('.$existing.')']);
-            Log::warning("Gelato reconciliation : commande #{$order->id} adoptee -> {$existing}");
-            return;
-        }
-
-        // Aucune commande côté Gelato (confirmé) : on reprend le verrou (compare-and-set sur l'ancien départ) puis on crée.
-        $reclaimed = Order::whereKey($order->id)->whereNull('gelato_order_id')->where('gelato_submit_key', $key)
-            ->where('gelato_submit_started_at', $startedAt)
-            ->update(['gelato_submit_started_at' => now(), 'gelato_submit_state' => 'submitting']);
-        if ($reclaimed === 1) {
-            $this->submit(Order::find($order->id)->load('items.product'), $urls, $key);
-        }
+        app(GelatoReconciler::class)->reconcile($fresh);
     }
 
     private function submit(Order $order, array $urls, string $key): void

@@ -20,7 +20,7 @@ class Order extends Model
         'gelato_order_id', 'status', 'subtotal', 'tax_amount', 'shipping_cost',
         'total', 'shipping_address', 'billing_address', 'tracking_number',
         'tracking_url', 'notes', 'gelato_submit_key', 'gelato_submit_started_at',
-        'gelato_submit_state', 'gelato_issue',
+        'gelato_submit_state', 'gelato_issue', 'confirmation_sent_at',
     ];
 
     protected $casts = [
@@ -31,6 +31,7 @@ class Order extends Model
         'shipping_cost' => 'decimal:2',
         'total' => 'decimal:2',
         'gelato_submit_started_at' => 'datetime',
+        'confirmation_sent_at' => 'datetime',
     ];
 
     protected static function booted(): void

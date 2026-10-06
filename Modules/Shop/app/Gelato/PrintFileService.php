@@ -90,17 +90,23 @@ class PrintFileService
         return $file;
     }
 
+    /**
+     * Mêmes garanties que approve() : transaction + verrou de ligne + revalidation du hash vu par l'appelant,
+     * pour qu'un statut MockupReady ne porte jamais l'aperçu d'un ancien hash (course avec un re-prepare).
+     */
     public function markMockupReady(PrintFile $file, ?string $mockupPath = null): PrintFile
     {
-        $this->requireStatus($file, [PrintFileStatus::Prepared], PrintFileStatus::MockupReady);
-        $path = $mockupPath ?? $file->mockup_path;
-        if (empty($path)) {
-            throw new PrintFileNotApprovedException('Aucun aperçu (mockup) : impossible de passer à MOCKUP_READY.');
-        }
+        return DB::transaction(function () use ($file, $mockupPath) {
+            $locked = $this->lockAndRevalidate($file, [PrintFileStatus::Prepared], PrintFileStatus::MockupReady);
+            $path = $mockupPath ?? $locked->mockup_path;
+            if (empty($path)) {
+                throw new PrintFileNotApprovedException('Aucun aperçu (mockup) : impossible de passer à MOCKUP_READY.');
+            }
 
-        $file->forceFill(['status' => PrintFileStatus::MockupReady, 'mockup_path' => $path])->save();
+            $locked->forceFill(['status' => PrintFileStatus::MockupReady, 'mockup_path' => $path])->save();
 
-        return $file;
+            return $locked;
+        });
     }
 
     /**
@@ -136,14 +142,35 @@ class PrintFileService
 
     public function markSellable(PrintFile $file): PrintFile
     {
-        $this->requireStatus($file, [PrintFileStatus::Approved], PrintFileStatus::Sellable);
-        if (! $file->isOrderable()) {
-            throw new PrintFileNotApprovedException('Approbation invalide (hash modifié) : impossible de rendre vendable.');
+        return DB::transaction(function () use ($file) {
+            $locked = $this->lockAndRevalidate($file, [PrintFileStatus::Approved], PrintFileStatus::Sellable);
+            if (! $locked->isOrderable()) {
+                throw new PrintFileNotApprovedException('Approbation invalide (hash modifié) : impossible de rendre vendable.');
+            }
+
+            $locked->forceFill(['status' => PrintFileStatus::Sellable])->save();
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Relit la ligne sous verrou (à appeler DANS une transaction), exige le statut attendu et un hash identique à celui vu par l'appelant.
+     *
+     * @param list<PrintFileStatus> $allowed
+     */
+    private function lockAndRevalidate(PrintFile $file, array $allowed, PrintFileStatus $target): PrintFile
+    {
+        $locked = PrintFile::whereKey($file->getKey())->lockForUpdate()->first()
+            ?? throw new PrintFileNotApprovedException('Fichier d\'impression introuvable.');
+
+        $this->requireStatus($locked, $allowed, $target);
+
+        if (! hash_equals((string) $locked->print_file_hash, (string) $file->print_file_hash)) {
+            throw new PrintFileNotApprovedException('Le fichier a changé (hash différent) : nouvel aperçu requis.');
         }
 
-        $file->forceFill(['status' => PrintFileStatus::Sellable])->save();
-
-        return $file;
+        return $locked;
     }
 
     /** Fichier commandable pour un produit/variante (variante précise d'abord, sinon produit entier), ou null. */

@@ -217,7 +217,7 @@ test('#1/#2 verrou orphelin : réconciliation adopte la commande existante et al
     Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/v4/orders'));
 });
 
-test('#1/#2 verrou orphelin sans commande côté Gelato : une seule création', function () {
+test('#1 verrou orphelin, recherche vide : NE CRÉE PAS, reste unknown, alerte admin', function () {
     Mail::fake();
     Http::fake([
         'order.gelatoapis.com/v4/orders:search' => Http::response(['orders' => []], 200),
@@ -233,7 +233,9 @@ test('#1/#2 verrou orphelin sans commande côté Gelato : une seule création', 
 
     app(CreateGelatoOrder::class)->handle(new ShopOrderPaid(Order::find($order->id)));
 
-    expect(Order::find($order->id)->gelato_order_id)->toBe('G-NEW');
+    expect(Order::find($order->id)->gelato_order_id)->toBeNull()
+        ->and(Order::find($order->id)->gelato_submit_state)->toBe('unknown');
+    Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/v4/orders'));
 });
 
 test('#1 réconciliation impossible : on ne crée pas (pas de double), état UNKNOWN', function () {
@@ -348,4 +350,102 @@ test('#10 status et approved_hash non assignables en masse ; approve revalide le
     $stale = $file->fresh();
     zePrepared($product, 'ccc'); // re-prepare concurrent : repasse PREPARED
     expect(fn () => $svc->approve($stale, 1))->toThrow(PrintFileNotApprovedException::class);
+});
+
+
+// ---- 3e round ----
+
+test('#1 recherche renvoie null/corps inexploitable : pas de création, unknown', function () {
+    Mail::fake();
+    Http::fake([
+        'order.gelatoapis.com/v4/orders:search' => Http::response(['orders' => null], 200),
+        'order.gelatoapis.com/v4/orders' => Http::response(['id' => 'G-NEW'], 200),
+    ]);
+    $product = zeProduct();
+    zeApprove(zePrepared($product));
+    $order = zeOrder($product);
+    Order::whereKey($order->id)->update(['gelato_submit_key' => 'k', 'gelato_submit_started_at' => now()->subMinutes(60)]);
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid(Order::find($order->id)));
+
+    expect(Order::find($order->id)->gelato_order_id)->toBeNull()->and(Order::find($order->id)->gelato_submit_state)->toBe('unknown');
+    Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/v4/orders'));
+});
+
+test('#2 clé API absente + drapeau ON : awaiting_print_file, alerte, aucun envoi', function () {
+    config(['shop.gelato.api_key' => null, 'shop.admin_email' => 'admin@example.com']);
+    Http::fake();
+    Mail::shouldReceive('raw')->once();
+    $product = zeProduct();
+    zeApprove(zePrepared($product));
+    $order = zeOrder($product);
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+
+    Http::assertNothingSent();
+    expect(Order::find($order->id)->status)->toBe('awaiting_print_file')
+        ->and(Order::find($order->id)->gelato_issue)->toContain('Clé API');
+});
+
+test('#2 clé API absente + drapeau OFF : comportement historique (ignorée, statut inchangé)', function () {
+    config(['shop.gelato.api_key' => null, 'shop.gelato_zero_erreur' => false]);
+    Http::fake();
+    $order = zeOrder(zeProduct());
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+
+    expect(Order::find($order->id)->status)->toBe('paid');
+});
+
+test('#3 checkout refuse un productUid non concordant avant paiement', function () {
+    $product = zeProduct();
+    zeApprove(zePrepared($product)); // préparé pour UID-1
+    $svc = app(PrintFileService::class);
+    expect($svc->assertOrderable($product->id, 'UID-1', 'UID-1'))->toBeInstanceOf(PrintFile::class);
+    expect(fn () => $svc->assertOrderable($product->id, 'UID-1', 'AUTRE'))->toThrow(PrintFileNotApprovedException::class);
+    // le contrôle du checkout appelle exactement assertOrderable($pid, $variant, $variant)
+    $src = file_get_contents(base_path('Modules/Shop/app/Http/Controllers/CheckoutController.php'));
+    expect($src)->toContain('assertOrderable((int) $cartItem[\'product_id\'], $variant, $variant)');
+});
+
+test('#6 rejeu ShopOrderPaid : un seul courriel de confirmation', function () {
+    \Illuminate\Support\Facades\Notification::fake();
+    $order = zeOrder(zeProduct());
+
+    app(\Modules\Shop\Listeners\SendOrderConfirmation::class)->handle(new ShopOrderPaid($order));
+    app(\Modules\Shop\Listeners\SendOrderConfirmation::class)->handle(new ShopOrderPaid(Order::find($order->id)));
+
+    \Illuminate\Support\Facades\Notification::assertSentOnDemandTimes(\Modules\Shop\Notifications\OrderConfirmedNotification::class, 1);
+    expect(Order::find($order->id)->confirmation_sent_at)->not->toBeNull();
+});
+
+test('#7 shop:gelato-reconcile adopte si trouvée, sinon alerte sans créer', function () {
+    Mail::fake();
+    Http::fake([
+        'order.gelatoapis.com/v4/orders:search' => Http::sequence()
+            ->push(['orders' => [['id' => 'G-X', 'orderReferenceId' => 'REF-A']]], 200)
+            ->push(['orders' => []], 200),
+        'order.gelatoapis.com/v4/orders' => Http::response(['id' => 'G-NEW'], 200),
+    ]);
+    $p = zeProduct();
+    $a = zeOrder($p); $a->forceFill(['order_number' => 'REF-A'])->save();
+    $b = zeOrder($p); $b->forceFill(['order_number' => 'REF-B'])->save();
+    foreach ([$a, $b] as $o) {
+        Order::whereKey($o->id)->update(['gelato_submit_key' => 'k'.$o->id, 'gelato_submit_state' => 'unknown']);
+    }
+
+    $this->artisan('shop:gelato-reconcile')->assertSuccessful();
+
+    expect(Order::find($a->id)->gelato_order_id)->toBe('G-X')
+        ->and(Order::find($b->id)->gelato_order_id)->toBeNull()
+        ->and(Order::find($b->id)->gelato_submit_state)->toBe('unknown');
+    Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/v4/orders'));
+});
+
+test('#9 markMockupReady/markSellable refusent un hash périmé', function () {
+    $product = zeProduct();
+    $stale = zePrepared($product, 'old');
+    zePrepared($product, 'new'); // re-prepare concurrent : hash change
+    $svc = app(PrintFileService::class);
+    expect(fn () => $svc->markMockupReady($stale))->toThrow(PrintFileNotApprovedException::class);
 });

@@ -52,6 +52,7 @@ class ShopServiceProvider extends ServiceProvider
             \Modules\Shop\Console\ResyncGelatoProductCommand::class,
             \Modules\Shop\Console\CleanupPendingOrdersCommand::class,
             \Modules\Shop\Console\SendAbandonmentRemindersCommand::class,
+            \Modules\Shop\Console\GelatoReconcileCommand::class,
         ]);
     }
 
