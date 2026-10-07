@@ -32,6 +32,16 @@ return [
     'gelato_orphan_minutes' => (int) env('SHOP_GELATO_ORPHAN_MINUTES', 10),
     'gelato_zero_erreur' => (bool) env('SHOP_GELATO_ZERO_ERREUR', false),
 
+    // Éditeur client (le client conçoit, le serveur re-rend via le moteur). Exige AUSSI gelato_zero_erreur. OFF = aucune route.
+    'gelato_editor' => (bool) env('SHOP_GELATO_EDITOR', false),
+    'editor' => [
+        'safe_margin_mm' => (float) env('SHOP_EDITOR_SAFE_MARGIN_MM', 10),
+        'default_area_mm' => ['widthMm' => 300.0, 'heightMm' => 400.0], // surchargeable par metadata.editor_area_mm du produit
+        'max_elements' => 30,
+        'max_upload_kb' => 15360,
+        'moderator' => null, // classe implémentant ContentModeratorContract (défaut : NullContentModerator)
+    ],
+
     // Moteur « print-prep » (projet mcp_gelato) : HTTP local, repli CLI.
     'print_prep' => [
         'url' => env('GELATO_PREP_URL'),

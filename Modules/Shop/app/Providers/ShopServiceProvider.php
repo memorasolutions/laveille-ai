@@ -37,6 +37,10 @@ class ShopServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(
+            \Modules\Shop\Gelato\Moderation\ContentModeratorContract::class,
+            fn ($app) => $app->make(config('shop.editor.moderator') ?: \Modules\Shop\Gelato\Moderation\NullContentModerator::class)
+        );
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
     }

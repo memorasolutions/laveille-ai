@@ -20,6 +20,11 @@ class PrintPrepException extends RuntimeException
     public const UNREACHABLE = 'UNREACHABLE';
     public const INVALID_RESPONSE = 'INVALID_RESPONSE';
 
+    /** Refus métier du rendu par spec (éditeur client) : à montrer au client, jamais à retenter tel quel. */
+    public const SPEC_REFUSALS = [
+        'HORS_ZONE_SECURITE', 'TEXTE_TROP_LARGE', 'IMAGE_DEFORMEE', 'DPI_TROP_BAS', 'POLICE_NON_SUPPORTEE', 'ASSET_INCONNU',
+    ];
+
     public function __construct(
         public readonly string $errorCode,
         string $message = '',
@@ -31,6 +36,6 @@ class PrintPrepException extends RuntimeException
     /** Refus métier (à remonter à l'admin) par opposition à une panne technique. */
     public function isRefusal(): bool
     {
-        return in_array($this->errorCode, [self::NON_CONFORME, self::ZONE_INCONNUE], true);
+        return in_array($this->errorCode, [self::NON_CONFORME, self::ZONE_INCONNUE, ...self::SPEC_REFUSALS], true);
     }
 }

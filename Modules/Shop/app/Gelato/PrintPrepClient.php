@@ -44,6 +44,40 @@ class PrintPrepClient
         return $this->call('POST', '/v1/validate', $payload);
     }
 
+    /**
+     * Téléverse une image brute vers le moteur (POST /v1/assets, HTTP seulement, pas de repli CLI).
+     * Le moteur vérifie le type réel, le plafond de pixels et refuse le SVG.
+     *
+     * @return array{assetHash:string,format:string,width:int,height:int}
+     * @throws PrintPrepException
+     */
+    public function uploadAsset(string $binary, string $mime = 'application/octet-stream'): array
+    {
+        if ($this->baseUrl() === '') {
+            throw new PrintPrepException(PrintPrepException::NOT_CONFIGURED, 'Moteur print-prep non configuré (GELATO_PREP_URL).');
+        }
+
+        try {
+            $response = $this->http($this->secret())->withBody($binary, $mime)->post($this->baseUrl().'/v1/assets');
+        } catch (ConnectionException $e) {
+            throw new PrintPrepException(PrintPrepException::UNREACHABLE, 'print-prep injoignable : '.$e->getMessage());
+        }
+
+        return $this->interpret($response);
+    }
+
+    /**
+     * Rend une spec déclarative côté moteur (POST /v1/render-spec). Le serveur ne fait jamais confiance au pixel client.
+     *
+     * @param array<string,mixed> $spec
+     * @return array<string,mixed> status, contentHash, publicUrl, specHash, validation, mockupPreviewPath, elements
+     * @throws PrintPrepException refus 422 (HORS_ZONE_SECURITE, ...) ou panne
+     */
+    public function renderSpec(array $spec): array
+    {
+        return $this->call('POST', '/v1/render-spec', $spec);
+    }
+
     /** @return array<string,mixed> @throws PrintPrepException */
     public function health(): array
     {
@@ -72,10 +106,7 @@ class PrintPrepClient
 
     private function viaHttp(string $method, string $path, array $payload): array
     {
-        $secret = (string) ($this->config['secret'] ?? '');
-        if ($secret === '') {
-            throw new PrintPrepException(PrintPrepException::NOT_CONFIGURED, 'GELATO_PREP_SECRET absent.');
-        }
+        $secret = $this->secret();
 
         try {
             $response = $this->http($secret)->send($method, $this->baseUrl().$path, $method === 'GET' ? [] : ['json' => $payload]);
@@ -84,6 +115,16 @@ class PrintPrepClient
         }
 
         return $this->interpret($response);
+    }
+
+    private function secret(): string
+    {
+        $secret = (string) ($this->config['secret'] ?? '');
+        if ($secret === '') {
+            throw new PrintPrepException(PrintPrepException::NOT_CONFIGURED, 'GELATO_PREP_SECRET absent.');
+        }
+
+        return $secret;
     }
 
     private function http(string $secret): PendingRequest
