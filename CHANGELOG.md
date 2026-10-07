@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.322.0] - 2026-10-07
+
+### Ajouté
+- **Une fiche au Glossaire Techno : « CGNAT (Carrier-Grade NAT) ».** La technique par laquelle un fournisseur d'accès à Internet fait partager une même adresse IPv4 publique à de nombreux abonnés, faute d'adresses disponibles. La fiche explique le mécanisme (double traduction NAT444, plage partagée 100.64.0.0/10 réservée par le RFC 6598), la raison du déploiement (épuisement des adresses IPv4) et les conséquences concrètes pour l'utilisateur : connexions entrantes bloquées, auto-hébergement et redirection de port impossibles, géolocalisation faussée, attribution plus difficile pour les enquêtes. Angle québécois honnête : le RFC 6598 a été coécrit en 2012 par un ingénieur de l'opérateur canadien Rogers, sans affirmer de taux de déploiement précis au Canada (non établi par les sources). Trois sources neutres (RFC 6598, 6888 et 6269 de l'IETF), faits recoupés par deux recherches indépendantes (Perplexity et Codex), paire d'illustrations WebP et JPEG (1200x669), aucune parenté hiérarchique fabriquée (aucun terme parent réseau n'existe au glossaire), migration réversible, aucune donnée utilisateur touchée, aucune nouvelle dépendance.
+
 ## [1.321.0] - 2026-10-07
 
 ### Ajouté
