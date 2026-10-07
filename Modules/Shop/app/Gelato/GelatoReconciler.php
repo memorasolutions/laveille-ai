@@ -39,6 +39,10 @@ class GelatoReconciler
         } catch (\Throwable $e) {
             Log::error("Reconciliation Gelato impossible pour commande #{$order->id} : {$e->getMessage()}");
             $this->markUnknown($order, 'Réconciliation impossible : '.$e->getMessage());
+            $this->alert($order, 'réconciliation Gelato impossible ou ambiguë - aucune adoption, aucune création', [
+                $e->getMessage(),
+                'Intervention manuelle requise : vérifier le tableau de bord Gelato, puis adopter l\'id ou libérer la clé.',
+            ]);
 
             return self::UNKNOWN;
         }

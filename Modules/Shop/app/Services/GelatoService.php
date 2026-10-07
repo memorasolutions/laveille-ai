@@ -112,7 +112,8 @@ class GelatoService
     }
 
     /**
-     * Réconciliation : id de la commande Gelato portant cet orderReferenceId, null si AUCUNE (confirmé).
+     * Réconciliation : id de l'UNIQUE commande Gelato valide (ni refusée, ni échouée, ni annulée) portant cet orderReferenceId,
+     * null si aucune valide. Plusieurs valides = ambigu : lève (jamais de choix arbitraire).
      * TODO(vérifier en réel) : endpoint de recherche v4 `POST /v4/orders:search` (filtre `orderReferenceIds`),
      * non éprouvé contre l'API live - toute réponse inattendue lève (jamais un « introuvable » deviné).
      *
@@ -133,13 +134,25 @@ class GelatoService
             throw new GelatoSubmitException('Recherche Gelato inexploitable (HTTP '.$response->status().')', false, $response->status());
         }
 
+        // Égalité STRICTE sur la référence, id non vide, et on écarte les commandes refusées / échouées / annulées
+        // (une même référence peut porter une tentative refusée ET une commande valide).
+        $valid = [];
         foreach ($response->json('orders') as $found) {
-            if (($found['orderReferenceId'] ?? null) === $orderReferenceId && ! empty($found['id'])) {
-                return (string) $found['id'];
+            if (! is_array($found) || ($found['orderReferenceId'] ?? null) !== $orderReferenceId || empty($found['id'])) {
+                continue;
             }
+            if (in_array($found['financialStatus'] ?? null, ['refused', 'canceled'], true)
+                || in_array($found['fulfillmentStatus'] ?? null, ['failed', 'canceled'], true)) {
+                continue;
+            }
+            $valid[(string) $found['id']] = true;
         }
 
-        return null;
+        if (count($valid) > 1) {
+            throw new GelatoSubmitException("Plusieurs commandes Gelato valides pour la référence {$orderReferenceId} (".implode(', ', array_keys($valid))."), intervention manuelle requise", false, $response->status());
+        }
+
+        return $valid === [] ? null : (string) array_key_first($valid);
     }
 
     /** @param array<int|string,string>|null $printFileUrls */

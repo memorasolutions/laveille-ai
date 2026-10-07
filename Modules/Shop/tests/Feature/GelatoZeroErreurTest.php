@@ -449,3 +449,50 @@ test('#9 markMockupReady/markSellable refusent un hash périmé', function () {
     $svc = app(PrintFileService::class);
     expect(fn () => $svc->markMockupReady($stale))->toThrow(PrintFileNotApprovedException::class);
 });
+
+function zeReconcile(array $orders): array
+{
+    config(['shop.admin_email' => 'admin@example.com']);
+    Mail::fake();
+    Http::fake([
+        'order.gelatoapis.com/v4/orders:search' => Http::response(['orders' => $orders], 200),
+        'order.gelatoapis.com/v4/orders' => Http::response(['id' => 'G-NEW'], 200),
+    ]);
+    $o = zeOrder(zeProduct());
+    $o->forceFill(['order_number' => 'REF-6'])->save();
+    Order::whereKey($o->id)->update(['gelato_submit_key' => 'k6', 'gelato_submit_state' => 'unknown']);
+
+    $result = app(\Modules\Shop\Gelato\GelatoReconciler::class)->reconcile(Order::find($o->id));
+
+    return [$result, Order::find($o->id)];
+}
+
+test('#10 réconciliation : [refusée, livrée] adopte la LIVRÉE, jamais la refusée', function () {
+    [$result, $order] = zeReconcile([
+        ['id' => 'G-REFUSED', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'refused', 'fulfillmentStatus' => 'failed'],
+        ['id' => 'G-OK', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'delivered'],
+    ]);
+
+    expect($result)->toBe('adopted')->and($order->gelato_order_id)->toBe('G-OK');
+    Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/v4/orders'));
+});
+
+test('#10 réconciliation : uniquement une refusée = introuvable, unknown, aucune adoption', function () {
+    [$result, $order] = zeReconcile([
+        ['id' => 'G-REFUSED', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'refused', 'fulfillmentStatus' => 'failed'],
+    ]);
+
+    expect($result)->toBe('unknown')->and($order->gelato_order_id)->toBeNull()->and($order->gelato_submit_state)->toBe('unknown');
+    Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/v4/orders'));
+});
+
+test('#10 réconciliation : DEUX commandes valides = ambigu, unknown + alerte, aucune adoption', function () {
+    [$result, $order] = zeReconcile([
+        ['id' => 'G-A', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'printed'],
+        ['id' => 'G-B', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'delivered'],
+    ]);
+
+    expect($result)->toBe('unknown')->and($order->gelato_order_id)->toBeNull()->and($order->gelato_submit_state)->toBe('unknown')
+        ->and($order->gelato_issue)->toContain('Plusieurs commandes Gelato valides');
+    Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/v4/orders'));
+});
