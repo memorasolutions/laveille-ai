@@ -127,6 +127,7 @@ class Tool extends Model implements Searchable
         'tutorials_last_scanned_at', // 2026-05-05 #138 : fix critique - sans ca, tools:enrich-tutorials re-scannait toujours les memes 10 outils.
         'underlying_model', 'is_multimodal', 'output_types', 'opt_out_training', 'unique_value',
         'last_change_detected_at', 'last_change_type', 'last_change_note', // S90 #43 freshness signals
+        'third_party_ai_note', 'privacy_policy_url', 'privacy_checked_at', // v1.321.0 module précaution données personnelles
     ];
 
     public function submitter(): BelongsTo
@@ -269,6 +270,7 @@ class Tool extends Model implements Searchable
         'learning_curve' => 'integer',
         'has_api_access' => 'boolean',
         'featured_until' => 'datetime',
+        'privacy_checked_at' => 'date',
         'featured_order' => 'integer',
         'faq' => 'array',
         'target_audience' => 'array',

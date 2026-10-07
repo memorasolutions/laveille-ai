@@ -443,6 +443,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             @endif
         </div>
+        @include('directory::public.partials.privacy-notice', ['tool' => $tool, 'placement' => 'top'])
         <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center;">
             <span class="rt-badge badge-{{ $tool->pricing }}">{{ $pricingLabels[$tool->pricing] ?? ucfirst($tool->pricing) }}</span>
             <span class="rt-badge" style="background: #F3E8FF; color: #7E22CE;">{{ ucfirst($tool->website_type ?? 'website') }}</span>
@@ -782,6 +783,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         </a>
                     </div>
                 @endif
+                @include('directory::public.partials.privacy-notice', ['tool' => $tool, 'placement' => 'cta'])
                 <div style="margin-top: 14px; font-size: 13px; color: #059669; font-weight: 600;">✓ {{ __('Vérifié par La veille') }}</div>
                 <div style="margin-top: 16px;">
                     @include('directory::public.partials.collection-button', ['tool' => $tool])

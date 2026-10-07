@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.321.0] - 2026-10-07
+
+### Ajouté
+- **Module « précaution données personnelles » dans l'annuaire (éteint par défaut).** Une note de conseil adressée à l'utilisateur, jamais un jugement sur l'outil : transmettre seulement les renseignements nécessaires et vérifier comment le service utilise, conserve et partage les documents. Deux couches : une note générale par catégorie (variante « CV » et variante « documents », pilotée par `config('directory.privacy_notice.categories')`) et, par outil, un fait vérifié optionnel (`third_party_ai_note`, `privacy_policy_url`, `privacy_checked_at`) affiché avec le lien de la politique. Placée près du bouton « Visiter le site ». Interrupteur public en réglage runtime `directory.privacy_notice_enabled` (OFF), activable sans redéploiement par `php artisan directory:privacy-notice on`. Migration réversible, textes dans `Modules/Directory/lang/fr_CA/privacy_notice.php`.
+
+### Modifié
+- **Fiche CVBooster préparée (reste en modération)** : descriptif factuel, catégorie « Écriture IA », fait vérifié de la politique de confidentialité. Aucune publication.
+
+Module Directory (désactivable, exportable), aucune donnée utilisateur touchée, aucune nouvelle dépendance (règle 18).
+
 ## [1.320.0] - 2026-10-06
 
 ### Ajouté
