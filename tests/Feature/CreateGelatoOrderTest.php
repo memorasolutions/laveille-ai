@@ -72,18 +72,18 @@ it('refuses order when product is null', function () {
     expect(true)->toBeTrue();
 });
 
-it('refuses order when neither store_variant_map nor print_file_url present', function () {
+it('refuses a catalogue product without store mapping, even if print_file_url is set', function () {
     Mail::fake();
 
     $product = (object) [
         'name' => 'T-shirt',
-        'metadata' => ['store_variant_map' => [], 'print_file_url' => null],
+        'metadata' => ['gelato_store_product_id' => 'sp_1', 'store_variant_map' => [], 'print_file_url' => 'https://example.com/design.png'],
     ];
     $item = (object) ['id' => 1, 'gelato_variant_id' => 'var_abc', 'product' => $product];
 
     $order = makeOrderMock([$item]);
     $order->shouldReceive('update')
-        ->withArgs(fn ($attrs) => str_contains($attrs['notes'] ?? '', 'sans design'))
+        ->withArgs(fn ($attrs) => str_contains($attrs['notes'] ?? '', 'sans storeProductVariantId'))
         ->once()
         ->andReturnTrue();
 
@@ -96,45 +96,33 @@ it('refuses order when neither store_variant_map nor print_file_url present', fu
     expect(true)->toBeTrue();
 });
 
-it('accepts order when store_variant_map is present', function () {
+// Le chemin « commande acceptée » (mapping présent) passe désormais par le verrou atomique en base (même verrou que
+// le chemin strict) : il ne peut plus se tester avec un Order simulé. Couvert avec une vraie base par
+// Modules/Shop/tests/Feature/GelatoZeroErreurTest.php : « flag OFF : le routage par produit reste appliqué » et « Z1 ... ».
+
+it('refuses an editor product that only has a raw print_file_url (no approved PrintFile)', function () {
     Mail::fake();
 
+    $printFiles = Mockery::mock(\Modules\Shop\Gelato\PrintFileService::class);
+    $printFiles->shouldReceive('assertOrderable')->andThrow(new \Modules\Shop\Gelato\PrintFileNotApprovedException('Aucun fichier approuvé'));
+    app()->instance(\Modules\Shop\Gelato\PrintFileService::class, $printFiles);
+
     $product = (object) [
+        'id' => 4,
         'name' => 'T-shirt',
-        'metadata' => ['store_variant_map' => ['var_abc' => 'store_var_xyz']],
+        'metadata' => ['store_variant_map' => [], 'print_file_url' => 'https://example.com/design.png'],
     ];
-    $item = (object) ['id' => 1, 'gelato_variant_id' => 'var_abc', 'product' => $product];
+    $item = (object) ['id' => 1, 'product_id' => 4, 'gelato_variant_id' => 'var_abc', 'product' => $product];
 
     $order = makeOrderMock([$item]);
-    $order->shouldReceive('update')->once()->andReturnTrue();
+    $order->shouldReceive('update')
+        ->withArgs(fn ($attrs) => str_contains($attrs['notes'] ?? '', 'approuvé'))
+        ->once()
+        ->andReturnTrue();
 
     $service = Mockery::mock(GelatoService::class);
     $service->shouldReceive('isConfigured')->andReturnTrue();
-    $service->shouldReceive('createOrder')->once()->with($order)->andReturn('gelato-id-456');
-
-    (new CreateGelatoOrder($service))->handle(new ShopOrderPaid($order));
-
-    expect(true)->toBeTrue();
-});
-
-it('accepts order when print_file_url present (fallback)', function () {
-    Mail::fake();
-
-    $product = (object) [
-        'name' => 'T-shirt',
-        'metadata' => [
-            'store_variant_map' => [],
-            'print_file_url' => 'https://example.com/design.png',
-        ],
-    ];
-    $item = (object) ['id' => 1, 'gelato_variant_id' => 'var_abc', 'product' => $product];
-
-    $order = makeOrderMock([$item]);
-    $order->shouldReceive('update')->once()->andReturnTrue();
-
-    $service = Mockery::mock(GelatoService::class);
-    $service->shouldReceive('isConfigured')->andReturnTrue();
-    $service->shouldReceive('createOrder')->once()->with($order)->andReturn('gelato-id-789');
+    $service->shouldNotReceive('createOrder');
 
     (new CreateGelatoOrder($service))->handle(new ShopOrderPaid($order));
 

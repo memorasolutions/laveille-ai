@@ -16,6 +16,13 @@
 
 @section('content')
 <div class="container sp-container">
+    {{-- Toast du thème (accessible, sans popup natif) : alimenté par l'évènement window « cart-error ». --}}
+    <div x-data="{ msg: '', tid: null }" @cart-error.window="msg = $event.detail.message; clearTimeout(tid); tid = setTimeout(() => msg = '', 6000)"
+         x-show="msg" x-cloak x-transition role="alert" aria-live="assertive"
+         style="position: fixed; top: 16px; right: 16px; z-index: 9999; max-width: 360px; background: #fff; color: #7f1d1d; border: 2px solid #b91c1c; border-radius: 8px; padding: 12px 16px; box-shadow: 0 4px 16px rgba(0,0,0,.2);">
+        <span x-text="msg"></span>
+        <button type="button" @click="msg = ''" aria-label="{{ __('Fermer') }}" style="margin-left: 12px; background: none; border: 0; font-weight: 700; cursor: pointer; color: inherit;">×</button>
+    </div>
     @if($errors->any())
         <div class="sp-error-box">
             <strong>{{ __('Veuillez corriger les erreurs suivantes :') }}</strong>
@@ -41,7 +48,7 @@
         <div class="col-md-7">
         <div class="sp-cart-list">
             @foreach($content as $item)
-            <div class="sp-cart-card" x-data="cartItem({{ $item['product_id'] }}, '{{ addslashes($item['variant_label'] ?? '') }}', {{ $item['quantity'] }}, {{ $item['unit_price'] }})" x-show="!removed" x-transition>
+            <div class="sp-cart-card" x-data="cartItem({{ $item['product_id'] }}, '{{ addslashes($item['variant_label'] ?? '') }}', {{ $item['quantity'] }}, {{ $item['unit_price'] }})" @item-variant-updated="onVariantUpdated($event.detail)" x-show="!removed" x-transition>
                 {{-- Supprimer --}}
                 <button type="button" @click="removeItem()" aria-label="{{ __('Retirer') }} {{ $item['product_name'] }}" class="sp-cart-remove" title="{{ __('Retirer') }}"><i class="ti-trash" aria-hidden="true"></i></button>
                 {{-- Ligne 1 : image + nom + variante --}}
@@ -77,7 +84,7 @@
                             <div x-show="editing === 'color'" x-transition class="sp-variant-picker">
                                 @foreach($item['product_variants'] as $v)
                                 @if(!empty($v['color']))
-                                <button type="button" @click="pick('{{ $v['label'] }}{{ $currentSize ? ' - '.$currentSize : '' }}', '{{ $v['gelato_uid'] }}')" class="sp-color-circle" :class="currentColor==='{{ $v['label'] }}' ? 'active' : ''" style="background:{{ $v['color'] }}" title="{{ $v['label'] }}"></button>
+                                <button type="button" @click="pickColor('{{ addslashes($v['label']) }}')" class="sp-color-circle" :class="currentColor==='{{ $v['label'] }}' ? 'active' : ''" style="background:{{ $v['color'] }}" title="{{ $v['label'] }}"></button>
                                 @endif
                                 @endforeach
                             </div>
@@ -88,10 +95,11 @@
                                 @foreach($sizeOptions as $sz)
                                 @php
                                     $szVariant = collect($item['product_variants'])->first(fn($v) => ($v['label'] ?? '') === $sz);
-                                    $szUid = $szVariant['gelato_uid'] ?? preg_replace('/_gsi_[^_]+_/', '_gsi_' . strtolower($sz) . '_', $item['gelato_variant_id'] ?? '');
+                                    $colorVariant = $currentColor ? collect($item['product_variants'])->first(fn($v) => ($v['label'] ?? '') === $currentColor) : null;
+                                    $szUid = $colorVariant['product_uids'][$sz] ?? $szVariant['gelato_uid'] ?? preg_replace('/_gsi_[^_]+_/', '_gsi_' . strtolower($sz) . '_', $item['gelato_variant_id'] ?? '');
                                     $newLabel = $currentColor ? $currentColor . ' - ' . $sz : $sz;
                                 @endphp
-                                <button type="button" @click="pick('{{ addslashes($newLabel) }}', '{{ $szUid }}')" class="sp-size-pill" :class="currentSize==='{{ $sz }}' ? 'active' : ''">{{ $sz }}</button>
+                                <button type="button" @click="pickSize('{{ addslashes($sz) }}')" class="sp-size-pill" :class="currentSize==='{{ $sz }}' ? 'active' : ''">{{ $sz }}</button>
                                 @endforeach
                             </div>
                             @endif
@@ -291,28 +299,41 @@
 @push('scripts')
 <script>
 document.addEventListener('alpine:init', () => {
+    // Source de vérité = la réponse du serveur : un échec (422, réseau, JSON invalide) est toujours montré, jamais pris pour un succès.
+    async function spCartPost(el, url, payload) {
+        try {
+            var r = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value, 'Accept': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            var data = await r.json().catch(() => ({}));
+            if (r.ok && data.success) return data;
+            el.$dispatch('cart-error', { message: @json(__('Cette modification n\'a pas pu être appliquée. Votre panier est inchangé.')) });
+        } catch (e) {
+            el.$dispatch('cart-error', { message: @json(__('Connexion impossible. Votre panier est inchangé.')) });
+        }
+        return null;
+    }
     Alpine.data('cartItem', (productId, variantLabel, initialQty, price) => ({
         qty: initialQty,
         unitPrice: price,
+        label: variantLabel,
         removed: false,
+        onVariantUpdated(d) {
+            this.label = d.variant_label;
+            this.unitPrice = Number(d.unit_price);
+        },
         async changeQty(delta) {
+            var previous = this.qty;
             this.qty = Math.max(0, Math.min(99, this.qty + delta));
-            if (this.qty === 0) { this.removeItem(); return; }
-            var res = await fetch(@json(route('shop.cart.quantity')), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value, 'Accept': 'application/json' },
-                body: JSON.stringify({ product_id: productId, quantity: this.qty, variant_label: variantLabel })
-            }).then(r => r.json());
-            if (res.success) this.$dispatch('cart-updated', res);
+            if (this.qty === 0) { this.qty = previous; this.removeItem(); return; }
+            var res = await spCartPost(this, @json(route('shop.cart.quantity')), { product_id: productId, quantity: this.qty, variant_label: this.label });
+            if (res) this.$dispatch('cart-updated', res); else this.qty = previous;
         },
         async removeItem() {
-            this.removed = true;
-            var res = await fetch(@json(route('shop.cart.remove')), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value, 'Accept': 'application/json' },
-                body: JSON.stringify({ product_id: productId, variant_label: variantLabel })
-            }).then(r => r.json());
-            if (res.success) this.$dispatch('cart-updated', res);
+            var res = await spCartPost(this, @json(route('shop.cart.remove')), { product_id: productId, variant_label: this.label });
+            if (res) { this.removed = true; this.$dispatch('cart-updated', res); }
         }
     }));
     Alpine.data('variantPicker', (productId, color, size, oldLabel, hasColors) => ({
@@ -321,20 +342,26 @@ document.addEventListener('alpine:init', () => {
         currentSize: size,
         oldLabel: oldLabel,
         updating: false,
-        async pick(newLabel, newUid) {
+        pickColor(newColor) {
+            return this.pick(this.currentSize ? newColor + ' - ' + this.currentSize : newColor);
+        },
+        pickSize(newSize) {
+            return this.pick(hasColors && this.currentColor ? this.currentColor + ' - ' + newSize : newSize);
+        },
+        async pick(newLabel) {
             this.updating = true;
-            try {
-                await fetch(@json(route('shop.cart.variant')), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value, 'Accept': 'application/json' },
-                    body: JSON.stringify({ product_id: productId, old_variant_label: this.oldLabel, new_variant_label: newLabel, new_gelato_uid: newUid })
-                });
-                this.oldLabel = newLabel;
-                var parts = newLabel.split(' - ');
+            // L'identifiant Gelato et le prix sont résolus par le serveur : on n'envoie que le libellé voulu.
+            var res = await spCartPost(this, @json(route('shop.cart.variant')), { product_id: productId, old_variant_label: this.oldLabel, new_variant_label: newLabel });
+            if (res) {
+                var label = res.new_variant_label || newLabel;
+                this.oldLabel = label;
+                var parts = label.split(' - ');
                 if (parts.length === 2) { this.currentColor = parts[0]; this.currentSize = parts[1]; }
                 else if (hasColors) { this.currentColor = parts[0]; }
                 else { this.currentSize = parts[0]; }
-            } catch(e) { console.error('Variant update failed', e); }
+                this.$dispatch('item-variant-updated', { variant_label: label, unit_price: res.unit_price, gelato_variant_id: res.gelato_variant_id });
+                this.$dispatch('cart-updated', res);
+            }
             this.editing = null;
             this.updating = false;
         }

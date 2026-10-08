@@ -33,15 +33,17 @@
                     <span>{{ number_format($order->subtotal, 2, ',', ' ') }} $</span>
                 </div>
                 @if($order->tax_amount > 0)
-                @php $tpsAmt = round($order->subtotal * config('shop.tax.tps', 5) / 100, 2); $tvqAmt = round($order->subtotal * config('shop.tax.tvq', 9.975) / 100, 2); @endphp
+                @php ['tps' => $tpsAmt, 'tvq' => $tvqAmt] = $order->taxLines(); @endphp
                 <div class="sp-tax-row">
                     <span>{{ __('TPS') }} (5%) <span class="sp-tax-number">839145984</span></span>
                     <span>{{ number_format($tpsAmt, 2, ',', ' ') }} $</span>
                 </div>
+                @if($tvqAmt > 0)
                 <div class="sp-tax-row">
                     <span>{{ __('TVQ') }} (9,975%) <span class="sp-tax-number">1221788059</span></span>
                     <span>{{ number_format($tvqAmt, 2, ',', ' ') }} $</span>
                 </div>
+                @endif
                 @endif
                 @if($order->shipping_cost > 0)
                 <div class="sp-summary-row" style="color: var(--c-text-muted);">

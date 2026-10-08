@@ -7,9 +7,17 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="card-title mb-0">{{ __('Produits') }}</h4>
+                    <div class="d-flex gap-2">
+                    @can('update_products')
+                    <form action="{{ route('admin.shop.products.sync-gelato') }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-secondary" data-testid="sync-gelato-now">{{ __('Synchroniser maintenant') }}</button>
+                    </form>
+                    @endcan
                     @can('create_products')
                     <a href="{{ route('admin.shop.products.create') }}" class="btn btn-primary">{{ __('Ajouter un produit') }}</a>
                     @endcan
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">

@@ -4,6 +4,7 @@ namespace Modules\Shop\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Shop\Gelato\ZeroErreur;
 use Modules\Shop\Models\Order;
 use Modules\Shop\Services\StripeService;
 use Modules\Shop\Events\ShopOrderFulfilled;
@@ -14,7 +15,19 @@ class WebhookController extends Controller
 {
     public function stripe(Request $request, StripeService $stripeService)
     {
-        $stripeService->handleWebhook($request);
+        try {
+            $accepted = $stripeService->handleWebhook($request);
+        } catch (\Throwable $e) {
+            // Signature valide, erreur interne : 5xx pour que Stripe rejoue (jamais 200).
+            Log::error('Stripe webhook : erreur interne apres signature valide - '.$e->getMessage());
+            return response()->json(['error' => 'Internal error, retry'], 500);
+        }
+
+        // Fail-closed (drapeau ON) : signature absente/invalide ou secret manquant -> refus 400.
+        if (ZeroErreur::enabled() && $accepted === false) {
+            return response()->json(['error' => 'Invalid signature'], 400);
+        }
+
         return response()->json(['received' => true]);
     }
 
@@ -22,7 +35,15 @@ class WebhookController extends Controller
     {
         try {
             $secret = config('shop.gelato_webhook_secret');
-            if ($secret && $request->header('X-Gelato-Secret') !== $secret) {
+
+            if (ZeroErreur::enabled()) {
+                // Fail-closed : secret absent OU en-tête invalide -> refus, rien n'est traité.
+                $given = (string) $request->header('X-Gelato-Secret');
+                if (! $secret || ! hash_equals((string) $secret, $given)) {
+                    Log::warning('Gelato webhook refuse (fail-closed) : '.($secret ? 'signature invalide' : 'GELATO_WEBHOOK_SECRET non configure'));
+                    return response()->json(['error' => 'Unauthorized'], 401);
+                }
+            } elseif ($secret && $request->header('X-Gelato-Secret') !== $secret) {
                 Log::warning('Gelato webhook : secret invalide');
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
@@ -55,6 +76,10 @@ class WebhookController extends Controller
             return response()->json(['received' => true]);
         } catch (\Exception $e) {
             Log::error('Gelato webhook : erreur — ' . $e->getMessage());
+            if (ZeroErreur::enabled()) {
+                // Signature déjà validée plus haut : erreur interne -> 5xx pour que Gelato rejoue.
+                return response()->json(['error' => 'Internal error, retry'], 500);
+            }
             return response()->json(['received' => true]);
         }
     }
@@ -182,6 +207,20 @@ class WebhookController extends Controller
             $trackingUrl = $payload['trackingUrl'] ?? ($payload['tracking']['trackingUrl'] ?? null);
         }
 
-        return ['trackingCode' => $trackingCode, 'trackingUrl' => $trackingUrl];
+        return ['trackingCode' => $trackingCode, 'trackingUrl' => self::safeTrackingUrl($trackingUrl)];
+    }
+
+    /** Seul http(s) est stocké : un schéma javascript:/data: rendu dans un href serait une XSS. Sinon null. */
+    private static function safeTrackingUrl(mixed $url): ?string
+    {
+        if (! is_string($url)) {
+            return null;
+        }
+        $url = trim($url);
+        if ($url === '' || strlen($url) > 2048 || ! preg_match('#^https?://#i', $url) || filter_var($url, FILTER_VALIDATE_URL) === false) {
+            return null;
+        }
+
+        return $url;
     }
 }

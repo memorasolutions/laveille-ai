@@ -27,7 +27,7 @@ class OrderConfirmedNotification extends Notification implements ShouldQueue
     public function toMail($notifiable): MailMessage
     {
         $this->order->load('items.product');
-        $trackingUrl = route('shop.order-lookup') . '?email=' . urlencode($this->order->email) . '&order_id=' . $this->order->id;
+        $trackingUrl = route('shop.order-lookup') . '?order_number=' . urlencode((string) $this->order->order_number); // jamais le courriel dans l'URL (journaux, historique, Referer)
 
         return (new MailMessage)
             ->subject('Confirmation de votre commande #' . $this->order->id)

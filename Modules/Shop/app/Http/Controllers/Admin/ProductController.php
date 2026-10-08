@@ -22,6 +22,32 @@ class ProductController extends Controller
         return view('shop::admin.products.index', compact('products'));
     }
 
+    /**
+     * Bouton « Synchroniser maintenant » : lance la synchro du store Gelato et affiche le résultat.
+     * Logique partagée avec la commande shop:sync-gelato (GelatoSyncService::syncStore).
+     */
+    public function syncGelato(\Modules\Shop\Services\GelatoSyncService $sync)
+    {
+        @set_time_limit(300);
+        $result = $sync->syncStore();
+
+        if (! $result['ok']) {
+            return redirect()->route('admin.shop.products.index')
+                ->with('error', __('Synchronisation Gelato impossible : :raison', ['raison' => $result['error']]));
+        }
+
+        $message = __('Synchronisation Gelato terminée : :c créé(s), :u mis à jour, :n inchangé(s), :d dépublié(s).', [
+            'c' => $result['created'], 'u' => $result['updated'], 'n' => $result['unchanged'], 'd' => $result['unpublished'],
+        ]);
+
+        if ($result['errors'] > 0) {
+            return redirect()->route('admin.shop.products.index')
+                ->with('error', $message.' '.__(':e erreur(s), consulte les journaux.', ['e' => $result['errors']]));
+        }
+
+        return redirect()->route('admin.shop.products.index')->with('success', $message);
+    }
+
     public function create()
     {
         return view('shop::admin.products.create');

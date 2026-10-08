@@ -6,6 +6,8 @@ return [
     'name' => 'Shop',
     'enabled' => env('SHOP_ENABLED', true),
     'maintenance' => env('SHOP_MAINTENANCE', false),
+    // Boutique visible du seul super-admin (404 pour tous les autres, webhooks épargnés).
+    'founder_only' => env('SHOP_FOUNDER_ONLY', false),
 
     'gelato' => [
         'api_key' => env('GELATO_API_KEY'),
@@ -20,6 +22,45 @@ return [
         'secret_key' => env('STRIPE_SECRET_KEY'),
         'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
         'webhook_secret' => env('STRIPE_SHOP_WEBHOOK_SECRET'),
+    ],
+
+    /*
+     * DRAPEAU « Gelato zéro erreur » (défaut : désactivé, la prod ne change pas).
+     * ON = fichier d'impression préparé et approuvé obligatoire, idempotence de
+     * la commande Gelato, signatures webhooks Gelato et Stripe en fail-closed
+     * (secrets GELATO_WEBHOOK_SECRET et STRIPE_SHOP_WEBHOOK_SECRET OBLIGATOIRES).
+     */
+    // Minutes avant qu'un verrou de soumission Gelato sans gelato_order_id soit jugé orphelin (réconciliation + alerte).
+    'gelato_orphan_minutes' => (int) env('SHOP_GELATO_ORPHAN_MINUTES', 10),
+    'gelato_zero_erreur' => (bool) env('SHOP_GELATO_ZERO_ERREUR', false),
+    // Marqueur d'environnement gravé (métadonnée) sur chaque commande Gelato : la réconciliation n'adopte jamais une commande
+    // d'un autre environnement du même compte. Vide = hôte de APP_URL.
+    // M7 (documenté, revue fable 2026-10-08) : poser SHOP_GELATO_ENV_MARKER EXPLICITEMENT, avec une valeur DIFFÉRENTE par
+    // environnement (ex. prod / local / staging). Un marqueur absent ou identique entre environnements qui partagent le même
+    // compte Gelato affaiblit l'isolation de la réconciliation (une commande d'un autre environnement pourrait être adoptée).
+    'gelato_env_marker' => env('SHOP_GELATO_ENV_MARKER'),
+
+    // Éditeur client (le client conçoit, le serveur re-rend via le moteur). Exige AUSSI gelato_zero_erreur. OFF = aucune route.
+    'gelato_editor' => (bool) env('SHOP_GELATO_EDITOR', false),
+
+    // Synchro catalogue Gelato : publier (status=published) les produits Gelato actifs/prêts. false = brouillon.
+    'gelato_sync_autopublish' => (bool) env('SHOP_GELATO_SYNC_AUTOPUBLISH', true),
+    'editor' => [
+        'safe_margin_mm' => (float) env('SHOP_EDITOR_SAFE_MARGIN_MM', 10),
+        'default_area_mm' => ['widthMm' => 300.0, 'heightMm' => 400.0], // surchargeable par metadata.editor_area_mm du produit
+        'max_elements' => 30,
+        'max_upload_kb' => 15360,
+        'moderator' => null, // classe implémentant ContentModeratorContract (défaut : NullContentModerator)
+    ],
+
+    // Moteur « print-prep » (projet mcp_gelato) : HTTP local, repli CLI.
+    'print_prep' => [
+        'url' => env('GELATO_PREP_URL'),
+        'secret' => env('GELATO_PREP_SECRET'),
+        'cli_path' => env('GELATO_PREP_CLI'),   // ex. /chemin/mcp_gelato/dist/cli/prepare.js
+        'node_binary' => env('GELATO_PREP_NODE', 'node'),
+        'timeout' => (int) env('GELATO_PREP_TIMEOUT', 60),
+        'connect_timeout' => (int) env('GELATO_PREP_CONNECT_TIMEOUT', 5),
     ],
 
     'currency' => env('SHOP_CURRENCY', 'CAD'),

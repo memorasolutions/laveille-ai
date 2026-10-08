@@ -3,7 +3,6 @@
 namespace Modules\Shop\Services;
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Modules\Shop\Models\Cart;
 use Modules\Shop\Models\Product;
 
@@ -34,8 +33,26 @@ class CartService
         ]);
     }
 
+    /**
+     * @throws \InvalidArgumentException combinaison couleur/taille inexistante ou produit non vendable
+     */
     public function add(int $productId, int $qty = 1, ?string $variantLabel = null, ?string $gelatoVariantId = null): Cart
     {
+        $product = Product::findOrFail($productId);
+        $resolver = $this->resolver();
+
+        if (! $resolver->isPassThrough($product) && $product->status !== 'published') {
+            throw new \InvalidArgumentException('Produit non disponible.');
+        }
+
+        // Libellé canonique, identifiant Gelato et prix viennent TOUJOURS du serveur (variantes synchronisées).
+        $resolved = $resolver->resolve($product, $variantLabel, $gelatoVariantId);
+        if ($resolved === null) {
+            throw new \InvalidArgumentException('Variante inexistante ou indisponible.');
+        }
+        $variantLabel = $resolved['label'];
+        $gelatoVariantId = $resolved['gelato_uid'];
+
         $cart = $this->getOrCreateCart();
         $items = $cart->items ?? [];
         $index = $this->findItemIndex($items, $productId, $variantLabel);
@@ -43,20 +60,12 @@ class CartService
         if ($index !== false) {
             $items[$index]['quantity'] += $qty;
         } else {
-            $product = Product::findOrFail($productId);
-
-            // Si pas de gelato_variant_id fourni, chercher dans les variants du produit
-            if (! $gelatoVariantId && ! empty($product->variants)) {
-                $match = collect($product->variants)->firstWhere('label', $variantLabel);
-                $gelatoVariantId = $match['gelato_uid'] ?? null;
-            }
-
             $items[] = [
                 'product_id' => $productId,
                 'variant_label' => $variantLabel,
                 'gelato_variant_id' => $gelatoVariantId,
                 'quantity' => $qty,
-                'unit_price' => $this->resolveUnitPrice($product, $variantLabel),
+                'unit_price' => $resolved['price'],
             ];
         }
 
@@ -141,23 +150,33 @@ class CartService
             return 0.0;
         }
 
-        return array_reduce($cart->items, function ($total, $item) {
-            return $total + ($item['unit_price'] * $item['quantity']);
-        }, 0.0);
+        return $this->subtotalOf($cart->items);
+    }
+
+    /** Sous-total d'une liste d'articles DONNÉE (instantané) : le checkout facture ce calcul, jamais une relecture du panier. */
+    public function subtotalOf(array $items): float
+    {
+        return array_reduce($items, fn ($total, $item) => $total + ($item['unit_price'] * $item['quantity']), 0.0);
+    }
+
+    public function taxAmountOf(float $subtotal): float
+    {
+        return round($subtotal * (config('shop.tax.tps', 0) + config('shop.tax.tvq', 0)) / 100, 2);
+    }
+
+    public function tpsOf(float $subtotal): float
+    {
+        return round($subtotal * config('shop.tax.tps', 0) / 100, 2);
     }
 
     public function getTaxAmount(): float
     {
-        $subtotal = $this->getSubtotal();
-        $tps = config('shop.tax.tps', 0);
-        $tvq = config('shop.tax.tvq', 0);
-
-        return round($subtotal * ($tps + $tvq) / 100, 2);
+        return $this->taxAmountOf($this->getSubtotal());
     }
 
     public function getTpsOnly(): float
     {
-        return round($this->getSubtotal() * config('shop.tax.tps', 0) / 100, 2);
+        return $this->tpsOf($this->getSubtotal());
     }
 
     public function getTotal(): float
@@ -165,6 +184,11 @@ class CartService
         return round($this->getSubtotal() + $this->getTaxAmount(), 2);
     }
 
+    /**
+     * Ré-aligne chaque article sur le catalogue courant : libellé canonique (couleur + taille), identifiant Gelato
+     * de CETTE couleur et de CETTE taille, prix. Un article dont la variante n'existe plus est laissé tel quel
+     * (le contrôle de disponibilité du checkout le refusera : jamais de repli sur le prix de base).
+     */
     public function revalidatePrices(): bool
     {
         $cart = $this->getCart();
@@ -181,9 +205,18 @@ class CartService
                 continue;
             }
 
-            $currentPrice = $this->resolveUnitPrice($product, $item['variant_label'] ?? null);
-            if (abs($currentPrice - ($item['unit_price'] ?? 0)) > 0.01) {
-                $item['unit_price'] = $currentPrice;
+            $resolved = $this->resolver()->resolve($product, $item['variant_label'] ?? null, $item['gelato_variant_id'] ?? null);
+            if ($resolved === null) {
+                continue;
+            }
+
+            if (abs($resolved['price'] - ($item['unit_price'] ?? 0)) > 0.01) {
+                $item['unit_price'] = $resolved['price'];
+                $changed = true;
+            }
+            if (($item['variant_label'] ?? null) !== $resolved['label'] || ($item['gelato_variant_id'] ?? null) !== $resolved['gelato_uid']) {
+                $item['variant_label'] = $resolved['label'];
+                $item['gelato_variant_id'] = $resolved['gelato_uid'];
                 $changed = true;
             }
         }
@@ -194,6 +227,29 @@ class CartService
         }
 
         return $changed;
+    }
+
+    /**
+     * Raison pour laquelle un article du panier ne peut PAS être vendu maintenant, ou null s'il l'est.
+     * Produit supprimé/dépublié (y compris retiré côté Gelato par la synchro) ou variante inexistante.
+     */
+    public function unavailableReason(array $item): ?string
+    {
+        $product = Product::find($item['product_id'] ?? 0);
+        if (! $product) {
+            return 'produit_introuvable';
+        }
+        if ($this->resolver()->isPassThrough($product)) {
+            return null; // design personnalisé : brouillon par construction, contrôlé par le print file
+        }
+        if ($product->status !== 'published') {
+            return 'produit_non_publie';
+        }
+        if ($this->resolver()->resolve($product, $item['variant_label'] ?? null, $item['gelato_variant_id'] ?? null) === null) {
+            return 'variante_indisponible';
+        }
+
+        return null;
     }
 
     public function clear(): void
@@ -250,52 +306,39 @@ class CartService
         return array_reduce($cart->items, fn ($total, $item) => $total + $item['quantity'], 0);
     }
 
-    public function updateItemVariant(int $productId, string $oldLabel, string $newLabel, ?string $newGelatoUid = null): void
+    /**
+     * Change la variante (couleur et/ou taille) d'un article : la variante COMPLÈTE est ré-résolue côté serveur
+     * (identifiant Gelato de la bonne couleur ET de la bonne taille, prix), jamais l'identifiant transmis par le navigateur.
+     *
+     * @return array l'article tel qu'enregistré (libellé canonique, identifiant, prix)
+     * @throws \InvalidArgumentException combinaison inexistante ou article introuvable (jamais un faux succès)
+     */
+    public function updateItemVariant(int $productId, string $oldLabel, string $newLabel, ?string $newGelatoUid = null): array
     {
         $cart = $this->getCart();
-        if (! $cart || empty($cart->items)) {
-            return;
-        }
-
-        $items = $cart->items;
+        $items = $cart?->items ?? [];
         $index = $this->findItemIndex($items, $productId, $oldLabel);
 
-        if ($index !== false) {
-            $items[$index]['variant_label'] = $newLabel;
-            if ($newGelatoUid !== null) {
-                $items[$index]['gelato_variant_id'] = $newGelatoUid;
-            }
-            // Mettre à jour le prix si la taille a changé
-            $product = Product::find($items[$index]['product_id']);
-            if ($product) {
-                $items[$index]['unit_price'] = $this->resolveUnitPrice($product, $newLabel);
-            }
-            $cart->update(['items' => $items]);
+        if ($index === false) {
+            throw new \InvalidArgumentException('Article introuvable dans le panier.');
         }
+
+        $product = Product::findOrFail($productId);
+        $resolved = $this->resolver()->resolve($product, $newLabel, $newGelatoUid);
+        if ($resolved === null) {
+            throw new \InvalidArgumentException('Variante inexistante ou indisponible.');
+        }
+        $items[$index]['variant_label'] = $resolved['label'];
+        $items[$index]['gelato_variant_id'] = $resolved['gelato_uid'];
+        $items[$index]['unit_price'] = $resolved['price'];
+        $cart->update(['items' => $items]);
+
+        return $items[$index];
     }
 
-    private function resolveSizeFromLabel(?string $variantLabel): ?string
+    private function resolver(): VariantResolver
     {
-        if (! $variantLabel || ! str_contains($variantLabel, ' - ')) {
-            return null;
-        }
-
-        return trim(Str::after($variantLabel, ' - '));
-    }
-
-    private function resolveUnitPrice(Product $product, ?string $variantLabel): float
-    {
-        $size = $this->resolveSizeFromLabel($variantLabel);
-
-        if ($size && ! empty($product->variants)) {
-            foreach ($product->variants as $variant) {
-                if (! empty($variant['size_prices'][$size])) {
-                    return (float) $variant['size_prices'][$size];
-                }
-            }
-        }
-
-        return (float) $product->price;
+        return app(VariantResolver::class);
     }
 
     private function findItemIndex(array $items, int $productId, ?string $variantLabel): int|false

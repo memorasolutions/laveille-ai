@@ -29,6 +29,11 @@ class ShopServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
 
+        // FounderOnly doit trancher (404) AVANT 'auth', sinon un invité est redirigé vers le login
+        // au lieu de voir une boutique « inexistante ». Reste après StartSession (user lisible).
+        $this->app->make(\Illuminate\Contracts\Http\Kernel::class)
+            ->addToMiddlewarePriorityBefore(\Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class, \Modules\Shop\Http\Middleware\FounderOnly::class);
+
         View::composer('shop::partials.mini-cart', \Modules\Shop\Http\ViewComposers\CartComposer::class);
     }
 
@@ -37,6 +42,10 @@ class ShopServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(
+            \Modules\Shop\Gelato\Moderation\ContentModeratorContract::class,
+            fn ($app) => $app->make(config('shop.editor.moderator') ?: \Modules\Shop\Gelato\Moderation\NullContentModerator::class)
+        );
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
     }
@@ -52,6 +61,7 @@ class ShopServiceProvider extends ServiceProvider
             \Modules\Shop\Console\ResyncGelatoProductCommand::class,
             \Modules\Shop\Console\CleanupPendingOrdersCommand::class,
             \Modules\Shop\Console\SendAbandonmentRemindersCommand::class,
+            \Modules\Shop\Console\GelatoReconcileCommand::class,
         ]);
     }
 

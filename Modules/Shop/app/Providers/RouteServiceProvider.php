@@ -36,6 +36,8 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapWebRoutes(): void
     {
         Route::middleware('web')->group(module_path($this->name, '/routes/web.php'));
+        // Éditeur client : le fichier se déclare vide tant que le drapeau shop.gelato_editor est OFF.
+        require module_path($this->name, '/routes/editor.php');
     }
 
     /**
