@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.323.0] - 2026-10-08
+
+### Ajouté
+- **Boutique Gelato - flux catalogue correct et durcissement de la zone argent** (livrée derrière le mode maintenance, un accès réservé au fondateur et des drapeaux désactivés par défaut). La cause racine des commandes fautives est réparée : une commande ne part plus avec le logo brut du serveur quand le mappage de variante manque. Routage par produit (catalogue = identifiant de variante Gelato sans fichier, éditeur = fichier d'impression approuvé, échec bruyant si le mappage est absent). Synchronisation complète du catalogue (variantes, tailles et couleurs, prix coût plus marge par couleur et taille, publication selon drapeau, retrait = dépublication jamais suppression, bouton admin "Synchroniser maintenant"). Accès restreint au fondateur par un middleware réversible. Durcissement zone argent et confidentialité par quatre rounds adversariaux (Codex deux fois, fable une fois, un round final) : instantané de panier pour accorder le montant Stripe et la commande; le webhook ne marque "payé" que si le paiement est confirmé et que le montant concorde; la province de taxe est dérivée du code postal et n'est plus contournable; réconciliation stricte; confidentialité des pages de confirmation et de suivi; verrous de panier et de synchronisation revérifiés avant chaque écriture. 200 tests de la boutique au vert. À trancher avant toute ouverture publique : le barème fiscal hors Québec et la taxe sur la livraison (décision légale du fondateur). Migrations additives et réversibles.
+
 ## [1.322.1] - 2026-10-08
 
 ### Corrigé
