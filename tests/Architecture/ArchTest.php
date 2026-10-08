@@ -58,9 +58,17 @@ arch()->preset()->security()->ignoring([
     'Modules\Newsletter\Http\Controllers\BrevoWebhookController',
     'Modules\Notifications\Services\AutomationAlertService',
     'Modules\Shop\Services\GelatoWizardService',
+    // Boutique : sha1 d'un contenu synchronise pour en faire une EMPREINTE stable (detection de
+    // changement entre deux synchros catalogue Gelato). Pas un secret, pas une signature - compare
+    // a une empreinte stockee pour savoir s'il faut re-publier; somme rapide, hors champ de la regle.
+    'Modules\Shop\Services\GelatoSyncService',
     'Modules\Academy\Services\CertificateService',
     // Rate-limit key uniquement (PAS le jeton du lien magique lui-même, généré ailleurs) :
     'Modules\Auth\Http\Controllers\MagicLinkController',
+    // Boutique : sha1 d'un courriel pour NOMMER le seau de limitation de débit du suivi de
+    // commande (order-lookup:email:<hash>). Pas un secret, pas une signature - la valeur ne sert
+    // qu'a regrouper des tentatives; meme categorie que MagicLinkController ci-dessus.
+    'Modules\Shop\Http\Controllers\OrderLookupController',
     // sha1 exigé par le PROTOCOLE de l'API Have I Been Pwned (k-anonymity) - le remplacer
     // casserait la fonctionnalité, l'API n'accepte que sha1 :
     'Modules\Auth\Rules\PasswordNotCompromisedRule',
