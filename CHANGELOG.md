@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.322.1] - 2026-10-08
+
+### Corrigé
+- **Pub AdSense retirée de l'en-tête du site.** Le mode automatique de Google injectait par moments une annonce dans le bandeau d'en-tête, au-dessus du logo, ce qui repoussait toute la page vers le bas (signalé par le fondateur deux jours de suite). Un garde-fou de placement, installé dans le chargeur AdSense (`Modules/FrontTheme/.../master.blade.php`), retire l'annonce automatique de cette seule zone (en-tête), tandis que les emplacements de contenu et de pied de page restent intacts. Contrôle de placement par retrait du conteneur injecté, sans masquage d'impression. Aucune donnée touchée, entièrement réversible. Le réglage propre et définitif reste de couper le mode automatique au tableau de bord AdSense (à faire quand la session Google sera connectée), et ce garde-fou protège en attendant.
+
 ## [1.322.0] - 2026-10-07
 
 ### Ajouté

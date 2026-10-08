@@ -70,6 +70,21 @@
       s.crossOrigin = 'anonymous';
       s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('services.adsense.client_id') }}';
       document.head.appendChild(s);
+      // Garde-fou de PLACEMENT - le mode auto de Google place parfois une annonce (sans data-ad-slot)
+      // DANS l'en-tete du site, au-dessus du logo. On la retire de CETTE zone uniquement, les autres
+      // emplacements (contenu, pied) restent intacts. Controle de placement, pas de masquage - on retire
+      // le conteneur injecte, aucune impression n'est cachee. (2026-10-08, demande du fondateur.)
+      var lvHeader = document.getElementById('header') || document.querySelector('.wpo-site-header');
+      if (lvHeader) {
+        var lvPurgeHeaderAds = function(){
+          lvHeader.querySelectorAll('.google-auto-placed, ins.adsbygoogle:not([data-ad-slot])').forEach(function(el){
+            var host = el.closest('.google-auto-placed') || el;
+            if (host && host.parentNode) { host.parentNode.removeChild(host); }
+          });
+        };
+        lvPurgeHeaderAds();
+        new MutationObserver(lvPurgeHeaderAds).observe(lvHeader, { childList: true, subtree: true });
+      }
     };
     </script>
     @endif
