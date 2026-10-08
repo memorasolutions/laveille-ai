@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.324.0] - 2026-10-08
+
+### Ajouté
+- **Pub des pages d'outils repliable et mémorisée** (proposition du fondateur). Sur chaque page d'outil, le bloc publicitaire peut maintenant être réduit, à la manière du bloc « En bref » : ouvert par défaut, un bouton « Réduire / Afficher la publicité » bascule l'état, et ce choix est mémorisé 7 jours dans un cookie (`lv_tool_ad_collapsed`). Un seul gabarit partagé couvre toutes les pages d'outils (`Modules/Tools/.../partials/tool-ad.blade.php`). Conçu pour ne pas casser le remplissage AdSense : le repli est purement visuel et appliqué après le chargement (aucun `x-cloak` sur le bloc annonce, l'unité reste visible au premier affichage pour que l'annonce se remplisse normalement). Désactivable par `ADS_TOOL_COLLAPSIBLE=false` (retour au rendu simple, zéro casse). Membres et pages sans publicité : inchangés.
+
 ## [1.323.0] - 2026-10-08
 
 ### Ajouté
