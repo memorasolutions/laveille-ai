@@ -6,6 +6,8 @@ return [
     'name' => 'Shop',
     'enabled' => env('SHOP_ENABLED', true),
     'maintenance' => env('SHOP_MAINTENANCE', false),
+    // Boutique visible du seul super-admin (404 pour tous les autres, webhooks épargnés).
+    'founder_only' => env('SHOP_FOUNDER_ONLY', false),
 
     'gelato' => [
         'api_key' => env('GELATO_API_KEY'),
@@ -31,9 +33,18 @@ return [
     // Minutes avant qu'un verrou de soumission Gelato sans gelato_order_id soit jugé orphelin (réconciliation + alerte).
     'gelato_orphan_minutes' => (int) env('SHOP_GELATO_ORPHAN_MINUTES', 10),
     'gelato_zero_erreur' => (bool) env('SHOP_GELATO_ZERO_ERREUR', false),
+    // Marqueur d'environnement gravé (métadonnée) sur chaque commande Gelato : la réconciliation n'adopte jamais une commande
+    // d'un autre environnement du même compte. Vide = hôte de APP_URL.
+    // M7 (documenté, revue fable 2026-10-08) : poser SHOP_GELATO_ENV_MARKER EXPLICITEMENT, avec une valeur DIFFÉRENTE par
+    // environnement (ex. prod / local / staging). Un marqueur absent ou identique entre environnements qui partagent le même
+    // compte Gelato affaiblit l'isolation de la réconciliation (une commande d'un autre environnement pourrait être adoptée).
+    'gelato_env_marker' => env('SHOP_GELATO_ENV_MARKER'),
 
     // Éditeur client (le client conçoit, le serveur re-rend via le moteur). Exige AUSSI gelato_zero_erreur. OFF = aucune route.
     'gelato_editor' => (bool) env('SHOP_GELATO_EDITOR', false),
+
+    // Synchro catalogue Gelato : publier (status=published) les produits Gelato actifs/prêts. false = brouillon.
+    'gelato_sync_autopublish' => (bool) env('SHOP_GELATO_SYNC_AUTOPUBLISH', true),
     'editor' => [
         'safe_margin_mm' => (float) env('SHOP_EDITOR_SAFE_MARGIN_MM', 10),
         'default_area_mm' => ['widthMm' => 300.0, 'heightMm' => 400.0], // surchargeable par metadata.editor_area_mm du produit

@@ -4,7 +4,6 @@ namespace Modules\Shop\Console;
 
 use Illuminate\Console\Command;
 use Modules\Shop\Gelato\GelatoReconciler;
-use Modules\Shop\Gelato\ZeroErreur;
 use Modules\Shop\Models\Order;
 use Modules\Shop\Services\GelatoService;
 
@@ -19,11 +18,9 @@ class GelatoReconcileCommand extends Command
 
     public function handle(GelatoReconciler $reconciler, GelatoService $gelato): int
     {
-        if (! ZeroErreur::enabled()) {
-            $this->warn('Drapeau shop.gelato_zero_erreur OFF : rien à faire.');
-
-            return self::SUCCESS;
-        }
+        // Aucune dépendance au drapeau « zéro erreur » : le verrou de soumission est posé par les DEUX chemins, et la
+        // réconciliation n'adopte qu'une commande existante (elle ne crée jamais). Elle doit donc pouvoir débloquer
+        // une commande UNKNOWN même drapeau OFF.
         if (! $gelato->isConfigured()) {
             $this->error('Clé API Gelato absente : réconciliation impossible.');
 

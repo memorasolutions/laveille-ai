@@ -8,6 +8,11 @@ declare(strict_types=1);
 
 namespace Modules\Shop\Gelato\Editor;
 
+/**
+ * DOCUMENTÉ, NON CORRIGÉ (revue fable 2026-10-08) : M1 / M2 - le prix de l'éditeur personnalisé n'est pas finalisé
+ * (dérivation du prix d'une variante personnalisée, cohérence panier/devis). Le risque est confiné : il faut DEUX drapeaux
+ * OFF (shop.gelato_editor ET shop.gelato_zero_erreur). Ne pas activer l'éditeur en production avant décision et re-gate.
+ */
 /** Point unique de lecture du drapeau shop.gelato_editor (DRY). Exige AUSSI shop.gelato_zero_erreur. */
 final class GelatoEditor
 {

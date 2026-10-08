@@ -11,7 +11,7 @@ class OrderItem extends Model
 
     protected $fillable = [
         'order_id', 'product_id', 'variant_label', 'quantity',
-        'unit_price', 'gelato_variant_id',
+        'unit_price', 'gelato_variant_id', 'gelato_store_product_variant_id',
     ];
 
     protected $casts = [
@@ -24,8 +24,12 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class, 'order_id');
     }
 
+    /**
+     * withTrashed : un produit archivé (SoftDeletes) APRÈS le paiement reste lisible pour sa commande payée.
+     * Sans cela, la relation renvoie null et l'article déjà encaissé est refusé avant même de lire son identifiant figé.
+     */
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id')->withTrashed();
     }
 }

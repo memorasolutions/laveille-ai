@@ -12,10 +12,11 @@ use Modules\Shop\Http\Controllers\Admin\ProductController;
 use Modules\Shop\Http\Controllers\Admin\ProductWizardController;
 use Modules\Shop\Http\Controllers\Admin\OrderController;
 use Modules\Shop\Http\Controllers\Admin\SettingsController;
+use Modules\Shop\Http\Middleware\FounderOnly;
 use Modules\Shop\Http\Middleware\ShopMaintenanceMode;
 
 // Routes publiques boutique — protégées par ShopMaintenanceMode (kill switch admin only quand SHOP_MAINTENANCE=true)
-Route::middleware(['web', ShopMaintenanceMode::class])
+Route::middleware(['web', FounderOnly::class, ShopMaintenanceMode::class])
     ->prefix(config('shop.routes.prefix', 'boutique'))
     ->group(function () {
         Route::get('/', [PublicShopController::class, 'index'])->name('shop.index');
@@ -28,13 +29,13 @@ Route::middleware(['web', ShopMaintenanceMode::class])
         Route::get('/paiement/{order}', [CheckoutController::class, 'pay'])->name('shop.checkout.pay');
         Route::get('/confirmation/{order}', [CheckoutController::class, 'success'])->name('shop.confirmation');
         Route::get('/suivi', [OrderLookupController::class, 'index'])->name('shop.order-lookup');
-        Route::post('/suivi', [OrderLookupController::class, 'search'])->name('shop.order-lookup.search');
+        Route::post('/suivi', [OrderLookupController::class, 'search'])->name('shop.order-lookup.search')->middleware('throttle:20,5');
         Route::get('/mes-commandes', [UserOrderController::class, 'index'])->name('shop.my-orders')->middleware('auth');
         Route::get('/{product:slug}', [PublicShopController::class, 'show'])->name('shop.show');
     });
 
 // Estimation livraison (AJAX) — protégée aussi (évite checkout via API pendant maintenance)
-Route::middleware(['web', ShopMaintenanceMode::class])
+Route::middleware(['web', FounderOnly::class, ShopMaintenanceMode::class])
     ->post('/api/shop/shipping-quote', ShippingQuoteController::class)
     ->name('shop.shipping-quote');
 
@@ -53,7 +54,7 @@ Route::middleware('api')
 // grep littéral prefix('admin des rounds précédents). Permissions view_/create_/update_/
 // delete_products et view_/update_ecommerce_orders réutilisées : elles existaient déjà dans le
 // seeder RBAC mais n'avaient jamais été câblées à aucune route.
-Route::middleware(['web', 'auth'])
+Route::middleware(['web', FounderOnly::class, 'auth'])
     ->prefix(config('shop.routes.admin_prefix', 'admin/shop'))
     ->as('admin.shop.')
     ->group(function () {
@@ -67,6 +68,7 @@ Route::middleware(['web', 'auth'])
             Route::put('products/{product}', [ProductController::class, 'update'])->name('products.update');
             Route::patch('products/{product}', [ProductController::class, 'update']);
         });
+        Route::post('products-sync-gelato', [ProductController::class, 'syncGelato'])->name('products.sync-gelato')->middleware('permission:update_products');
         Route::delete('products/{product}', [ProductController::class, 'destroy'])->name('products.destroy')->middleware('permission:delete_products');
 
         Route::middleware('permission:view_ecommerce_orders')->group(function () {

@@ -25,7 +25,8 @@ class ResyncGelatoProductCommand extends Command
     protected $signature = 'shop:gelato-resync
         {slug : Slug du produit local (ex: t-shirt-unisexe-gildan-5000)}
         {gelato_store_product_id : UUID du store_product Gelato (ex: 41394873-2eaf-4950-bafc-15f6769ede41)}
-        {--dry : Mode dry-run (affiche le résultat sans persister)}';
+        {--dry : Mode dry-run (affiche le résultat sans persister)}
+        {--reassign : Autorise à rattacher un produit déjà lié à un AUTRE produit Gelato}';
 
     protected $description = 'Resync ciblé d\'un produit local depuis Gelato store (1 produit, mapping propre)';
 
@@ -56,7 +57,7 @@ class ResyncGelatoProductCommand extends Command
             return self::SUCCESS;
         }
 
-        $result = $service->syncProductBySlug($slug, $gelatoStoreProductId);
+        $result = $service->syncProductBySlug($slug, $gelatoStoreProductId, (bool) $this->option('reassign'));
 
         if (! ($result['ok'] ?? false)) {
             $this->error('Sync failed: ' . ($result['error'] ?? 'unknown'));

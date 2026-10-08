@@ -14,6 +14,9 @@ class CartController extends Controller
 
     public function index()
     {
+        // Un ancien panier (libellé doublé, identifiant d'une autre taille) est ré-aligné avant l'affichage.
+        $this->cartService->revalidatePrices();
+
         // Pré-remplir : profil sauvegardé → dernière commande → nom du profil
         $savedAddress = [];
         if (Auth::check()) {
@@ -64,21 +67,27 @@ class CartController extends Controller
         $gelatoUid = $request->input('variant_gelato_uid');
 
         if ($request->filled('size_label')) {
-            $size = $request->input('size_label');
-            // Combiner couleur + taille dans le label
-            $variantLabel = $variantLabel ? $variantLabel . ' - ' . $size : $size;
-            // Remplacer la taille dans le UID Gelato (_gsi_m_ → _gsi_2xl_, etc.)
-            if ($gelatoUid) {
-                $gelatoUid = preg_replace('/_gsi_[^_]+_/', '_gsi_' . strtolower($size) . '_', $gelatoUid);
+            $size = trim((string) $request->input('size_label'));
+            // Le formulaire envoie DÉJÀ « Couleur - Taille » : ne jamais redoubler la taille. Le résolveur serveur
+            // retrouve ensuite l'identifiant Gelato et le prix de la variante exacte (aucune réécriture d'identifiant ici).
+            $suffix = ' - '.$size;
+            if ($variantLabel === null || $variantLabel === '') {
+                $variantLabel = $size;
+            } elseif ($variantLabel !== $size && ! str_ends_with($variantLabel, $suffix)) {
+                $variantLabel .= $suffix;
             }
         }
 
-        $this->cartService->add(
-            $request->integer('product_id'),
-            $request->integer('quantity', 1),
-            $variantLabel,
-            $gelatoUid
-        );
+        try {
+            $this->cartService->add(
+                $request->integer('product_id'),
+                $request->integer('quantity', 1),
+                $variantLabel,
+                $gelatoUid
+            );
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', __('Cette variante n\'est pas disponible. Choisissez une autre couleur ou taille.'));
+        }
 
         $product = \Modules\Shop\Models\Product::find($request->integer('product_id'));
         return back()->with('success', __('Produit ajouté au panier.'))->with('cart_added', [
@@ -134,15 +143,28 @@ class CartController extends Controller
             'new_gelato_uid' => 'nullable|string',
         ]);
 
-        $this->cartService->updateItemVariant(
-            $request->integer('product_id'),
-            $request->input('old_variant_label'),
-            $request->input('new_variant_label'),
-            $request->input('new_gelato_uid')
-        );
+        try {
+            $updated = $this->cartService->updateItemVariant(
+                $request->integer('product_id'),
+                $request->input('old_variant_label'),
+                $request->input('new_variant_label'),
+                $request->input('new_gelato_uid')
+            );
+        } catch (\InvalidArgumentException $e) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'variant_unavailable'], 422);
+            }
+
+            return back()->with('error', __('Cette variante n\'est pas disponible.'));
+        }
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'new_variant_label' => $request->input('new_variant_label')]);
+            // Source de vérité = le serveur : libellé canonique, prix et identifiant RÉSOLUS (pas ceux demandés par le navigateur).
+            return response()->json($this->cartTotals() + [
+                'new_variant_label' => $updated['variant_label'],
+                'unit_price' => (float) $updated['unit_price'],
+                'gelato_variant_id' => $updated['gelato_variant_id'] ?? null,
+            ]);
         }
 
         return back()->with('success', __('Option mise à jour.'));

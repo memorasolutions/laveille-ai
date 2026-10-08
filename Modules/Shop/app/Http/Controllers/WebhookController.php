@@ -207,6 +207,20 @@ class WebhookController extends Controller
             $trackingUrl = $payload['trackingUrl'] ?? ($payload['tracking']['trackingUrl'] ?? null);
         }
 
-        return ['trackingCode' => $trackingCode, 'trackingUrl' => $trackingUrl];
+        return ['trackingCode' => $trackingCode, 'trackingUrl' => self::safeTrackingUrl($trackingUrl)];
+    }
+
+    /** Seul http(s) est stocké : un schéma javascript:/data: rendu dans un href serait une XSS. Sinon null. */
+    private static function safeTrackingUrl(mixed $url): ?string
+    {
+        if (! is_string($url)) {
+            return null;
+        }
+        $url = trim($url);
+        if ($url === '' || strlen($url) > 2048 || ! preg_match('#^https?://#i', $url) || filter_var($url, FILTER_VALIDATE_URL) === false) {
+            return null;
+        }
+
+        return $url;
     }
 }

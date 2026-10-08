@@ -31,7 +31,7 @@
                     @csrf
                     <div class="sp-form-group">
                         <label class="sp-form-label">{{ __('Numéro de commande') }}</label>
-                        <input type="number" name="order_id" required autocomplete="off" class="sp-form-input">
+                        <input type="text" name="order_number" required autocomplete="off" class="sp-form-input" value="{{ old('order_number', request('order_number')) }}">
                     </div>
                     <div class="sp-form-group" style="margin-bottom: 16px;">
                         <label class="sp-form-label">{{ __('Courriel') }}</label>
@@ -96,7 +96,7 @@
                 </div>
 
                 {{-- Tracking --}}
-                @if($order->tracking_url)
+                @if($order->tracking_url && preg_match('#^https?://#i', $order->tracking_url))
                     <div style="text-align: center; margin-top: 20px;">
                         <a href="{{ $order->tracking_url }}" target="_blank" rel="noopener" class="sp-btn-primary">
                             <i class="fa fa-truck"></i> {{ __('Suivre mon colis') }}

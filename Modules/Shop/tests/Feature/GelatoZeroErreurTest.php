@@ -198,7 +198,7 @@ test('#1 rejet 4xx confirmé : la clé est libérée pour permettre une reprise'
 test('#1/#2 verrou orphelin : réconciliation adopte la commande existante et alerte l admin, sans recréer', function () {
     config(['shop.admin_email' => 'admin@example.com']);
     Http::fake([
-        'order.gelatoapis.com/v4/orders:search' => Http::response(['orders' => [['id' => 'G-EXIST', 'orderReferenceId' => 'REF-1']]], 200),
+        'order.gelatoapis.com/v4/orders:search' => Http::response(['orders' => [['id' => 'G-EXIST', 'orderReferenceId' => 'REF-1', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'created', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]]]], 200),
         'order.gelatoapis.com/v4/orders' => Http::response(['id' => 'G-NEW'], 200),
     ]);
     $product = zeProduct();
@@ -262,7 +262,7 @@ test('#3 Stripe : erreur interne après signature valide = 500 (Stripe rejoue), 
     $order->forceFill(['status' => 'pending', 'stripe_session_id' => 'cs_1'])->save();
     Event::listen(ShopOrderPaid::class, fn () => throw new RuntimeException('BD indisponible'));
 
-    $body = json_encode(['type' => 'checkout.session.completed', 'data' => ['object' => ['id' => 'cs_1', 'payment_intent' => 'pi_1']]]);
+    $body = json_encode(['type' => 'checkout.session.completed', 'data' => ['object' => ['id' => 'cs_1', 'payment_intent' => 'pi_1', 'payment_status' => 'paid', 'amount_total' => (int) round($order->total * 100)]]]);
     $t = time();
     $sig = 't='.$t.',v1='.hash_hmac('sha256', $t.'.'.$body, 'whsec');
     $call = fn () => $this->call('POST', route('shop.webhook.stripe'), [], [], [], ['HTTP_STRIPE_SIGNATURE' => $sig, 'CONTENT_TYPE' => 'application/json'], $body);
@@ -403,9 +403,11 @@ test('#3 checkout refuse un productUid non concordant avant paiement', function 
     $svc = app(PrintFileService::class);
     expect($svc->assertOrderable($product->id, 'UID-1', 'UID-1'))->toBeInstanceOf(PrintFile::class);
     expect(fn () => $svc->assertOrderable($product->id, 'UID-1', 'AUTRE'))->toThrow(PrintFileNotApprovedException::class);
-    // le contrôle du checkout appelle exactement assertOrderable($pid, $variant, $variant)
+    // le checkout passe par le résolveur unique, qui appelle exactement assertOrderable($pid, $variant, $variant)
     $src = file_get_contents(base_path('Modules/Shop/app/Http/Controllers/CheckoutController.php'));
-    expect($src)->toContain('assertOrderable((int) $cartItem[\'product_id\'], $variant, $variant)');
+    expect($src)->toContain('OrderItemRouter')->and($src)->not->toContain('print_file_url');
+    $rsrc = file_get_contents(base_path('Modules/Shop/app/Gelato/OrderItemRouter.php'));
+    expect($rsrc)->toContain('assertOrderable((int) ($item->product_id ?? $product->id), $variant, $variant)');
 });
 
 test('#6 rejeu ShopOrderPaid : un seul courriel de confirmation', function () {
@@ -423,7 +425,7 @@ test('#7 shop:gelato-reconcile adopte si trouvée, sinon alerte sans créer', fu
     Mail::fake();
     Http::fake([
         'order.gelatoapis.com/v4/orders:search' => Http::sequence()
-            ->push(['orders' => [['id' => 'G-X', 'orderReferenceId' => 'REF-A']]], 200)
+            ->push(['orders' => [['id' => 'G-X', 'orderReferenceId' => 'REF-A', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'created', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]]]], 200)
             ->push(['orders' => []], 200),
         'order.gelatoapis.com/v4/orders' => Http::response(['id' => 'G-NEW'], 200),
     ]);
@@ -469,8 +471,8 @@ function zeReconcile(array $orders): array
 
 test('#10 réconciliation : [refusée, livrée] adopte la LIVRÉE, jamais la refusée', function () {
     [$result, $order] = zeReconcile([
-        ['id' => 'G-REFUSED', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'refused', 'fulfillmentStatus' => 'failed'],
-        ['id' => 'G-OK', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'delivered'],
+        ['id' => 'G-REFUSED', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'refused', 'fulfillmentStatus' => 'failed', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]],
+        ['id' => 'G-OK', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'delivered', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]],
     ]);
 
     expect($result)->toBe('adopted')->and($order->gelato_order_id)->toBe('G-OK');
@@ -479,7 +481,7 @@ test('#10 réconciliation : [refusée, livrée] adopte la LIVRÉE, jamais la ref
 
 test('#10 réconciliation : uniquement une refusée = introuvable, unknown, aucune adoption', function () {
     [$result, $order] = zeReconcile([
-        ['id' => 'G-REFUSED', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'refused', 'fulfillmentStatus' => 'failed'],
+        ['id' => 'G-REFUSED', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'refused', 'fulfillmentStatus' => 'failed', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]],
     ]);
 
     expect($result)->toBe('unknown')->and($order->gelato_order_id)->toBeNull()->and($order->gelato_submit_state)->toBe('unknown');
@@ -488,11 +490,255 @@ test('#10 réconciliation : uniquement une refusée = introuvable, unknown, aucu
 
 test('#10 réconciliation : DEUX commandes valides = ambigu, unknown + alerte, aucune adoption', function () {
     [$result, $order] = zeReconcile([
-        ['id' => 'G-A', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'printed'],
-        ['id' => 'G-B', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'delivered'],
+        ['id' => 'G-A', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'printed', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]],
+        ['id' => 'G-B', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'delivered', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]],
     ]);
 
     expect($result)->toBe('unknown')->and($order->gelato_order_id)->toBeNull()->and($order->gelato_submit_state)->toBe('unknown')
         ->and($order->gelato_issue)->toContain('Plusieurs commandes Gelato valides');
     Http::assertNotSent(fn ($r) => $r->method() === 'POST' && str_ends_with($r->url(), '/v4/orders'));
+});
+
+
+function zeCatalogProduct(?array $map = ['UID-1' => 'SV-1']): Product
+{
+    $p = zeProduct();
+    $p->update(['metadata' => ['gelato_store_product_id' => 'SP-1', 'store_variant_map' => $map ?? [], 'print_file_url' => 'https://raw.test/figé.png']]);
+
+    return $p->fresh();
+}
+
+test('catalogue avec mapping : envoi storeProductVariantId, sans files, sans fichier brut, idempotent', function () {
+    Http::fake(['order.gelatoapis.com/*' => Http::response(['id' => 'G-9'], 200)]);
+    $order = zeOrder(zeCatalogProduct());
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid(Order::find($order->id)));
+
+    Http::assertSentCount(1);
+    Http::assertSent(fn ($r) => $r['items'][0]['storeProductVariantId'] === 'SV-1'
+        && ! array_key_exists('files', $r['items'][0])
+        && ! str_contains(json_encode($r->data()), 'raw.test'));
+    expect(Order::find($order->id)->gelato_order_id)->toBe('G-9');
+});
+
+test('catalogue sans mapping : aucune commande envoyée, awaiting_print_file, jamais de repli fichier brut', function () {
+    Http::fake();
+    $order = zeOrder(zeCatalogProduct([]));
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+
+    Http::assertNothingSent();
+    expect(Order::find($order->id)->status)->toBe('awaiting_print_file')
+        ->and(Order::find($order->id)->gelato_issue)->toContain('storeProductVariantId');
+});
+
+test('GelatoService : catalogue sans mapping lève GelatoRoutingException (strict et standard)', function () {
+    Http::fake();
+    $order = zeOrder(zeCatalogProduct([]));
+    $svc = app(\Modules\Shop\Services\GelatoService::class);
+
+    expect(fn () => $svc->submitOrderStrict($order, 'k'))->toThrow(\Modules\Shop\Gelato\GelatoRoutingException::class);
+    expect(fn () => $svc->createOrder($order))->toThrow(\Modules\Shop\Gelato\GelatoRoutingException::class);
+    Http::assertNothingSent();
+});
+
+test('flag OFF : le routage par produit reste appliqué (catalogue = store, jamais le fichier brut)', function () {
+    config(['shop.gelato_zero_erreur' => false]);
+    Http::fake(['order.gelatoapis.com/*' => Http::response(['id' => 'G-OFF'], 200)]);
+    $order = zeOrder(zeCatalogProduct());
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+
+    Http::assertSent(fn ($r) => $r['items'][0]['storeProductVariantId'] === 'SV-1' && ! array_key_exists('files', $r['items'][0]));
+});
+
+test('flag OFF : produit éditeur avec seulement print_file_url brut est refusé', function () {
+    config(['shop.gelato_zero_erreur' => false]);
+    Http::fake();
+    $product = zeProduct();
+    $product->update(['metadata' => ['print_file_url' => 'https://raw.test/figé.png']]);
+    $order = zeOrder($product->fresh());
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+
+    Http::assertNothingSent();
+});
+
+// ---------------------------------------------------------------------------------------------------------------
+// Passe zone argent #2 (2026-10-07) : 6 défauts du chemin de commande.
+// ---------------------------------------------------------------------------------------------------------------
+
+test('Z1 drapeau OFF : ShopOrderPaid deux fois (même sans gelato_order_id visible) = UNE seule commande Gelato', function () {
+    config(['shop.gelato_zero_erreur' => false]);
+    Http::fake(['order.gelatoapis.com/*' => Http::response(['id' => 'G-OFF-1'], 200)]);
+    $order = zeOrder(zeCatalogProduct());
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid(Order::find($order->id)));
+    // course entre deux workers : l'id n'est pas encore visible, la clé atomique doit bloquer
+    Order::whereKey($order->id)->update(['gelato_order_id' => null]);
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid(Order::find($order->id)));
+
+    Http::assertSentCount(1);
+    Http::assertSent(fn ($r) => $r->hasHeader('Idempotency-Key'));
+    expect(Order::find($order->id)->gelato_submit_key)->not->toBeNull();
+});
+
+test('Z1 drapeau OFF : échec ambigu (null) conserve le verrou, aucun doublon au rejeu', function () {
+    config(['shop.gelato_zero_erreur' => false, 'shop.admin_email' => 'a@example.com']);
+    Mail::fake();
+    Http::fake(['order.gelatoapis.com/v4/orders' => Http::response('boom', 500)]);
+    $order = zeOrder(zeCatalogProduct());
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid(Order::find($order->id)));
+
+    $fresh = Order::find($order->id);
+    expect($fresh->gelato_order_id)->toBeNull()->and($fresh->gelato_submit_key)->not->toBeNull()->and($fresh->gelato_submit_state)->toBe('unknown');
+    Http::assertSentCount(1);
+});
+
+test('Z2 mapping changé APRÈS la création : la commande part avec le storeProductVariantId FIGÉ', function () {
+    Http::fake(['order.gelatoapis.com/*' => Http::response(['id' => 'G-F'], 200)]);
+    $product = zeCatalogProduct(['UID-1' => 'SV-OLD']);
+    $order = zeOrder($product);
+    OrderItem::where('order_id', $order->id)->update(['gelato_store_product_variant_id' => 'SV-OLD']);
+    // le mapping courant est vidé après le paiement
+    $product->update(['metadata' => ['gelato_store_product_id' => 'SP-1', 'store_variant_map' => []]]);
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid(Order::find($order->id)));
+
+    Http::assertSent(fn ($r) => $r['items'][0]['storeProductVariantId'] === 'SV-OLD' && ! array_key_exists('files', $r['items'][0]));
+    expect(Order::find($order->id)->gelato_order_id)->toBe('G-F');
+});
+
+test('Z2 article sans valeur figée : résolution en direct (compatibilité)', function () {
+    Http::fake(['order.gelatoapis.com/*' => Http::response(['id' => 'G-C'], 200)]);
+    $order = zeOrder(zeCatalogProduct(['UID-1' => 'SV-LIVE']));
+
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+
+    Http::assertSent(fn ($r) => $r['items'][0]['storeProductVariantId'] === 'SV-LIVE');
+});
+
+function zeCheckout(array $quoteMethods, float $clientShipping, Product $product, array $cartVariant = ['UID-1']): array
+{
+    Http::fake(['order.gelatoapis.com/v4/orders:quote' => Http::response(['quotes' => [['shipmentMethods' => $quoteMethods]]], 200)]);
+    config(['shop.handling_fee' => 0]);
+    $cart = Mockery::mock(\Modules\Shop\Services\CartService::class);
+    $cart->shouldReceive('revalidatePrices')->andReturnTrue();
+    $cart->shouldReceive('getCart')->andReturn((new \Modules\Shop\Models\Cart)->forceFill(['id' => 1])); // verrou de panier (#11)
+    $cart->shouldReceive('unavailableReason')->andReturnNull(); // disponibilité (#14), testée à part dans GelatoAuditCodexTest
+    $cart->shouldReceive('getContent')->andReturn([['product_id' => $product->id, 'quantity' => 1, 'unit_price' => 30, 'gelato_variant_id' => $cartVariant[0], 'variant_label' => null]]);
+    $cart->shouldReceive('subtotalOf')->andReturn(30.0);   // calculs sur l'INSTANTANÉ du panier (R2-7)
+    $cart->shouldReceive('taxAmountOf')->andReturn(4.5);
+    $cart->shouldReceive('tpsOf')->andReturn(1.5);
+    $cart->shouldReceive('clear')->andReturnNull();
+    $stripe = Mockery::mock(\Modules\Shop\Services\StripeService::class);
+    $stripe->shouldReceive('createCheckoutSession')->andReturn(['session_id' => 'cs_1', 'client_secret' => 'sec']);
+
+    $request = \Illuminate\Http\Request::create('/commander', 'POST', [
+        'email' => 'c@example.com', 'shipping_cost' => $clientShipping,
+        'shipping_address' => ['first_name' => 'A', 'last_name' => 'B', 'address_line1' => '1 rue X', 'city' => 'Laval', 'state' => 'QC', 'postal_code' => 'H7N1A1', 'country' => 'CA'],
+    ]);
+    $request->setLaravelSession(app('session.store'));
+    $response = (new \Modules\Shop\Http\Controllers\CheckoutController($cart, $stripe))->create($request);
+
+    return [$response, Order::latest('id')->first()];
+}
+
+test('Z2/Z3 checkout : coût de livraison valide accepté, valeur SERVEUR, identifiant catalogue figé sur l article', function () {
+    $product = zeCatalogProduct(['UID-1' => 'SV-1']);
+    [$response, $order] = zeCheckout([['name' => 'Standard', 'shipmentMethodUid' => 'std', 'price' => 12.5, 'currency' => 'CAD']], 12.5, $product);
+
+    expect($order)->not->toBeNull()->and((float) $order->shipping_cost)->toBe(12.5);
+    expect($order->items()->first()->gelato_store_product_variant_id)->toBe('SV-1');
+});
+
+test('Z3 checkout : coût de livraison trafiqué trop bas est REFUSÉ, aucune commande créée', function () {
+    $product = zeCatalogProduct(['UID-1' => 'SV-1']);
+    [$response, $order] = zeCheckout([['name' => 'Standard', 'shipmentMethodUid' => 'std', 'price' => 12.5, 'currency' => 'CAD']], 1.0, $product);
+
+    expect($order)->toBeNull()
+        ->and(session('errors')->get('shipping_cost'))->not->toBeEmpty();
+});
+
+test('Z3 checkout : devis Gelato indisponible = refus (fail-closed), aucune commande', function () {
+    $product = zeCatalogProduct(['UID-1' => 'SV-1']);
+    Http::fake(['order.gelatoapis.com/v4/orders:quote' => Http::response('down', 500)]);
+    [$response, $order] = zeCheckout([], 5.0, $product);
+
+    expect($order)->toBeNull();
+});
+
+test('Z4 échec de routage : verrou libéré, jamais UNKNOWN, aucune commande envoyée', function () {
+    config(['shop.admin_email' => 'a@example.com']);
+    Mail::fake();
+    Http::fake();
+    $order = zeOrder(zeCatalogProduct([]));
+    // simule une course : le routage est résolu par buildOrderBody (corps AVANT verrou) -> doit être DÉFINITIF
+    app(CreateGelatoOrder::class)->handle(new ShopOrderPaid($order));
+
+    $fresh = Order::find($order->id);
+    Http::assertNothingSent();
+    expect($fresh->status)->toBe('awaiting_print_file')
+        ->and($fresh->gelato_submit_key)->toBeNull()
+        ->and($fresh->gelato_submit_state)->not->toBe('unknown')
+        ->and($fresh->gelato_order_id)->toBeNull();
+});
+
+test('Z4 routage qui échoue DANS submit (verrou déjà pris) : libère le verrou, pas UNKNOWN', function () {
+    config(['shop.admin_email' => 'a@example.com']);
+    Mail::fake();
+    Http::fake();
+    $order = zeOrder(zeCatalogProduct([]));
+    $svc = Mockery::mock(\Modules\Shop\Services\GelatoService::class)->makePartial();
+    $svc->shouldReceive('isConfigured')->andReturnTrue();
+    $svc->shouldReceive('buildOrderBody')->andReturn(['items' => []]); // passe l'amont
+    $svc->shouldReceive('submitOrderStrict')->andThrow(new \Modules\Shop\Gelato\GelatoRoutingException('mapping disparu'));
+
+    (new CreateGelatoOrder($svc))->handle(new ShopOrderPaid($order));
+
+    $fresh = Order::find($order->id);
+    expect($fresh->gelato_submit_key)->toBeNull()
+        ->and($fresh->gelato_submit_state)->toBe('rejected')
+        ->and($fresh->status)->toBe('awaiting_print_file');
+});
+
+test('Z5 réconciliation : réponse potentiellement tronquée (>= limite) = lève, n adopte JAMAIS', function () {
+    $orders = [];
+    for ($i = 0; $i < \Modules\Shop\Services\GelatoService::SEARCH_LIMIT; $i++) {
+        $orders[] = ['id' => "G-R{$i}", 'orderReferenceId' => 'REF-6', 'financialStatus' => $i === 7 ? 'paid' : 'refused', 'fulfillmentStatus' => $i === 7 ? 'printed' : 'failed'];
+    }
+    [$result, $order] = zeReconcile($orders);
+
+    expect($result)->toBe('unknown')->and($order->gelato_order_id)->toBeNull()
+        ->and($order->gelato_issue)->toContain('tronquée');
+});
+
+test('Z5 la recherche demande bien la limite documentée', function () {
+    zeReconcile([]);
+    Http::assertSent(fn ($r) => str_ends_with($r->url(), '/v4/orders:search') && $r['limit'] === \Modules\Shop\Services\GelatoService::SEARCH_LIMIT);
+});
+
+test('Z6 réconciliation : entrée au statut ABSENT n est jamais adoptée', function () {
+    [$result, $order] = zeReconcile([
+        ['id' => 'G-NOSTATUS', 'orderReferenceId' => 'REF-6'],
+        ['id' => 'G-HALF', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]],
+        ['id' => 'G-EMPTY', 'orderReferenceId' => 'REF-6', 'financialStatus' => '', 'fulfillmentStatus' => 'printed', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]],
+    ]);
+
+    expect($result)->toBe('unknown')->and($order->gelato_order_id)->toBeNull();
+});
+
+// Révisé après la revue adversariale Codex (2026-10-08, défaut nº7b) : une entrée complète A + une entrée B sans statut
+// pour la même référence = AMBIGUË. Adopter A serait un pari (B pourrait être la vraie commande vivante).
+test('Z6 réconciliation : une entrée complète n est PAS adoptée si une autre entrée de la référence est sans statut', function () {
+    [$result, $order] = zeReconcile([
+        ['id' => 'G-NOSTATUS', 'orderReferenceId' => 'REF-6'],
+        ['id' => 'G-OK', 'orderReferenceId' => 'REF-6', 'financialStatus' => 'paid', 'fulfillmentStatus' => 'printed', 'metadata' => [['key' => 'memora_env', 'value' => app(\Modules\Shop\Services\GelatoService::class)->envMarker()]]],
+    ]);
+
+    expect($result)->toBe('unknown')->and($order->gelato_order_id)->toBeNull();
 });

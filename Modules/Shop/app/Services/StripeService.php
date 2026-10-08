@@ -114,22 +114,19 @@ class StripeService
         try {
             $event = json_decode($payload, true);
 
-            if (($event['type'] ?? '') === 'checkout.session.completed') {
-                $session = $event['data']['object'];
-                $order = Order::where('stripe_session_id', $session['id'])->first();
+            $type = $event['type'] ?? '';
 
-                // Rejeu sûr (drapeau ON) : une commande déjà « paid » sans commande Gelato ré-émet l'événement
-                // (l'écouteur est idempotent) - sinon un échec APRÈS la mise à jour du statut ne serait jamais repris.
-                $replay = ZeroErreur::enabled() && $order && $order->status === 'paid' && empty($order->gelato_order_id);
-
-                if ($order && ($order->status === 'pending' || $replay)) {
-                    if ($order->status === 'pending') {
-                        $order->update([
-                            'status' => 'paid',
-                            'stripe_payment_intent_id' => $session['payment_intent'] ?? null,
-                        ]);
-                    }
-                    event(new ShopOrderPaid($order));
+            // « completed » ne veut PAS dire « payé » : un moyen de paiement différé (ACSS, virement) complète la session
+            // en payment_status=unpaid. Le paiement différé réussi arrive plus tard par async_payment_succeeded.
+            if (in_array($type, ['checkout.session.completed', 'checkout.session.async_payment_succeeded'], true)) {
+                $this->settlePaidSession($event['data']['object'] ?? []);
+            } elseif ($type === 'checkout.session.async_payment_failed') {
+                // Jamais payée : la commande reste « pending » (rien n'est imprimé) et la trace est conservée.
+                $session = $event['data']['object'] ?? [];
+                Log::warning('Stripe webhook : paiement différé échoué', ['session' => $session['id'] ?? null]);
+                $order = Order::where('stripe_session_id', $session['id'] ?? '')->first();
+                if ($order && $order->status === 'pending') {
+                    $order->update(['notes' => trim(($order->notes ? $order->notes."\n" : '').'Paiement différé Stripe échoué.')]);
                 }
             }
         } catch (\Exception $e) {
@@ -140,6 +137,49 @@ class StripeService
         }
 
         return true;
+    }
+
+    /**
+     * Marque « payée » (et déclenche l'impression) UNIQUEMENT si Stripe confirme l'encaissement : payment_status=paid ET
+     * montant encaissé = total de la commande au cent près (défense en profondeur contre une session détournée/falsifiée).
+     */
+    private function settlePaidSession(array $session): void
+    {
+        $order = Order::where('stripe_session_id', $session['id'] ?? '')->first();
+
+        // Rejeu sûr (drapeau ON) : une commande déjà « paid » sans commande Gelato ré-émet l'événement
+        // (l'écouteur est idempotent) - sinon un échec APRÈS la mise à jour du statut ne serait jamais repris.
+        $replay = ZeroErreur::enabled() && $order && $order->status === 'paid' && empty($order->gelato_order_id);
+
+        if (! $order || ($order->status !== 'pending' && ! $replay)) {
+            return;
+        }
+
+        if (($session['payment_status'] ?? null) !== 'paid') {
+            Log::info('Stripe webhook : session non payée (paiement différé ?), commande laissée en attente', [
+                'order' => $order->id, 'payment_status' => $session['payment_status'] ?? null,
+            ]);
+            return;
+        }
+
+        $expectedCents = (int) round(((float) $order->total) * 100);
+        if (! isset($session['amount_total']) || (int) $session['amount_total'] !== $expectedCents) {
+            Log::critical('Stripe webhook : montant encaissé différent du total de la commande, NON marquée payée', [
+                'order' => $order->id, 'attendu_cents' => $expectedCents, 'recu_cents' => $session['amount_total'] ?? null,
+            ]);
+            if ($order->status === 'pending') {
+                $order->update(['notes' => trim(($order->notes ? $order->notes."\n" : '').'ALERTE : montant Stripe différent du total, vérification manuelle requise.')]);
+            }
+            return;
+        }
+
+        if ($order->status === 'pending') {
+            $order->update([
+                'status' => 'paid',
+                'stripe_payment_intent_id' => $session['payment_intent'] ?? null,
+            ]);
+        }
+        event(new ShopOrderPaid($order));
     }
 
     public function refund(string $paymentIntentId, ?int $amountCents = null): bool

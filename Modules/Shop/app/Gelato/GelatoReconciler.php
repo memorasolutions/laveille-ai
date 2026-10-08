@@ -35,7 +35,7 @@ class GelatoReconciler
         $reference = (string) ($order->order_number ?? $order->id);
 
         try {
-            $existing = $this->gelato->findOrderIdByReference($reference);
+            $existing = $this->gelato->findOrderIdByReference($reference, $order);
         } catch (\Throwable $e) {
             Log::error("Reconciliation Gelato impossible pour commande #{$order->id} : {$e->getMessage()}");
             $this->markUnknown($order, 'Réconciliation impossible : '.$e->getMessage());
@@ -49,9 +49,11 @@ class GelatoReconciler
 
         if ($existing !== null && $existing !== '') {
             Order::whereKey($order->id)->whereNull('gelato_order_id')->update([
-                'gelato_order_id' => $existing, 'status' => 'processing', 'gelato_submit_state' => 'submitted',
+                'gelato_order_id' => $existing, 'gelato_submit_state' => 'submitted',
                 'gelato_issue' => 'Commande Gelato retrouvée par réconciliation ('.$existing.')',
             ]);
+            // Une commande annulée/remboursée entre-temps reste telle : l'adoption n'en fait jamais une commande « en traitement ».
+            Order::whereKey($order->id)->whereNotIn('status', ['cancelled', 'refunded'])->update(['status' => 'processing']);
             Log::warning("Gelato reconciliation : commande #{$order->id} adoptee -> {$existing}");
 
             return self::ADOPTED;

@@ -20,8 +20,22 @@ class Order extends Model
         'gelato_order_id', 'status', 'subtotal', 'tax_amount', 'shipping_cost',
         'total', 'shipping_address', 'billing_address', 'tracking_number',
         'tracking_url', 'notes', 'gelato_submit_key', 'gelato_submit_started_at',
-        'gelato_submit_state', 'gelato_issue', 'confirmation_sent_at',
+        'gelato_submit_state', 'gelato_issue', 'confirmation_sent_at', 'shipping_method_uid',
     ];
+
+    /**
+     * Composantes de taxe AFFICHÉES, dont la somme égale toujours le tax_amount FACTURÉ au cent près
+     * (TVQ = taxe facturée - TPS, au lieu d'un 2e arrondi indépendant qui pouvait écarter de 0,01 $).
+     *
+     * @return array{tps: float, tvq: float}
+     */
+    public function taxLines(): array
+    {
+        $total = round((float) $this->tax_amount, 2);
+        $tps = min($total, round((float) $this->subtotal * (float) config('shop.tax.tps', 5) / 100, 2));
+
+        return ['tps' => $tps, 'tvq' => round($total - $tps, 2)];
+    }
 
     protected $casts = [
         'shipping_address' => 'array',
@@ -44,17 +58,20 @@ class Order extends Model
     }
 
     /**
-     * Génère un numéro de commande unique : yyyymmddHHmmss-XXX
+     * Numéro de commande unique et NON DEVINABLE : yyyymmdd-XXXXXXXXXX (10 caractères aléatoires, ~50 bits).
+     * Il sert de preuve de possession au suivi invité (/suivi) : l'ancien format horodaté + 3 chiffres était énumérable.
+     * Les commandes existantes gardent leur numéro (aucune réécriture).
      */
     public static function generateUniqueOrderNumber(int $attempts = 0): string
     {
-        if ($attempts >= 10) {
-            return Carbon::now()->format('Ymd-His') . '-' . random_int(10000, 99999);
+        $alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // sans I, L, O, 0, 1 : lisible au téléphone
+        $suffix = '';
+        for ($i = 0; $i < 10; $i++) {
+            $suffix .= $alphabet[random_int(0, strlen($alphabet) - 1)];
         }
+        $number = Carbon::now()->format('Ymd') . '-' . $suffix;
 
-        $number = Carbon::now()->format('Ymd-His') . '-' . random_int(100, 999);
-
-        if (static::where('order_number', $number)->exists()) {
+        if ($attempts < 10 && static::withTrashed()->where('order_number', $number)->exists()) {
             return self::generateUniqueOrderNumber($attempts + 1);
         }
 
