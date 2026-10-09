@@ -10,6 +10,24 @@ return [
     'openrouter_api_key' => env('OPENROUTER_API_KEY'),
 
     /*
+     * Module « précaution données personnelles » (v1.321.0). Note de minimisation pour
+     * l'UTILISATEUR sur les fiches (jamais un jugement sur l'outil). Interrupteur public =
+     * réglage runtime `directory.privacy_notice_enabled` (table settings, OFF par défaut) :
+     * activable sans redéploiement. `categories` : variante de texte => slugs de catégories qui
+     * déclenchent la note (aucune catégorie « CV » n'existait au 2026-10-07 : ajouter son slug
+     * sous `cv` le jour où elle est créée). `recheck_months` : échéance de re-vérification de la
+     * politique d'un outil (privacy_checked_at + N mois).
+     */
+    'privacy_notice' => [
+        'default_enabled' => false,
+        'recheck_months' => 6,
+        'categories' => [
+            'cv' => ['cv-candidatures'],
+            'documents' => ['ecriture-ia'],
+        ],
+    ],
+
+    /*
      * Cascade de modèles de rédaction OpenRouter (OpenRouterService::generate() /
      * classifyPricing()) - chaque appel passe par OpenRouterPrivacy::applyTo(), qui impose
      * provider.data_collection=deny + provider.zdr=true (rétention nulle, règle non négociable

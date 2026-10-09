@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.324.0] - 2026-10-08
+
+### Ajouté
+- **Pub des pages d'outils repliable et mémorisée** (proposition du fondateur). Sur chaque page d'outil, le bloc publicitaire peut maintenant être réduit, à la manière du bloc « En bref » : ouvert par défaut, un bouton « Réduire / Afficher la publicité » bascule l'état, et ce choix est mémorisé 7 jours dans un cookie (`lv_tool_ad_collapsed`). Un seul gabarit partagé couvre toutes les pages d'outils (`Modules/Tools/.../partials/tool-ad.blade.php`). Conçu pour ne pas casser le remplissage AdSense : le repli est purement visuel et appliqué après le chargement (aucun `x-cloak` sur le bloc annonce, l'unité reste visible au premier affichage pour que l'annonce se remplisse normalement). Désactivable par `ADS_TOOL_COLLAPSIBLE=false` (retour au rendu simple, zéro casse). Membres et pages sans publicité : inchangés.
+
+## [1.323.0] - 2026-10-08
+
+### Ajouté
+- **Boutique Gelato - flux catalogue correct et durcissement de la zone argent** (livrée derrière le mode maintenance, un accès réservé au fondateur et des drapeaux désactivés par défaut). La cause racine des commandes fautives est réparée : une commande ne part plus avec le logo brut du serveur quand le mappage de variante manque. Routage par produit (catalogue = identifiant de variante Gelato sans fichier, éditeur = fichier d'impression approuvé, échec bruyant si le mappage est absent). Synchronisation complète du catalogue (variantes, tailles et couleurs, prix coût plus marge par couleur et taille, publication selon drapeau, retrait = dépublication jamais suppression, bouton admin "Synchroniser maintenant"). Accès restreint au fondateur par un middleware réversible. Durcissement zone argent et confidentialité par quatre rounds adversariaux (Codex deux fois, fable une fois, un round final) : instantané de panier pour accorder le montant Stripe et la commande; le webhook ne marque "payé" que si le paiement est confirmé et que le montant concorde; la province de taxe est dérivée du code postal et n'est plus contournable; réconciliation stricte; confidentialité des pages de confirmation et de suivi; verrous de panier et de synchronisation revérifiés avant chaque écriture. 200 tests de la boutique au vert. À trancher avant toute ouverture publique : le barème fiscal hors Québec et la taxe sur la livraison (décision légale du fondateur). Migrations additives et réversibles.
+
+## [1.322.1] - 2026-10-08
+
+### Corrigé
+- **Pub AdSense retirée de l'en-tête du site.** Le mode automatique de Google injectait par moments une annonce dans le bandeau d'en-tête, au-dessus du logo, ce qui repoussait toute la page vers le bas (signalé par le fondateur deux jours de suite). Un garde-fou de placement, installé dans le chargeur AdSense (`Modules/FrontTheme/.../master.blade.php`), retire l'annonce automatique de cette seule zone (en-tête), tandis que les emplacements de contenu et de pied de page restent intacts. Contrôle de placement par retrait du conteneur injecté, sans masquage d'impression. Aucune donnée touchée, entièrement réversible. Le réglage propre et définitif reste de couper le mode automatique au tableau de bord AdSense (à faire quand la session Google sera connectée), et ce garde-fou protège en attendant.
+
+## [1.322.0] - 2026-10-07
+
+### Ajouté
+- **Une fiche au Glossaire Techno : « CGNAT (Carrier-Grade NAT) ».** La technique par laquelle un fournisseur d'accès à Internet fait partager une même adresse IPv4 publique à de nombreux abonnés, faute d'adresses disponibles. La fiche explique le mécanisme (double traduction NAT444, plage partagée 100.64.0.0/10 réservée par le RFC 6598), la raison du déploiement (épuisement des adresses IPv4) et les conséquences concrètes pour l'utilisateur : connexions entrantes bloquées, auto-hébergement et redirection de port impossibles, géolocalisation faussée, attribution plus difficile pour les enquêtes. Angle québécois honnête : le RFC 6598 a été coécrit en 2012 par un ingénieur de l'opérateur canadien Rogers, sans affirmer de taux de déploiement précis au Canada (non établi par les sources). Trois sources neutres (RFC 6598, 6888 et 6269 de l'IETF), faits recoupés par deux recherches indépendantes (Perplexity et Codex), paire d'illustrations WebP et JPEG (1200x669), aucune parenté hiérarchique fabriquée (aucun terme parent réseau n'existe au glossaire), migration réversible, aucune donnée utilisateur touchée, aucune nouvelle dépendance.
+
+## [1.321.0] - 2026-10-07
+
+### Ajouté
+- **Module « précaution données personnelles » dans l'annuaire (éteint par défaut).** Une note de conseil adressée à l'utilisateur, jamais un jugement sur l'outil : transmettre seulement les renseignements nécessaires et vérifier comment le service utilise, conserve et partage les documents. Deux couches : une note générale par catégorie (variante « CV » et variante « documents », pilotée par `config('directory.privacy_notice.categories')`) et, par outil, un fait vérifié optionnel (`third_party_ai_note`, `privacy_policy_url`, `privacy_checked_at`) affiché avec le lien de la politique. Placée près du bouton « Visiter le site ». Interrupteur public en réglage runtime `directory.privacy_notice_enabled` (OFF), activable sans redéploiement par `php artisan directory:privacy-notice on`. Migration réversible, textes dans `Modules/Directory/lang/fr_CA/privacy_notice.php`.
+
+### Modifié
+- **Fiche CVBooster préparée (reste en modération)** : descriptif factuel, catégorie « Écriture IA », fait vérifié de la politique de confidentialité. Aucune publication.
+
+Module Directory (désactivable, exportable), aucune donnée utilisateur touchée, aucune nouvelle dépendance (règle 18).
+
 ## [1.320.0] - 2026-10-06
 
 ### Ajouté

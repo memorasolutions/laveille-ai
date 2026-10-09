@@ -76,6 +76,7 @@ class DirectoryServiceProvider extends ServiceProvider
             \Modules\Directory\Console\GenerateAlternativesCommand::class,
             \Modules\Directory\Console\DiscoverNewToolsCommand::class,
             \Modules\Directory\Console\ReenrichStaleCommand::class,
+            \Modules\Directory\Console\PrivacyNoticeToggleCommand::class,
             \Modules\Directory\Console\RefreshPricingCommand::class,
             \Modules\Directory\Console\Commands\AuditPricingTieredCommand::class,
             \Modules\Directory\Console\Commands\BackfillEcosystemTagsCommand::class,
