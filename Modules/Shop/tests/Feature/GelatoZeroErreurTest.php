@@ -503,7 +503,7 @@ test('#10 réconciliation : DEUX commandes valides = ambigu, unknown + alerte, a
 function zeCatalogProduct(?array $map = ['UID-1' => 'SV-1']): Product
 {
     $p = zeProduct();
-    $p->update(['metadata' => ['gelato_store_product_id' => 'SP-1', 'store_variant_map' => $map ?? [], 'print_file_url' => 'https://raw.test/figé.png']]);
+    $p->update(['metadata' => ['gelato_store_product_id' => 'SP-1', 'store_variant_map' => $map ?? [], 'print_file_url' => 'https://raw.test/figé.png', 'cost_base' => 8.0]]);
 
     return $p->fresh();
 }

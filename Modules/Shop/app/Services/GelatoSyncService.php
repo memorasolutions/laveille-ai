@@ -637,6 +637,18 @@ class GelatoSyncService
         unset($variant);
         $fullyPriced = $variants !== [] && $unpriced === 0;
 
+        // Coût réel (USD) PAR VARIANTE vendue, indexé par uid catalogue Gelato : le garde-fou de marge du checkout utilise
+        // le coût de la variante réellement commandée (une grande taille ou une couleur plus chère n'est plus sous-estimée).
+        $costByUid = [];
+        foreach ($variants as $variant) {
+            foreach ($variant['product_uids'] as $size => $uid) {
+                $c = $costs[$variant['color_slug']][$size] ?? null;
+                if ($c !== null && (float) $c > 0) {
+                    $costByUid[(string) $uid] = round((float) $c, 4);
+                }
+            }
+        }
+
         $sizes = [];
         foreach ($variants as $variant) {
             $sizes = array_merge($sizes, array_keys($variant['size_prices']));
@@ -693,6 +705,7 @@ class GelatoSyncService
                     'store_variant_map' => $map,
                     'sizes' => $sizes,
                     'cost_base' => $baseCost,
+                    'cost_by_uid' => $costByUid,
                     'cost_currency' => 'USD',
                     'gelato_sync_hash' => $hash,
                 ] + ($unpriced > 0 ? ['gelato_sync_pricing_incomplete' => $unpriced] : [])
@@ -741,6 +754,9 @@ class GelatoSyncService
         }
         if ($ambiguities !== []) {
             $metadata['gelato_sync_ambiguous'] = $ambiguities;
+        }
+        if ($costByUid !== []) {
+            $metadata['cost_by_uid'] = $costByUid;
         }
         if ($baseCost !== null) {
             $metadata['cost_base'] = $baseCost;

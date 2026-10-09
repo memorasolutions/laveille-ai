@@ -93,7 +93,9 @@ test('la synchro crée un produit avec store_variant_map COMPLET, marqueur, prix
         ->and($v['variant_ids']['M'])->toBe('var-white-M')
         ->and($v['size_prices']['S'])->toBe(Product::smartPrice(10.0, 't-shirts'))
         ->and($v['size_prices']['XL'])->toBe(Product::smartPrice(12.0, 't-shirts'))
-        ->and((float) $p->price)->toBe(Product::smartPrice(10.0, 't-shirts'));
+        ->and((float) $p->price)->toBe(Product::smartPrice(10.0, 't-shirts'))
+        ->and((float) $p->metadata['cost_by_uid'][gcsUid('white', 'XL')])->toBe(12.0)
+        ->and((float) $p->metadata['cost_by_uid'][gcsUid('white', 'S')])->toBe(10.0);
 });
 
 test('une re-synchro met à jour sans dupliquer (idempotent)', function () {

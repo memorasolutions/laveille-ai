@@ -159,11 +159,13 @@ class CartService
         return array_reduce($items, fn ($total, $item) => $total + ($item['unit_price'] * $item['quantity']), 0.0);
     }
 
-    public function taxAmountOf(float $subtotal): float
+    /** Taxe sur une base DONNÉE (produit + livraison + manutention) pour une province; Québec par défaut (estimation du panier). */
+    public function taxAmountOf(float $taxableBase, string $province = 'QC', string $country = 'CA'): float
     {
-        return round($subtotal * (config('shop.tax.tps', 0) + config('shop.tax.tvq', 0)) / 100, 2);
+        return app(TaxCalculator::class)->compute($country, $province, $taxableBase)['total'];
     }
 
+    /** TPS seule (composante fédérale) sur une base donnée. */
     public function tpsOf(float $subtotal): float
     {
         return round($subtotal * config('shop.tax.tps', 0) / 100, 2);

@@ -1,33 +1,39 @@
 # État de session - La veille de Stef v2
 
-> Fichier UNIQUE de reprise (réécrit, jamais empilé). Dernière mise à jour : 2026-10-08, ~09h20 Québec (13:20 UTC).
+> Fichier UNIQUE de reprise (réécrit, jamais empilé). Dernière mise à jour : 2026-10-09, ~13h30 Québec (17:30 UTC).
+
+> ▶️ SESSION ACTIVE le 2026-10-09. Le fondateur a répondu à ses 12 questions en attente (Q1-Q12). Direction : « tout mettre prêt pour mettre des formations en ligne » + ouvrir la boutique Gelato (tests fondateur d'abord). Deux chantiers autonomes lancés ce tour : (1) synchro avec la session Moodle (faite, alignée), (2) refonte prix+taxes zéro-perte de la boutique (en cours, agent d'implémentation lancé).
 
 ## 1. Où on en est (terminé et PROUVÉ)
 
-- **Boutique Gelato : flux catalogue RÉPARÉ et DÉPLOYÉ en production (v1.323.0).** La cause des commandes qui envoyaient toujours le même chandail avec un logo du serveur est corrigée : routage par `storeProductVariantId` du vrai produit Gelato, repli du logo brut SUPPRIMÉ, échec bruyant si le mapping manque. CI GitHub verte, déploiement cPanel réussi, migrations additives passées. Version servie en prod vérifiée : `v=1.323.0` dans les assets.
-- **Durcissement zone argent tenu par 4 rondes adversariales** (Codex x2, puis fable) + correctifs A1 (`CanadianProvince` : province dérivée du code postal, pas du champ déclaré) et A2 (`settlePaidSession` : marque payé UNIQUEMENT si `payment_status=paid` ET montant encaissé = total au cent près). Verdict fable : "SÛR DERRIÈRE DRAPEAU OFF".
-- **Tests tous verts** : 200 tests Shop (1182 assertions) + testsuite Architecture/Unit 95 (le seul trou du déploiement était le preset sécurité Pest, hors du filtre Shop : 2 usages non-crypto `sha1` exemptés avec justification dans `tests/Architecture/ArchTest.php`, même convention que les entrées existantes).
-- **Accès restreint au fondateur (#2987)** : boutique en maintenance (503 pour le public) + middleware FounderOnly, drapeaux zone-argent OFF (`shop.gelato_zero_erreur`, `shop.gelato_editor`), réversibles par `.env`.
-- **Cause racine expliquée** : `docs/boutique-gelato-pourquoi-ca-echouait.html` (3 causes : repli `print_file_url` brut, absence de synchro catalogue, libellé de variante doublé).
-- **Vrai produit Gelato confirmé À LA SOURCE** (MCP gelato, lecture) : magasin "La veille.ai", T-shirt Gildan 5000, 72 variantes (9 couleurs x 8 tailles) toutes `connected`, mockup Gelato réel, `isReadyToPublish`. C'est LUI que la vitrine affichera dès l'ouverture.
-- **P1 d'énumération de commande (`/confirmation/{order}`)** : re-vérifié DORMANT en prod. `ShopMaintenanceMode` tourne APRÈS `SubstituteBindings` (un id de commande réel renvoie 503 pour un non-admin), et la branche ajoute les contrôles de propriété. Pas de fuite ouverte.
-- **AdSense en-tête (#2991)** : garde-fou `lvPurgeHeaderAds` déployé (v1.322.1), il retire les auto-ads injectées dans l'en-tête. DOM prod vérifié : 0 auto-ad dans l'en-tête.
+- **Synchro académie/SSO avec le peer Moodle : FAITE et alignée.** Journal durable `_sso-academie/JOURNAL-DEMANDES.md` entrée D-20261009-10. Décisions fondateur relayées ; partage du travail CONFIRMÉ des deux côtés (moi = socle IdP Passport réversible OFF + listener Cashier + checkout taxes/redirection ; peer = récepteur `local_laveille` grant/revoke DÉJÀ prouvé D-09 + thème + config auth_oauth2 à l'allumage). Aucun double emploi, pas de casse.
+- **Boutique Gelato - recherche et conception prix/taxes : FAITES.** Cartographie du chemin prix→taxe→Stripe (sous-agent) ; analyse quantitative « jamais de perte » (Codex, 0 jeton) ; faits fiscaux 2026 (sonar-pro, Perplexity navigateur indisponible). Tout consolidé dans `docs/boutique-gelato-prix-taxes-2026.md` (spec + décisions + logique d'argent).
 
-## 2. Ce qui BLOQUE en attendant une décision du fondateur
+## 2. Décisions du fondateur du 2026-10-09 (Q1-Q12) - intégrées
 
-- **Ouverture commerciale de la boutique (#2984-D, #2988)** : consignée dans `QUESTIONS-CLAUDE.html` entrée 328. Trois décisions zone-argent/légales qui lui reviennent :
-  1. **Ouvrir la boutique** (lever la maintenance) OU se connecter en super-admin pour que je lance la synchro + prenne la capture. Je NE peux PAS me connecter à sa place (OTP courriel + frontière 1Password).
-  2. **Prix et devise** : Gelato en EUR, boutique en CAD. Fixer la marge cible (%) avant d'exposer un prix.
-  3. **Taxe M3 (Loi 25)** : avant toute vente PUBLIQUE, décider quelles provinces taxer (recommandation : lancer Québec seul, taxe exacte, puis brancher la grille TVH). Sans réponse : rien ne bouge, aucun prix/taxe faux exposé, aucune commande ne part.
-- **AdSense mode auto (#2983 + #2991 racine permanente)** : le correctif définitif (couper/borner le mode auto) est au tableau de bord Google AdSense, pas dans le code. BLOQUÉ : session Google à reconnecter par le fondateur.
-- **Garde-crontab gmemora (#2990)** : acquittement à faire par le fondateur (non bloquant pour laveille).
+- **Q1-Q5 (académie/SSO)** : canonique = formations.laveille.ai ; l'académie maison de laveille REDIRIGE vers Moodle ; vente = option (ii) (paiement+taxes sur laveille, provisionnement Moodle) ; SSO = go de principe, allumage au 1er cours réel + EFVP ; se synchroniser avec le peer (FAIT).
+- **Q6** : boutique accès fondateur SEUL pour tests (statu quo, founder_only ON).
+- **Q7** : viser une bonne marge (20 %?) ; ne JAMAIS perdre, frais Stripe inclus ; +1 $ sur livraison ; prix CAD ; cadrer où vendre/livrer. → Décision retenue (doc) : GARDER 30 % markup (20 % trop mince après Stripe), + garde-fou de marge plancher + gross-up Stripe + arrondi vers le haut. Codex le confirme.
+- **Q8** : taxes toutes provinces, 0 hors Canada. → Table GST/TVH par destination + TVQ (QC) ; PAS de TVP C.-B./SK/MB (pas inscrit — défaut sûr, drapeau pour activer plus tard) ; livraison+manutention taxées.
+- **Q9** : créer un compte test @memora.ca (atterrit dans sa boîte).
+- **Q10 (AdSense auto)** : « Ouvre-le, je te donne accès » → EN ATTENTE de son accès.
+- **Q11 (Gemini/Perplexity)** : il a fait ia-sync ; je l'ai refait aussi. Perplexity reste déconnecté (ia-sync ne l'a pas resynchronisé) → repli sonar-pro utilisé.
+- **Q12 (crons)** : ne toucher qu'aux crons du projet laveille (noté).
 
-## 3. Prochaine action (sans dépendre du fondateur)
+## 3. Ce qui est EN COURS
 
-- **#2989 - Packaging exportable du module Gelato boutique (phase 2)** : contrats, config, README d'installation pour réutiliser le module dans d'autres projets Laravel. Seul todo Gelato restant qui ne dépend pas d'une décision du fondateur.
-- Todos en attente de date : #2924 (FTC, 14 oct), #2931 (Reddit, 15 oct), #2977 (veille actu2, 20 oct), #2981 (badge CVBooster).
+- **#3005 + #3006 (prix+taxes zéro-perte)** : agent d'implémentation lancé (code + tests Pest, SANS déploiement). À réviser à son retour + revue adversariale Codex avant tout déploiement. Spec : `docs/boutique-gelato-prix-taxes-2026.md`.
+- **#3002 (socle SSO IdP)** : à coder APRÈS le feu du branchement (synchro faite) ; reste réversible OFF, allumage au go fondateur + EFVP.
+- **#3003 (listener Cashier + taxes checkout)** : suit #3005/#3006 et le socle.
+- **#3007 (`/academie` → redirection)** : à faire, zéro casse (inspecter d'abord ce que sert le module `Academy` maison, préserver toute donnée).
+- **#3008 (compte test @memora.ca)** : après que les prix soient corrects.
 
-## 4. Sauvegarde / versioning
+## 4. Ce qui BLOQUE en attendant le fondateur
 
-- `feature/gelato-zero-erreur` fusionnée proprement dans master (worktree de déploiement retiré). Poussé sur `origin` (GitHub, CI + déploiement) ET `forge` (Pi). v1.323.0 en prod.
-- Migrations additives nullable (réversibles à l'ajout). Aucune donnée utilisateur touchée. Aucune mutation de prod non autorisée. Backup du journal avant écriture (`QUESTIONS-CLAUDE.html.bak-gelato-*`).
+- **Q10 AdSense auto** : attend son accès à la session Google AdSense (« je te donne accès »).
+- **Décisions non bloquantes portées au fondateur (doc §6, défaut sûr déjà appliqué)** : TVP C.-B./SK/MB (probable : pas inscrit → pas facturée) ; ouvrir la vente aux États-Unis (défaut : Canada seul) ; politique de remboursement (frais Stripe ~1 $ non récupérables).
+- **#2924** (FTC, 14 oct), **#2931** (Reddit, 15 oct), **#2977** (veille actu2, 20 oct) : en attente de DATE.
+
+## 5. Sauvegarde / versioning
+
+- Aucune mutation de prod ce tour. Prochain déploiement : après revue de #3005/#3006 (bump SemVer MINOR, backup, CI verte, validation visuelle). Boutique en founder_only : aucun risque public pendant la construction.

@@ -54,9 +54,10 @@ class Product extends Model
     }
 
     /**
-     * Calcule le prix de vente : production × taux CAD × (1 + marge).
+     * Calcule le prix de vente : production × taux CAD × (1 + marge) / (1 - frais Stripe %).
+     * Le pourcentage Stripe (2,9 %) est absorbé ici; le fixe (0,30 $) est couvert par la manutention + le garde-fou de marge.
      * La livraison est facturée séparément au checkout (pas dans le prix produit).
-     * Arrondi au .99 : >= .05 → même entier, <= .04 → entier précédent.
+     * Arrondi .99 vers le HAUT : jamais sous le prix calculé.
      */
     public static function smartPrice(float $costBaseUsd, string $category = 'default'): float
     {
@@ -66,25 +67,21 @@ class Product extends Model
         $margins = config('shop.pricing.margins', ['default' => 0.30]);
         $margin = Arr::get($margins, $category, $margins['default'] ?? 0.30);
 
-        $result = $costCad * (1 + $margin);
+        $stripePct = min(max((float) config('shop.pricing.stripe_fee_pct', 0.029), 0.0), 0.5);
+        $result = $costCad * (1 + $margin) / (1 - $stripePct);
 
         return self::roundTo99($result);
     }
 
     /**
-     * Arrondi intelligent au .99 :
-     * >= .05 → .99 du même entier (54.24 → 54.99)
-     * <= .04 → .99 de l'entier précédent (55.04 → 54.99, 55.00 → 54.99)
+     * Arrondi au .99 vers le HAUT : le plus petit x.99 supérieur ou égal au prix (54.24 → 54.99, 54.99 → 54.99,
+     * 55.00 → 55.99). Ne descend jamais sous le prix calculé (l'ancien arrondi vers le bas rognait jusqu'à ~0,95 $).
      */
     public static function roundTo99(float $price): float
     {
-        $cents = round(($price - floor($price)) * 100);
+        $n = (int) ceil(round($price - 0.99, 6));
 
-        if ($cents >= 5) {
-            return floor($price) + 0.99;
-        }
-
-        return floor($price) - 1 + 0.99;
+        return round($n + 0.99, 2);
     }
 
     public function calculatePrice(): float
