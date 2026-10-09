@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.327.0] - 2026-10-09
+
+### Ajouté
+- Socle fournisseur d'identité OAuth2 (Passport), ÉTEINT par défaut (`IDP_ENABLED=false`), préparation du futur SSO Moodle. Aucune route ni migration active tant qu'il est éteint.
+
+### Modifié
+- Résilience CI des tests dépendants de secrets (clé Stripe factice, `Notification::fake`).
+
 ## [1.326.0] - 2026-10-09
 
 ### Modifié
