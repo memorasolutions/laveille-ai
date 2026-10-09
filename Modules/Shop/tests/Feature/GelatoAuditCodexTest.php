@@ -91,7 +91,7 @@ function acPaidOrder(Product $product, array $itemOver = [], array $orderOver = 
 
 beforeEach(function () {
     config([
-        'shop.gelato.api_key' => 'k', 'shop.gelato.store_id' => AC_STORE, 'shop.gelato_zero_erreur' => true,
+        'shop.gelato.api_key' => 'k', 'shop.stripe.secret_key' => 'sk_test_factice', 'shop.gelato.store_id' => AC_STORE, 'shop.gelato_zero_erreur' => true,
         'shop.admin_email' => 'a@example.com', 'shop.handling_fee' => 0, 'shop.maintenance' => false, 'shop.founder_only' => false, 'shop.gelato_sync_autopublish' => true,
     ]);
     Mail::fake();

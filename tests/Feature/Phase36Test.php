@@ -115,6 +115,9 @@ test('magic link service cleanup deletes expired tokens', function () {
 });
 
 test('send magic link auto-crée un compte pour un courriel inconnu', function () {
+    // Aucun envoi réel : le mailer nommé (postmark/workspace) contourne MAIL_MAILER=array.
+    \Illuminate\Support\Facades\Notification::fake();
+
     // MagicLinkController::sendLink() auto-crée désormais le compte (comportement voulu,
     // cf. commentaire dans le contrôleur) au lieu de rejeter l'e-mail comme inexistant.
     $this->post('/magic-link', ['email' => 'nonexistent@test.com'])
@@ -125,6 +128,8 @@ test('send magic link auto-crée un compte pour un courriel inconnu', function (
 });
 
 test('send magic link succeeds for valid user', function () {
+    // Aucun envoi réel : le mailer nommé (postmark/workspace) contourne MAIL_MAILER=array.
+    \Illuminate\Support\Facades\Notification::fake();
     $user = User::factory()->create();
     $this->post('/magic-link', ['email' => $user->email])
         ->assertRedirect()
