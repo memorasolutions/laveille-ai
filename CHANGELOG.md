@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.325.0] - 2026-10-09
+
+### Ajouté
+- **Taxes provinciales par destination (boutique Gelato).** La taxe (TVH, TPS, TVQ) est calculée selon la province de livraison, sur le produit, la livraison et la manutention. Une borne de pays limite les destinations acceptées. Une commande est bloquée si la province ne peut pas être résolue.
+- **Garde-fou de marge zéro-perte.** La marge est vérifiée AVANT l'encaissement; le coût réel de chaque variante (`cost_by_uid`) est utilisé, et une commande dont le coût est inconnu est bloquée.
+
+### Modifié
+- Le calcul de prix absorbe désormais les frais Stripe et arrondit vers le haut (.99), pour ne jamais vendre à perte.
+- Bug de conversion de devise (FX) corrigé dans le service de taux de change.
+- Aucune migration. La boutique reste en accès fondateur seul.
+
 ## [1.324.0] - 2026-10-08
 
 ### Ajouté
@@ -667,7 +678,6 @@ post-déploiement avait bien été faite, mais elle n'était écrite nulle part.
 - `public/images/tools/generateur-mots-passe.bak.jpg`, résidu du 22 mars 2026 versionné par
   erreur avant que `.gitignore` ne porte ses règles `*.bak`. Servi en 200 depuis six mois,
   référencé nulle part. L'image d'origine n'est pas touchée et git conserve l'historique.
-
 
 ## [1.293.3] - 2026-09-21
 
@@ -3878,7 +3888,6 @@ en dessous. **Septième fois de la journée que le mécanisme cherché existait 
   Contre-épreuve de CONSERVATION incluse : le cas Astra visé reste bloqué, et « Paragraph Composer »
   sans virgule aussi - une garde qui ne bloque plus rien passerait sinon pour un succès.
 
-
 ## [1.254.12] - 2026-09-06
 
 ### Corrigé
@@ -4093,7 +4102,6 @@ en dessous. **Septième fois de la journée que le mécanisme cherché existait 
 ### Tests
 - Deux cas neufs dans `GlossaryLinkifierTest` : un terme de glossaire respecte son `exclude_suffix`, et
   la contre-epreuve qu'il continue de lier hors du compose. 55 tests verts, 94 assertions.
-
 
 All notable changes to this project will be documented in this file.
 
