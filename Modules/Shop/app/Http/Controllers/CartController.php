@@ -176,15 +176,21 @@ class CartController extends Controller
         $country = $country ?? request()->input('country', 'CA');
         $province = $province ?? request()->input('province', 'QC');
 
-        $tps = ($country === 'CA') ? round($subtotal * config('shop.tax.tps', 5) / 100, 2) : 0;
-        $tvq = ($country === 'CA' && strtoupper($province) === 'QC') ? round($subtotal * config('shop.tax.tvq', 9.975) / 100, 2) : 0;
+        // Estimation du panier : base = sous-total (la livraison n'est connue qu'au checkout, qui recalcule la taxe
+        // définitive sur produit + livraison + manutention). Barème par province dans shop.tax.provinces.
+        $calc = app(\Modules\Shop\Services\TaxCalculator::class)->compute($country, $province, $subtotal);
+        $amountOf = fn (string $code): float => (float) (collect($calc['lines'])->firstWhere('code', $code)['amount'] ?? 0);
 
         return [
             'success' => true,
             'subtotal' => $subtotal,
-            'tps' => $tps,
-            'tvq' => $tvq,
-            'total' => round($subtotal + $tps + $tvq, 2),
+            'tps' => $amountOf('TPS'),
+            'tvq' => $amountOf('TVQ'),
+            'hst' => $amountOf('TVH'),
+            'pst' => $amountOf('TVP'),
+            'tax' => $calc['total'],
+            'tax_label' => $calc['label'],
+            'total' => round($subtotal + $calc['total'], 2),
             'itemCount' => $this->cartService->itemCount(),
         ];
     }

@@ -12,6 +12,8 @@ use Modules\Shop\Models\Product;
 use Modules\Shop\Services\CanadianProvince;
 use Modules\Shop\Services\CartService;
 use Modules\Shop\Services\GelatoService;
+use Modules\Shop\Services\MarginGuard;
+use Modules\Shop\Services\TaxCalculator;
 use Modules\Shop\Services\StripeService;
 use Modules\Shop\Events\ShopOrderCreated;
 
@@ -39,6 +41,15 @@ class CheckoutController extends Controller
             'shipping_address.postal_code' => 'required|string',
             'shipping_address.country' => 'required|string|size:2',
         ]);
+
+        // Borne pays : seuls les pays de shop.shipping_countries (défaut CA) sont livrés. Code normalisé en majuscules
+        // (« ca » ne doit plus échapper à la taxe canadienne par une comparaison stricte).
+        $countryCode = strtoupper(trim((string) $request->input('shipping_address.country', '')));
+        $allowed = array_map('strtoupper', (array) config('shop.shipping_countries', ['CA']));
+        if (! in_array($countryCode, $allowed, true)) {
+            return back()->withInput()->withErrors(['shipping_address.country' => __('Nous ne livrons pas encore dans ce pays.')]);
+        }
+        $request->merge(['shipping_address' => array_merge((array) $request->input('shipping_address'), ['country' => $countryCode])]);
 
         $cart = $this->cartService->getCart();
         if (! $cart) {
@@ -103,23 +114,21 @@ class CheckoutController extends Controller
         // Province AUTORITATIVE : dérivée du code postal, JAMAIS du champ « state » déclaré (un client de Laval pouvait
         // forcer state=AB et payer 5 % au lieu de 14,975 %). La valeur déclarée est écrasée par celle du code postal,
         // pour que la taxe, le devis de livraison et l'adresse envoyée à Gelato racontent la même province.
-        // M3 (DÉCISION LÉGALE DU FONDATEUR, non tranchée ici) : le barème complet reste à décider avant ouverture publique
-        // (provinces à TVH ON 13 % / NB-NL-NS-PE 15 % actuellement facturées 5 %, taxabilité de la livraison).
+        // Barème par province (TVH, TPS+TVQ, TPS seule) : shop.tax.provinces, calculé par TaxCalculator sur produit + livraison.
         $province = '';
         if ($country === 'CA') {
             $province = CanadianProvince::resolve($shippingAddress['postal_code'] ?? '', $shippingAddress['state'] ?? '');
             if ($province === null) {
                 return back()->withInput()->withErrors(['shipping_address.postal_code' => __('Le code postal canadien est invalide.')]);
             }
+            if (! app(TaxCalculator::class)->isKnownProvince($province)) {
+                // Jamais de repli silencieux sur la TPS seule : en province à TVH, ce serait sous-facturer la taxe.
+                return back()->withInput()->withErrors(['shipping_address.postal_code' => __('Adresse de livraison à préciser : la province n\'a pas pu être déterminée.')]);
+            }
             $shippingAddress['state'] = $province;
             $request->merge(['shipping_address' => $shippingAddress]);
         }
 
-        $taxAmount = match (true) {
-            $country === 'CA' && $province === 'QC' => $this->cartService->taxAmountOf($subtotal),
-            $country === 'CA' => $this->cartService->tpsOf($subtotal),
-            default => 0,
-        };
         // Frais de livraison : JAMAIS crus sur parole. Recalculés côté serveur (devis Gelato) ; la valeur du client
         // doit correspondre à l'un des modes de livraison réellement offerts, sinon la commande est refusée.
         $clientShipping = (float) $request->input('shipping_cost', 0);
@@ -152,7 +161,16 @@ class CheckoutController extends Controller
             return back()->withInput()->withErrors(['shipping_cost' => __('Les frais de livraison ont changé. Veuillez recalculer la livraison avec votre code postal.')]);
         }
 
+        // Taxe sur produit + livraison + manutention (la manutention est déjà comprise dans le prix du mode de livraison).
+        $taxCalc = app(TaxCalculator::class)->compute($country, $province, $subtotal + $shippingCost);
+        $taxAmount = $taxCalc['total'];
         $total = round($subtotal + $taxAmount + $shippingCost, 2);
+
+        // GARDE-FOU DE MARGE, AVANT toute commande et toute charge Stripe : on ne vend jamais à perte.
+        $margin = app(MarginGuard::class)->evaluate($cartItems, $total, $taxAmount, $shippingCost);
+        if (! $margin['ok']) {
+            return back()->withInput()->with('error', __('Commande refusée : marge insuffisante. Veuillez nous contacter pour finaliser cet achat.'));
+        }
 
         // Créer la commande
         $order = Order::create([
@@ -201,7 +219,7 @@ class CheckoutController extends Controller
 
         // Créer session Stripe Checkout (mode embedded)
         $returnUrl = route('shop.confirmation', $order) . '?session_id={CHECKOUT_SESSION_ID}';
-        $taxLabel = ($country === 'CA' && $province === 'QC') ? 'TPS + TVQ' : 'TPS';
+        $taxLabel = $taxCalc['label'] !== '' ? $taxCalc['label'] : 'Taxes';
         $checkout = $this->stripeService->createCheckoutSession(
             $cartItems,
             $returnUrl,

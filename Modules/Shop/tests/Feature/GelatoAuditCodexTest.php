@@ -56,7 +56,7 @@ function acProduct(array $over = []): Product
 
     return Product::create(array_merge([
         'name' => 'T-shirt', 'slug' => 'ts-'.uniqid(), 'price' => 20.99, 'status' => 'published', 'variants' => $variants,
-        'metadata' => ['gelato_store_product_id' => 'sp-1', 'store_variant_map' => $map, 'sizes' => ['M', 'XL', '2XL']],
+        'metadata' => ['gelato_store_product_id' => 'sp-1', 'store_variant_map' => $map, 'sizes' => ['M', 'XL', '2XL'], 'cost_base' => 8.0, 'cost_currency' => 'USD'],
     ], $over));
 }
 
@@ -1120,7 +1120,7 @@ test('A1 code postal H7N + state=AB déclaré : la TPS+TVQ (14,975 %) est factur
     $this->actingAs($user)->post(route('shop.checkout'), $payload)->assertRedirect();
 
     $order = Order::first();
-    expect((float) $order->tax_amount)->toBe(round(20.99 * 14.975 / 100, 2))
+    expect((float) $order->tax_amount)->toBe(round((20.99 + 12.5) * 14.975 / 100, 2))
         ->and($order->shipping_address['state'])->toBe('QC');
 });
 
@@ -1134,7 +1134,7 @@ test('A1 code postal T (AB) + state=QC déclaré : seulement la TPS (la province
 
     $this->actingAs($user)->post(route('shop.checkout'), $payload)->assertRedirect();
 
-    expect((float) Order::first()->tax_amount)->toBe(round(20.99 * 5 / 100, 2));
+    expect((float) Order::first()->tax_amount)->toBe(round((20.99 + 12.5) * 5 / 100, 2));
 });
 
 test('A1 première lettre de code postal canadien invalide : refusé, aucune commande', function () {

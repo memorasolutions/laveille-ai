@@ -68,6 +68,30 @@ return [
     'tax' => [
         'tps' => (float) env('SHOP_TAX_TPS', 5.0),
         'tvq' => (float) env('SHOP_TAX_TVQ', 9.975),
+
+        // Taxe PROVINCIALE de vente (TVP/RST) : NON perçue par défaut. Percevoir une taxe sans y être inscrit est pire que
+        // ne pas la percevoir. À n'activer (SHOP_TAX_COLLECT_PST=true) qu'après inscription à la TVP C.-B./Sask./Man.
+        'collect_pst' => (bool) env('SHOP_TAX_COLLECT_PST', false),
+
+        // Barème par province de LIVRAISON (taux en %, recoupés 2026-10-09). Clés :
+        //   'hst' => taux unique combiné (TVH)        'qst' => true : TPS + TVQ (taux ci-dessus)
+        //   'pst' => taxe provinciale, utilisée SEULEMENT si collect_pst = true
+        // Province absente de la table = TPS seule (repli sûr). Hors Canada = 0, géré par le code.
+        'provinces' => [
+            'ON' => ['hst' => 13.0],
+            'NB' => ['hst' => 15.0],
+            'NS' => ['hst' => 14.0], // baissée de 15 % le 2025-04-01
+            'PE' => ['hst' => 15.0],
+            'NL' => ['hst' => 15.0],
+            'QC' => ['qst' => true],
+            'AB' => [],
+            'BC' => ['pst' => 7.0],
+            'SK' => ['pst' => 6.0],
+            'MB' => ['pst' => 7.0],
+            'YT' => [],
+            'NT' => [],
+            'NU' => [],
+        ],
     ],
 
     'handling_fee' => (float) env('SHOP_HANDLING_FEE', 1.00),
@@ -89,6 +113,17 @@ return [
 
     'pricing' => [
         'usd_cad_rate' => (float) env('SHOP_USD_CAD_RATE', 1.40),
+        // Plancher de taux de sécurité : taux de PRIX = max(taux vivant, plancher). Un CAD fort (moins de CAD par USD)
+        // baisserait le prix de vente sans baisser le coût d'impression payé en USD : le plancher empêche cette érosion de marge.
+        'usd_cad_rate_floor' => (float) env('SHOP_USD_CAD_RATE_FLOOR', 1.40),
+        // Frais Stripe (2,9 % + 0,30 $ CAD) : le pourcentage est absorbé dans le prix produit; le fixe entre dans le garde-fou.
+        'stripe_fee_pct' => (float) env('SHOP_STRIPE_FEE_PCT', 0.029),
+        'stripe_fee_fixed' => (float) env('SHOP_STRIPE_FEE_FIXED', 0.30),
+        // Garde-fou AVANT encaissement : marge nette minimale (CAD) exigée par commande. 1,00 $ et non 0 : un plancher à 0
+        // laisse passer une commande à l'équilibre exact, qu'une dérive de coût mineure ou un arrondi font basculer en perte.
+        'floor_margin_cad' => (float) env('SHOP_FLOOR_MARGIN_CAD', 1.00),
+        // Coût inconnu (aucun cost_base / cost_by_uid valide) : la commande est TOUJOURS refusée; ce drapeau n'ajuste que le message.
+        'floor_block_unknown_cost' => (bool) env('SHOP_FLOOR_BLOCK_UNKNOWN_COST', true),
         'estimated_shipping_usd' => (float) env('SHOP_ESTIMATED_SHIPPING_USD', 11.00),
         'shipping_by_category' => [
             'hoodies' => 12.00,

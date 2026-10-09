@@ -33,17 +33,12 @@
                     <span>{{ number_format($order->subtotal, 2, ',', ' ') }} $</span>
                 </div>
                 @if($order->tax_amount > 0)
-                @php ['tps' => $tpsAmt, 'tvq' => $tvqAmt] = $order->taxLines(); @endphp
+                @foreach($order->taxBreakdown() as $taxLine)
                 <div class="sp-tax-row">
-                    <span>{{ __('TPS') }} (5%) <span class="sp-tax-number">839145984</span></span>
-                    <span>{{ number_format($tpsAmt, 2, ',', ' ') }} $</span>
+                    <span>{{ $taxLine['label'] }}@if($taxLine['rate'] > 0) ({{ rtrim(rtrim(number_format($taxLine['rate'], 3, ',', ''), '0'), ',') }} %)@endif @if(in_array($taxLine['code'], ['TPS', 'TVH'], true))<span class="sp-tax-number">839145984</span>@elseif($taxLine['code'] === 'TVQ')<span class="sp-tax-number">1221788059</span>@endif</span>
+                    <span>{{ number_format($taxLine['amount'], 2, ',', ' ') }} $</span>
                 </div>
-                @if($tvqAmt > 0)
-                <div class="sp-tax-row">
-                    <span>{{ __('TVQ') }} (9,975%) <span class="sp-tax-number">1221788059</span></span>
-                    <span>{{ number_format($tvqAmt, 2, ',', ' ') }} $</span>
-                </div>
-                @endif
+                @endforeach
                 @endif
                 @if($order->shipping_cost > 0)
                 <div class="sp-summary-row" style="color: var(--c-text-muted);">

@@ -1,41 +1,39 @@
 # État de session - La veille de Stef v2
 
-> Fichier UNIQUE de reprise (réécrit, jamais empilé). Dernière mise à jour : 2026-10-02, ~22h00 Québec.
+> Fichier UNIQUE de reprise (réécrit, jamais empilé). Dernière mise à jour : 2026-10-09, ~13h30 Québec (17:30 UTC).
 
-## 1. Où on en est (terminé et prouvé)
+> ▶️ SESSION ACTIVE le 2026-10-09. Le fondateur a répondu à ses 12 questions en attente (Q1-Q12). Direction : « tout mettre prêt pour mettre des formations en ligne » + ouvrir la boutique Gelato (tests fondateur d'abord). Deux chantiers autonomes lancés ce tour : (1) synchro avec la session Moodle (faite, alignée), (2) refonte prix+taxes zéro-perte de la boutique (en cours, agent d'implémentation lancé).
 
-**Correctifs d'outils, déployés et prouvés en prod :**
-- ✅ Menu mobile (#2940, v1.316.9) - sous-menus qui ouvrent, menu qui ne se referme plus. Capture.
-- ✅ Roue de tirage plein écran (#2941, v1.316.10) - la bonne personne est retirée. Mesure déterministe avant/après au navigateur + capture. Le responsecache périmé qui masquait le correctif a été purgé. Audit des autres outils plein écran : seul roue-tirage était touché.
+## 1. Où on en est (terminé et PROUVÉ)
 
-**Mesure et stratégie (livrés en documents locaux) :**
-- ✅ Rapport GA4 d'acquisition (#2798) : `docs/rapports/2026-10-02-acquisition-sources-laveille.html`. SEO + ChatGPT/AEO = meilleurs signaux de qualité; Facebook basse portée et non balisé; LinkedIn nul.
-- ✅ Carnet d'apprentissages sociaux (#2943) : `docs/publications/apprentissages-sociaux.md` (méthode + registre append-only + boucle vers /publier et /article).
-- ✅ Décision réseaux (#2944) : 2 oracles convergents (Perplexity + Codex) → NE PAS ajouter de réseau; approfondir l'INFOLETTRE + convertir les visites déjà acquises. 3 oracles navigateur non consultés (déconnectés).
+- **Synchro académie/SSO avec le peer Moodle : FAITE et alignée.** Journal durable `_sso-academie/JOURNAL-DEMANDES.md` entrée D-20261009-10. Décisions fondateur relayées ; partage du travail CONFIRMÉ des deux côtés (moi = socle IdP Passport réversible OFF + listener Cashier + checkout taxes/redirection ; peer = récepteur `local_laveille` grant/revoke DÉJÀ prouvé D-09 + thème + config auth_oauth2 à l'allumage). Aucun double emploi, pas de casse.
+- **Boutique Gelato - recherche et conception prix/taxes : FAITES.** Cartographie du chemin prix→taxe→Stripe (sous-agent) ; analyse quantitative « jamais de perte » (Codex, 0 jeton) ; faits fiscaux 2026 (sonar-pro, Perplexity navigateur indisponible). Tout consolidé dans `docs/boutique-gelato-prix-taxes-2026.md` (spec + décisions + logique d'argent).
 
-**Doc du connecteur portail (#2945) :**
-- ✅ `docs/memora-portal-connecteur.md` (détail complet v1.49/1.50/1.57.1) + résumé lean dans `CLAUDE.md` (219 → 79 lignes). Contradiction corrigée : laveille.ai (cie 33) est EXEMPTÉE d'approbation, ses posts programmés partent SEULS.
+## 2. Décisions du fondateur du 2026-10-09 (Q1-Q12) - intégrées
 
-**Hygiène :** crons prod vérifiés (83), aucun cron temporaire de moi, rien supprimé. Runners HTTP de la session auto-supprimés.
+- **Q1-Q5 (académie/SSO)** : canonique = formations.laveille.ai ; l'académie maison de laveille REDIRIGE vers Moodle ; vente = option (ii) (paiement+taxes sur laveille, provisionnement Moodle) ; SSO = go de principe, allumage au 1er cours réel + EFVP ; se synchroniser avec le peer (FAIT).
+- **Q6** : boutique accès fondateur SEUL pour tests (statu quo, founder_only ON).
+- **Q7** : viser une bonne marge (20 %?) ; ne JAMAIS perdre, frais Stripe inclus ; +1 $ sur livraison ; prix CAD ; cadrer où vendre/livrer. → Décision retenue (doc) : GARDER 30 % markup (20 % trop mince après Stripe), + garde-fou de marge plancher + gross-up Stripe + arrondi vers le haut. Codex le confirme.
+- **Q8** : taxes toutes provinces, 0 hors Canada. → Table GST/TVH par destination + TVQ (QC) ; PAS de TVP C.-B./SK/MB (pas inscrit — défaut sûr, drapeau pour activer plus tard) ; livraison+manutention taxées.
+- **Q9** : créer un compte test @memora.ca (atterrit dans sa boîte).
+- **Q10 (AdSense auto)** : « Ouvre-le, je te donne accès » → EN ATTENTE de son accès.
+- **Q11 (Gemini/Perplexity)** : il a fait ia-sync ; je l'ai refait aussi. Perplexity reste déconnecté (ia-sync ne l'a pas resynchronisé) → repli sonar-pro utilisé.
+- **Q12 (crons)** : ne toucher qu'aux crons du projet laveille (noté).
 
-## 2. Ce qui est en cours / prochaine action non bloquée
+## 3. Ce qui est EN COURS
 
-- **RIEN en cours que je puisse avancer seul.** Tout le reste dépend d'une date, d'une autre session, ou d'un geste de Stéphane.
+- **#3005 + #3006 (prix+taxes zéro-perte)** : agent d'implémentation lancé (code + tests Pest, SANS déploiement). À réviser à son retour + revue adversariale Codex avant tout déploiement. Spec : `docs/boutique-gelato-prix-taxes-2026.md`.
+- **#3002 (socle SSO IdP)** : à coder APRÈS le feu du branchement (synchro faite) ; reste réversible OFF, allumage au go fondateur + EFVP.
+- **#3003 (listener Cashier + taxes checkout)** : suit #3005/#3006 et le socle.
+- **#3007 (`/academie` → redirection)** : à faire, zéro casse (inspecter d'abord ce que sert le module `Academy` maison, préserver toute donnée).
+- **#3008 (compte test @memora.ca)** : après que les prix soient corrects.
 
-## 3. Ce qui BLOQUE (sur le fondateur ou l'extérieur)
+## 4. Ce qui BLOQUE en attendant le fondateur
 
-- **#2942 AdSense** : le navigateur n'est pas connecté à Google (mur de connexion). ia-sync NON relancé (il a déconnecté AdSense aujourd'hui, mémoire du 2026-10-01). Reconnexion par Stéphane (se connecter à adsense.google.com dans le navigateur) OU autorisation de tenter ia-sync. Reco prête : bloquer les catégories hors-marque (sûr) + vérifier le câblage du consentement avant d'activer les annonces personnalisées (Loi 25).
-- **#2799** : mesure de contenu multi-projets - exige le club des sages complet → Gemini + ChatGPT + claude.ai navigateur déconnectés.
-- **#2924 FTC** (hold 14 oct), **#2931 Reddit** (hold 15 oct).
-- **#2276** (Namaste), **#2638** (connecteur MCP), **#2927** (LucidNest) : action dans d'autres sessions.
-- **#1847, #2720** : chantiers/règles permanents, pas des todos à cocher.
+- **Q10 AdSense auto** : attend son accès à la session Google AdSense (« je te donne accès »).
+- **Décisions non bloquantes portées au fondateur (doc §6, défaut sûr déjà appliqué)** : TVP C.-B./SK/MB (probable : pas inscrit → pas facturée) ; ouvrir la vente aux États-Unis (défaut : Canada seul) ; politique de remboursement (frais Stripe ~1 $ non récupérables).
+- **#2924** (FTC, 14 oct), **#2931** (Reddit, 15 oct), **#2977** (veille actu2, 20 oct) : en attente de DATE.
 
-## 4. Prochaine action proposée
+## 5. Sauvegarde / versioning
 
-1. **Reconnecte adsense.google.com dans le navigateur** (ou dis-moi de tenter ia-sync) → je fais l'audit + le blocage des catégories hors-marque (#2942).
-2. **Reconnecte Gemini/ChatGPT/claude.ai navigateur** → je lance le panel complet sur #2799 et je peux refaire #2944 à 5 oracles.
-3. Sinon, j'attends tes prochains signalements.
-
-## Note : sauvegarde
-
-Les changements de docs/config de cette session (CLAUDE.md, docs/memora-portal-connecteur.md, carnet, rapport, cet état) sont poussés sur la FORGE (miroir Pi, sans CI → pas de déploiement). Ils partiront vers origin (et donc en prod) avec la prochaine vraie livraison de code, pour ne pas déclencher une fenêtre de 503 pour des docs.
+- Aucune mutation de prod ce tour. Prochain déploiement : après revue de #3005/#3006 (bump SemVer MINOR, backup, CI verte, validation visuelle). Boutique en founder_only : aucun risque public pendant la construction.

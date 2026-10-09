@@ -37,6 +37,30 @@ class Order extends Model
         return ['tps' => $tps, 'tvq' => round($total - $tps, 2)];
     }
 
+    /**
+     * Lignes de taxe selon la province de livraison (TPS/TVQ, TVH, TPS seule), base = sous-total + livraison (manutention incluse).
+     * Somme = tax_amount facturé. Si le barème actuel ne redonne pas la taxe stockée (commande antérieure au barème, ou
+     * configuration changée depuis), une ligne unique « Taxes » du montant réellement facturé : jamais un détail inventé.
+     *
+     * @return list<array{code: string, label: string, rate: float, amount: float}>
+     */
+    public function taxBreakdown(): array
+    {
+        $billed = round((float) $this->tax_amount, 2);
+        $address = (array) $this->shipping_address;
+        $calc = app(\Modules\Shop\Services\TaxCalculator::class)->compute(
+            (string) ($address['country'] ?? 'CA'),
+            (string) ($address['state'] ?? ''),
+            (float) $this->subtotal + (float) $this->shipping_cost
+        );
+
+        if ($calc['lines'] !== [] && abs($calc['total'] - $billed) < 0.005) {
+            return $calc['lines'];
+        }
+
+        return $billed > 0 ? [['code' => 'TAXES', 'label' => 'Taxes', 'rate' => 0.0, 'amount' => $billed]] : [];
+    }
+
     protected $casts = [
         'shipping_address' => 'array',
         'billing_address' => 'array',
