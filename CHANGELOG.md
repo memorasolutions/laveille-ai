@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.326.0] - 2026-10-09
+
+### Modifié
+- Académie maison désactivée. `/academie` redirige (301) vers formations.laveille.ai (le Moodle est l'académie). Aucune migration.
+
 ## [1.325.0] - 2026-10-09
 
 ### Ajouté
