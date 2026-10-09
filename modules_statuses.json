@@ -49,7 +49,7 @@
     "CloudflareCache": true,
     "Sudoku": true,
     "Authors": true,
-    "Academy": true,
+    "Academy": false,
     "Sso": true,
     "Books": true,
     "Journal": true,

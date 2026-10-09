@@ -35,6 +35,11 @@ use App\Models\User;
 uses(Tests\TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
+    // Ces tests exercent des modèles/Livewire du module Academy ; si Academy est désactivé
+    // (modules_statuses.json), les tables et le provider n'existent pas → on saute, convention projet.
+    if (! \Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
+        test()->markTestSkipped('Module Academy désactivé — tests skipped.');
+    }
     Setting::set('ai.openrouter_api_key', 'test-key', 'string', 'ai');
     Setting::set('ai.chatbot_model', 'meta-llama/llama-3.3-70b-instruct:free', 'string', 'ai');
     Setting::set('ai.temperature', '0.7', 'number', 'ai');

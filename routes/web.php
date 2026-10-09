@@ -34,4 +34,10 @@ Route::match(['get', 'post'], '/locale/{locale}', \Modules\Translation\Http\Cont
 Route::get('/llms.txt', [\App\Http\Controllers\LlmsController::class, 'index'])->name('llms.index');
 Route::get('/llms-full.txt', \App\Http\Controllers\LlmsFullController::class)->name('llms.full');
 
+// Ancienne académie maison désactivée (module Academy OFF le 2026-10-09) : tout /academie* redirige
+// définitivement (301) vers le Moodle canonique. Le Moodle EST désormais l'académie (décision fondateur).
+Route::get('/academie/{path?}', fn () => redirect('https://formations.laveille.ai', 301))
+    ->where('path', '.*')
+    ->name('academie.redirect');
+
 // Legal pages moved to Modules/Privacy
