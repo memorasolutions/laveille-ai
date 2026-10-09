@@ -1,0 +1,11 @@
+{
+    "name": "Idp",
+    "alias": "idp",
+    "description": "laveille.ai comme fournisseur d'identité OAuth2/OIDC pour Moodle (éteint par défaut, IDP_ENABLED).",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Idp\\Providers\\IdpServiceProvider"
+    ],
+    "files": []
+}

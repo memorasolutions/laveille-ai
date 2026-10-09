@@ -55,5 +55,6 @@
     "Journal": true,
     "Decido": true,
     "Signature": true,
-    "Analytics": true
+    "Analytics": true,
+    "Idp": true
 }

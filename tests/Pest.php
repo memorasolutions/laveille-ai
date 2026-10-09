@@ -21,6 +21,10 @@ pest()->extend(Tests\TestCase::class)
 pest()->extend(Tests\TestCase::class)
     ->in(__DIR__.'/../Modules/Sso/tests/Feature');
 
+// Module Idp (IdP OAuth2 pour Moodle, éteint par défaut) : même principe que Sso.
+pest()->extend(Tests\TestCase::class)
+    ->in(__DIR__.'/../Modules/Idp/tests/Feature');
+
 pest()->extend(Tests\TestCase::class)
     ->in('Unit/Helpers');
 

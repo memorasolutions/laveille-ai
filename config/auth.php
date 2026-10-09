@@ -48,6 +48,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // IdP OAuth2 (Modules/Idp) : guard Passport dédié, n'affecte pas 'web' ni Sanctum.
+        'idp' => [
+            'driver' => 'passport',
+            'provider' => 'oauth_users',
+        ],
     ],
 
     /*
@@ -71,6 +77,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+
+        'oauth_users' => [
+            'driver' => 'eloquent',
+            'model' => Modules\Idp\Models\OAuthUser::class,
         ],
 
         // 'users' => [
