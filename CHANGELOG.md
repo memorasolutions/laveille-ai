@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.327.5] - 2026-10-10
+
+### Corrigé
+- **Pub AdSense auto intrusive en tête de contenu** (grosse bannière sous le fil d'Ariane, sur toutes les pages, signalée par le fondateur). Le garde-fou de placement du mode auto de Google, qui ne nettoyait que l'en-tête (#2991), est généralisé : il retire désormais toute annonce AUTO (`.google-auto-placed`, `ins.adsbygoogle` sans `data-ad-slot`) située AU-DESSUS de `#main-content`, partout sur le site. Les emplacements MANUELS (contenu, pied) restent intacts. Contrôle de placement, pas de masquage.
+
 ## [1.327.4] - 2026-10-10
 
 ### Corrigé

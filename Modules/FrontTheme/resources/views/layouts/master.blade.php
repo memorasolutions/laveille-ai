@@ -71,19 +71,25 @@
       s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('services.adsense.client_id') }}';
       document.head.appendChild(s);
       // Garde-fou de PLACEMENT - le mode auto de Google place parfois une annonce (sans data-ad-slot)
-      // DANS l'en-tete du site, au-dessus du logo. On la retire de CETTE zone uniquement, les autres
-      // emplacements (contenu, pied) restent intacts. Controle de placement, pas de masquage - on retire
-      // le conteneur injecte, aucune impression n'est cachee. (2026-10-08, demande du fondateur.)
-      var lvHeader = document.getElementById('header') || document.querySelector('.wpo-site-header');
-      if (lvHeader) {
-        var lvPurgeHeaderAds = function(){
-          lvHeader.querySelectorAll('.google-auto-placed, ins.adsbygoogle:not([data-ad-slot])').forEach(function(el){
-            var host = el.closest('.google-auto-placed') || el;
-            if (host && host.parentNode) { host.parentNode.removeChild(host); }
-          });
-        };
-        lvPurgeHeaderAds();
-        new MutationObserver(lvPurgeHeaderAds).observe(lvHeader, { childList: true, subtree: true });
+      // EN TETE de page : au-dessus du logo (en-tete) OU juste sous le fil d'Ariane, avant le contenu
+      // (grosse banniere intrusive signalee le 2026-10-10). On retire les annonces AUTO situees
+      // AU-DESSUS de #main-content, partout sur le site. Les emplacements MANUELS (data-ad-slot :
+      // contenu, pied) restent intacts - controle de placement, pas de masquage, aucune impression
+      // manuelle cachee. (2026-10-08 en-tete, generalise a la tete de contenu le 2026-10-10.)
+      var lvMain = document.getElementById('main-content');
+      var lvPurgeTopAds = function(){
+        if (!lvMain) { return; }
+        document.querySelectorAll('.google-auto-placed, ins.adsbygoogle:not([data-ad-slot])').forEach(function(el){
+          // On ne retire QUE ce qui est au-dessus du contenu : ni dans #main-content, ni apres lui.
+          if (lvMain.contains(el)) { return; }
+          if (!(lvMain.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING)) { return; }
+          var host = el.closest('.google-auto-placed') || el;
+          if (host && host.parentNode) { host.parentNode.removeChild(host); }
+        });
+      };
+      lvPurgeTopAds();
+      if (document.body) {
+        new MutationObserver(lvPurgeTopAds).observe(document.body, { childList: true, subtree: true });
       }
     };
     </script>
