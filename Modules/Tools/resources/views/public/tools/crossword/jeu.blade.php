@@ -48,7 +48,7 @@
 .cw-loader{padding:3rem;text-align:center;color:#1A1D23}
 .cw-clues-section h2{color:#053d4a}
 /* 2026-10-10 : barre d'indice actif collante au-dessus de la grille (standard des mots croisés en ligne) */
-.cw-active-clue{position:sticky;top:var(--cw-sticky-top,0);z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .75rem;padding:.6rem .75rem;background:#fff;border:2px solid #053d4a;border-radius:10px;box-shadow:0 2px 8px rgba(5,61,74,.18);color:#1A1D23}
+.cw-active-clue{margin-top:.5rem;position:sticky;top:var(--cw-sticky-top,0);z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .75rem;padding:.6rem .75rem;background:#fff;border:2px solid #053d4a;border-radius:10px;box-shadow:0 2px 8px rgba(5,61,74,.18);color:#1A1D23}
 .cw-active-clue-body{flex:1 1 14rem;min-width:0}
 .cw-active-clue-meta{font-size:.8rem;font-weight:800;color:#053d4a;text-transform:uppercase;letter-spacing:.02em}
 .cw-active-clue-text{font-size:1.05rem;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
@@ -56,7 +56,7 @@
 .cw-clue-nav-btn{min-height:44px;min-width:44px;padding:.4rem .8rem;background:#053d4a;color:#fff;border:2px solid #053d4a;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.3rem}
 .cw-clue-nav-btn:hover{background:#032327}
 .cw-clue-nav-btn:focus-visible{outline:3px solid #1A1D23;outline-offset:2px}
-.cw-all-clues-link{background:none;border:none;padding:.25rem 0;color:#053d4a;font-weight:700;font-size:.85rem;text-decoration:underline;cursor:pointer;min-height:32px}
+.cw-all-clues-link{display:block;margin-bottom:.25rem;background:none;border:none;padding:.25rem 0;color:#053d4a;font-weight:700;font-size:.85rem;text-decoration:underline;cursor:pointer;min-height:32px}
 .cw-all-clues-link:focus-visible{outline:3px solid #053d4a;outline-offset:2px}
 .cw-grid-wrap .table-responsive{scroll-margin-top:6rem}
 @media print{.no-print{display:none!important}.cw-status-bar{display:none}}
@@ -133,39 +133,38 @@
               </div>
             </div>
 
-            <div class="row">
-              {{-- 2026-10-10 : barre d'indice actif collante (bindée sur currentWord) - un seul bloc, au-dessus de la grille --}}
-              <div class="col-12 mt-2 no-print">
-                <div class="cw-active-clue" role="group" aria-label="{{ __('Indice du mot en cours') }}">
-                  <div class="cw-active-clue-body" id="cw-active-clue" aria-live="polite" aria-atomic="true">
-                    <template x-if="currentWord">
-                      <div>
-                        <div class="cw-active-clue-meta">
-                          <span x-text="currentWord.number"></span>
-                          <span x-text="currentWord.orientation === 'horizontal' ? @json(__('Horizontal')) : @json(__('Vertical'))"></span>
-                          <span aria-hidden="true">·</span>
-                          <span x-text="currentWord.length + ' ' + (currentWord.length > 1 ? @json(__('lettres')) : @json(__('lettre')))"></span>
-                        </div>
-                        <div class="cw-active-clue-text" x-text="currentWord.clue"></div>
+            {{-- 2026-10-10 : barre d'indice actif collante (bindée sur currentWord), enfant direct de la racine pour que sticky couvre grille + indices --}}
+            <div class="cw-active-clue no-print" role="group" aria-label="{{ __('Indice du mot en cours') }}">
+                <div class="cw-active-clue-body" id="cw-active-clue" aria-live="polite" aria-atomic="true">
+                  <template x-if="currentWord">
+                    <div>
+                      <div class="cw-active-clue-meta">
+                        <span x-text="currentWord.number"></span>
+                        <span x-text="currentWord.orientation === 'horizontal' ? '{{ __('Horizontal') }}' : '{{ __('Vertical') }}'"></span>
+                        <span aria-hidden="true">·</span>
+                        <span x-text="currentWord.length + ' ' + (currentWord.length > 1 ? '{{ __('lettres') }}' : '{{ __('lettre') }}')"></span>
                       </div>
-                    </template>
-                    <template x-if="!currentWord">
-                      <div class="cw-active-clue-text">{{ __('Touche une case pour voir sa définition') }}</div>
-                    </template>
-                  </div>
-                  <div class="cw-active-clue-nav">
-                    <button type="button" class="cw-clue-nav-btn" @click="goToPrevWord()" aria-label="{{ __('Mot précédent') }}">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="15 18 9 12 15 6"/></svg>
-                      <span>{{ __('Précédent') }}</span>
-                    </button>
-                    <button type="button" class="cw-clue-nav-btn" @click="goToNextWord()" aria-label="{{ __('Mot suivant') }}">
-                      <span>{{ __('Suivant') }}</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                  </div>
+                      <div class="cw-active-clue-text" x-text="currentWord.clue"></div>
+                    </div>
+                  </template>
+                  <template x-if="!currentWord">
+                    <div class="cw-active-clue-text">{{ __('Touche une case pour voir sa définition') }}</div>
+                  </template>
                 </div>
-                <button type="button" class="cw-all-clues-link" @click="scrollToClues()">{{ __('Tous les indices') }} <span aria-hidden="true">↓</span></button>
+                <div class="cw-active-clue-nav">
+                  <button type="button" class="cw-clue-nav-btn" @click="goToPrevWord()" aria-label="{{ __('Mot précédent') }}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="15 18 9 12 15 6"/></svg>
+                    <span>{{ __('Précédent') }}</span>
+                  </button>
+                  <button type="button" class="cw-clue-nav-btn" @click="goToNextWord()" aria-label="{{ __('Mot suivant') }}">
+                    <span>{{ __('Suivant') }}</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+                  </button>
+                </div>
               </div>
+              <button type="button" class="cw-all-clues-link no-print" @click="scrollToClues()">{{ __('Tous les indices') }} <span aria-hidden="true">↓</span></button>
+
+            <div class="row">
               {{-- 2026-05-05 #125 : grille col-12 pleine largeur + indices 50/50 sous (pas latéral) --}}
               <div class="col-12 mb-4 cw-grid-wrap" :style="`--cols: ${grid.cols}; --rows: ${grid.rows};`">
                 <div class="table-responsive d-flex justify-content-center">
