@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.327.4] - 2026-10-10
+
+### Corrigé
+- **SSO IdP : `/oauth/authorize` renvoyait 500** une fois l'IdP allumé en production (`AuthorizationViewResponse is not instantiable`). Passport 13 exige qu'une vue de consentement soit liée, même quand le client first-party la saute. Ajout de la vue `Modules/Idp/resources/views/authorize.blade.php` et du binding `Passport::authorizationView(...)` (chargés seulement quand `IDP_ENABLED=true`). Prouvé par test (contrat instanciable). Aucune incidence quand l'IdP est éteint.
+
 ## [1.327.3] - 2026-10-10
 
 ### Modifié

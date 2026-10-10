@@ -66,6 +66,12 @@ class IdpServiceProvider extends BaseModuleServiceProvider
             'email' => 'Lire votre adresse courriel',
             'profile' => 'Lire votre nom',
         ]);
+
+        // Vue de consentement : Passport 13 EXIGE que ce contrat soit lié, sinon /oauth/authorize
+        // renvoie 500 (« AuthorizationViewResponse is not instantiable »), même pour un client
+        // first-party qui saute l'écran. La vue vit dans Modules/Idp/resources/views/authorize.blade.php
+        // (namespace idp, chargé par bootModule) et ne s'affiche que pour un client NON first-party.
+        Passport::authorizationView('idp::authorize');
     }
 
     /**

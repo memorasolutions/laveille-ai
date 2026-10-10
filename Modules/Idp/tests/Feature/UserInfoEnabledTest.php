@@ -151,3 +151,10 @@ it('ON : le client maison saute le consentement seulement si first-party ET nom 
     $tiers->owner_id = $user->id;
     expect($tiers->skipsAuthorization($user, []))->toBeFalse();
 });
+
+it('ON : la vue de consentement est liée (sinon /oauth/authorize renvoie 500)', function (): void {
+    // Régression du flip du 2026-10-10 : sans ce binding, Passport 13 lève
+    // « AuthorizationViewResponse is not instantiable » sur /oauth/authorize.
+    $response = app(\Laravel\Passport\Contracts\AuthorizationViewResponse::class);
+    expect($response)->toBeInstanceOf(\Laravel\Passport\Contracts\AuthorizationViewResponse::class);
+});
