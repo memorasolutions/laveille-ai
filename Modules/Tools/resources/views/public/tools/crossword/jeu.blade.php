@@ -59,6 +59,8 @@
 .cw-all-clues-link{display:block;margin-bottom:.25rem;background:none;border:none;padding:.25rem 0;color:#053d4a;font-weight:700;font-size:.85rem;text-decoration:underline;cursor:pointer;min-height:32px}
 .cw-all-clues-link:focus-visible{outline:3px solid #053d4a;outline-offset:2px}
 .cw-grid-wrap .table-responsive{scroll-margin-top:6rem}
+/* le thème pose overflow:hidden sur .page-wrapper, ce qui désactive position:sticky ; clip coupe pareil sans créer de conteneur de défilement */
+.page-wrapper{overflow:clip!important}
 @media print{.no-print{display:none!important}.cw-status-bar{display:none}}
 /* 2026-05-05 #100 : la formule clamp() gère déjà le mobile - règle simplifiée pour tablette éventuelle */
 </style>
