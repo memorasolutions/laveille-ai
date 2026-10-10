@@ -24,7 +24,7 @@ declare(strict_types=1);
  */
 
 $lvMajor = 1;
-$lvMinor = 334;
+$lvMinor = 335;
 $lvPatch = 0;
 
 return [

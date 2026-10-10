@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.335.0] - 2026-10-10
+
+### Ajouté
+- **API `GET /api/header-nav` : chaque entrée de menu porte désormais son icône** (`items[{label, url, subtitle, icon}]`). `icon` est la classe Themify (`ti-*`) déjà utilisée par l'entête de laveille.ai; l'académie Moodle peut ainsi afficher le même pictogramme que le site, à partir de la source unique. Champ additif, le reste du contrat `GET /api/header-nav` est inchangé. Défensif côté serveur : une entrée sans icône renvoie une chaîne vide plutôt que de rompre la réponse. Les clés de présentation internes (`mobile`, `sidebar`, `tail`) restent exclues de l'API.
+
 ## [1.334.0] - 2026-10-10
 
 ### Ajouté

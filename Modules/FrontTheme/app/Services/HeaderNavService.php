@@ -335,6 +335,10 @@ class HeaderNavService
                     'label' => $item['label'],
                     'url' => $item['url'],
                     'subtitle' => $item['subtitle'],
+                    // Classe d'icône Themify (ti-*) de la feuille, pour que le consommateur (Moodle)
+                    // rende le même pictogramme que l'entête. Défensif : une entrée sans icône
+                    // renvoie une chaîne vide plutôt que de lever un warning qui casserait l'API.
+                    'icon' => $item['icon'] ?? '',
                 ], $group['items']),
             ], $node['children']);
         }

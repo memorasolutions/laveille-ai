@@ -49,10 +49,12 @@ it("n'expose un cta que sous Outils, et des children que sous les panneaux", fun
     expect(array_keys($accueil))->toBe(['label', 'url']);
 });
 
-it("ne laisse sortir aucune clé de présentation interne", function () {
+it("ne laisse sortir aucune clé de présentation interne, mais expose l'icône (ticket #3028)", function () {
     $brut = $this->get('/api/header-nav')->getContent();
 
-    foreach (['"icon"', '"mobile"', '"sidebar"', '"tail"', '"layout"', '"margin_last"'] as $cle) {
+    // 'icon' est désormais un champ de contrat (parité des pictogrammes avec l'académie Moodle) :
+    // il ne fait plus partie des clés internes à bannir. Les autres restent purement présentation.
+    foreach (['"mobile"', '"sidebar"', '"tail"', '"layout"', '"margin_last"'] as $cle) {
         expect($brut)->not->toContain($cle);
     }
 
@@ -60,7 +62,9 @@ it("ne laisse sortir aucune clé de présentation interne", function () {
     foreach ($menu as $noeud) {
         foreach ($noeud['children'] ?? [] as $groupe) {
             foreach ($groupe['items'] as $item) {
-                expect(array_keys($item))->toBe(['label', 'url', 'subtitle']);
+                expect(array_keys($item))->toBe(['label', 'url', 'subtitle', 'icon']);
+                // Chaque feuille porte une classe Themify ti-* non vide, que le consommateur rend tel quel.
+                expect($item['icon'])->toBeString()->toStartWith('ti-');
             }
         }
     }
