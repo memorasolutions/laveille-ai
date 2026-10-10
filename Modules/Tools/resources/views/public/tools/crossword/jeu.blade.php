@@ -47,6 +47,18 @@
 .cw-subtitle{color:#1A1D23;font-weight:500}
 .cw-loader{padding:3rem;text-align:center;color:#1A1D23}
 .cw-clues-section h2{color:#053d4a}
+/* 2026-10-10 : barre d'indice actif collante au-dessus de la grille (standard des mots croisés en ligne) */
+.cw-active-clue{position:sticky;top:var(--cw-sticky-top,0);z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .75rem;padding:.6rem .75rem;background:#fff;border:2px solid #053d4a;border-radius:10px;box-shadow:0 2px 8px rgba(5,61,74,.18);color:#1A1D23}
+.cw-active-clue-body{flex:1 1 14rem;min-width:0}
+.cw-active-clue-meta{font-size:.8rem;font-weight:800;color:#053d4a;text-transform:uppercase;letter-spacing:.02em}
+.cw-active-clue-text{font-size:1.05rem;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.cw-active-clue-nav{display:flex;gap:.4rem;flex:0 0 auto}
+.cw-clue-nav-btn{min-height:44px;min-width:44px;padding:.4rem .8rem;background:#053d4a;color:#fff;border:2px solid #053d4a;border-radius:8px;font-weight:700;font-size:.9rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.3rem}
+.cw-clue-nav-btn:hover{background:#032327}
+.cw-clue-nav-btn:focus-visible{outline:3px solid #1A1D23;outline-offset:2px}
+.cw-all-clues-link{background:none;border:none;padding:.25rem 0;color:#053d4a;font-weight:700;font-size:.85rem;text-decoration:underline;cursor:pointer;min-height:32px}
+.cw-all-clues-link:focus-visible{outline:3px solid #053d4a;outline-offset:2px}
+.cw-grid-wrap .table-responsive{scroll-margin-top:6rem}
 @media print{.no-print{display:none!important}.cw-status-bar{display:none}}
 /* 2026-05-05 #100 : la formule clamp() gère déjà le mobile - règle simplifiée pour tablette éventuelle */
 </style>
@@ -122,6 +134,38 @@
             </div>
 
             <div class="row">
+              {{-- 2026-10-10 : barre d'indice actif collante (bindée sur currentWord) - un seul bloc, au-dessus de la grille --}}
+              <div class="col-12 mt-2 no-print">
+                <div class="cw-active-clue" role="group" aria-label="{{ __('Indice du mot en cours') }}">
+                  <div class="cw-active-clue-body" id="cw-active-clue" aria-live="polite" aria-atomic="true">
+                    <template x-if="currentWord">
+                      <div>
+                        <div class="cw-active-clue-meta">
+                          <span x-text="currentWord.number"></span>
+                          <span x-text="currentWord.orientation === 'horizontal' ? @json(__('Horizontal')) : @json(__('Vertical'))"></span>
+                          <span aria-hidden="true">·</span>
+                          <span x-text="currentWord.length + ' ' + (currentWord.length > 1 ? @json(__('lettres')) : @json(__('lettre')))"></span>
+                        </div>
+                        <div class="cw-active-clue-text" x-text="currentWord.clue"></div>
+                      </div>
+                    </template>
+                    <template x-if="!currentWord">
+                      <div class="cw-active-clue-text">{{ __('Touche une case pour voir sa définition') }}</div>
+                    </template>
+                  </div>
+                  <div class="cw-active-clue-nav">
+                    <button type="button" class="cw-clue-nav-btn" @click="goToPrevWord()" aria-label="{{ __('Mot précédent') }}">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="15 18 9 12 15 6"/></svg>
+                      <span>{{ __('Précédent') }}</span>
+                    </button>
+                    <button type="button" class="cw-clue-nav-btn" @click="goToNextWord()" aria-label="{{ __('Mot suivant') }}">
+                      <span>{{ __('Suivant') }}</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <button type="button" class="cw-all-clues-link" @click="scrollToClues()">{{ __('Tous les indices') }} <span aria-hidden="true">↓</span></button>
+              </div>
               {{-- 2026-05-05 #125 : grille col-12 pleine largeur + indices 50/50 sous (pas latéral) --}}
               <div class="col-12 mb-4 cw-grid-wrap" :style="`--cols: ${grid.cols}; --rows: ${grid.rows};`">
                 <div class="table-responsive d-flex justify-content-center">
@@ -141,6 +185,7 @@
                                          spellcheck="false"
                                          :data-row="rowIndex"
                                          :data-col="colIndex"
+                                         :aria-describedby="currentWord ? 'cw-active-clue' : null"
                                          :value="userInput[rowIndex+'-'+colIndex] || ''"
                                          @input="setCell(rowIndex, colIndex, $event.target.value)"
                                          @focus="startTimer(); setDirectionFromCell(rowIndex, colIndex)"
@@ -158,7 +203,7 @@
                 </div>
               </div>
 
-              <div class="col-12 cw-clues-section">
+              <div class="col-12 cw-clues-section" id="cw-clues-section" tabindex="-1">
                 <div class="row">
                   {{-- 2026-05-05 #123 : 2 colonnes Horizontaux | Verticaux côte à côte sur tablette+ --}}
                   <div class="col-sm-6 mb-4">
@@ -611,19 +656,59 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    focusWord(word) {
+    focusWord(word, firstEmpty = false) {
       // B2 : track current word pour révéler-mot
       this.currentWord = word;
       // 2026-05-05 #95 : verrouille la direction sur l'orientation du mot choisi
       this.currentDirection = word.orientation;
-      const r = word.row;
-      const c = word.col;
+      let r = word.row;
+      let c = word.col;
+      if (firstEmpty) {
+        // 2026-10-10 : Précédent/Suivant placent le focus sur la première case VIDE du mot (sinon la première)
+        for (let i = 0; i < word.length; i++) {
+          const rr = word.orientation === 'horizontal' ? word.row : word.row + i;
+          const cc = word.orientation === 'horizontal' ? word.col + i : word.col;
+          if (!this.userInput[rr+'-'+cc]) { r = rr; c = cc; break; }
+        }
+      }
       const input = document.querySelector('input[data-row="'+r+'"][data-col="'+c+'"]');
       if (input) {
-        input.focus();
+        input.focus({ preventScroll: true });
         input.select();
         this.startTimer();
+        this.ensureCellVisible(input);
       }
+    },
+
+    // 2026-10-10 : navigation entre MOTS (ordre stable horizontaux puis verticaux, avec bouclage)
+    goToWordOffset(step) {
+      const all = [...this.horizontalWords, ...this.verticalWords];
+      if (!all.length) return;
+      const idx = this.currentWord ? all.indexOf(this.currentWord) : -1;
+      const next = idx === -1 ? (step > 0 ? 0 : all.length - 1) : (idx + step + all.length) % all.length;
+      this.focusWord(all[next], true);
+    },
+    goToPrevWord() { this.goToWordOffset(-1); },
+    goToNextWord() { this.goToWordOffset(1); },
+
+    scrollToClues() {
+      const el = document.getElementById('cw-clues-section');
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.focus({ preventScroll: true });
+    },
+
+    // 2026-10-10 : ne scrolle que si la case active est masquée (sous la barre collante ou sous le clavier virtuel)
+    ensureCellVisible(input) {
+      try {
+        const bar = document.querySelector('.cw-active-clue');
+        const vv = window.visualViewport;
+        const top = (bar ? bar.getBoundingClientRect().bottom : 0) + 8;
+        const bottom = (vv ? vv.height + vv.offsetTop : window.innerHeight) - 8;
+        const rect = input.getBoundingClientRect();
+        if (rect.top < top) window.scrollBy({ top: rect.top - top, behavior: 'auto' });
+        else if (rect.bottom > bottom) window.scrollBy({ top: rect.bottom - bottom, behavior: 'auto' });
+      } catch (e) {}
     },
 
     resetGame() {

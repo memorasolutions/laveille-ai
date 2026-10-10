@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.334.0] - 2026-10-10
+
+### Ajouté
+- **Mots-croisés en ligne : barre d'indice actif collante au-dessus de la grille.** Le joueur n'a plus à descendre lire la liste des indices : la définition du mot en cours (numéro, direction, longueur, texte complet) reste affichée en haut pendant qu'il joue, et se met à jour dès qu'il change de case ou de mot. Boutons « Précédent » et « Suivant » (cibles de 44 px) pour passer de mot en mot, avec bouclage, le curseur se plaçant sur la première case vide. Annonce vocale du changement de mot (`aria-live`), définition liée aux cases par `aria-describedby`. Lien « Tous les indices » vers la liste complète, conservée sous la grille (un clic sur un indice active toujours son mot et met la barre à jour). Barre placée en haut, jamais en bas, pour ne pas être masquée par le clavier du téléphone.
+
 ## [1.333.0] - 2026-10-10
 
 ### Modifié
