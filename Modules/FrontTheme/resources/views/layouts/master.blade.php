@@ -71,25 +71,26 @@
       s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('services.adsense.client_id') }}';
       document.head.appendChild(s);
       // Garde-fou de PLACEMENT - le mode auto de Google place parfois une annonce (sans data-ad-slot)
-      // EN TETE de page : au-dessus du logo (en-tete) OU juste sous le fil d'Ariane, avant le contenu
-      // (grosse banniere intrusive signalee le 2026-10-10). On retire les annonces AUTO situees
-      // AU-DESSUS de #main-content, partout sur le site. Les emplacements MANUELS (data-ad-slot :
+      // dans le CHROME du site : au-dessus du logo (en-tete), juste sous le fil d'Ariane (avant le
+      // contenu), OU dans les colonnes du PIED DE PAGE (deux grosses bannieres meubles signalees le
+      // 2026-10-10 : "c'est beaucoup trop"). INVARIANT : une annonce AUTO n'est toleree QUE dans
+      // #main-content (le corps). On retire donc toute annonce AUTO situee HORS du contenu, ou qu'elle
+      // soit (en-tete, tete de contenu, pied, barres). Les emplacements MANUELS (data-ad-slot :
       // contenu, pied) restent intacts - controle de placement, pas de masquage, aucune impression
-      // manuelle cachee. (2026-10-08 en-tete, generalise a la tete de contenu le 2026-10-10.)
+      // manuelle cachee. (2026-10-08 en-tete, 2026-10-10 tete de contenu, 2026-10-10 generalise au chrome.)
       var lvMain = document.getElementById('main-content');
-      var lvPurgeTopAds = function(){
+      var lvPurgeChromeAds = function(){
         if (!lvMain) { return; }
         document.querySelectorAll('.google-auto-placed, ins.adsbygoogle:not([data-ad-slot])').forEach(function(el){
-          // On ne retire QUE ce qui est au-dessus du contenu : ni dans #main-content, ni apres lui.
+          // On ne GARDE les annonces AUTO que DANS le corps (#main-content). Tout le reste = chrome, on retire.
           if (lvMain.contains(el)) { return; }
-          if (!(lvMain.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING)) { return; }
           var host = el.closest('.google-auto-placed') || el;
           if (host && host.parentNode) { host.parentNode.removeChild(host); }
         });
       };
-      lvPurgeTopAds();
+      lvPurgeChromeAds();
       if (document.body) {
-        new MutationObserver(lvPurgeTopAds).observe(document.body, { childList: true, subtree: true });
+        new MutationObserver(lvPurgeChromeAds).observe(document.body, { childList: true, subtree: true });
       }
     };
     </script>

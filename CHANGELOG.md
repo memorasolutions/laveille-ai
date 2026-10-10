@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.327.7] - 2026-10-10
+
+### Corrigé
+- **Pub AdSense AUTO dans le pied de page** (deux grosses bannières meubles "Shop SoftSeason Furniture" injectées dans les colonnes du footer, signalées par le fondateur : "c'est beaucoup trop"). Le garde-fou de placement du mode auto de Google, qui ne retirait que les annonces AUTO au-dessus de `#main-content` (#2991, v1.327.5), est généralisé en un INVARIANT unique : une annonce AUTO (`.google-auto-placed`, `ins.adsbygoogle` sans `data-ad-slot`) n'est tolérée QUE dans `#main-content` (le corps). Toute annonce AUTO hors du contenu est retirée, où qu'elle soit (en-tête, tête de contenu, pied, barres). Les emplacements MANUELS (`data-ad-slot` : contenu, pied) restent intacts.
+
 ## [1.327.6] - 2026-10-10
 
 ### Corrigé
