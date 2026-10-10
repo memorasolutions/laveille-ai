@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
+use Modules\Core\Support\DisposableEmail;
 use Modules\Core\Support\Honeypot;
 
 class ContactController extends Controller
@@ -91,15 +92,18 @@ class ContactController extends Controller
             $reasons[] = $signal;
         }
 
-        // Signaux « contenu » faillibles : shortener, keyword, allcaps.
-        $weakSignals = array_intersect(['shortener', 'keyword', 'allcaps'], $signals);
+        // Signaux « contenu » faillibles : shortener, keyword, allcaps, gibberish (charabia).
+        $weakSignals = array_intersect(['shortener', 'keyword', 'allcaps', 'gibberish'], $signals);
         $weakCount = count($weakSignals);
 
         // Spam à haute confiance : honeypot (déjà traité), URL dans le nom, >=4 liens, time-trap
-        // (soumission quasi instantanée = robot), OU au moins 2 signaux « contenu » combinés.
+        // (soumission quasi instantanée = robot), adresse jetable, suite de chiffres répétée entre
+        // champs (signature de bot), OU au moins 2 signaux « contenu » combinés.
         $hardSpam = $urlInName
             || $urlCount >= 4
             || in_array('timetrap', $signals, true)
+            || in_array('disposable_email', $signals, true)
+            || in_array('repeated_token', $signals, true)
             || $weakCount >= 2;
 
         // Signal faible isolé : exactement 1 des 3 signaux « contenu ».
@@ -250,7 +254,64 @@ class ContactController extends Controller
             }
         }
 
+        // 5) Adresse jetable (fournisseur temporaire, ex. notboxletters.com) : signal FORT.
+        //    Un visiteur sincère utilise très rarement une telle adresse; la quarantaine reste
+        //    consultable, donc aucun message n'est perdu même en cas de rare faux positif.
+        if (DisposableEmail::isDisposable((string) ($data['email'] ?? ''))) {
+            $signals[] = 'disposable_email';
+        }
+
+        // 6) MÊME suite de chiffres (>= 4) présente dans PLUSIEURS champs : signature de bot très
+        //    forte. Mesuré le 2026-10-09 : « 696976 » injecté à l'identique dans le nom, le sujet ET
+        //    le message. Un humain ne répète jamais une suite de chiffres d'un champ à l'autre.
+        $name = (string) ($data['name'] ?? '');
+        $digitFreq = [];
+        foreach ([$name, $subject, $message] as $field) {
+            if (preg_match_all('~\d{4,}~', $field, $m)) {
+                foreach (array_unique($m[0]) as $run) {
+                    $digitFreq[$run] = ($digitFreq[$run] ?? 0) + 1;
+                }
+            }
+        }
+        foreach ($digitFreq as $count) {
+            if ($count >= 2) {
+                $signals[] = 'repeated_token';
+                break;
+            }
+        }
+
+        // 7) Charabia : une suite de LETTRES d'au moins 8 caractères dont moins de 20 % sont des
+        //    voyelles (y et voyelles accentuées comptées). Signal FAIBLE : un mot français long a
+        //    toujours plus de voyelles, donc un faux positif reste livré (préfixé), jamais rejeté.
+        foreach ([$name, $subject, $message] as $field) {
+            if ($this->hasGibberishRun($field)) {
+                $signals[] = 'gibberish';
+                break;
+            }
+        }
+
         return array_values(array_unique($signals));
+    }
+
+    /**
+     * Vrai si le texte contient une suite de lettres >= 8 caractères au ratio de voyelles < 20 %.
+     * Les voyelles incluent y et les voyelles accentuées françaises, pour ne pas surdétecter.
+     */
+    private function hasGibberishRun(string $text): bool
+    {
+        if (! preg_match_all('~\p{L}{8,}~u', $text, $runs)) {
+            return false;
+        }
+
+        foreach ($runs[0] as $run) {
+            $letters = mb_strlen($run);
+            $vowels = preg_match_all('~[aeiouyàâäéèêëïîôöùûüÿ]~iu', $run);
+            if ($letters >= 8 && ($vowels / $letters) < 0.20) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

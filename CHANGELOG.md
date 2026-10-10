@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.327.3] - 2026-10-10
+
+### Modifié
+- **Filtrage anti-spam du formulaire de contact renforcé** (un spam est passé le 2026-10-09). Deux signaux FORTS (mise en quarantaine, aucun courriel) : adresse d'un fournisseur jetable (bloc réutilisable `Modules\Core\Support\DisposableEmail`, liste extensible par `DISPOSABLE_EMAIL_DOMAINS`) et même suite de chiffres répétée dans plusieurs champs (signature de bot). Un signal FAIBLE : charabia (suite de lettres sans voyelles). Conçu sans faux positif : un message légitime qui répète un mot ou contient un numéro de téléphone part normalement. Aucune donnée touchée; la quarantaine reste consultable.
+
 ## [1.327.2] - 2026-10-10
 
 ### Modifié

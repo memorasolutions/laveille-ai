@@ -251,3 +251,56 @@ it('envoie en « new », trace la raison et préfixe « [Spam probable] » pour 
     expect($msg->status)->toBe('new');
     expect($msg->spam_reason)->toBe('shortener');
 });
+
+it('met en quarantaine le spam charabia du 2026-10-09 (adresse jetable + chiffres répétés), sans courriel', function () {
+    // Reproduction exacte du spam reçu : même suite « 696976 » dans le nom, le sujet ET le message,
+    // charabia en majuscules, expéditeur sur un domaine jetable (notboxletters.com).
+    $response = submitContact(contactPayload([
+        'name' => 'NARETGR696976NERTHRTYHR',
+        'email' => 'jorre_4319@notboxletters.com',
+        'subject' => 'TOTYJTRT696976TIRTYRTTR',
+        'message' => 'MEJTYJY696976MAMYJRTH, un message assez long pour franchir la validation min:10.',
+    ]));
+
+    expect($response->getSession()->get('success'))->not->toBeNull();
+    expect(sentSubjects())->toBeEmpty();
+
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('spam');
+    expect((string) $msg->spam_reason)->toContain('disposable_email');
+    expect((string) $msg->spam_reason)->toContain('repeated_token');
+});
+
+it('met en quarantaine une adresse jetable, même avec un message normal, sans courriel', function () {
+    $response = submitContact(contactPayload([
+        'email' => 'test1234@mailinator.com',
+    ]));
+
+    expect($response->getSession()->get('success'))->not->toBeNull();
+    expect(sentSubjects())->toBeEmpty();
+
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg)->not->toBeNull();
+    expect($msg->status)->toBe('spam');
+    expect((string) $msg->spam_reason)->toContain('disposable_email');
+});
+
+it('ne pénalise PAS un message légitime répétant un mot et contenant un numéro (aucun faux positif)', function () {
+    // « plateforme » se répète entre sujet et message (mot, pas une suite de chiffres), et le
+    // message porte un numéro de téléphone (chiffres présents dans UN seul champ). Ni repeated_token
+    // ni gibberish ne doivent se déclencher : le message part normalement, sans préfixe.
+    $response = submitContact(contactPayload([
+        'subject' => 'Question sur la plateforme de veille',
+        'message' => 'Bonjour, votre plateforme de veille m\'intéresse beaucoup. Rappelez-moi au 418 555 1234. Merci.',
+    ]));
+
+    $subjects = sentSubjects();
+    expect($subjects)->toHaveCount(1);
+    expect(str_starts_with($subjects[0], '[Spam probable]'))->toBeFalse();
+
+    $msg = ContactMessage::query()->latest('id')->first();
+    expect($msg->status)->toBe('new');
+    expect((string) $msg->spam_reason)->not->toContain('repeated_token');
+    expect((string) $msg->spam_reason)->not->toContain('gibberish');
+});
