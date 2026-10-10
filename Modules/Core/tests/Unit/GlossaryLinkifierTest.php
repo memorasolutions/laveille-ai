@@ -1029,7 +1029,7 @@ it('exige un hash à jour pour les tables sensibles au cache - rappel du bump CA
     ]);
 
     expect(GlossaryLinkifier::CACHE_KEY)
-        ->toBe('glossary.terms.v30.', 'CACHE_KEY a changé - si c\'est volontaire (ajout à une table sensible au cache), recalcule aussi le hash juste en dessous dans LE MÊME commit.')
+        ->toBe('glossary.terms.v31.', 'CACHE_KEY a changé - si c\'est volontaire (ajout à une table sensible au cache), recalcule aussi le hash juste en dessous dans LE MÊME commit.')
         ->and(md5($snapshot))
         ->toBe('8b747d76d9e019ad51e39e92ae4f7011', 'Une table sensible au cache (TOOL_COMPOUND_EXCLUSIONS, TOOL_SUFFIX_COMPOUND_EXCLUSIONS, TOOL_PREFIX_PATTERN_EXCLUSIONS ou ALIAS_NEVER_AUTO) a changé SANS bump de CACHE_KEY (ou le hash n\'a pas été mis à jour avec le bump) - voir le docblock de CACHE_KEY : sans ce bump, le correctif reste en cache et n\'arrive jamais au visiteur.');
 });
