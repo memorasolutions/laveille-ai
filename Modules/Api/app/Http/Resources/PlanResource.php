@@ -28,6 +28,9 @@ final class PlanResource extends JsonResource
             'interval' => $this->interval,
             'trial_days' => $this->trial_days,
             'features' => $this->features ?? [],
+            'source' => config('api.attribution.source'),
+            'license' => config('api.attribution.license'),
+            'license_url' => config('api.attribution.license_url'),
         ];
     }
 }

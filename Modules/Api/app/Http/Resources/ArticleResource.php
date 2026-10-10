@@ -37,6 +37,10 @@ final class ArticleResource extends JsonResource
             ),
             'comments_count' => $this->whenCounted('comments'),
             'url' => url('/api/v1/articles/'.$this->slug),
+            'web_url' => $this->getPublicUrl(),
+            'source' => config('api.attribution.source'),
+            'license' => config('api.attribution.license'),
+            'license_url' => config('api.attribution.license_url'),
         ];
     }
 }
