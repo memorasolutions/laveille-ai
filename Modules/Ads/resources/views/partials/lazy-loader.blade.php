@@ -35,6 +35,17 @@
     });
   }
 
+  // Contenu ajouté après coup (défilement infini) : une cellule d'annonce clonée est poussée et surveillée.
+  document.addEventListener('lv:content-appended', function (e) {
+    var node = e.detail && e.detail.node;
+    if (!node || !node.matches || !node.matches('[data-lv-ad-cell]')) { return; }
+    var ins = node.querySelector('ins.adsbygoogle');
+    if (!window.__lvAdsenseLoaded || !ins) { node.classList.add('lv-ad-off'); return; }
+    ins.setAttribute('data-lv-pushed', '1');
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (err) { /* sans effet sur la page */ }
+    watchCell(node);
+  });
+
   function init() {
     // Après le chargement + 1,5 s : laisse au consentement (retour d'un visiteur déjà consentant) le temps
     // de charger AdSense avant de juger qu'il est absent.

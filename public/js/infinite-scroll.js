@@ -97,7 +97,10 @@
                     // Append les enfants
                     var children = Array.from(newContent.children);
                     children.forEach(function(child) {
-                        contentContainer.appendChild(child.cloneNode(true));
+                        var added = child.cloneNode(true);
+                        contentContainer.appendChild(added);
+                        // Signale le contenu ajouté (les cellules d'annonce in-feed s'initialisent à ce signal).
+                        document.dispatchEvent(new CustomEvent('lv:content-appended', { detail: { node: added } }));
                     });
                 }
 
