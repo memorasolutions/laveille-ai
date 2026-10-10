@@ -196,10 +196,15 @@
                 <div class="col-sm-6 col-md-4" style="margin-bottom: 1.25rem;">
                     @include('news::public.partials.article-card', ['article' => $article])
                 </div>
-                @if($loop->iteration === 3 && class_exists(\Modules\Ads\Services\AdsRenderer::class)
+                @if(class_exists(\Modules\Ads\Services\AdsRenderer::class)
+                    && ! $loop->last
+                    && ($lvInfeedInterval = (int) config('ads.infeed.interval', 6)) > 0
+                    && $loop->iteration >= ($lvInfeedFirst = max(1, (int) config('ads.infeed.first_position', 3)))
+                    && ($loop->iteration - $lvInfeedFirst) % $lvInfeedInterval === 0
                     && ($lvInfeedAd = app(\Modules\Ads\Services\AdsRenderer::class)->render('news-infeed')))
-                {{-- Unite in-feed MANUELLE : propre colonne, etiquetee, espace reserve (anti-CLS). --}}
-                <div class="col-sm-6 col-md-4 nw-ad-cell" style="margin-bottom: 1.25rem;">
+                {{-- Unite in-feed MANUELLE, repetee (config ads.infeed). Cellule a effondrement propre : le
+                     lazy-loader du module Ads la retire si l'annonce n'est pas servie (voir data-lv-ad-cell). --}}
+                <div class="col-sm-6 col-md-4 nw-ad-cell" data-lv-ad-cell style="margin-bottom: 1.25rem;">
                     <aside class="nw-ad" aria-label="{{ __('Annonce') }}" style="min-height:300px;border:1px dashed #cbd5e1;border-radius:8px;padding:.5rem;display:flex;flex-direction:column;overflow:hidden;">
                         <span style="font-size:.75rem;color:#475569;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.35rem;">{{ __('Annonce') }}</span>
                         {!! $lvInfeedAd !!}

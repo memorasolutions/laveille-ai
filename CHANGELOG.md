@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.331.0] - 2026-10-10
+
+### Ajouté
+- **Unité AdSense in-feed répétée sur /actualites** : l'unité s'insère à la 3e carte puis toutes les 6 cartes (3, 9, 15...), jamais deux annonces d'affilée ni après la dernière carte. Source unique : l'emplacement `news-infeed`, rappelé à chaque position. Configurable dans le module Ads (`ads.infeed.first_position` et `ads.infeed.interval`, variables `ADS_INFEED_FIRST_POSITION` et `ADS_INFEED_INTERVAL`). Désactivable : `ADS_INFEED_INTERVAL=0` (aucune insertion) ou emplacement `news-infeed` inactif.
+
+### Corrigé
+- **Boîte « Annonce » vide sur /actualites** : l'unité se poussait bien vers AdSense (chargement différé), mais le cadre de 300 px restait affiché dès qu'AdSense n'était pas chargé (visiteur sans consentement), non servie (`unfilled`) ou bloquée. Le chargeur du module Ads effondre maintenant la cellule entière (cadre et étiquette) dans ces trois cas, et ne la montre que si l'annonce est servie (`data-ad-status="filled"`); l'espace n'est réservé que pendant le chargement (anti-CLS), 10 s au plus.
+
 ## [1.330.0] - 2026-10-10
 
 ### Ajouté

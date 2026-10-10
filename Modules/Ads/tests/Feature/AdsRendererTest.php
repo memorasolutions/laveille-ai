@@ -257,3 +257,16 @@ it('rend une unité manuelle (data-ad-slot) pour news-infeed, rien si inactive',
     Cache::flush();
     expect(app(AdsRenderer::class)->render('news-infeed'))->toBeNull();
 });
+
+it('la config in-feed expose une première position 3 et un intervalle 6 par défaut', function (): void {
+    expect(config('ads.infeed.first_position'))->toBe(3)
+        ->and(config('ads.infeed.interval'))->toBe(6);
+});
+
+it('le chargeur effondre les cellules d\'annonce non servies', function (): void {
+    $html = view('ads::partials.lazy-loader')->render();
+
+    expect($html)->toContain('data-lv-ad-cell')
+        ->toContain('lv-ad-off')
+        ->toContain('data-ad-status');
+});
