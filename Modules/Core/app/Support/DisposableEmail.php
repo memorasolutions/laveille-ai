@@ -22,9 +22,12 @@ namespace Modules\Core\Support;
  * détruit jamais le message. On vise donc la précision (zéro faux positif sur un domaine courant),
  * pas l'exhaustivité (la liste des fournisseurs jetables est mouvante et sans fin).
  *
- * La liste peut être étendue sans toucher ce fichier via DISPOSABLE_EMAIL_DOMAINS (domaines
- * supplémentaires séparés par des virgules) - utile pour bloquer un nouveau fournisseur repéré
- * sans redéploiement de code.
+ * La liste peut être étendue sans toucher ce fichier via la variable d'environnement
+ * DISPOSABLE_EMAIL_DOMAINS (domaines supplémentaires séparés par des virgules) - utile pour
+ * bloquer un nouveau fournisseur repéré sans redéploiement de code. L'env() est lu dans le fichier
+ * de config du module (clé `core.disposable_email_domains`), JAMAIS ici : la règle d'architecture
+ * du projet interdit env() hors des fichiers de config, et config:cache est interdit sur ce projet
+ * (la valeur est donc relue à chaque requête).
  */
 final class DisposableEmail
 {
@@ -80,7 +83,7 @@ final class DisposableEmail
     {
         $extra = array_filter(array_map(
             static fn (string $d): string => mb_strtolower(trim($d)),
-            explode(',', (string) env('DISPOSABLE_EMAIL_DOMAINS', ''))
+            explode(',', (string) config('core.disposable_email_domains', ''))
         ));
 
         return array_values(array_unique(array_merge(self::KNOWN_DOMAINS, $extra)));

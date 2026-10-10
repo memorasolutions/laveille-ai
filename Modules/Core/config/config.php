@@ -20,4 +20,12 @@ return [
      * interdit sur ce projet - env() relu à chaque requête).
      */
     'glossary_linkifier_enabled' => (bool) env('GLOSSARY_LINKIFIER_ENABLED', true),
+
+    /**
+     * Domaines d'adresses jetables SUPPLÉMENTAIRES (séparés par des virgules) ajoutés à la liste
+     * intégrée de Modules\Core\Support\DisposableEmail. env() vit ICI (fichier de config) et jamais
+     * dans la classe - la règle d'architecture interdit env() hors config. config:cache étant
+     * interdit sur ce projet, la valeur est relue à chaque requête, sans redéploiement.
+     */
+    'disposable_email_domains' => (string) env('DISPOSABLE_EMAIL_DOMAINS', ''),
 ];

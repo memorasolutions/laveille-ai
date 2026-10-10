@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.327.6] - 2026-10-10
+
+### Corrigé
+- **CI débloquée (train v1.327.3 à .5 coincé)** : le bloc anti-spam `Modules\Core\Support\DisposableEmail` lisait `env('DISPOSABLE_EMAIL_DOMAINS')` directement, ce que la règle d'architecture (`Tests\Architecture\ArchTest`) interdit hors des fichiers de config. Le sas bloquant "Architecture + Unit" échouait, donc le déploiement était `skipped` depuis v1.327.3 - l'anti-spam, le correctif IdP `/oauth/authorize` et le retrait de la pub n'étaient jamais arrivés en prod (restée sur v1.327.2). La valeur passe désormais par la clé de config `core.disposable_email_domains` (l'`env()` vit dans `Modules/Core/config/config.php`, relu à chaque requête car `config:cache` est interdit sur ce projet). Architecture : 33 tests au vert; anti-spam : 15 tests, 79 assertions au vert.
+
 ## [1.327.5] - 2026-10-10
 
 ### Corrigé
