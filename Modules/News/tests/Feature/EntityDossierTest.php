@@ -312,3 +312,23 @@ it("le fil d'Ariane d'un dossier rend 4 niveaux avec deux liens de retour (Actua
     expect($items[1]['item'])->toBe(route('news.index'));
     expect($items[2]['item'])->toBe(route('news.dossiers'));
 });
+
+// Le filtre client de l'index a besoin du nombre d'articles et de la dernière activité.
+it("expose le nombre d'articles et la date du dernier article de chaque dossier", function () {
+    $src = dossierSource()->id;
+    foreach ([30, 10, 20, 5, 15] as $jours) {
+        $a = dossierFiche($src, "Fiche récente {$jours}");
+        $a->forceFill(['published_at' => now()->subDays($jours)])->save();
+        dossierMarquer($a, 'openai', 'OpenAI');
+    }
+
+    $dossier = app(\Modules\News\Services\EntityDossierService::class)->dossiers()->first();
+
+    expect((int) $dossier->total)->toBe(5)
+        ->and(\Illuminate\Support\Carbon::parse($dossier->last_activity)->toDateString())
+        ->toBe(now()->subDays(5)->toDateString());
+
+    $this->get(route('news.dossiers'))->assertStatus(200)
+        ->assertSee('dossiersFiltre', false)->assertSee('Rechercher un dossier')
+        ->assertSee('Activité récente');
+});

@@ -60,7 +60,8 @@ class EntityDossierService
     }
 
     /**
-     * Les dossiers servables, du plus fourni au moins fourni.
+     * Les dossiers servables, du plus fourni au moins fourni. Chaque ligne porte aussi
+     * `last_activity` : la date du DERNIER article publié du dossier (pas une date technique).
      *
      * @return Collection<int, object>
      */
@@ -72,6 +73,7 @@ class EntityDossierService
                 'news_article_entities.entity_slug',
                 'news_article_entities.entity_label',
                 DB::raw('count(*) as total'),
+                DB::raw('max(coalesce(news_articles.published_at, news_articles.pub_date)) as last_activity'),
             ]);
     }
 

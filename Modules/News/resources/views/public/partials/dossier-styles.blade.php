@@ -35,6 +35,19 @@
         font-size: 1.125rem; font-weight: 600; color: #111827; margin: 0 0 0.25rem;
     }
     .nw-dossier-card-count { font-size: 0.875rem; color: #6b7280; }
+    .nw-dossiers-outils { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 0.75rem; }
+    .nw-dossiers-champ { display: flex; flex-direction: column; gap: 0.25rem; flex: 1 1 14rem; max-width: 22rem; }
+    .nw-dossiers-champ label { font-size: 0.875rem; font-weight: 600; color: #374151; }
+    .nw-dossiers-champ input, .nw-dossiers-champ select {
+        min-height: 44px; padding: 0.4rem 0.75rem; border: 1px solid #6b7280; border-radius: 8px;
+        font-size: 1rem; background: #fff; color: #111827;
+    }
+    .nw-dossiers-effacer {
+        min-height: 44px; padding: 0.4rem 1rem; border: 1px solid #6b7280; border-radius: 8px;
+        background: #fff; color: #111827; font-size: 0.9375rem; cursor: pointer;
+    }
+    .nw-dossiers-effacer:hover { background: #f3f4f6; }
+    .nw-dossiers-compteur { font-size: 0.9375rem; color: #4b5563; margin-bottom: 1rem; }
     .nw-dossier-voisins { margin-top: 2rem; }
     .nw-dossier-voisins h2 { font-family: var(--f-heading); font-size: 1.25rem; margin-bottom: 0.75rem; }
     .nw-dossier-voisins-liste { display: flex; flex-wrap: wrap; gap: 0.5rem; }

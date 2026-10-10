@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.330.0] - 2026-10-10
+
+### Ajouté
+- **Dossiers thématiques : recherche, tri, nombre d'articles et date** : la page `/actualites/dossiers` affiche pour chaque dossier son nombre d'articles et la date de son dernier article publié (« 18 actualités · Dernier article le 8 octobre 2026 »). Un champ « Rechercher un dossier » (insensible aux accents et à la casse), un sélecteur de tri (« Activité récente » par défaut, « Nombre d'articles », « A-Z »), un compteur de résultats et un bouton « Effacer ». Filtrage entièrement côté client sur les dossiers déjà rendus : la route reste en cache HTTP et aucune clé de cache n'est modifiée. Dégradation gracieuse : sans JavaScript, la liste rendue par le serveur reste visible. `EntityDossierService::dossiers()` expose désormais `last_activity`. Désactivable : retirer le bloc `x-data="dossiersFiltre"` de la vue `dossiers-index` rétablit la liste simple.
+
 ## [1.329.0] - 2026-10-10
 
 ### Ajouté
