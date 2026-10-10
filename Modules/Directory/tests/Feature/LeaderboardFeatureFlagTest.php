@@ -45,13 +45,15 @@ it('route name directory.leaderboard reste enregistre cote routes/web.php', func
 });
 
 it('header partial gate combine Route::has + config flag', function () {
-    $content = file_get_contents(base_path('Modules/FrontTheme/resources/views/partials/header.blade.php'));
+    // (#3013) La nav vit désormais dans la source unique HeaderNavService (entête desktop, repli mobile
+    // et barre latérale en dérivent) : le gate ne s'écrit plus qu'à UN endroit.
+    $content = file_get_contents(base_path('Modules/FrontTheme/app/Services/HeaderNavService.php'));
 
     // Aucune ref leaderboard sans gate config
-    expect($content)->not->toMatch('/@if\(Route::has\(\'directory\.leaderboard\'\)\)/');
-    // Toutes les refs combinent les deux conditions
+    expect($content)->not->toMatch('/Route::has\(\'directory\.leaderboard\'\)\s*\?/');
+    // La ref combine les deux conditions
     expect(substr_count($content, "Route::has('directory.leaderboard') && config('directory.leaderboard.enabled', false)"))
-        ->toBeGreaterThanOrEqual(4);
+        ->toBeGreaterThanOrEqual(1);
 });
 
 it('footer partial gate combine Route::has + config flag', function () {

@@ -24,21 +24,16 @@ uses(Tests\TestCase::class);
 
 function megaMenuSourceVivante(): string
 {
-    $chemin = base_path('Modules/FrontTheme/resources/views/partials/header.blade.php');
-    $lignes = file($chemin);
-
-    // On s'arrête au premier `@if(false)` : au-delà commence le code mort du ticket #200.
-    $fin = null;
-    foreach ($lignes as $i => $ligne) {
-        if (str_contains($ligne, '@if(false)')) {
-            $fin = $i;
-            break;
-        }
+    // Depuis le ticket #3013 les trois méga-menus sortent d'un même gabarit alimenté par la source
+    // unique (HeaderNavService) : on contrôle le HTML RENDU, où chaque panneau apparaît bien une fois.
+    // Le code mort des anciens méga-menus (@if(false)) a été retiré du gabarit d'entête.
+    foreach (['directory_tools_count', 'dictionary_terms_count', 'acronyms_count'] as $cle) {
+        cache()->put($cle, 1, 60);
     }
 
-    expect($fin)->not->toBeNull('Le repère @if(false) a disparu du gabarit : ces tests lisent la mauvaise zone.');
-
-    return implode('', array_slice($lignes, 0, $fin));
+    return view('fronttheme::partials.nav.items', [
+        'nav' => app(\Modules\FrontTheme\Services\HeaderNavService::class)->tree(),
+    ])->render();
 }
 
 it('ouvre les méga-menus au clic et jamais au survol', function () {

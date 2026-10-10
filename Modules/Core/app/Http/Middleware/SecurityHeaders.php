@@ -50,7 +50,9 @@ class SecurityHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }
 
-        if ($request->is('api/*')) {
+        // Les réponses d'API sont non cachables par défaut. Exception : une route qui déclare
+        // elle-même `public` (ex. GET /api/header-nav, #3013) a choisi son cache en connaissance de cause.
+        if ($request->is('api/*') && ! $response->headers->hasCacheControlDirective('public')) {
             $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate');
         }
 

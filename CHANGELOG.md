@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.332.0] - 2026-10-10
+
+### Ajouté
+- **API publique `GET /api/header-nav` : la navigation de l'entête, en lecture seule** : sérialise le menu (Accueil, Outils, Annuaire, Apprendre, Académie et Livres selon leurs portes) au format JSON figé `{version, generated_at, menu[{label, url, children[{group, items[{label, url, subtitle}]}], cta}], footer{legal}}`. Le `cta` n'existe que sous Outils (« Voir tous les outils gratuits »). Publique, `ETag` dérivé de `version` (empreinte du contenu, stable d'une requête à l'autre), `Cache-Control: public, max-age=300`, réponse `304` sur `If-None-Match`, limitée à 60 requêtes par minute. Destinée à l'académie Moodle, qui affiche ainsi le même méga-menu que laveille.ai.
+- **Source unique de la navigation** : `Modules/FrontTheme/app/Services/HeaderNavService.php` définit l'arbre une seule fois. L'entête de laveille.ai (méga-menus desktop, repli mobile et barre latérale du hamburger) et l'API en dérivent. Ajouter, retirer ou renommer une entrée se fait à cet endroit et se voit des deux côtés. Chaque entrée reste gardée par `Route::has()` et ses drapeaux de configuration. Réutilisable dans un autre projet Laravel (aucune dépendance au reste du thème).
+
+### Modifié
+- **Entête refactoré, rendu identique** : `header.blade.php` boucle sur l'arbre via les gabarits `partials/nav/items`, `partials/nav/mega-panel` et `partials/nav/sidebar` (mêmes classes, mêmes styles en ligne, mêmes attributs Alpine, mêmes identifiants `lv-mega-*`, même ordre). HTML rendu comparé avant/après sur trois configurations (défaut, tout activé, Quête désactivée) : identique. Le code mort des anciens méga-menus « Ressources », « Jouer » et « Pages » (bloc `@if(false)`) est retiré; il reste dans l'historique git.
+- Le middleware `SecurityHeaders` n'impose plus `no-store` aux réponses d'API qui déclarent elles-mêmes `Cache-Control: public` (les autres routes d'API restent non cachables).
+- Les tests qui lisaient le code source Blade de l'entête contrôlent désormais le HTML rendu (méga-menus au clic, outils fiscaux distincts) ou la source unique (porte de l'Académie et du Classement).
+
 ## [1.331.2] - 2026-10-10
 
 ### Corrigé

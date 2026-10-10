@@ -127,8 +127,9 @@ test('BUG-01 : ContentSecurityPolicy Core inclut screenpal.com dans frame-src (s
 
 test('GAP-01 : le header FrontTheme contient un lien défensif vers academy.index (structurel)', function () {
     $source = file_get_contents(
-        base_path('Modules/FrontTheme/resources/views/partials/header.blade.php')
+        base_path('Modules/FrontTheme/app/Services/HeaderNavService.php')
     );
+    // (#3013) La nav vit désormais dans la source unique HeaderNavService, d'où dérive l'entête.
     // Le lien doit être conditionnel (Route::has)
     expect($source)->toContain("Route::has('academy.index')");
     // Et pointer vers la route academy.index
