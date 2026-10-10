@@ -235,3 +235,25 @@ it('clearCache vide les deux clés du jour (rendu direct et ligne résolue)', fu
     expect(Cache::has("ad_placement:test-slot:{$day}"))->toBeFalse()
         ->and(Cache::has("ad_placement_row:test-slot:{$day}"))->toBeFalse();
 });
+
+it('la migration news-infeed crée un emplacement AdSense actif et se réverse', function (): void {
+    $migration = require base_path('Modules/Ads/database/migrations/2026_10_10_000001_seed_news_infeed_placement.php');
+
+    $migration->up();
+    $ad = AdPlacement::where('key', 'news-infeed')->first();
+    expect($ad)->not->toBeNull()
+        ->and($ad->is_active)->toBeTrue()
+        ->and($ad->ad_slot)->not->toBeEmpty();
+
+    $migration->down();
+    expect(AdPlacement::where('key', 'news-infeed')->exists())->toBeFalse();
+});
+
+it('rend une unité manuelle (data-ad-slot) pour news-infeed, rien si inactive', function (): void {
+    // La ligne est semée par la migration.
+    expect(app(AdsRenderer::class)->render('news-infeed'))->toContain('data-ad-slot="4523648998"');
+
+    AdPlacement::where('key', 'news-infeed')->update(['is_active' => false]);
+    Cache::flush();
+    expect(app(AdsRenderer::class)->render('news-infeed'))->toBeNull();
+});

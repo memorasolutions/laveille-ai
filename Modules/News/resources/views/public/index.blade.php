@@ -7,6 +7,9 @@
     ? __('Les affirmations virales examinées une à une : citation inexacte, attribution erronée, contenu généré par une IA. Ce qui est exact, ce qui ne l\'est pas, et pourquoi.')
     : __('Veille quotidienne IA et technologie : résumés structurés par intelligence artificielle, classés par catégorie.'))
 
+{{-- Pas d'annonce AUTO de Google sur cette page : seule l'unite MANUELLE in-feed (cle `news-infeed`) reste. --}}
+@section('suppress_auto_ads', '1')
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => ($filters['verifications'] ?? false) ? __('Vérifications') : __('Actualités')])
 @endsection
@@ -193,6 +196,16 @@
                 <div class="col-sm-6 col-md-4" style="margin-bottom: 1.25rem;">
                     @include('news::public.partials.article-card', ['article' => $article])
                 </div>
+                @if($loop->iteration === 3 && class_exists(\Modules\Ads\Services\AdsRenderer::class)
+                    && ($lvInfeedAd = app(\Modules\Ads\Services\AdsRenderer::class)->render('news-infeed')))
+                {{-- Unite in-feed MANUELLE : propre colonne, etiquetee, espace reserve (anti-CLS). --}}
+                <div class="col-sm-6 col-md-4 nw-ad-cell" style="margin-bottom: 1.25rem;">
+                    <aside class="nw-ad" aria-label="{{ __('Annonce') }}" style="min-height:300px;border:1px dashed #cbd5e1;border-radius:8px;padding:.5rem;display:flex;flex-direction:column;overflow:hidden;">
+                        <span style="font-size:.75rem;color:#475569;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.35rem;">{{ __('Annonce') }}</span>
+                        {!! $lvInfeedAd !!}
+                    </aside>
+                </div>
+                @endif
                 @endforeach
             </div>
 
@@ -235,6 +248,8 @@ function newsLiveSearch() {
                 const fresh = doc.getElementById('nw-results-container');
                 if (fresh && container) {
                     container.innerHTML = fresh.innerHTML;
+                    // Une unite AdSense injectee apres coup ne s'initialise pas : on retire la cellule pub inerte.
+                    container.querySelectorAll('.nw-ad-cell').forEach(function (c) { c.remove(); });
                     window.history.pushState({}, '', url.toString());
                     const cardCount = container.querySelectorAll('.nw-card').length;
                     this.statusMessage = cardCount > 0

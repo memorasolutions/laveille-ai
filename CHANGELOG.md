@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.328.0] - 2026-10-10
+
+### Ajouté
+- **Unité AdSense in-feed manuelle sur /actualites** : insérée après la 3e carte de la grille (propre colonne), étiquetée « Annonce », avec espace réservé (min-height) pour éviter tout décalage au chargement. Nouvel emplacement `news-infeed` (migration réversible, unité display responsive existante). Désactivable : `is_active = 0` sur la ligne `news-infeed`, ou module Ads désactivé; absente, la page ne change pas.
+
+### Modifié
+- **Annonces AUTO de Google supprimées sur /actualites** (le gros bloc en tête de grille). Drapeau de page `@section('suppress_auto_ads')` : le garde-fou de placement du layout purge alors TOUTES les annonces AUTO, y compris dans `#main-content`; les unités manuelles (`data-ad-slot`) restent. Défaut inchangé pour les autres pages; retirer la section pour réactiver.
+
 ## [1.327.7] - 2026-10-10
 
 ### Corrigé

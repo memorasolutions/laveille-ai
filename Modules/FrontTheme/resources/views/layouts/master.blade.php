@@ -78,12 +78,15 @@
       // soit (en-tete, tete de contenu, pied, barres). Les emplacements MANUELS (data-ad-slot :
       // contenu, pied) restent intacts - controle de placement, pas de masquage, aucune impression
       // manuelle cachee. (2026-10-08 en-tete, 2026-10-10 tete de contenu, 2026-10-10 generalise au chrome.)
+      // Drapeau de page (@section('suppress_auto_ads')) : la page ne tolere AUCUNE annonce AUTO,
+      // meme dans #main-content (ex. /actualites : seules les unites MANUELLES a data-ad-slot restent).
+      var lvNoAuto = {{ \Illuminate\Support\Facades\View::hasSection('suppress_auto_ads') ? 'true' : 'false' }};
       var lvMain = document.getElementById('main-content');
       var lvPurgeChromeAds = function(){
         if (!lvMain) { return; }
         document.querySelectorAll('.google-auto-placed, ins.adsbygoogle:not([data-ad-slot])').forEach(function(el){
           // On ne GARDE les annonces AUTO que DANS le corps (#main-content). Tout le reste = chrome, on retire.
-          if (lvMain.contains(el)) { return; }
+          if (!lvNoAuto && lvMain.contains(el)) { return; }
           var host = el.closest('.google-auto-placed') || el;
           if (host && host.parentNode) { host.parentNode.removeChild(host); }
         });
