@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.331.2] - 2026-10-10
+
+### Corrigé
+- **Favicon : le logo « œil » remplace l'ancien logo** : l'icône affichée dans l'onglet du navigateur (et l'icône iOS) montrait encore l'ancien logo. Régénérée à partir de `public/images/logo-eye.svg` : `public/images/favicon.png` (32x32), `public/favicon.ico` (16/32/48) et sa copie `public/auth/images/favicon.ico`, plus `public/icons/apple-touch-icon-180x180.png` (œil centré sur fond blanc). Un paramètre `?v=eye` est ajouté aux liens d'icône du gabarit principal et des pages d'erreur pour forcer le rafraîchissement chez les visiteurs déjà venus. Les anciens fichiers restent dans l'historique git.
+
 ## [1.331.1] - 2026-10-10
 
 ### Corrigé

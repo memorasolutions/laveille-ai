@@ -127,10 +127,10 @@
     <meta name="theme-color" content="#064E5A">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon.png') }}">
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon-180x180.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/favicon.png') }}?v=eye">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon.png') }}?v=eye">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=eye">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('icons/apple-touch-icon-180x180.png') }}?v=eye">
     <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
     <title>@yield('title', config('app.name'))</title>
     <meta name="description" content="@yield('meta_description', \Modules\Settings\Facades\Settings::get('seo.meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.'))">
