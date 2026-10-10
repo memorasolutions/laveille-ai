@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.329.0] - 2026-10-10
+
+### Ajouté
+- **API publique : lien web et attribution** : chaque article renvoyé par `/api/v1/articles` porte désormais `web_url` (adresse absolue de la page de l'article, pour générer des références), `source`, `license` et `license_url` (CC BY 4.0, « La veille (laveille.ai) »). Les forfaits (`PlanResource`) portent `source`, `license` et `license_url`. Le champ `url` existant est inchangé. Source unique dans `Modules/Api/config/config.php` (clé `api.attribution`), modifiable par `API_ATTRIBUTION_SOURCE`, `API_ATTRIBUTION_LICENSE` et `API_ATTRIBUTION_LICENSE_URL`.
+- **Glossaire : nouveaux alias d'auto-lien** : « mésalignement » et « misalignment » pointent vers la fiche alignement-ia, « grader » vers llm-as-a-judge (migration réversible, aucun alias retiré). Clé de cache de l'auto-lien passée à v31 pour un effet immédiat.
+
 ## [1.328.0] - 2026-10-10
 
 ### Ajouté
