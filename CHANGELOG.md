@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.331.1] - 2026-10-10
+
+### Corrigé
+- **Annonces in-feed de /actualites : plus aucune boîte vide, à aucune position** : en v1.331.0, seules les unités proches de l'écran étaient demandées à AdSense, et les autres restaient affichées comme cadres vides. Désormais toutes les unités in-feed sont demandées dès le chargement, mais restent hors de la grille (sans cadre ni étiquette) tant qu'aucune annonce n'est servie; elles n'entrent dans la grille que si AdSense répond `filled`. Non servie, bloquée, ou sans réponse en 6 s : la cellule entière (cadre et étiquette « Annonce ») disparaît. La réserve de 300 px est retirée. Sans consentement, aucune cellule n'apparaît.
+
 ## [1.331.0] - 2026-10-10
 
 ### Ajouté

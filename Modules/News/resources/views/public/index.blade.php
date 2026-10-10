@@ -19,6 +19,11 @@
     /* .nw-articles-grid.row : la regle vit desormais dans partials/article-card.blade.php,
        avec le composant qu'elle sert (2026-09-14). */
     .nw-filters { margin-bottom: 1.5rem; }
+    /* Unite in-feed : EN ATTENTE = hors flux (aucun cadre, aucun trou dans la grille) mais avec une largeur,
+       pour qu'AdSense puisse la remplir. Elle entre dans la grille (.lv-ad-ok) SEULEMENT si l'annonce est
+       servie; sinon .lv-ad-off la retire entierement (cellule + etiquette). Voir ads::partials.lazy-loader. */
+    .nw-ad-cell:not(.lv-ad-ok) { position: absolute !important; left: -9999px; top: 0; width: min(340px, calc(100vw - 32px)); visibility: hidden; pointer-events: none; }
+    .nw-ad-cell.lv-ad-off { display: none !important; }
     .nw-filter-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem; }
     .nw-filter-label { font-size: 0.8125rem; font-weight: 600; color: #6b7280; min-width: 70px; }
     .nw-search-wrap { position: relative; }
@@ -205,7 +210,7 @@
                 {{-- Unite in-feed MANUELLE, repetee (config ads.infeed). Cellule a effondrement propre : le
                      lazy-loader du module Ads la retire si l'annonce n'est pas servie (voir data-lv-ad-cell). --}}
                 <div class="col-sm-6 col-md-4 nw-ad-cell" data-lv-ad-cell style="margin-bottom: 1.25rem;">
-                    <aside class="nw-ad" aria-label="{{ __('Annonce') }}" style="min-height:300px;border:1px dashed #cbd5e1;border-radius:8px;padding:.5rem;display:flex;flex-direction:column;overflow:hidden;">
+                    <aside class="nw-ad" aria-label="{{ __('Annonce') }}" style="border:1px dashed #cbd5e1;border-radius:8px;padding:.5rem;display:flex;flex-direction:column;overflow:hidden;">
                         <span style="font-size:.75rem;color:#475569;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.35rem;">{{ __('Annonce') }}</span>
                         {!! $lvInfeedAd !!}
                     </aside>

@@ -11,30 +11,27 @@
   if (window.__lvAdsLazyInit) { return; }
   window.__lvAdsLazyInit = true;
 
-  // Cellules (data-lv-ad-cell) : visibles seulement tant qu'une annonce peut encore arriver (espace
-  // réservé anti-CLS pendant le chargement), retirées si AdSense n'est pas chargé (pas de consentement),
-  // si l'annonce est « unfilled », ou si rien n'est servi 10 s après la demande (bloqueur de pub).
+  // Cellules (data-lv-ad-cell) : en attente (hors flux, voir CSS de la page) jusqu'a ce que l'annonce soit
+  // SERVIE (data-ad-status=filled -> lv-ad-ok, la cellule entre dans la grille). Retiree entierement
+  // (lv-ad-off : cellule + etiquette) si AdSense n'est pas charge (pas de consentement), si l'annonce est
+  // « unfilled », ou si rien n'est servi 6 s apres la demande (bloqueur de pub, faible inventaire).
+  function watchCell(cell) {
+    var ins = cell.querySelector('ins.adsbygoogle');
+    if (!ins) { cell.classList.add('lv-ad-off'); return; }
+    function check() {
+      var st = ins.getAttribute('data-ad-status');
+      if (st === 'filled') { cell.classList.remove('lv-ad-off'); cell.classList.add('lv-ad-ok'); return true; }
+      if (st === 'unfilled') { cell.classList.remove('lv-ad-ok'); cell.classList.add('lv-ad-off'); return true; }
+      return false;
+    }
+    new MutationObserver(check).observe(ins, { attributes: true, attributeFilter: ['data-ad-status'] });
+    setTimeout(function () { if (!check()) { cell.classList.add('lv-ad-off'); } }, 6000);
+  }
+
   function collapseCells() {
-    var cells = document.querySelectorAll('[data-lv-ad-cell]');
-    if (!cells.length) { return; }
-    Array.prototype.forEach.call(cells, function (cell) {
-      var ins = cell.querySelector('ins.adsbygoogle');
-      if (!ins) { cell.classList.add('lv-ad-off'); return; }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-lv-ad-cell]'), function (cell) {
       if (!window.__lvAdsenseLoaded) { cell.classList.add('lv-ad-off'); return; }
-      function check() {
-        var st = ins.getAttribute('data-ad-status');
-        if (st === 'filled') { cell.classList.remove('lv-ad-off'); return true; }
-        if (st === 'unfilled') { cell.classList.add('lv-ad-off'); return true; }
-        return false;
-      }
-      var timer = null;
-      function arm() {
-        if (ins.getAttribute('data-lv-pushed') && !timer) {
-          timer = setTimeout(function () { if (!check()) { cell.classList.add('lv-ad-off'); } }, 10000);
-        }
-      }
-      new MutationObserver(function () { arm(); check(); }).observe(ins, { attributes: true, attributeFilter: ['data-ad-status', 'data-lv-pushed'] });
-      arm(); check();
+      watchCell(cell);
     });
   }
 
@@ -55,6 +52,13 @@
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch (e) { /* une unité en échec ne doit jamais casser la page */ }
     }
+
+    // Les unites en cellule (hors flux tant que non servies) ne peuvent pas etre « vues » : poussees d'emblee.
+    var observable = [];
+    Array.prototype.forEach.call(nodes, function (el) {
+      if (el.closest('[data-lv-ad-cell]')) { push(el); } else { observable.push(el); }
+    });
+    nodes = observable;
 
     if (!('IntersectionObserver' in window)) {
       Array.prototype.forEach.call(nodes, push);
