@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.333.0] - 2026-10-10
+
+### Modifié
+- **Mots-croisés en ligne : la correction au fur et à mesure est DÉSACTIVÉE par défaut** (plus de défi). Le joueur l'active par la case « Corriger au fur et à mesure » (anciennement « Auto-check » - l'anglais est retiré), qui colore les erreurs en direct; sinon il remplit la grille et contrôle à la fin avec le bouton « Vérifier ». La préférence reste mémorisée par navigateur (`cw_autocheck`), donc un joueur qui l'avait activée la garde.
+
+### Ajouté
+- **Mots-croisés : partage natif du résultat à la réussite.** Le bouton « Partager mon résultat » de la modale de fin ouvre la feuille de partage du téléphone (X, Facebook, Messages, WhatsApp…) quand elle est disponible (`navigator.share`), pour favoriser la viralité façon Wordle; repli automatique sur la copie du score dans le presse-papier sur ordinateur.
+
 ## [1.332.0] - 2026-10-10
 
 ### Ajouté

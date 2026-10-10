@@ -95,7 +95,7 @@
               </div>
               <label class="cw-toggle-autocheck" :title="autoCheck ? '{{ __('Validation immédiate activée – case rouge si erreur') }}' : '{{ __('Validation manuelle – clic Vérifier requis') }}'">
                 <input type="checkbox" x-model="autoCheck" aria-label="{{ __('Activer la validation automatique des cases') }}">
-                <span>{{ __('Auto-check') }}</span>
+                <span>{{ __('Corriger au fur et à mesure') }}</span>
               </label>
               <div class="d-flex gap-2 ms-auto flex-wrap">
                 <button type="button" class="cw-action-secondary" @click="checkGrid()" :disabled="completed" aria-label="{{ __('Vérifier la grille – anime les cases erronées') }}">
@@ -224,7 +224,7 @@
               <button type="button" class="ct-btn ct-btn-primary cw-action-btn" @click="resetGame(); completed = false" aria-label="{{ __('Recommencer la partie') }}">
                 {{ __('Recommencer') }}
               </button>
-              <button type="button" class="ct-btn ct-btn-outline cw-action-btn d-inline-flex align-items-center gap-2" @click="copyWordleShare()" aria-label="{{ __('Copier mon résultat au format partageable') }}">
+              <button type="button" class="ct-btn ct-btn-outline cw-action-btn d-inline-flex align-items-center gap-2" @click="nativeShareWordle()" aria-label="{{ __('Partager mon résultat') }}">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                 <span x-show="!wordleShareCopied">{{ __('Partager mon résultat') }}</span>
                 <span x-show="wordleShareCopied" x-cloak>{{ __('Copié ✓') }}</span>
@@ -280,7 +280,8 @@ document.addEventListener('alpine:init', () => {
     completionMessage: '',
 
     // 2026-05-05 Tier S+A : auto-check toggle, erreurs, mot courant, revealed cells (sans erreur counter), Wordle share
-    autoCheck: localStorage.getItem('cw_autocheck') !== '0',
+    // 2026-10-10 : correction au fur et a mesure DESACTIVEE par defaut (plus de defi) ; activee seulement si le joueur l'a cochee ('1').
+    autoCheck: localStorage.getItem('cw_autocheck') === '1',
     errorsCount: 0,
     revealedCells: {},      // {key: true} pour cases revelees via hint/word/reveal-puzzle
     currentWord: null,
