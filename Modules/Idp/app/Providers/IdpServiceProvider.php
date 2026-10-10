@@ -39,12 +39,46 @@ class IdpServiceProvider extends BaseModuleServiceProvider
         $this->app->register(\Laravel\Passport\PassportServiceProvider::class);
         // Avant le boot() de Passport : il lit ce drapeau pour ne pas enregistrer ses propres routes.
         Passport::ignoreRoutes();
+
+        // Client maison : saute l'écran de consentement pour un client FIRST-PARTY (le Moodle de
+        // formations.laveille.ai), car AUCUNE vue d'autorisation n'est définie dans ce projet - sans
+        // ce modèle, le flux /oauth/authorize casserait au consentement. Voir Modules\Idp\Models\OAuthClient.
+        Passport::useClientModel(\Modules\Idp\Models\OAuthClient::class);
     }
 
     public function boot(): void
     {
         $this->bootModule();
+        $this->registerIdpScopes();
+        $this->registerIdpMigrations();
         $this->registerIdpRoutes();
+    }
+
+    /** Scopes OIDC. Définis UNIQUEMENT quand l'IdP est activé (éteint = aucune trace Passport). */
+    public function registerIdpScopes(): void
+    {
+        if (! config('idp.enabled')) {
+            return;
+        }
+
+        Passport::tokensCan([
+            'openid' => 'Vérifier votre identité',
+            'email' => 'Lire votre adresse courriel',
+            'profile' => 'Lire votre nom',
+        ]);
+    }
+
+    /**
+     * Passport 13 ne charge PAS ses migrations (il les publie seulement). On les charge ici,
+     * à la condition que l'IdP soit activé : éteint, `migrate` ne crée aucune table oauth_*.
+     */
+    public function registerIdpMigrations(): void
+    {
+        if (! config('idp.enabled')) {
+            return;
+        }
+
+        $this->loadMigrationsFrom(base_path('vendor/laravel/passport/database/migrations'));
     }
 
     /** N'enregistre AUCUNE route tant que IDP_ENABLED est faux (réversibilité). */

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.327.2] - 2026-10-10
+
+### Modifié
+- Machinerie d'activation du fournisseur d'identité SSO (module Idp), toujours ÉTEINTE (`IDP_ENABLED=false`) : scope `openid` exigé sur `/api/oauth/userinfo`, scopes OIDC (openid/email/profile) et migrations Passport chargés UNIQUEMENT quand l'IdP est activé, et nouveau modèle de client `OAuthClient` qui saute l'écran de consentement pour le seul client first-party de confiance (le Moodle). Prouvé inerte OFF (revue adversariale 2 familles : aucune fuite OFF) et 9 tests Idp verts. Aucune route ni table active tant que l'IdP reste éteint. Aucune migration appliquée.
+
 ## [1.327.1] - 2026-10-10
 
 ### Modifié
