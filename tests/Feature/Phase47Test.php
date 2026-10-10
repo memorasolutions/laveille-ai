@@ -41,6 +41,10 @@ it('magic link request page loads', function () {
 });
 
 it('send link creates token and redirects to verify', function () {
+    // Aucun envoi réel : le mailer nommé (postmark/workspace) contourne MAIL_MAILER=array.
+    \Illuminate\Support\Facades\Notification::fake();
+    \Illuminate\Support\Facades\Mail::fake();
+
     $user = User::factory()->create();
 
     $response = $this->post(route('magic-link.send'), ['email' => $user->email]);
@@ -50,6 +54,10 @@ it('send link creates token and redirects to verify', function () {
 });
 
 it('send link auto-crée un compte pour un courriel inconnu', function () {
+    // Aucun envoi réel : le mailer nommé (postmark/workspace) contourne MAIL_MAILER=array.
+    \Illuminate\Support\Facades\Notification::fake();
+    \Illuminate\Support\Facades\Mail::fake();
+
     // MagicLinkController::sendLink() auto-crée désormais le compte (comportement voulu,
     // cf. commentaire dans le contrôleur) au lieu de rejeter l'e-mail comme inexistant.
     $response = $this->post(route('magic-link.send'), ['email' => 'nonexistent@test.com']);

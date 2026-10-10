@@ -42,6 +42,11 @@ class AcademyAiFeedbackTest extends TestCase
     {
         parent::setUp();
 
+        // Module Academy désactivé à dessein (modules_statuses.json) : on saute proprement.
+        if (! \Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
+            $this->markTestSkipped('Module Academy désactivé — tests skipped.');
+        }
+
         // Rôles/permissions requis par la CoursePolicy (instructor/student/staff).
         $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
         $this->seed(\Modules\Academy\Database\Seeders\AcademyPermissionsSeeder::class);

@@ -35,6 +35,11 @@ class AiTranslationTest extends TestCase
     {
         parent::setUp();
 
+        // Module Academy désactivé à dessein (modules_statuses.json) : on saute proprement.
+        if (! \Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
+            $this->markTestSkipped('Module Academy désactivé — tests skipped.');
+        }
+
         $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
         $this->seed(\Modules\Academy\Database\Seeders\AcademyPermissionsSeeder::class);
     }

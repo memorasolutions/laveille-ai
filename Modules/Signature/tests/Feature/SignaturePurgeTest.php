@@ -156,7 +156,10 @@ test('B2 - la restauration depuis la quarantaine redonne son contenu et son imag
 });
 
 test('B2 - après le délai de rétention, signature:purge-quarantaine vide l\'archive et la quarantaine (donnée définitivement perdue, comme prévu)', function (): void {
-    $sig = sigOldSignature(['last_owner_activity_at' => now()->subMonths(7)]);
+    // 8 mois (et non 7) : le test voyage 31 jours dans le passé avant la purge. Avec 7 mois, selon la
+    // longueur des mois du jour d'exécution, l'activité retombe à moins de 6 mois à cet instant et la
+    // purge n'a pas lieu (échec dépendant de la date). 8 mois reste hors seuil quel que soit le jour.
+    $sig = sigOldSignature(['last_owner_activity_at' => now()->subMonths(8)]);
     $image = SignatureImage::create([
         'signature_id' => $sig->id,
         'role' => SignatureImage::ROLE_LOGO,

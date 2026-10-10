@@ -30,6 +30,16 @@ class AcademyTutorTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Module Academy désactivé à dessein (modules_statuses.json) : on saute proprement.
+        if (! \Nwidart\Modules\Facades\Module::find('Academy')?->isEnabled()) {
+            $this->markTestSkipped('Module Academy désactivé — tests skipped.');
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Helpers de fixture (inline — aucune factory externe requise)
     // -------------------------------------------------------------------------

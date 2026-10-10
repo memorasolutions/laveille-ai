@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.327.1] - 2026-10-10
+
+### Modifié
+- Résilience CI de la suite nocturne (fichiers de test uniquement, aucun code de production) : gardes `markTestSkipped` sur les suites Academy quand le module est désactivé, `Notification::fake`/`Mail::fake` sur les tests de lien magique (le mailer nommé contournait `MAIL_MAILER=array`), et correctif d'un test de purge de signatures dépendant de la date (seuil porté à 8 mois pour être stable quel que soit le jour d'exécution). Aucune migration.
+
 ## [1.327.0] - 2026-10-09
 
 ### Ajouté
