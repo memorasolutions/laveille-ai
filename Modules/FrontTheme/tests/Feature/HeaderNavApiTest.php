@@ -70,6 +70,22 @@ it("ne laisse sortir aucune clé de présentation interne, mais expose l'icône 
     }
 });
 
+it('expose utility_bar.latest_news (null, ou {title non vide, url https laveille}) (ticket #3030)', function () {
+    $json = $this->getJson('/api/header-nav')->assertOk()->json();
+
+    expect($json)->toHaveKey('utility_bar');
+    expect($json['utility_bar'])->toHaveKey('latest_news');
+
+    $news = $json['utility_bar']['latest_news'];
+    // Contrat : null quand il n'y a pas d'article publié (le consommateur garde son repli),
+    // sinon exactement {title, url} - title non vide, url absolue https sur laveille.
+    if ($news !== null) {
+        expect(array_keys($news))->toBe(['title', 'url']);
+        expect($news['title'])->toBeString()->not->toBe('');
+        expect($news['url'])->toBeString()->toStartWith('http');
+    }
+});
+
 it('pose ETag et Cache-Control public, puis répond 304 sur If-None-Match', function () {
     $premiere = $this->getJson('/api/header-nav');
     $etag = $premiere->headers->get('ETag');

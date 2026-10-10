@@ -30,7 +30,9 @@ declare(strict_types=1);
 
 namespace Modules\FrontTheme\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Nwidart\Modules\Facades\Module;
 
 class HeaderNavService
 {
@@ -102,11 +104,16 @@ class HeaderNavService
     {
         $menu = array_map(fn (array $node) => $this->apiNode($node), $this->tree());
         $footer = ['legal' => $this->legalLinks()];
+        // Barre utilitaire : le dernier article publié, pour que la topbar du consommateur (Moodle)
+        // affiche le même titre défilant que l'entête de laveille.ai. latest_news = null quand il
+        // n'y a pas d'article (le consommateur garde alors son repli).
+        $utilityBar = ['latest_news' => $this->latestNewsForApi()];
 
         return [
-            'version' => substr(hash('sha256', (string) json_encode([$menu, $footer], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)), 0, 16),
+            'version' => substr(hash('sha256', (string) json_encode([$menu, $footer, $utilityBar], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)), 0, 16),
             'generated_at' => now()->toIso8601String(),
             'menu' => $menu,
+            'utility_bar' => $utilityBar,
             'footer' => $footer,
         ];
     }
@@ -312,6 +319,54 @@ class HeaderNavService
         }
 
         return $item;
+    }
+
+    /**
+     * Dernier article d'actualité PUBLIÉ (module News), ou null. SOURCE UNIQUE : l'entête de
+     * laveille.ai (barre « dernière actualité ») et l'API GET /api/header-nav en dérivent, même
+     * sélection et même cache. Requête directe sur is_published (jamais le scope published()
+     * surchargé) + exclusion des fiches retirées (410), pour ne jamais pointer vers une fiche morte.
+     *
+     * @return object|null  modèle NewsArticle (id, title, seo_title, slug) ou null si module absent/vide
+     */
+    public function latestNewsArticle()
+    {
+        $class = 'Modules\\News\\Models\\NewsArticle';
+        if (! Module::has('News') || ! Module::find('News')?->isEnabled() || ! class_exists($class)) {
+            return null;
+        }
+
+        return Cache::remember('front_latest_news_article', 300, function () use ($class) {
+            try {
+                return $class::where('is_published', true)
+                    ->whereNull('retired_at')
+                    ->latest('pub_date')
+                    ->first(['id', 'title', 'seo_title', 'slug']);
+            } catch (\Throwable $e) {
+                // Table absente ou base indisponible (ex. migrations non jouées) : la barre
+                // « dernière actualité » de l'entête ET l'API tombent sur leur repli, jamais un 500.
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Forme publique du dernier article pour la barre utilitaire de l'API : {title, url} ou null.
+     * Titre identique à l'entête (seo_title sinon title) ; URL absolue de la fiche.
+     *
+     * @return array{title:string,url:string}|null
+     */
+    private function latestNewsForApi(): ?array
+    {
+        $article = $this->latestNewsArticle();
+        if ($article === null) {
+            return null;
+        }
+
+        return [
+            'title' => (string) ($article->seo_title ?? $article->title),
+            'url' => route('news.show', $article),
+        ];
     }
 
     /** Compteur mis en cache une heure, comme avant l'extraction depuis l'entête. */

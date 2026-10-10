@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.336.0] - 2026-10-10
+
+### Ajouté
+- **API `GET /api/header-nav` : nouvelle clé `utility_bar.latest_news`** portant le dernier article publié (`{title, url}`), ou `null` s'il n'y en a pas. Permet à l'académie Moodle d'afficher dans sa barre utilitaire le même titre d'actualité défilant que l'entête de laveille.ai, depuis la source unique. Le titre et la sélection sont identiques à l'entête (dernier article `is_published`, non retiré, par date de parution; titre = `seo_title` sinon `title`; URL absolue de la fiche). `latest_news` entre dans l'empreinte `version` : le `304` continue de fonctionner, et l'ETag change quand l'article change. Champ additif, le reste du contrat est inchangé.
+- **Source unique du « dernier article » de l'entête** : la sélection (requête + cache `front_latest_news_article`) est désormais portée par `HeaderNavService::latestNewsArticle()`. La barre « dernière actualité » de l'entête (via `FrontendDataComposer`) ET l'API en dérivent - une seule définition de la règle, plus de duplication. Rendu de l'entête inchangé.
+
 ## [1.335.0] - 2026-10-10
 
 ### Ajouté
