@@ -14,7 +14,7 @@ return [
     'enabled' => (bool) env('IDP_ENABLED', false),
 
     // Claims exposés par /api/oauth/userinfo.
-    'claims' => ['sub', 'email', 'email_verified', 'name'],
+    'claims' => ['sub', 'email', 'email_verified', 'name', 'given_name', 'family_name'],
 
     // Clients de confiance qui sautent l'écran de consentement (first-party, même organisation).
     // On NE se fie PAS au seul « sans propriétaire » (un client créé par artisan sans --user est

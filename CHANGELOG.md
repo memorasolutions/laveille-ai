@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.337.0] - 2026-10-11
+
+### Ajouté
+- **IdP OAuth2 : le `userinfo` expose désormais `given_name` et `family_name`.** En plus de `sub`, `email`, `email_verified` et `name`, le point `/api/oauth/userinfo` renvoie le prénom et le nom séparés (depuis `first_name`/`last_name` du compte; repli par découpage du nom complet quand ces champs sont vides). Permet à l'académie Moodle de remplir correctement le prénom et le nom du profil lors de la connexion SSO. Additif : les claims existants sont inchangés, et la liaison des comptes continue de reposer sur `sub` + `email`.
+
 ## [1.336.1] - 2026-10-11
 
 ### Modifié

@@ -75,7 +75,7 @@ it('ON : le provider Passport est chargé', function (): void {
 
 it('ON : un OAuthUser authentifié par le guard idp obtient ses claims', function (): void {
     idpLoadKeys();
-    $user = User::factory()->create(['is_active' => true, 'email_verified_at' => now()]);
+    $user = User::factory()->create(['is_active' => true, 'email_verified_at' => now(), 'first_name' => 'Jean', 'last_name' => 'Tremblay', 'name' => 'Jean Tremblay']);
     idpActingAs($user, ['openid']);
 
     $this->getJson('/api/oauth/userinfo')->assertOk()->assertExactJson([
@@ -83,6 +83,8 @@ it('ON : un OAuthUser authentifié par le guard idp obtient ses claims', functio
         'email' => $user->email,
         'email_verified' => true,
         'name' => $user->name,
+        'given_name' => 'Jean',
+        'family_name' => 'Tremblay',
     ]);
 });
 
@@ -99,9 +101,9 @@ it('ON : sans jeton, 401', function (): void {
     $this->getJson('/api/oauth/userinfo')->assertUnauthorized();
 });
 
-it('ON : un jeton portant le scope openid obtient les 4 claims', function (): void {
+it('ON : un jeton portant le scope openid obtient les 6 claims (prénom/nom déduits du nom complet en repli)', function (): void {
     idpLoadKeys();
-    $user = User::factory()->create(['is_active' => true, 'email_verified_at' => now()]);
+    $user = User::factory()->create(['is_active' => true, 'email_verified_at' => now(), 'first_name' => null, 'last_name' => null, 'name' => 'Marie Lapointe']);
     idpActingAs($user, ['openid']);
 
     $this->getJson('/api/oauth/userinfo')->assertOk()->assertExactJson([
@@ -109,6 +111,8 @@ it('ON : un jeton portant le scope openid obtient les 4 claims', function (): vo
         'email' => $user->email,
         'email_verified' => true,
         'name' => $user->name,
+        'given_name' => 'Marie',
+        'family_name' => 'Lapointe',
     ]);
 });
 

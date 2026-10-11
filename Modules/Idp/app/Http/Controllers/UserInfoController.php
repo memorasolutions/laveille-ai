@@ -25,11 +25,21 @@ class UserInfoController extends Controller
             return response()->json(['message' => 'Compte désactivé.'], 403);
         }
 
+        // Prénom/nom séparés pour le mappage de profil côté client (ex. Moodle given_name/family_name).
+        // Repli si first_name/last_name sont vides : 1er mot du nom complet = prénom, le reste = nom.
+        $given = (string) ($user->first_name ?? '');
+        $family = (string) ($user->last_name ?? '');
+        if ($given === '' && $family === '') {
+            [$given, $family] = array_pad(preg_split('/\s+/', trim((string) $user->name), 2) ?: [''], 2, '');
+        }
+
         $claims = [
             'sub' => (string) $user->getKey(),
             'email' => $user->email,
             'email_verified' => $user->email_verified_at !== null,
             'name' => $user->name,
+            'given_name' => $given,
+            'family_name' => $family,
         ];
 
         return response()->json(array_intersect_key($claims, array_flip(config('idp.claims', []))));
