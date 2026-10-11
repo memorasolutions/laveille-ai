@@ -36,7 +36,9 @@ Route::get('/llms-full.txt', \App\Http\Controllers\LlmsFullController::class)->n
 
 // Ancienne académie maison désactivée (module Academy OFF le 2026-10-09) : tout /academie* redirige
 // définitivement (301) vers le Moodle canonique. Le Moodle EST désormais l'académie (décision fondateur).
-Route::get('/academie/{path?}', fn () => redirect('https://formations.laveille.ai', 301))
+// 2026-10-11 : le Moodle est passé du sous-domaine à laveille.ai/formations (bascule « un seul site ») ;
+// la cible devient /formations, en préservant le chemin.
+Route::get('/academie/{path?}', fn (?string $path = null) => redirect('/formations'.($path !== null && $path !== '' ? '/'.$path : ''), 301))
     ->where('path', '.*')
     ->name('academie.redirect');
 

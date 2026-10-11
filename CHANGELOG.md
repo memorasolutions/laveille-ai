@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.336.1] - 2026-10-11
+
+### Modifié
+- **Bascule « un seul site » - redirection héritée `/academie` vers `/formations`.** Le Moodle (l'académie) est désormais servi sous `laveille.ai/formations` plutôt que sur le sous-domaine `formations.laveille.ai`. La route `/academie/{path?}` redirige maintenant (301) vers `/formations` en préservant le chemin, au lieu de l'ancien sous-domaine. Côté infrastructure (hors dépôt) : symlink `public/formations` vers le webroot Moodle (servi en PHP 8.4), redirection 301 de bord `formations.laveille.ai/*` -> `laveille.ai/formations/*` (path-for-path, Cloudflare), et `redirect_uri` du client OAuth2 « Moodle formations » pointant sur `https://laveille.ai/formations/admin/oauth2callback.php` (l'ancien sous-domaine reste accepté le temps de la transition). Le sous-domaine demeure vivant comme filet de rollback. Lien public vers l'académie toujours éteint.
+
 ## [1.336.0] - 2026-10-10
 
 ### Ajouté
