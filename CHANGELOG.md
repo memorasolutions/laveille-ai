@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.338.0] - 2026-10-11
+
+### Ajouté
+- **IdP OAuth2 : le `userinfo` expose le claim `picture` (avatar).** Quand l'utilisateur a téléversé un avatar sur laveille, `/api/oauth/userinfo` renvoie son URL (`picture`), que l'académie Moodle peut mapper sur la photo de profil à la connexion. Le claim est OMIS (jamais `null` ni data-URI de repli à initiales) quand aucun avatar n'est téléversé, pour que le client garde sa propre image par défaut. Additif : les autres claims (`sub`, `email`, `name`, `given_name`, `family_name`) sont inchangés. Complète la synchro de profil sens unique Laravel vers Moodle.
+
 ## [1.337.0] - 2026-10-11
 
 ### Ajouté

@@ -42,6 +42,12 @@ class UserInfoController extends Controller
             'family_name' => $family,
         ];
 
+        // Avatar (claim OIDC « picture ») : seulement si une vraie image a été téléversée
+        // (URL HTTP récupérable par le client, jamais le data-URI de repli à initiales).
+        if ($user->avatar) {
+            $claims['picture'] = asset('storage/'.$user->avatar);
+        }
+
         return response()->json(array_intersect_key($claims, array_flip(config('idp.claims', []))));
     }
 }

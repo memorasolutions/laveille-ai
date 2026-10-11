@@ -116,6 +116,23 @@ it('ON : un jeton portant le scope openid obtient les 6 claims (prénom/nom déd
     ]);
 });
 
+it('ON : le claim picture est présent quand un avatar est téléversé', function (): void {
+    idpLoadKeys();
+    $user = User::factory()->create(['is_active' => true, 'email_verified_at' => now(), 'avatar' => 'avatars/jean.png']);
+    idpActingAs($user, ['openid']);
+
+    $this->getJson('/api/oauth/userinfo')->assertOk()
+        ->assertJsonPath('picture', asset('storage/avatars/jean.png'));
+});
+
+it('ON : le claim picture est ABSENT sans avatar (jamais de data-URI)', function (): void {
+    idpLoadKeys();
+    $user = User::factory()->create(['is_active' => true, 'email_verified_at' => now(), 'avatar' => null]);
+    idpActingAs($user, ['openid']);
+
+    $this->getJson('/api/oauth/userinfo')->assertOk()->assertJsonMissingPath('picture');
+});
+
 it('ON : un jeton SANS le scope openid est refusé (403)', function (): void {
     idpLoadKeys();
     $user = User::factory()->create(['is_active' => true, 'email_verified_at' => now()]);
