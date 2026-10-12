@@ -135,7 +135,6 @@
                             @guest
                                 <li><a href="{{ route('login') }}" target="_blank" rel="noopener">🔑 {{ __('Se connecter') }}</a></li>
                             @endguest
-                        </ul>
                         @auth
                             @can('view_admin_panel')
                             <li style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.15);">
@@ -147,6 +146,7 @@
                             <li style="margin-top:6px;"><a href="{{ route('admin.directory.moderation') }}" target="_blank" rel="noopener">📋 {{ __('Modération') }}</a></li>
                             @endcan
                         @endauth
+                        </ul>
                     </div>
                 </div>
             </div>

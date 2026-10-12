@@ -4,6 +4,11 @@
 <style>
   /* Effondrement propre : une cellule dont l'annonce n'est pas servie ne laisse ni cadre ni étiquette. */
   [data-lv-ad-cell].lv-ad-off, ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
+  /* Unité hors cellule (barre latérale). Quand l'annonce n'est pas servie, on replie son cadre
+     réservé (min-height) au lieu de laisser un grand rectangle blanc. :has() sur les navigateurs
+     modernes; repli gracieux (le cadre reste) sur les plus anciens. */
+  .lv-adsense-wrap:has(> ins.adsbygoogle[data-ad-status="unfilled"]),
+  .widget:has(> .lv-adsense-wrap > ins.adsbygoogle[data-ad-status="unfilled"]) { display: none !important; }
 </style>
 <script>
 (function () {
