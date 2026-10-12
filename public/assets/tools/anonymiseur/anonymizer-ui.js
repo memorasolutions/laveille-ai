@@ -1,3 +1,8 @@
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
+ */
 // anonymizer-ui.js — éditeur annoté inline (souligné = à anonymiser, surligné = anonymisé)
 // Vanilla, sans dépendance. Consomme window.AnonymizerCore. Aucune popup native.
 

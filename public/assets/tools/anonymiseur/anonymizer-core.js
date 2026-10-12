@@ -1,3 +1,8 @@
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
+ */
 // anonymizer-core.js — moteur pur réversible (testé en Node + navigateur)
 
 const FAKE_DATA = {
@@ -281,7 +286,7 @@ function detectEntities(text) {
   const nasStd = /(?<!\d)\d{3}[ -]?\d{3}[ -]?\d{3}(?!\d)/g;
   while ((m = nasStd.exec(text))) { const c = m[0].replace(/[ -]/g, ''); if (c.length === 9 && luhnNAS(c)) push(m[0], 'id', 'NAS', 0.9); }
   // 13. Montant avec le symbole $ APRÈS le nombre (format québécois : « 1 250,00 $ », « 2 750$ »)
-  const amountFr = /\d{1,3}(?:[ .  ]\d{3})*(?:,\d{2})?\s*\$/g;
+  const amountFr = /(?:\d{1,3}(?:[ .  ]\d{3})+|\d+)(?:,\d{2})?\s*\$/g;
   while ((m = amountFr.exec(text))) push(m[0], 'amount', 'Montant', 0.9);
   // 14. Nom abrégé après titre de civilité (initiale + nom : « Mme L. Gagnon », « Dr. A. Roy »)
   const titledAbbrev = /\b(?:Dr\.?|M\.?|Mme\.?|Me|Pr|Mr)[^\S\r\n]+([A-ZÀ-Ÿ]\.?[^\S\r\n]+[A-ZÀ-Ÿ][a-zà-ÿ'’\-]+)/g;
@@ -458,11 +463,21 @@ function detectEntities(text) {
   entities.filter((e) => ['name', 'firstName', 'lastName'].includes(e.category)).forEach((e) => {
     String(e.value).split(/[\s-]+/).forEach((w) => nomsPersonnesConnus.add(normalize(w)));
   });
-  const cityContext = /\b(?:succursale\s+de\s+(?:l['’])?|bureau\s+de\s+(?:l['’])?|à\s+)([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)/gu;
+  const cityContext = /(?<![\p{L}\p{N}])(?:succursale\s+de\s+(?:l['’])?|bureau\s+de\s+(?:l['’])?|à\s+)([A-ZÀ-Ÿ][a-zà-ÿ'’]+(?:-[A-ZÀ-Ÿ]?[a-zà-ÿ'’]+)*)/gu;
   while ((m = cityContext.exec(text))) {
     const candidat = m[1];
     if (estMotIgnore(candidat, STOPWORDS)) continue;
     if (nomsPersonnesConnus.has(normalize(candidat))) continue;
+    // « à » (et « de ») précèdent aussi des PERSONNES (« merci à Jean », « la lettre de Marie ») :
+    // un candidat dont un mot est un PRÉNOM connu est écarté ici, sinon il serait remplacé par un
+    // faux nom de ville, ce qui corromprait le sens.
+    // EXCEPTION — les toponymes HAGIONYMES (« Saint-Jean », « Sainte-Marie »…) commencent par
+    // Saint/Sainte et désignent une municipalité même quand leur 2e mot est un prénom. Beaucoup ne
+    // sont PAS dans la liste fermée (VILLES_QUEBEC ne porte que « Saint-Jean-sur-Richelieu », pas
+    // « Saint-Jean »), donc sans cette exception elles ne seraient captées par AUCUNE voie - une
+    // vraie fuite de nom de ville dans le texte envoyé à l'IA.
+    const estHagionyme = /^sainte?[-\s]/i.test(candidat);
+    if (!estHagionyme && candidat.split(/[\s-]+/).some((mot) => detectGenrePrenom(mot))) continue;
     push(candidat, 'city', 'Ville', 0.7);
   }
   return entities;

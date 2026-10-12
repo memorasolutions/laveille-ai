@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.340.0] - 2026-10-12
+
+### Ajouté
+- **Anonymiseur : interface disponible en anglais.** Les 30 chaînes de l'écran (entête, étapes, aides, boutons, messages) ont désormais leur traduction anglaise dans `lang/en.json`; auparavant un visiteur en anglais voyait le texte français de repli. Le français reste la source et demeure inchangé. Invariant de traduction respecté (`fr ⊆ en`).
+
+### Corrigé
+- **Anonymiseur : détection d'un montant « collé au symbole » (format québécois).** Un montant comme « 1250$ » écrit sans séparateur de milliers n'était masqué qu'en partie (« 250$ », laissant le « 1 » en clair). La regex `amountFr` capte désormais le montant en entier, qu'il soit groupé (« 1 250,00 $ ») ou non (« 1250$ »).
+- **Anonymiseur : détection d'une ville introduite par « à ».** « à Toronto », « à Rivière-du-Loup »… n'étaient pas repérés par le contexte (la frontière de mot ASCII échouait devant le « à » accentué). La borne est passée en Unicode (`\p{L}\p{N}`), cohérente avec le reste du moteur. Les villes déjà connues et les noms de personnes restent gérés comme avant.
+- **Anonymiseur : fuite d'adresse dans un lien collé.** Lors d'un collage riche, un lien conservait son `href` (`mailto:jean@…` ou une URL portant un nom), qui pouvait survivre au masquage du texte visible et fuir à une copie HTML manuelle. Les liens `<a>` sont désormais déballés en texte simple au collage : aucun `href` n'est conservé.
+- **Suite nocturne (diagnostic) : `UserInfoEnabledTest` ne trouvait plus la table `oauth_clients`.** En environnement de test, les migrations Passport se chargent désormais inconditionnellement (la migration globale `RefreshDatabase` tourne au premier test venu, souvent non-IdP). Le comportement de PRODUCTION est inchangé : aucune table `oauth_*` n'est créée quand l'IdP est éteint (invariant d'exportabilité du module préservé).
+
+### Interne
+- Attribution `@author MEMORA solutions` ajoutée en tête des trois fichiers JS de l'anonymiseur (moteur, interface, éditeur riche).
+
 ## [1.339.0] - 2026-10-12
 
 ### Ajouté

@@ -1,3 +1,8 @@
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
+ */
 // anonymizer-rich.js — éditeur riche : collage sanitizé + surlignage sur les nœuds texte.
 // Vanilla, additif. Expose window.AnonRich = { sanitizePastedHtml, highlightEntitiesInElement }.
 // Consomme window.AnonymizerCore.buildAccentInsensitiveBoundedRegex pour le matching insensible accents/casse.
@@ -5,13 +10,16 @@
   'use strict';
 
   // Balises de mise en forme conservées au collage (liste blanche stricte).
-  const ALLOWED = new Set(['p', 'br', 'b', 'strong', 'i', 'em', 'u', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'blockquote', 'a']);
+  const ALLOWED = new Set(['p', 'br', 'b', 'strong', 'i', 'em', 'u', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'blockquote']);
   // Balises de bloc non conservées : on les déballe MAIS on insère un <br> pour garder le saut de ligne.
   const BLOCK_UNWRAP = new Set(['div', 'section', 'article', 'header', 'footer', 'tr', 'table', 'tbody', 'thead', 'pre']);
 
   /**
-   * Nettoie le HTML collé (Word, Google Docs…) : ne garde que ALLOWED, retire tous les attributs
-   * (sauf href valide sur <a>), supprime script/style/commentaires/balises Word (« : » dans le nom).
+   * Nettoie le HTML collé (Word, Google Docs…) : ne garde que ALLOWED, retire TOUS les attributs,
+   * supprime script/style/commentaires/balises Word (« : » dans le nom). Les liens <a> sont
+   * DÉBALLÉS en texte simple (hors ALLOWED) : un href collé — « mailto:jean@… » ou une URL
+   * portant un nom ou un courriel — survivrait sinon à l'anonymisation du texte visible et
+   * fuirait lors d'une copie HTML manuelle (vie privée).
    * @param {string} html
    * @returns {string} HTML nettoyé (ou '')
    */
@@ -40,12 +48,10 @@
       if (tag === 'script' || tag === 'style' || tag.indexOf(':') !== -1) { node.remove(); return; }
 
       if (ALLOWED.has(tag)) {
-        const keepHref = tag === 'a' && /^(https?:\/\/|mailto:)/i.test(node.getAttribute('href') || '');
+        // Vie privée : on retire TOUS les attributs des balises conservées (aucune exception href).
         Array.prototype.slice.call(node.attributes).forEach(function (a) {
-          if (keepHref && a.name === 'href') return;
           node.removeAttribute(a.name);
         });
-        if (tag === 'a' && !keepHref) unwrap(node, false); // lien sans href utile → déballer
         return;
       }
       unwrap(node, BLOCK_UNWRAP.has(tag)); // balise hors liste → déballer (bloc → + <br>)

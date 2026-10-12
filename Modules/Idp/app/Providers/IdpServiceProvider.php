@@ -75,12 +75,19 @@ class IdpServiceProvider extends BaseModuleServiceProvider
     }
 
     /**
-     * Passport 13 ne charge PAS ses migrations (il les publie seulement). On les charge ici,
-     * à la condition que l'IdP soit activé : éteint, `migrate` ne crée aucune table oauth_*.
+     * Passport 13 ne charge PAS ses migrations (il les publie seulement). On les charge ici.
+     * EN PRODUCTION : à la condition que l'IdP soit activé - éteint, `migrate` ne crée aucune table
+     * oauth_* (invariant d'exportabilité : un déploiement sans IdP ne porte aucune trace Passport).
+     * EN TEST : on les charge TOUJOURS. La suite complète migre une seule fois (RefreshDatabase),
+     * au tout premier test venu - le plus souvent un test NON-IdP où le drapeau est faux. Sans ce
+     * chargement inconditionnel en test, les tables oauth_* manquent lorsqu'un test IdP s'exécute
+     * ensuite dans le même processus (« no such table: oauth_clients »), peu importe que ce test-là
+     * ait activé l'IdP : la migration globale, elle, est déjà passée. Le comportement de PROD est
+     * inchangé (l'environnement n'y est jamais « testing »).
      */
     public function registerIdpMigrations(): void
     {
-        if (! config('idp.enabled')) {
+        if (! config('idp.enabled') && ! $this->app->environment('testing')) {
             return;
         }
 
