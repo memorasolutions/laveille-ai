@@ -8,23 +8,18 @@
 
 namespace Modules\Shop\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Modules\Shop\Gelato\GelatoHttpClient;
 use Modules\Shop\Models\Product;
 
 class GelatoWizardService
 {
     private const BASE_URL = 'https://product.gelatoapis.com/v3';
 
-    private static function headers(): array
-    {
-        return ['X-API-KEY' => config('shop.gelato.api_key')];
-    }
-
     private static function get(string $url, array $query = []): array
     {
         try {
-            return Http::withHeaders(self::headers())->get($url, $query)->json() ?? [];
+            return GelatoHttpClient::forApi('product')->get($url, $query)->json() ?? [];
         } catch (\Exception $e) {
             return [];
         }

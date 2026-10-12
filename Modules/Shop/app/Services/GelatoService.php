@@ -8,10 +8,10 @@
 
 namespace Modules\Shop\Services;
 
+use Modules\Shop\Gelato\GelatoHttpClient;
 use Modules\Shop\Gelato\GelatoSubmitException;
 use Modules\Shop\Gelato\OrderItemRouter;
 use Modules\Shop\Models\Order;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class GelatoService
@@ -26,16 +26,12 @@ class GelatoService
 
     private function client()
     {
-        return Http::withHeaders([
-            'X-API-KEY' => config('shop.gelato.api_key'),
-        ])->baseUrl(config('shop.gelato.api_url'));
+        return GelatoHttpClient::forApi('base');
     }
 
     private function orderClient()
     {
-        return Http::withHeaders([
-            'X-API-KEY' => config('shop.gelato.api_key'),
-        ])->baseUrl('https://order.gelatoapis.com');
+        return GelatoHttpClient::forApi('order');
     }
 
     public function getCatalogs(): array

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Modules\Shop\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Modules\Shop\Gelato\GelatoHttpClient;
 use Modules\Shop\Gelato\SyncLockLostException;
 use Modules\Shop\Models\Product;
 
@@ -65,10 +65,8 @@ class GelatoSyncService
     public function fetchStoreProduct(string $storeId, string $productId): ?array
     {
         try {
-            $response = Http::withHeaders([
-                'X-API-KEY' => config('shop.gelato.api_key'),
-            ])->baseUrl('https://ecommerce.gelatoapis.com')
-              ->get("/v1/stores/{$storeId}/products/{$productId}");
+            $response = GelatoHttpClient::forApi('ecommerce')
+                ->get("/v1/stores/{$storeId}/products/{$productId}");
 
             if (! $response->successful()) {
                 Log::error('GelatoSyncService.fetchStoreProduct failed', [
@@ -466,7 +464,7 @@ class GelatoSyncService
 
         for ($page = 0; $page < 20; $page++) {
             try {
-                $response = Http::withHeaders(['X-API-KEY' => config('shop.gelato.api_key')])
+                $response = GelatoHttpClient::forApi('ecommerce')
                     ->get("https://ecommerce.gelatoapis.com/v1/stores/{$storeId}/products", [
                         'limit' => $limit, 'offset' => $page * $limit,
                     ]);
@@ -901,7 +899,7 @@ class GelatoSyncService
 
         $cost = null;
         try {
-            $response = Http::withHeaders(['X-API-KEY' => config('shop.gelato.api_key')])
+            $response = GelatoHttpClient::forApi('product')
                 ->get("https://product.gelatoapis.com/v3/products/{$productUid}/prices", ['country' => 'CA']);
             if ($response->successful()) {
                 $data = $response->json();

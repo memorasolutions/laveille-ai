@@ -9,7 +9,7 @@
 namespace Modules\Shop\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
+use Modules\Shop\Gelato\GelatoHttpClient;
 use Modules\Shop\Models\Product;
 
 class SyncGelatoPricesCommand extends Command
@@ -103,9 +103,7 @@ class SyncGelatoPricesCommand extends Command
     private function fetchCost(string $productUid): ?float
     {
         try {
-            $response = Http::withHeaders([
-                'X-API-KEY' => config('shop.gelato.api_key'),
-            ])->get("https://product.gelatoapis.com/v3/products/{$productUid}/prices", [
+            $response = GelatoHttpClient::forApi('product')->get("https://product.gelatoapis.com/v3/products/{$productUid}/prices", [
                 'country' => 'CA',
             ]);
 
