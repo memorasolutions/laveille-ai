@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.342.0] - 2026-10-12
+
+### Ajouté
+- **Connexion : entrée par code (OTP) pour l'académie.** Un apprenant non connecté renvoyé par le SSO de l'académie (url.intended pointant vers /oauth/authorize) atterrit sur /magic-link (code courriel) au lieu du formulaire de mot de passe. Le super-admin garde le mot de passe : il est ramené vers /login sans boucle, grâce à un drapeau de session à usage unique. La connexion normale, hors contexte SSO, est inchangée. Réversible par AUTH_FORCE_OTP_IN_SSO=false. url.intended n'est jamais consommé, donc le retour SSO reste intact.
+
 ## [1.341.0] - 2026-10-12
 
 ### Ajouté
