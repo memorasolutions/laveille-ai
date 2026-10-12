@@ -27,6 +27,7 @@ use Modules\Auth\Http\Controllers\UserDashboardController;
 use Modules\Auth\Http\Controllers\UserNotificationsController;
 use Modules\Auth\Http\Controllers\UserSessionController;
 use Modules\Auth\Http\Controllers\UserSubscriptionController;
+use Modules\Auth\Http\Middleware\ForceOtpInSsoContext;
 use Modules\Auth\Livewire\ForgotPassword;
 use Modules\Auth\Livewire\Login;
 use Modules\Auth\Livewire\Register;
@@ -35,7 +36,7 @@ use Modules\Auth\Livewire\TwoFactorChallenge;
 use Modules\Auth\Services\AuthService;
 
 Route::middleware(['guest', 'throttle:10,1'])->group(function () {
-    Route::get('/login', Login::class)->name('login');
+    Route::get('/login', Login::class)->name('login')->middleware(ForceOtpInSsoContext::class);
     Route::get('/register', Register::class)->name('register');
     Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
     Route::get('/reset-password/{token}', ResetPassword::class)->name('password.reset');

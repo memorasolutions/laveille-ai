@@ -70,6 +70,17 @@ class MagicLinkController extends Controller
             return back()->withErrors(['email' => "Trop de tentatives. Réessayez dans {$seconds} secondes."]);
         }
 
+        // Le fondateur (super-admin) garde le mot de passe : on ne crée rien, on n'envoie aucun code,
+        // et url.intended reste intact (le retour SSO en dépend).
+        $existing = User::where('email', $request->email)->first();
+        if ($existing !== null && $existing->isSuperAdmin()) {
+            // force_password_login (usage unique) casse la boucle avec ForceOtpInSsoContext : sans
+            // lui, le middleware renverrait aussitôt le fondateur de /login vers /magic-link.
+            return redirect()->route('login')
+                ->with('status', 'Ce compte se connecte avec son mot de passe.')
+                ->with('force_password_login', true);
+        }
+
         // Auto-créer le compte + assigner le rôle par défaut dans une transaction : une création
         // partielle (compte créé mais assignRole() en échec) laisserait sinon un compte orphelin
         // sans rôle de façon PERMANENTE (wasRecentlyCreated devient false dès le 2e essai, donc
