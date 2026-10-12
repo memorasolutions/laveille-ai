@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.342.2] - 2026-10-12
+
+### Corrigé
+- **Bandeau de témoins : fin du clignotement au rechargement.** Le bandeau de consentement aux témoins (cookies) était rendu OUVERT par défaut côté serveur, puis masqué par le JavaScript après lecture du consentement déjà stocké. Un visiteur ayant déjà consenti voyait donc le bandeau apparaître une fraction de seconde puis glisser hors de l'écran à chaque rechargement (régression perçue, défaut latent depuis la création du module). Il est désormais rendu FERMÉ par défaut (et `inert`), et c'est le JavaScript qui l'OUVRE uniquement si aucun consentement valide n'existe. C'est la seule approche correcte avec le cache plein-page, qui fige le même HTML pour tous les visiteurs : un visiteur consentant ne voit plus rien, un nouveau visiteur voit le bandeau apparaître normalement.
+
+### Interne
+- **Module `Catalog` (désactivé).** Ajout du module nwidart `Catalog` (vitrine publique des cours Moodle à `/cours`, lecture seule du web service REST Moodle, affichage en cartes groupées par catégorie). Livré DÉSACTIVÉ dans `modules_statuses.json` en attendant le branchement du jeton WS côté serveur : aucun effet en production tant qu'il n'est pas activé.
+
 ## [1.342.1] - 2026-10-12
 
 ### Interne

@@ -8,7 +8,7 @@
     $cookiePolicyUrl = config('privacy.documents.cookie_policy.url', '/cookie-policy');
     $locale = app()->getLocale();
     $isFr = str_starts_with($locale, 'fr');
-    $hasCookie = false; // Toujours false côté serveur — le JS gère l'état via le cookie client
+    $hasCookie = false; // Rendu serveur TOUJOURS fermé (bandeau masqué par défaut). La page passe par le cache plein-page : le HTML ne peut pas varier par visiteur, donc c'est le JS qui OUVRE le bandeau si aucun consentement valide n'existe. Rendre « ouvert » par défaut faisait flasher le bandeau à chaque rechargement pour un visiteur déjà consentant (régression corrigée le 2026-10-12).
 
     $text = [
         'title' => $isFr ? 'Paramètres de confidentialité' : 'Privacy Settings',
@@ -113,11 +113,11 @@
         <span class="cc-fab-text">{{ $text['fab_label'] }}</span>
     </button>
 
-    {{-- Backdrop --}}
-    <div id="cc-backdrop" class="cc-backdrop {{ $hasCookie ? '' : 'cc-open' }}"></div>
+    {{-- Backdrop — rendu FERMÉ (anti-flash) ; le JS l'ouvre si aucun consentement valide --}}
+    <div id="cc-backdrop" class="cc-backdrop" inert></div>
 
-    {{-- Banniere modale --}}
-    <div id="cc-modal" class="cc-modal {{ $hasCookie ? '' : 'cc-open' }}" role="dialog" aria-modal="true" aria-labelledby="cc-title" aria-describedby="cc-desc">
+    {{-- Banniere modale — rendue FERMÉE + inert (anti-flash) ; le JS l'ouvre si besoin --}}
+    <div id="cc-modal" class="cc-modal" inert role="dialog" aria-modal="true" aria-labelledby="cc-title" aria-describedby="cc-desc">
         {{-- #Phase0 : titre + texte défilent si besoin, mais les actions (footer) restent
              TOUJOURS visibles dans la hauteur de la modale (flex column, cf. .cc-scroll). --}}
         <div class="cc-scroll">
@@ -406,8 +406,9 @@
             setTimeout(function() { openBanner(); }, 100);
         }
     } else {
-        // Pas de cookie : focus trap sur la banniere
-        setTimeout(function() { initFocusTrap(); }, 100);
+        // Pas de cookie : OUVRIR la banniere (rendue fermee par defaut cote serveur = anti-flash).
+        // openBanner() appelle initFocusTrap() en interne.
+        setTimeout(function() { openBanner(); }, 100);
     }
 })();
 </script>
