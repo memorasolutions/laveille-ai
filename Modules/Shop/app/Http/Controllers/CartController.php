@@ -49,11 +49,16 @@ class CartController extends Controller
             }
         }
 
+        // Même source que la mise à jour AJAX (cartTotals) : aperçu Québec calculé par TaxCalculator, arrondi unique.
+        $totals = $this->cartTotals('CA', 'QC');
+
         return view('shop::public.cart', [
             'content' => $this->cartService->getContent(),
-            'subtotal' => $this->cartService->getSubtotal(),
-            'tax' => $this->cartService->getTaxAmount(),
-            'total' => $this->cartService->getTotal(),
+            'subtotal' => $totals['subtotal'],
+            'tax' => $totals['tax'],
+            'cartTps' => $totals['tps'],
+            'cartTvq' => $totals['tvq'],
+            'total' => $totals['total'],
             'itemCount' => $this->cartService->itemCount(),
             'savedAddress' => $savedAddress,
         ]);

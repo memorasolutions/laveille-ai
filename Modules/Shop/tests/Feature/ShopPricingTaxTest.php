@@ -241,6 +241,13 @@ test('borne pays : pays ouvert par config accepté, 0 taxe canadienne', function
     expect($order)->not->toBeNull()->and((float) $order->tax_amount)->toBe(0.0);
 });
 
+test("borne pays : '*' = vendre partout, toute destination acceptée, 0 taxe canadienne", function () {
+    config(['shop.shipping_countries' => ['*']]);
+    [, $order] = ptCheckout(ptProduct(), 40.0, 8.0, ['country' => 'FR', 'state' => '', 'postal_code' => '75001']);
+
+    expect($order)->not->toBeNull()->and((float) $order->tax_amount)->toBe(0.0);
+});
+
 test('borne pays : code en minuscules normalisé (ca) et toujours taxé', function () {
     [, $order] = ptCheckout(ptProduct(), 40.0, 8.0, ['country' => 'ca']);
 

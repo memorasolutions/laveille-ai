@@ -52,7 +52,8 @@ class CheckoutController extends Controller
         // (« ca » ne doit plus échapper à la taxe canadienne par une comparaison stricte).
         $countryCode = strtoupper(trim((string) $request->input('shipping_address.country', '')));
         $allowed = array_map('strtoupper', (array) config('shop.shipping_countries', ['CA']));
-        if (! in_array($countryCode, $allowed, true)) {
+        // '*' dans la liste = vendre PARTOUT (aucune restriction de pays).
+        if (! in_array('*', $allowed, true) && ! in_array($countryCode, $allowed, true)) {
             return back()->withInput()->withErrors(['shipping_address.country' => __('Nous ne livrons pas encore dans ce pays.')]);
         }
         $request->merge(['shipping_address' => array_merge((array) $request->input('shipping_address'), ['country' => $countryCode])]);

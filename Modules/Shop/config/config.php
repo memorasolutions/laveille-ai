@@ -102,6 +102,9 @@ return [
 
     'handling_fee' => (float) env('SHOP_HANDLING_FEE', 1.00),
 
+    // Pays de livraison autorisés. Défaut = Canada seul. SHOP_SHIPPING_COUNTRIES='*' = vendre PARTOUT
+    // (aucune restriction de pays). La borne du checkout accepte alors toute destination que Gelato peut
+    // coter; le devis d'expédition réel par destination et le garde-fou de marge protègent la marge.
     'shipping_countries' => env('SHOP_SHIPPING_COUNTRIES')
         ? array_values(array_filter(array_map('trim', explode(',', (string) env('SHOP_SHIPPING_COUNTRIES')))))
         : ['CA'],

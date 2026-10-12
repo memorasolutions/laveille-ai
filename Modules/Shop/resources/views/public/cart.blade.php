@@ -131,14 +131,16 @@
                         <span x-text="cartSubtotal.toFixed(2).replace('.', ',') + ' $'"></span>
                     </div>
                     <div x-show="country === 'CA'" class="sp-tax-block">
+                        <div class="sp-tax-estimate" style="font-weight:600;">{{ __('Taxes estimées (Québec)') }}</div>
                         <div class="sp-tax-row">
-                            <span>{{ __('TPS') }} ({{ config('shop.tax.tps', 5) }}%) <span class="sp-tax-number">839145984</span></span>
+                            <span>{{ __('TPS') }} ({{ config('shop.tax.tps', 5) }} %) <span class="sp-tax-number">839145984</span></span>
                             <span x-text="cartTps.toFixed(2).replace('.', ',') + ' $'"></span>
                         </div>
                         <div class="sp-tax-row">
-                            <span>{{ __('TVQ') }} ({{ config('shop.tax.tvq', 9.975) }}%) <span class="sp-tax-number">1221788059</span></span>
+                            <span>{{ __('TVQ') }} ({{ config('shop.tax.tvq', 9.975) }} %) <span class="sp-tax-number">1221788059</span></span>
                             <span x-text="cartTvq.toFixed(2).replace('.', ',') + ' $'"></span>
                         </div>
+                        <div class="sp-tax-note" style="font-size:.85em;opacity:.8;margin-top:4px;">{{ __('Les taxes exactes selon votre province et la livraison sont calculées à l\'étape de paiement.') }}</div>
                     </div>
                     <hr style="margin: 12px 0;">
                     <div class="sp-summary-total">
@@ -372,8 +374,8 @@ document.addEventListener('alpine:init', () => {
         quoteFetched: false,
         methods: [],
         cartSubtotal: {{ $subtotal ?? 0 }},
-        cartTps: {{ isset($subtotal) ? round($subtotal * config('shop.tax.tps', 5) / 100, 2) : 0 }},
-        cartTvq: {{ isset($subtotal) ? round($subtotal * config('shop.tax.tvq', 9.975) / 100, 2) : 0 }},
+        cartTps: {{ $cartTps ?? 0 }},
+        cartTvq: {{ $cartTvq ?? 0 }},
         cartTotal: {{ $total ?? 0 }},
         selectedUid: null,
         selectedCost: 0,
