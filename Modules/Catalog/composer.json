@@ -1,0 +1,12 @@
+{
+    "name": "modules/catalog",
+    "authors": [
+        { "name": "MEMORA solutions", "email": "info@memora.ca", "homepage": "https://memora.solutions" }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Modules\\Catalog\\": "app/",
+            "Modules\\Catalog\\Tests\\": "tests/"
+        }
+    }
+}

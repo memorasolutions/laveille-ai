@@ -56,5 +56,6 @@
     "Decido": true,
     "Signature": true,
     "Analytics": true,
-    "Idp": true
+    "Idp": true,
+    "Catalog": false
 }

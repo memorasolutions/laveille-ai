@@ -1,0 +1,75 @@
+<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
+@extends(fronttheme_layout())
+
+@section('title', __('Nos formations').' - '.config('app.name'))
+
+@section('breadcrumb')
+    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Nos formations')])
+@endsection
+
+@push('styles')
+<style>
+    .catalog { padding: 32px 0; background: #fff; color: #111827; }
+    .catalog h1, .catalog h2, .catalog h3 { color: #111827; }
+    .catalog .catalog-section { margin-top: 32px; }
+    .catalog .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .catalog article { background: #fff; border: 1px solid #f3f4f6; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px #0000000d; transition: box-shadow .2s; }
+    .catalog article:hover { box-shadow: 0 4px 6px #0000001a; }
+    .catalog .catalog-image { width: 100%; height: 192px; object-fit: cover; }
+    .catalog .catalog-placeholder { height: 192px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #134e4a, #115e59); color: #fff; }
+    .catalog .catalog-placeholder svg { width: 64px; height: 64px; }
+    .catalog .catalog-card-body { padding: 20px; }
+    .catalog .catalog-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; background: #f0fdfa; color: #134e4a; font-size: 14px; }
+    .catalog .catalog-card-title { margin: 12px 0; font-size: 20px; }
+    .catalog p { color: #374151; }
+    .catalog a { color: #134e4a; text-decoration: underline; }
+    .catalog a:hover { color: #111827; }
+    .catalog a:focus-visible { outline: 3px solid #134e4a; outline-offset: 4px; }
+    @media (min-width: 768px) { .catalog .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (min-width: 1024px) { .catalog .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+</style>
+@endpush
+
+@section('content')
+<div class="catalog">
+    <div class="container">
+        <h1>{{ __('Nos formations') }}</h1>
+        @if(empty($categories))
+            <p>{{ __('Les formations seront bientôt disponibles.') }}</p>
+        @else
+            @foreach($categories as $group)
+                <section class="catalog-section">
+                    @if(count($categories) > 1)
+                        <h2>{{ $group['category'] }}</h2>
+                    @endif
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        @foreach($group['courses'] as $course)
+                            <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+                                @if($course['image_local'])
+                                    <img src="{{ $course['image_local'] }}" alt="{{ $course['fullname'] }}" class="catalog-image w-full h-48 object-cover" loading="lazy">
+                                @else
+                                    <div class="catalog-placeholder" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M3 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-3H3V4Zm18 0h-6a3 3 0 0 0-3 3v14a4 4 0 0 1 4-3h5V4Z" />
+                                        </svg>
+                                    </div>
+                                @endif
+                                <div class="catalog-card-body p-5">
+                                    <span class="catalog-badge">{{ $group['category'] }}</span>
+                                    @if(count($categories) > 1)
+                                        <h3 class="catalog-card-title">{{ $course['fullname'] }}</h3>
+                                    @else
+                                        <h2 class="catalog-card-title">{{ $course['fullname'] }}</h2>
+                                    @endif
+                                    <p>{{ \Illuminate\Support\Str::limit(strip_tags($course['summary']), 140) }}</p>
+                                    <a href="{{ $course['course_url'] }}" aria-label="{{ __('Voir la formation').' : '.$course['fullname'] }}">{{ __('Voir la formation') }}</a>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                </section>
+            @endforeach
+        @endif
+    </div>
+</div>
+@endsection
