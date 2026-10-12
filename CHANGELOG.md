@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.342.3] - 2026-10-12
+
+### Interne
+- **Module `Catalog` : conformité à la règle d'architecture sécurité.** `MoodleCatalogService` utilisait `parse_str` (forme à deux arguments, sans risque réel ici) pour fusionner la chaîne de requête d'une URL. Le préréglage `arch()->security()` bannit `parse_str` dans tout le projet, ce qui faisait échouer la suite Architecture et, par ricochet, bloquait le déploiement de TOUT le train (dont le correctif du bandeau de témoins de la v1.342.2). Remplacé par `GuzzleHttp\Psr7\Query::parse`, strictement équivalent pour cet usage et déjà fourni par le client HTTP : aucune dépendance nouvelle, aucun changement de comportement. Préféré à une exemption nommée pour ne pas inscrire `parse_str` dans du code neuf jamais exécuté en production.
+
 ## [1.342.2] - 2026-10-12
 
 ### Corrigé

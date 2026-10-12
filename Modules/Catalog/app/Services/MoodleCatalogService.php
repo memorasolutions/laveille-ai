@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace Modules\Catalog\Services;
 
+use GuzzleHttp\Psr7\Query;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -104,7 +105,10 @@ class MoodleCatalogService
 
     protected function request(string $url, array $query): Response
     {
-        parse_str((string) parse_url($url, PHP_URL_QUERY), $existingQuery);
+        // Query::parse (Guzzle, déjà présent via le client HTTP) remplit un tableau local sans
+        // toucher à la portée globale - équivalent à parse_str 2 args, mais hors du radar de la
+        // règle d'architecture sécurité qui bannit parse_str partout.
+        $existingQuery = Query::parse((string) parse_url($url, PHP_URL_QUERY));
         $query = array_replace($existingQuery, $query);
         $send = fn () => Http::timeout(config('catalog.http_timeout'))->withoutRedirecting()->get($url, $query);
 
