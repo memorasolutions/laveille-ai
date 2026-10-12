@@ -11,7 +11,7 @@
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => $tool->name, 'breadcrumbItems' => [__('Outils'), $tool->name]])
 @endsection
 @section('content')
-<section class="wpo-blog-single-section section-padding">
+<section class="wpo-blog-single-section section-padding" style="padding-top: 30px;">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10 col-12">
@@ -653,7 +653,7 @@
                                     {{ __('✍️ Partir de mon brouillon (courriel, notes, prompt existant)') }}
                                 </button>
                                 <div x-show="draftOpen" x-transition style="border: 1px solid var(--c-primary); border-radius: 10px; padding: 10px;">
-                                    <label class="form-label fw-medium mb-1" for="cpDraftText" style="font-size: 0.85rem;">{{ __('Colle ton texte ici') }}</label>
+                                    <label class="form-label fw-medium mb-1" for="cpDraftText" style="font-size: 0.85rem;">{{ __('Collez votre texte ici') }}</label>
                                     <textarea id="cpDraftText" class="form-control" rows="4" x-model="draftText" autocomplete="off" placeholder="{{ __('Ex: le courriel que tu écris souvent, tes notes de réunion, un prompt déjà utilisé...') }}" aria-label="{{ __('Brouillon à transformer') }}" @blur="checkDraftPii()"></textarea>
                                     <p class="small mb-0 mt-2 p-2 rounded" style="font-size: 0.8rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;" x-show="draftPiiWarning" x-cloak>🔒 {{ __('Ce texte semble contenir des renseignements personnels. Pour les retirer avant de l\'envoyer, utilise l\'') }}<a href="/outils/anonymiseur" style="color: #0A3A42; font-weight: 600; text-decoration: underline;">{{ __('Anonymiseur') }}</a>.</p>
                                     <p class="small mb-0 mt-2" style="font-size: 0.8rem; color: #991B1B;" x-show="draftError" x-cloak x-text="draftError" role="alert" aria-live="assertive"></p>
@@ -679,7 +679,7 @@
                                      reste du formulaire (voir <small class="text-muted"> ligne ~408 juste
                                      en dessous). Fait le pont entre ce champ et les espaces à remplir
                                      décrits plus bas dans cette même étape. --}}
-                                <small class="text-muted d-block mb-1">{{ __('Écris ta demande une fois - réutilise-la en changeant seulement quelques mots.') }}</small>
+                                <small class="text-muted d-block mb-1">{{ __('Écrivez votre demande une fois - réutilisez-la en changeant seulement quelques mots.') }}</small>
                                 <label class="form-label fw-medium">{{ __('Sur quoi porte votre demande ?') }} <span style="color: #991B1B;">*</span></label>
                                 <p class="small mb-2 p-2 rounded" style="font-size: 0.82rem; color: var(--c-dark); background: var(--c-primary-light); border-left: 3px solid var(--c-primary); border-radius: 8px;">🔒 {{ __('Il y a un vrai nom, un courriel, un numéro de téléphone ou une adresse dans votre texte ? Cachez-les d\'abord avec l\'') }}<a href="/outils/anonymiseur" style="color: #0A3A42; font-weight: 600; text-decoration: underline;">{{ __('Anonymiseur') }}</a>{{ __(', puis collez le résultat ici. Rien n\'est envoyé ni enregistré nulle part.') }}</p>
                                 <textarea id="cpTaskObject" class="form-control" rows="3" x-model="taskObject" autocomplete="off" aria-required="true" placeholder="{{ __('Ex: un plan marketing pour le lancement d\'une application mobile au Québec') }}" aria-label="{{ __('Description de la demande') }}"
@@ -749,7 +749,7 @@
                                      « Tu pourras changer : » ne disait pas QUOI ni son lien avec le
                                      texte - reformulé pour nommer explicitement le lien pastille ↔
                                      texte de la demande. --}}
-                                <p class="small mb-1" style="font-size:0.8rem; color:var(--c-text-muted);">{{ __("Tes espaces à remplir - chaque pastille est un bout de texte de ta demande :") }}</p>
+                                <p class="small mb-1" style="font-size:0.8rem; color:var(--c-text-muted);">{{ __("Vos espaces à remplir - chaque pastille est un bout de texte de votre demande :") }}</p>
                                 <div class="ct-chip-row" role="list" aria-label="{{ __('Espaces à remplir créés') }}">
                                     <template x-for="(sp, spIdx) in spaces" :key="spIdx">
                                         {{-- Couche 2 (canonKey, 2026-08-09) : spaceMissing(sp) remplace l'ancien
@@ -775,8 +775,8 @@
                                                 <button type="button" class="ct-chip__label" @click="startRenameSpace(spIdx)"
                                                     {{-- @js() : l'apostrophe de « n'a » cassait l'expression Alpine en quotes simples
                                                          (SyntaxError console, title/aria jamais rendus - trouvé au QC visuel). --}}
-                                                    :aria-label="(spaceMissing(sp) ? @js(__('ce mot n\'a pas été retrouvé dans ton texte : ')) : '') + sp.text"
-                                                    :title="spaceMissing(sp) ? @js(__('Ce mot n\'a pas été retrouvé dans ton texte.')) : sp.text">
+                                                    :aria-label="(spaceMissing(sp) ? @js(__('ce mot n\'a pas été retrouvé dans votre texte : ')) : '') + sp.text"
+                                                    :title="spaceMissing(sp) ? @js(__('Ce mot n\'a pas été retrouvé dans votre texte.')) : sp.text">
                                                     <span x-text="sp.text"></span>
                                                 </button>
                                             </template>
@@ -833,7 +833,7 @@
                             <div class="ct-block__field" x-show="audienceType === 'custom'">
                                 <label class="form-label fw-medium mb-1" for="cpAudienceCustom" style="font-size: 0.8rem;">{{ __('Audience personnalisée') }}</label>
                                 <input type="text" id="cpAudienceCustom" class="form-control" x-model="audienceCustom" autocomplete="off" placeholder="{{ __('Ex : mes élèves de 5e année, leurs parents') }}" aria-describedby="cpAudienceCustomHelp">
-                                <small id="cpAudienceCustomHelp" style="display:block; margin-top:4px; color:var(--c-muted, #5a6b6f); font-size:0.8rem;">{{ __('Tu peux nommer plusieurs lecteurs, séparés par des virgules.') }}</small>
+                                <small id="cpAudienceCustomHelp" style="display:block; margin-top:4px; color:var(--c-muted, #5a6b6f); font-size:0.8rem;">{{ __('Vous pouvez nommer plusieurs lecteurs, séparés par des virgules.') }}</small>
                             </div>
                         </div>
 
@@ -865,7 +865,7 @@
                                              handleFormatChange() (constructeur-prompts-core.js) : maximum 3
                                              sélections, et « Format JSON »/« Diagramme Mermaid » exclusifs entre eux
                                              et avec tout le reste. --}}
-                                        <p class="small text-muted mb-2" style="font-size: 0.75rem;">{{ __('Choisis 1 à 3 formats compatibles.') }}</p>
+                                        <p class="small text-muted mb-2" style="font-size: 0.75rem;">{{ __('Choisissez 1 à 3 formats compatibles.') }}</p>
                                         <select id="cpFormatSelect" class="form-control form-control-sm" @change="addFormatFromSelect($event.target.value); $event.target.value=''" aria-label="{{ __('Ajouter un format de sortie') }}">
                                             <option value="">{{ __('-- Ajouter un format --') }}</option>
                                             <template x-for="fmt in formats" :key="fmt.value">
@@ -913,6 +913,7 @@
                                                 <input type="text" x-model="length" class="form-control form-control-sm mt-1" autocomplete="off" placeholder="{{ __('Ex: 1000 mots exactement') }}" aria-label="{{ __('Longueur personnalisée') }}">
                                             </div>
                                         </div>
+                                        <p x-show="lengthFormatConflict" x-cloak role="status" aria-live="polite" class="small mt-1 mb-0" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="lengthFormatConflictMessage"></p>
                                     </div>
                                 </x-tools::prompt-block>
 
@@ -1132,6 +1133,7 @@
                             <span class="tool-wizard-nav__status">{{ __('Étape') }} <span x-text="step"></span> {{ __('sur') }} 4</span>
                             <div class="tool-wizard-nav__side tool-wizard-nav__side--end">
                                 <button class="ct-btn ct-btn-primary" @click="nextStep()" x-show="step < 4" style="min-height:44px;">{{ __('Suivant') }} →</button>
+                                <button type="button" class="ct-btn ct-btn-accent" @click="finishAndCopy()" x-show="step === 4" x-cloak style="min-height:44px;">{{ __('Terminer et copier le prompt') }}</button>
                             </div>
                         </div>
                         </div>
@@ -1179,7 +1181,7 @@
                             </div>
                         </div>
 
-                        {{-- Remplis tes espaces (ex-« Remplis tes variables », étendu tâches 1660-1665,
+                        {{-- Remplissez vos espaces (ex-« Remplis tes variables », étendu tâches 1660-1665,
                              2026-08-07) : zone de remplissage affichée SOUS l'aperçu, listant D'ABORD
                              les espaces créés par sélection/bouton (fillableSpaces - les "non
                              retrouvés" en sont exclus, seule action possible pour eux = le × de la
@@ -1189,8 +1191,8 @@
                              champ laissé vide garde le mot de départ - jamais bloquant. --}}
                         <div class="mb-3" x-show="fillableSpaces.length > 0 || promptVariables.length > 0" x-cloak>
                             <div class="p-3 rounded" style="background: var(--c-primary-light); border: 1px solid rgba(11,114,133,0.12); border-radius: 10px;">
-                                <h3 style="font-family: var(--f-heading); font-weight: 700; font-size: 0.95rem; color: var(--c-dark); margin: 0 0 0.35rem;">{{ __('Remplis tes espaces') }}</h3>
-                                <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.8rem;">{{ __('Ton prompt contient des espaces à remplir. Complète-les ici : la copie et « Ouvrir dans » utiliseront automatiquement tes réponses (les champs laissés vides gardent le mot de départ).') }}</p>
+                                <h3 style="font-family: var(--f-heading); font-weight: 700; font-size: 0.95rem; color: var(--c-dark); margin: 0 0 0.35rem;">{{ __('Remplissez vos espaces') }}</h3>
+                                <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.8rem;">{{ __('Votre prompt contient des espaces à remplir. Complétez-les ici : la copie et « Ouvrir dans » utiliseront automatiquement vos réponses (les champs laissés vides gardent le mot de départ).') }}</p>
                                 <template x-for="(sp, spIdx) in fillableSpaces" :key="sp.text">
                                     <div class="mb-2">
                                         {{-- Nom en évidence (panel round 2, Gemini) : l'étiquette porte le
@@ -1248,7 +1250,7 @@
                                 🔎 {{ __('Vérifications') }}
                             </button>
                             <div id="cpChecksPanel" class="ct-disclosure__panel" x-show="checksOpen" x-transition>
-                                <p class="small mb-2" style="color: var(--c-text-muted);">{{ __("Ton prompt fonctionne déjà. Ces précisions le rendraient encore meilleur :") }}</p>
+                                <p class="small mb-2" style="color: var(--c-text-muted);">{{ __("Votre prompt fonctionne déjà. Ces précisions le rendraient encore meilleur :") }}</p>
                                 <div aria-live="polite">
                                     <template x-if="diagnostic.ok">
                                         <p class="mb-0 small" style="color: var(--c-dark);">✓ {{ __('Votre prompt contient les éléments essentiels.') }}</p>
@@ -1301,10 +1303,21 @@
                         {{-- Repères de données (même signalement) : affichés SEULEMENT quand le prompt
                              en contient réellement, c'est-à-dire quand le contexte additionnel ou les
                              exemples sont remplis (voir hasDataDelimiters). Sinon ce serait du bruit. --}}
-                        <p x-show="isValid && hasDataDelimiters" x-cloak role="status" aria-live="polite" class="small mb-2" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="dataDelimitersMessage"></p>
-                        <div class="d-flex gap-2 mb-3 flex-wrap">
-                            <button class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
+                        {{-- Aide discrète (retour fondateur 2026-10-12) : le message technique sur les repères
+                             ⟦DONNEES⟧ brouillait les débutants en restant affiché en permanence. Il devient un
+                             petit ⓘ (infobulle + panneau au clic/toucher) placé à côté du bouton Copier ; le
+                             message dataDelimitersMessage reste inchangé et disponible. --}}
+                        <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+                            <button id="cpCopyBtn" class="ct-btn ct-btn-accent flex-fill" @click="copy()" :disabled="!isValid" aria-describedby="cpValidityHint" :style="!isValid && 'opacity:0.5;cursor:not-allowed;'"
                                     x-text="copied ? '{{ __('Copié !') }}' : '{{ __('Copier le prompt') }}'"></button>
+                            <span x-show="isValid && hasDataDelimiters" x-cloak x-data="{ dataHelpOpen: false }" class="d-inline-flex align-items-center">
+                                <button type="button" class="ct-btn ct-btn-outline ct-btn-icon" style="border-radius:50%;"
+                                        @click="dataHelpOpen = !dataHelpOpen" :aria-expanded="dataHelpOpen ? 'true' : 'false'"
+                                        :title="dataDelimitersMessage" :aria-label="dataDelimitersMessage">
+                                    <span aria-hidden="true">ⓘ</span>
+                                </button>
+                                <span x-show="dataHelpOpen" x-cloak role="status" aria-live="polite" class="small ms-2" style="color: var(--c-text-muted); font-size: 0.78rem;" x-text="dataDelimitersMessage"></span>
+                            </span>
                             {{-- "Améliorer avec mon IA" (Option 3 hybride, Partie B — 2026-07-26,
                                  validation croisée multi-IA) : modèle BYOA strict.
                                  AUCUN appel réseau backend — génère un méta-prompt 100% côté client
@@ -1440,7 +1453,7 @@
                                     <h3 style="font-family: var(--f-heading); font-weight: 700; margin: 0; font-size: 1rem;">{{ __('Mes derniers prompts (sur cet appareil)') }} (<span x-text="guestHistory.length"></span>)</h3>
                                     <button class="ct-btn ct-btn-outline-danger ct-btn-xs" style="min-height:44px;" @click="clearGuestHistory()">{{ __('Tout effacer') }}</button>
                                 </div>
-                                <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.75rem;">🔒 {{ __('Conservés uniquement dans ton navigateur, jamais envoyés au serveur.') }}</p>
+                                <p class="small mb-2" style="color: var(--c-text-muted); font-size: 0.75rem;">🔒 {{ __('Conservés uniquement dans votre navigateur, jamais envoyés au serveur.') }}</p>
                                 <template x-for="(g, gi) in guestHistory" :key="g.date + '_' + gi">
                                     <div class="d-flex justify-content-between align-items-center p-2 mb-1 rounded" style="background: #f8f9fa; font-size: 0.8rem;">
                                         <div class="flex-fill" style="cursor: pointer;" @click="loadGuestHistoryEntry(gi)">
@@ -1997,6 +2010,7 @@ $defaultFormats = [
     ['value' => 'Fiche pratique (1 page)', 'label' => __('Fiche pratique (1 page)')],
     ['value' => 'Modèle réutilisable (gabarit)', 'label' => __('Modèle réutilisable (gabarit)')],
     ['value' => 'FAQ structurée', 'label' => __('FAQ structurée')],
+    ['value' => 'Courriel', 'label' => __('Courriel')],
 ];
 $defaultLengths = [
     ['value' => 'Concis (100-200 mots)', 'label' => __('Concis (100-200 mots)')],
@@ -2084,9 +2098,10 @@ window.promptBuilderConfig = {
         saveError: @json(__('Erreur de sauvegarde. Réessayez.')),
         taskTextKept: @json(__('Votre texte a été conservé. Effacez-le si vous voulez repartir du gabarit de cette carte.')),
         loadError: @json(__('Impossible de charger ce prompt pour édition.')),
-        diagnosticFormat: @json(__("Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.")),
-        diagnosticAudience: @json(__("Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.")),
-        diagnosticContraintes: @json(__("Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).")),
+        lengthFormatConflict: @json(__('Astuce : « Concis » et « Paragraphes détaillés » tirent dans des directions opposées. Choisissez l\'un ou l\'autre pour un meilleur résultat.')),
+        diagnosticFormat: @json(__("Vous n'avez pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.")),
+        diagnosticAudience: @json(__("Vous n'avez pas indiqué à qui s'adresse la réponse (par exemple : vos élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.")),
+        diagnosticContraintes: @json(__("Vous n'avez coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).")),
         exportError: @json(__('Impossible d\'exporter le fichier. Réessayez.')),
         deleteError: @json(__('Erreur lors de la suppression. Réessayez.')),
         importError: @json(__('Erreur lors de l\'importation. Réessayez.')),
@@ -2128,8 +2143,8 @@ window.promptBuilderConfig = {
         // summary* plus haut : préfixe traduit, valeur brute (déjà en français, non traduite par
         // convention - personas/verbes/audiences/formats/longueurs/tons/techniques) concaténée telle
         // quelle.
-        addedPrefix: @json(__('Sera inclus dans ton prompt : ')),
-        addedAudience: @json(__('Sera inclus dans ton prompt : un niveau de langage adapté à ')),
+        addedPrefix: @json(__('Sera inclus dans votre prompt : ')),
+        addedAudience: @json(__('Sera inclus dans votre prompt : un niveau de langage adapté à ')),
         fragVerb: @json(__('verbe ')),
         fragFormat: @json(__('format ')),
         fragLength: @json(__('longueur ')),
@@ -2162,7 +2177,7 @@ window.promptBuilderConfig = {
         profileFeedbackTraduction: @json(__('Vous avez choisi Traduction : je retire les règles de français du Québec du résultat.')),
         // Espaces à remplir (tâches 1660-1665, panel multi-IA 5 rounds, 2026-08-07) : messages
         // JS dynamiques (toasts, mention "non rempli") - même pont i18n que le reste de ce fichier.
-        spaceTooShort: @json(__('Choisis un mot plus précis pour éviter les remplacements imprévus.')),
+        spaceTooShort: @json(__('Choisissez un mot plus précis pour éviter les remplacements imprévus.')),
         spaceAlreadyExists: @json(__('Cet espace existe déjà.')),
         spaceMultiOccurrences: @json(__('Ce texte apparaît :count fois : chaque endroit sera remplacé par ta réponse.')),
         spaceNewLabel: @json(__('information à préciser')),
@@ -2171,14 +2186,14 @@ window.promptBuilderConfig = {
         // Correctif UX « lien persistant pendant le nommage » (2026-08-09) : même patron
         // {placeholder} que spaceUnfilledMany ci-dessus, consommé par get spacePendingHintMessage()
         // dans constructeur-prompts-core.js.
-        spacePendingHint: @json(__("Le texte « {text} » vient d'être ajouté dans ta demande ci-dessus - donne-lui un nom parlant.")),
+        spacePendingHint: @json(__("Le texte « {text} » vient d'être ajouté dans votre demande ci-dessus - donnez-lui un nom parlant.")),
         // Couche 2 (tâches 1660-1665, boucle 5 oracles 2026-08-09) : C2-2 (garde-fou de fusion au
         // renommage, voir _confirmRenameMergeIfNeeded()) et C2-3 (avis d'orphelines à la copie, voir
         // orphanSpacesMessage()) dans constructeur-prompts-core.js.
-        spaceRenameMergeOne: @json(__('Ce texte apparaît déjà 1 fois dans ta demande - toutes les occurrences seront remplies ensemble.')),
-        spaceRenameMergeMany: @json(__('Ce texte apparaît déjà {count} fois dans ta demande - toutes les occurrences seront remplies ensemble.')),
-        spaceOrphanOne: @json(__("1 espace à remplir n'est plus dans ton texte.")),
-        spaceOrphanMany: @json(__('{count} espaces à remplir ne sont plus dans ton texte.')),
+        spaceRenameMergeOne: @json(__('Ce texte apparaît déjà 1 fois dans votre demande - toutes les occurrences seront remplies ensemble.')),
+        spaceRenameMergeMany: @json(__('Ce texte apparaît déjà {count} fois dans votre demande - toutes les occurrences seront remplies ensemble.')),
+        spaceOrphanOne: @json(__("1 espace à remplir n'est plus dans votre texte.")),
+        spaceOrphanMany: @json(__('{count} espaces à remplir ne sont plus dans votre texte.')),
         // Signalement fondateur (2026-08-25) : une variable entre doubles accolades laissée vide est
         // copiée telle quelle (voir get promptFilled()), alors qu'un espace à remplir retombe sur son
         // mot de départ. Seuls les espaces étaient signalés - même patron {count} que spaceUnfilledMany.
@@ -2192,7 +2207,7 @@ window.promptBuilderConfig = {
         // Brique 2 (2026-08-20) - « Partir de mon brouillon » : message doux affiché par submitDraft()
         // (constructeur-prompts-core.js) sur échec de transformation (JSON invalide, texte vide, budget
         // IA dépassé...) - jamais un 500, jamais une erreur technique brute affichée à l'utilisateur.
-        draftError: @json(__("Je n'ai pas pu transformer ce texte, réessaie ou pars du wizard."))
+        draftError: @json(__("Je n'ai pas pu transformer ce texte, réessayez ou partez du wizard."))
     }
 };
 </script>

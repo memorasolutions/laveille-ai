@@ -100,7 +100,7 @@ function assert(cond, label) { if (cond) { pass++; console.log('  ✅ ' + label)
         assert(pb.feedbackResultat.indexOf('longueur') === -1, 'défaut 2/4 : la ligne "Sera inclus..." ne mentionne pas la longueur quand `length` est vide');
         // NB : "ton " en sous-chaîne existe déjà dans le préfixe fixe "Sera inclus dans ton
         // prompt : " - on vérifie donc la valeur EXACTE plutôt qu'une sous-chaîne piégeuse.
-        assert(pb.feedbackTon === 'Sera inclus dans ton prompt : rôle « Expert en marketing digital ».', 'défaut 2/4 : la ligne "Sera inclus..." ne mentionne QUE le rôle (réellement saisi), jamais un ton quand `tone` est resté vide');
+        assert(pb.feedbackTon === 'Sera inclus dans votre prompt : rôle « Expert en marketing digital ».', 'défaut 2/4 : la ligne "Sera inclus..." ne mentionne QUE le rôle (réellement saisi), jamais un ton quand `tone` est resté vide');
         // Non-régression : une fois un VRAI contenu présent (rôle+tâche), le défaut honnête de
         // formatsSelected/constraintAntiAI (chip/case déjà visibles dès l'ouverture, jamais masqués
         // derrière "Aucune") continue de s'appliquer - seule la fuite à VIDE a été corrigée.

@@ -180,7 +180,7 @@ document.addEventListener('alpine:init', function() {
             // traduits) pour rester la source de vérité du TEXTE injecté dans le prompt, comme
             // partout ailleurs dans ce fichier (personas/verbes/audiences non traduits).
             _formatStructureValues: ['Liste à puces', 'Paragraphes détaillés', 'Tableau structuré', 'Plan hiérarchisé', 'Étapes numérotées'],
-            _formatDeliverableValues: ['Questionnaire / QCM avec corrigé', 'Grille d\'évaluation (rubrique)', 'Fiche pratique (1 page)', 'Modèle réutilisable (gabarit)', 'FAQ structurée'],
+            _formatDeliverableValues: ['Questionnaire / QCM avec corrigé', 'Grille d\'évaluation (rubrique)', 'Fiche pratique (1 page)', 'Modèle réutilisable (gabarit)', 'FAQ structurée', 'Courriel'],
             _formatExclusiveValues: ['Format JSON', 'Diagramme Mermaid'],
             length: '',
             tone: '',
@@ -371,7 +371,7 @@ document.addEventListener('alpine:init', function() {
             // repli taskObject si aucun focus).
             _lastFocusedSpaceField: 'cpTaskObject',
             // Éclaire dans l'aperçu les segments correspondant au champ actuellement en train d'être
-            // rempli (voir le bloc « Remplis tes espaces » plus bas, @focus/@blur).
+            // rempli (voir le bloc « Remplissez vos espaces » plus bas, @focus/@blur).
             focusedSpaceText: '',
             // Mots-outils français trop courts/ambigus pour servir d'ancrage fiable (spec §UI -
             // création, point A) - comparaison sur le texte EXACT trimé, jamais une recherche de
@@ -1011,7 +1011,7 @@ document.addEventListener('alpine:init', function() {
                 if (!this.audienceText) return '';
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 var txt = this.audienceText.charAt(0).toLowerCase() + this.audienceText.slice(1);
-                return (i18n.addedAudience || 'Sera inclus dans ton prompt : un niveau de langage adapté à ') + txt + '.';
+                return (i18n.addedAudience || 'Sera inclus dans votre prompt : un niveau de langage adapté à ') + txt + '.';
             },
             get feedbackResultat() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
@@ -1022,7 +1022,7 @@ document.addEventListener('alpine:init', function() {
                 if (this.formatText && (this.verbText || this.taskObject)) parts.push((i18n.fragFormat || 'format ') + this.formatText.toLowerCase());
                 if (this.length) parts.push((i18n.fragLength || 'longueur ') + this.length.toLowerCase());
                 if (!parts.length) return '';
-                return (i18n.addedPrefix || 'Sera inclus dans ton prompt : ') + parts.join(', ') + '.';
+                return (i18n.addedPrefix || 'Sera inclus dans votre prompt : ') + parts.join(', ') + '.';
             },
             get feedbackTon() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
@@ -1030,7 +1030,7 @@ document.addEventListener('alpine:init', function() {
                 if (this.personaText) parts.push((i18n.fragRole || 'rôle ') + '« ' + this.personaText + ' »');
                 if (this.tone) parts.push((i18n.fragTone || 'ton ') + this.tone.toLowerCase());
                 if (!parts.length) return '';
-                return (i18n.addedPrefix || 'Sera inclus dans ton prompt : ') + parts.join(', ') + '.';
+                return (i18n.addedPrefix || 'Sera inclus dans votre prompt : ') + parts.join(', ') + '.';
             },
             // Round 152 (2026-08-01) : même condition EXACTE que `stylistRulesApply` dans
             // get promptSegments() (variable locale à cette autre fonction, donc dupliquée ici en
@@ -1057,7 +1057,7 @@ document.addEventListener('alpine:init', function() {
                 if (this.language === 'es') parts.push(i18n.fragLangEs || 'réponse en espagnol');
                 if (this.constraintCustom) parts.push(i18n.fragCustom || 'vos contraintes personnalisées');
                 if (!parts.length) return '';
-                return (i18n.addedPrefix || 'Sera inclus dans ton prompt : ') + parts.join(', ') + '.';
+                return (i18n.addedPrefix || 'Sera inclus dans votre prompt : ') + parts.join(', ') + '.';
             },
             get feedbackModele() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
@@ -1075,7 +1075,7 @@ document.addEventListener('alpine:init', function() {
                 if (techniqueFrags[this.technique]) parts.push(techniqueFrags[this.technique]);
                 if (this.useDelimiters) parts.push(i18n.fragDelimiters || 'délimiteurs ###');
                 if (!parts.length) return '';
-                return (i18n.addedPrefix || 'Sera inclus dans ton prompt : ') + parts.join(', ') + '.';
+                return (i18n.addedPrefix || 'Sera inclus dans votre prompt : ') + parts.join(', ') + '.';
             },
             get feedbackProfile() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
@@ -1791,15 +1791,15 @@ document.addEventListener('alpine:init', function() {
                 // courante a déjà atteint celle du champ concerné - sinon un utilisateur encore à
                 // l'étape 2 (Tâche) se fait reprocher des champs d'étapes qu'il n'a pas encore vues.
                 if (this.step >= 4 && this.formatSelectionAll.length === 0 && !this.length) {
-                    issues.push({ key: 'format', message: i18n.diagnosticFormat || "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur." });
+                    issues.push({ key: 'format', message: i18n.diagnosticFormat || "Vous n'avez pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur." });
                 }
                 if (this.step >= 3 && !this.audienceText) {
-                    issues.push({ key: 'audience', message: i18n.diagnosticAudience || "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait." });
+                    issues.push({ key: 'audience', message: i18n.diagnosticAudience || "Vous n'avez pas indiqué à qui s'adresse la réponse (par exemple : vos élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait." });
                 }
                 var hasConstraint = this.constraintAntiAI || this.constraintTypo || this.constraintCanvas
                     || this.constraintChainOfThought || this.constraintAskIfUnclear || !!this.constraintCustom;
                 if (this.step >= 4 && !hasConstraint) {
-                    issues.push({ key: 'contraintes', message: i18n.diagnosticContraintes || "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue)." });
+                    issues.push({ key: 'contraintes', message: i18n.diagnosticContraintes || "Vous n'avez coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue)." });
                 }
                 return { ok: issues.length === 0, issues: issues };
             },
@@ -2026,7 +2026,7 @@ document.addEventListener('alpine:init', function() {
                     .then(function(res) {
                         self.draftLoading = false;
                         if (!res.ok || !res.data || !res.data.params || !res.data.params.taskObject) {
-                            self.draftError = (res.data && res.data.message) || (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.draftError) || "Je n'ai pas pu transformer ce texte, réessaie ou pars du wizard.";
+                            self.draftError = (res.data && res.data.message) || (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.draftError) || "Je n'ai pas pu transformer ce texte, réessayez ou partez du wizard.";
                             return;
                         }
                         self._applyWizardParams(res.data.params, { legacy: true });
@@ -2037,7 +2037,7 @@ document.addEventListener('alpine:init', function() {
                     })
                     .catch(function() {
                         self.draftLoading = false;
-                        self.draftError = (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.draftError) || "Je n'ai pas pu transformer ce texte, réessaie ou pars du wizard.";
+                        self.draftError = (window.promptBuilderConfig && window.promptBuilderConfig.i18n && window.promptBuilderConfig.i18n.draftError) || "Je n'ai pas pu transformer ce texte, réessayez ou partez du wizard.";
                     });
             },
             init: function() {
@@ -3475,7 +3475,7 @@ document.addEventListener('alpine:init', function() {
                 if (!text) return;
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 if (!this._isValidSpaceSelection(text)) {
-                    if (typeof window.toast === 'function') window.toast(i18n.spaceTooShort || 'Choisis un mot plus précis pour éviter les remplacements imprévus.', 'warning', 4000);
+                    if (typeof window.toast === 'function') window.toast(i18n.spaceTooShort || 'Choisissez un mot plus précis pour éviter les remplacements imprévus.', 'warning', 4000);
                     return;
                 }
                 if (this._findSpaceByText(text)) {
@@ -3672,8 +3672,8 @@ document.addEventListener('alpine:init', function() {
                 if (n === 0) { onProceed(); return; }
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 var template = n === 1
-                    ? (i18n.spaceRenameMergeOne || 'Ce texte apparaît déjà 1 fois dans ta demande - toutes les occurrences seront remplies ensemble.')
-                    : (i18n.spaceRenameMergeMany || 'Ce texte apparaît déjà {count} fois dans ta demande - toutes les occurrences seront remplies ensemble.');
+                    ? (i18n.spaceRenameMergeOne || 'Ce texte apparaît déjà 1 fois dans votre demande - toutes les occurrences seront remplies ensemble.')
+                    : (i18n.spaceRenameMergeMany || 'Ce texte apparaît déjà {count} fois dans votre demande - toutes les occurrences seront remplies ensemble.');
                 this.$dispatch('open-confirm-cp-rename-merge', {
                     message: template.replace('{count}', n),
                     callback: onProceed
@@ -3715,7 +3715,7 @@ document.addEventListener('alpine:init', function() {
                 if (this.spaceEditingIndex === idx) { this.spaceEditingIndex = null; this.spaceEditingText = ''; }
             },
 
-            // Liste affichée dans le bloc « Remplis tes espaces » (UI - remplissage) : uniquement
+            // Liste affichée dans le bloc « Remplissez vos espaces » (UI - remplissage) : uniquement
             // les espaces NON "non retrouvés" - un espace missing n'a nulle part où être rempli, sa
             // seule action possible reste le × de la pastille dans la bande.
             get fillableSpaces() {
@@ -3779,6 +3779,24 @@ document.addEventListener('alpine:init', function() {
                 var ex = this.examples ? String(this.examples).trim() : '';
                 return ctx !== '' || ex !== '';
             },
+            // Avertissement DOUX (jamais bloquant) : la longueur « Concis » et le format « Paragraphes
+            // détaillés » tirent dans des directions opposées. L'utilisateur garde le droit de garder les deux.
+            get lengthFormatConflict() {
+                var len = this.length ? String(this.length).toLowerCase() : '';
+                return len.indexOf('concis') === 0 && this.formatsSelected.indexOf('Paragraphes détaillés') !== -1;
+            },
+            get lengthFormatConflictMessage() {
+                var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
+                return i18n.lengthFormatConflict || 'Astuce : « Concis » et « Paragraphes détaillés » tirent dans des directions opposées. Choisissez l\'un ou l\'autre pour un meilleur résultat.';
+            },
+            // Dernière étape : amène au bouton Copier et copie le prompt s'il est complet.
+            finishAndCopy: function() {
+                var btn = document.getElementById('cpCopyBtn');
+                if (btn && typeof btn.scrollIntoView === 'function') {
+                    try { btn.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { btn.scrollIntoView(); }
+                }
+                if (this.isValid) this.copy();
+            },
             get dataDelimitersMessage() {
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
                 if (!this.hasDataDelimiters) return '';
@@ -3802,8 +3820,8 @@ document.addEventListener('alpine:init', function() {
                 var n = this.orphanSpacesCount;
                 if (n === 0) return '';
                 var template = n === 1
-                    ? (i18n.spaceOrphanOne || "1 espace à remplir n'est plus dans ton texte.")
-                    : (i18n.spaceOrphanMany || '{count} espaces à remplir ne sont plus dans ton texte.');
+                    ? (i18n.spaceOrphanOne || "1 espace à remplir n'est plus dans votre texte.")
+                    : (i18n.spaceOrphanMany || '{count} espaces à remplir ne sont plus dans votre texte.');
                 return template.replace('{count}', n);
             },
 
@@ -3824,7 +3842,7 @@ document.addEventListener('alpine:init', function() {
                 var text = this.mostRecentPendingSpaceText;
                 if (!text) return '';
                 var i18n = (window.promptBuilderConfig && window.promptBuilderConfig.i18n) || {};
-                var template = i18n.spacePendingHint || 'Le texte « {text} » vient d\'être ajouté dans ta demande ci-dessus - donne-lui un nom parlant.';
+                var template = i18n.spacePendingHint || 'Le texte « {text} » vient d\'être ajouté dans votre demande ci-dessus - donnez-lui un nom parlant.';
                 return template.replace('{text}', text);
             },
 

@@ -98,9 +98,9 @@ it('has English translations for the constructeur-prompts JS help/technique-hint
         "(Méthode : reformulation) L'IA reformule d'abord ta demande dans ses mots, puis répond.",
         "(Méthode : auto-vérification) L'IA relit sa réponse, corrige ses erreurs et ses oublis avant de te la livrer.",
         "(Méthode : variantes comparées) L'IA propose 2 ou 3 versions différentes et recommande la meilleure.",
-        "Tu n'as pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.",
-        "Tu n'as pas indiqué à qui s'adresse la réponse (par exemple : tes élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.",
-        "Tu n'as coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).",
+        "Vous n'avez pas indiqué la forme de la réponse attendue (texte court, liste, tableau...) ni sa longueur.",
+        "Vous n'avez pas indiqué à qui s'adresse la réponse (par exemple : vos élèves, des parents, des collègues). L'IA adaptera mieux son ton si elle le sait.",
+        "Vous n'avez coché aucune règle à faire respecter (par exemple : éviter le style trop « IA », poser une question si la demande est floue).",
     ];
 
     foreach ($keys as $key) {

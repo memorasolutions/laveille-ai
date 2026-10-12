@@ -85,7 +85,7 @@ it('renders the "Remplis tes espaces" fill-in panel (ex-"Remplis tes variables",
     expect($html)->toContain('x-for="(sp, spIdx) in fillableSpaces"');
     expect($html)->toContain('x-for="v in promptVariables"');
     expect($html)->toContain('x-model="varValues[v]"');
-    expect($html)->toContain('Remplis tes espaces');
+    expect($html)->toContain('Remplissez vos espaces');
     expect($html)->not->toContain('Remplis tes variables');
 });
 
@@ -111,7 +111,7 @@ it('renders the "Tu pourras changer" band of space pills below the context field
 
     $html = $this->actingAs($user)->get('/outils/constructeur-prompts')->assertOk()->getContent();
 
-    expect($html)->toContain("Tes espaces à remplir - chaque pastille est un bout de texte de ta demande :");
+    expect($html)->toContain("Vos espaces à remplir - chaque pastille est un bout de texte de votre demande :");
     expect($html)->toContain('x-for="(sp, spIdx) in spaces"');
     expect($html)->toContain('removeSpace(spIdx)');
     expect($html)->toContain('startRenameSpace(spIdx)');
@@ -131,7 +131,7 @@ it('renders the guest-only "on this device" history block, gated on !isAuthentic
     expect($html)->toContain('deleteGuestHistoryEntry(gi)');
     expect($html)->toContain('clearGuestHistory()');
     // Mention de confidentialité explicite, une ligne, exigée par le plan.
-    expect($html)->toContain('Conservés uniquement dans ton navigateur, jamais envoyés au serveur.');
+    expect($html)->toContain('Conservés uniquement dans votre navigateur, jamais envoyés au serveur.');
 });
 
 it('uses a versioned localStorage key (cpGuestHistory_v1) distinct from the existing pb_history mechanism', function () {

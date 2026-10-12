@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.339.0] - 2026-10-12
+
+### Ajouté
+- **Constructeur de prompts : nouveau format de sortie « Courriel ».** Ajouté à la liste des formats existants (même mécanique, aucun nouveau moteur) : seul, il demande une structure de courriel; combiné à d'autres livrables, il entre dans la séquence numérotée. Retour d'un test en classe où le format manquait.
+- **Glossaire : `/glossaire/jeton` et `/glossaire/vecteur` répondent enfin** (redirection 301 vers `token` et `embeddings`, dont les fiches existent sous leur nom anglais). Cibles vérifiées « 200 » avant mise en place. Mêmes motifs que les redirections de slugs déjà en service.
+- **Anonymiseur : catégorie « province ».** Une province sélectionnée est remplacée par une AUTRE province (jamais par une ville), avec son étiquette de jeton dédiée. Reconnaissance des noms d'entreprise à la sélection manuelle (suffixes inc./ltée/enr… et mots génériques comme Boulangerie, Clinique) : une entreprise reçoit un faux nom d'entreprise, plus un faux nom de personne.
+
+### Modifié
+- **Constructeur de prompts : corrections d'ergonomie** (retours d'un test en classe). Interface unifiée au vouvoiement (le tutoiement et le vouvoiement étaient mélangés). Le message technique sur les repères de délimitation des données passe d'un paragraphe toujours affiché près de « Copier » à une infobulle discrète (bouton d'information). Nouveau bouton « Terminer et copier le prompt » à la dernière étape. Avertissement doux (non bloquant) quand « Concis » et « Paragraphes détaillés » sont choisis ensemble. Départ de l'outil remonté (moins de défilement avant la première étape).
+- **Anonymiseur : vie privée renforcée.** Le texte saisi et les correspondances (qui contiennent de vraies données) passent de `localStorage` à `sessionStorage` : effacés à la fermeture de l'onglet - adapté à un poste partagé en salle de classe - tout en survivant à un rafraîchissement et au va-et-vient anonymiser puis restaurer. Les anciennes copies laissées en `localStorage` sont purgées. Le texte de la page le dit désormais honnêtement. Détection des noms en minuscules à la sélection manuelle et après un titre de civilité (m./mme/dr…). Moins de texte d'introduction avant la zone de saisie (accordéon de confiance replié par défaut, aide « Comment ça marche » déplacée sous l'éditeur).
+
+### Corrigé
+- **Anonymiseur : les remplacements préservent la nature de la donnée.** Une province ne devient plus une ville, et une entreprise (« … inc. ») ne reçoit plus un nom de personne. La restauration (y compris dans une réponse reformulée) est inchangée.
+
 ## [1.338.0] - 2026-10-11
 
 ### Ajouté

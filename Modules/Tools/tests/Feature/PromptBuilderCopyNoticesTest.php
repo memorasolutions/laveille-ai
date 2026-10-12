@@ -70,6 +70,12 @@ it('annonce avant la copie les variables laissées vides et les repères de donn
     expect($html)->toContain('unfilledVariablesCount > 0');
     expect($html)->toContain('isValid && hasDataDelimiters');
 
+    // Aide discrète (2026-10-12) : plus de paragraphe permanent, le message vit dans une infobulle
+    // (title + aria-label) d'un petit bouton ⓘ - l'explication reste donc bien présente.
+    expect($html)->toContain(':title="dataDelimitersMessage"');
+    expect($html)->toContain(':aria-label="dataDelimitersMessage"');
+    expect($html)->toContain('ⓘ');
+
     // Les libellés doivent être injectés par le pont i18n, jamais laissés au seul repli JS.
     expect($html)->toContain('variableUnfilledOne');
     expect($html)->toContain('variableUnfilledMany');
