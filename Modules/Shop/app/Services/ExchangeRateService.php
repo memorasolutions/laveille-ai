@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
+ */
+
 namespace Modules\Shop\Services;
 
 use Illuminate\Support\Facades\Http;

@@ -9,6 +9,10 @@ use Modules\Shop\Services\GelatoService;
 
 /**
  * Usage manuel ou planifié (AUCUN cron enregistré automatiquement). N'ADOPTE jamais à l'aveugle et ne CRÉE jamais de commande.
+ *
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
  */
 class GelatoReconcileCommand extends Command
 {

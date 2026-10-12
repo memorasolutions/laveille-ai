@@ -19,6 +19,10 @@ use Modules\Shop\Services\GelatoSyncService;
  *   - Backup automatique de l'ancien gelato_product_id dans legacy_gelato_uid
  *   - Pricing par taille via SIZE_SURCHARGE (Gelato facture XL+)
  *   - Hex couleurs Gildan 5000 mai 2026
+ *
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
  */
 class ResyncGelatoProductCommand extends Command
 {

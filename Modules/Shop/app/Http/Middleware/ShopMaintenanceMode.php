@@ -13,6 +13,10 @@ use Symfony\Component\HttpFoundation\Response;
  * Super admin et admin Stripe gardent l'accès complet pour réparer / tester.
  *
  * Activation : SHOP_MAINTENANCE=true dans .env prod + php artisan optimize:clear.
+ *
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
  */
 class ShopMaintenanceMode
 {

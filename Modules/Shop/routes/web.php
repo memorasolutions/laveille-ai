@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
+ */
+
 use Illuminate\Support\Facades\Route;
 use Modules\Shop\Http\Controllers\PublicShopController;
 use Modules\Shop\Http\Controllers\CartController;

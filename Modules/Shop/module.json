@@ -1,7 +1,7 @@
 {
     "name": "Shop",
     "alias": "shop",
-    "description": "",
+    "description": "Boutique MEMORA : catalogue, panier, Stripe, taxes canadiennes et impression à la demande Gelato.",
     "keywords": [],
     "priority": 0,
     "providers": [

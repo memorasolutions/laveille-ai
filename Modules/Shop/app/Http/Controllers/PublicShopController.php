@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
+ */
+
 namespace Modules\Shop\Http\Controllers;
 
 use Illuminate\Routing\Controller;

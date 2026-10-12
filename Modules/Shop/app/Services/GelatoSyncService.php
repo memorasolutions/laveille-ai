@@ -19,6 +19,10 @@ use Modules\Shop\Models\Product;
  *
  * Source de vérité = Gelato store. La DB locale est un cache requêtable.
  * Re-exécution idempotente : upsert sur slug.
+ *
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ *
+ * @project laveille.ai
  */
 class GelatoSyncService
 {
