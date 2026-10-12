@@ -74,9 +74,9 @@
                         </div>
 
                         <div id="infoBanner" class="mb-3">
-                            <x-core::accordion id="anonymTrust" icon="🛡️" :title="__('100 % local')" :subtitle="__('Traitement dans votre navigateur – aucun contenu envoyé à un serveur')" :open="true">
+                            <x-core::accordion id="anonymTrust" icon="🛡️" :title="__('100 % local')" :subtitle="__('Traitement dans votre navigateur – aucun contenu envoyé à un serveur')" :open="false">
                                 <p style="margin:0 0 .5rem;">{{ __('Votre texte, les règles et les correspondances vraie ↔ fictive restent sur votre appareil. Rien n\'est transmis : seul le texte déjà anonymisé sort, et uniquement si VOUS le copiez vers une IA externe.') }}</p>
-                                <p style="margin:0 0 .5rem;font-size:.88rem;color:#52586a;">{{ __('💾 Votre texte ET les correspondances sont enregistrés dans CE navigateur (jamais sur un serveur) pour les retrouver à votre retour – jusqu\'à « Réinitialiser » ou « Oublier mes données » (menu ⋯ Actions). Sur un poste partagé, effacez avant de partir.') }}</p>
+                                <p style="margin:0 0 .5rem;font-size:.88rem;color:#52586a;">{{ __('💾 Votre texte ET les correspondances sont conservés seulement le temps de votre session dans ce navigateur (jamais sur un serveur), puis effacés automatiquement quand vous fermez l\'onglet. Vous pouvez aussi les effacer avant : « Réinitialiser » ou « Oublier mes données » (menu ⋯ Actions).') }}</p>
                                 <p style="margin:0;font-size:.88rem;color:#52586a;">
                                     <a href="/glossaire/loi-25" target="_blank" rel="noopener">{{ __('Loi 25') }}</a> ·
                                     <a href="/glossaire/rgpd" target="_blank" rel="noopener">{{ __('RGPD') }}</a> ·
@@ -89,7 +89,7 @@
                         </div>
                         {{-- Amorce pédagogique : relie l'anonymiseur au constructeur de prompts (fil conducteur non-technicien). --}}
                         <p class="text-muted small mb-3" style="margin-top:-6px;">{{ __('💡 Tu veux poser une question à une IA (ChatGPT, Claude, Gemini) avec ce texte ? Masque d\'abord tes infos, puis clique « Créer un prompt » pour t\'en servir sans risque.') }}</p>
-                        {{-- Accordéon confidentialité : ouvert au 1er affichage ; « Je comprends » le ferme + mémorise (localStorage), reste fermé au retour (rouvrable). Script inline = anti-flash (s'exécute avant le paint). --}}
+                        {{-- Accordéon confidentialité : fermé par défaut ; « Je comprends » le ferme + mémorise (localStorage, sans donnée personnelle). Script inline = anti-flash (s'exécute avant le paint). --}}
                         <script>
                         (function () {
                             var trigger = document.getElementById('anonymTrust-trigger');
@@ -119,10 +119,6 @@
 
                         {{-- ÉTAPE 1 : éditeur annoté + aperçu --}}
                         <div class="anon-panel active" data-step-content="1">
-                            <div class="anon-help">
-                                💡 <strong>{{ __('Comment ça marche') }}</strong> <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;" data-help-key="anon-comment" aria-label="{{ __('Aide : comment ça marche') }}">?</button> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les masquer (elles deviennent surlignées). Pour masquer autre chose, sélectionnez simplement un passage avec la souris – un bouton « 🕵️ Anonymiser » apparaît juste au-dessus. Le texte prêt pour l\'IA apparaît à droite (ou en dessous sur mobile). Ensuite, collez le texte masqué dans votre IA (ou cliquez « Créer un prompt »). Quand l\'IA répond, revenez dans « Restaurer la réponse IA » pour retrouver vos vraies infos.') }}
-                            </div>
-
                             <x-tools::anonymizer-editor>
                                 <x-slot:previewActions>
                                     <button type="button" id="btnCopyAnon" class="anon-btn">📋 {{ __('Copier pour l\'IA') }}</button>
@@ -130,6 +126,10 @@
                                     <button type="button" class="anon-btn secondary anon-step" data-step="2">{{ __('J\'ai la réponse de l\'IA →') }}</button>
                                 </x-slot:previewActions>
                             </x-tools::anonymizer-editor>
+
+                            <div class="anon-help">
+                                💡 <strong>{{ __('Comment ça marche') }}</strong> <button type="button" class="ct-btn ct-btn-ghost ct-btn-xs" style="border-radius:50%;width:22px;height:22px;padding:0;line-height:22px;margin-left:4px;flex-shrink:0;" data-help-key="anon-comment" aria-label="{{ __('Aide : comment ça marche') }}">?</button> : {{ __('collez votre texte, cliquez « Détecter ». Les données repérées sont soulignées : cliquez dessus (ou « Tout anonymiser ») pour les masquer (elles deviennent surlignées). Pour masquer autre chose, sélectionnez simplement un passage avec la souris – un bouton « 🕵️ Anonymiser » apparaît juste au-dessus. Le texte prêt pour l\'IA apparaît à droite (ou en dessous sur mobile). Ensuite, collez le texte masqué dans votre IA (ou cliquez « Créer un prompt »). Quand l\'IA répond, revenez dans « Restaurer la réponse IA » pour retrouver vos vraies infos.') }}
+                            </div>
                         </div>
 
                         {{-- ÉTAPE 2 : restauration --}}

@@ -1,6 +1,12 @@
 // anonymizer-ui.js — éditeur annoté inline (souligné = à anonymiser, surligné = anonymisé)
 // Vanilla, sans dépendance. Consomme window.AnonymizerCore. Aucune popup native.
 
+// Stockage des VRAIES données (texte source, règles, remplacements, horodatage) : sessionStorage,
+// donc effacé à la fermeture de l'onglet mais conservé au rafraîchissement. Les préférences sans
+// PII (lv_anon_mode, lv_anon_view, lv_anon_v, lv_anon_trust_ack) restent en localStorage.
+const piiStore = () => window.sessionStorage;
+const PII_KEYS = ['lv_anon_source_v3', 'lv_anon_rules_v3', 'lv_anon_overrides_v3', 'lv_anon_ts'];
+
 const _norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 class AnonymizerUI {
@@ -53,8 +59,8 @@ class AnonymizerUI {
   // Enregistre les règles et les remplacements, puis met à jour l'horodatage TTL.
   saveRules() {
     try {
-      localStorage.setItem('lv_anon_rules_v3', JSON.stringify(this.rules));
-      localStorage.setItem('lv_anon_overrides_v3', JSON.stringify(this.overrides));
+      piiStore().setItem('lv_anon_rules_v3', JSON.stringify(this.rules));
+      piiStore().setItem('lv_anon_overrides_v3', JSON.stringify(this.overrides));
       this._touchTs();
     } catch (e) { console.warn('save', e); }
   }
@@ -62,7 +68,7 @@ class AnonymizerUI {
   // Persistance du TEXTE de l'éditeur (100 % local) + horodatage TTL.
   saveSource() {
     try {
-      localStorage.setItem('lv_anon_source_v3', this.sourceHtml || '');
+      piiStore().setItem('lv_anon_source_v3', this.sourceHtml || '');
       this._touchTs();
     } catch (e) {}
   }
@@ -70,7 +76,7 @@ class AnonymizerUI {
   loadSource() {
     if (this._purgeIfStale()) return;
     try {
-      const s = localStorage.getItem('lv_anon_source_v3');
+      const s = piiStore().getItem('lv_anon_source_v3');
       if (s && s.trim()) {
         this.sourceHtml = s;
         const tmp = document.createElement('div'); tmp.innerHTML = s;
@@ -85,41 +91,28 @@ class AnonymizerUI {
       // Anti règles fantômes : si la version de l'outil a changé, on repart propre
       const ver = window.LV_ANON_VERSION || '';
       if (ver && localStorage.getItem('lv_anon_v') !== ver) {
-        localStorage.removeItem('lv_anon_rules_v3');
-        localStorage.removeItem('lv_anon_overrides_v3');
+        piiStore().removeItem('lv_anon_rules_v3');
+        piiStore().removeItem('lv_anon_overrides_v3');
         localStorage.setItem('lv_anon_v', ver);
         this.rules = []; this.overrides = [];
         return;
       }
-      const s = localStorage.getItem('lv_anon_rules_v3'); if (s) this.rules = JSON.parse(s);
-      const o = localStorage.getItem('lv_anon_overrides_v3'); if (o) this.overrides = JSON.parse(o);
+      const s = piiStore().getItem('lv_anon_rules_v3'); if (s) this.rules = JSON.parse(s);
+      const o = piiStore().getItem('lv_anon_overrides_v3'); if (o) this.overrides = JSON.parse(o);
     } catch (e) { console.warn('load', e); this.rules = []; this.overrides = []; }
   }
 
-  // Horodatage de dernière activité (pour l'auto-purge TTL).
+  // Horodatage de dernière activité.
   _touchTs() {
-    try { localStorage.setItem('lv_anon_ts', String(Date.now())); } catch (e) {}
+    try { piiStore().setItem('lv_anon_ts', String(Date.now())); } catch (e) {}
   }
 
-  // Auto-purge des données sensibles (mapping + source) après 7 j d'inactivité : borne l'exposition
-  // sur poste partagé tout en préservant le « reviens plus tard » dans la fenêtre. Retourne true si purgé.
+  // Les données vivent en sessionStorage : la purge d'ancienneté n'a plus d'objet (l'onglet fermé les
+  // efface). On supprime seulement les ANCIENNES copies laissées en localStorage par les versions
+  // précédentes (vraies données persistantes). Retourne toujours false (rien à ignorer au chargement).
   _purgeIfStale() {
-    try {
-      const tsStr = localStorage.getItem('lv_anon_ts');
-      if (tsStr) {
-        const ts = Number(tsStr);
-        if (Date.now() - ts > 7 * 24 * 60 * 60 * 1000) {
-          localStorage.removeItem('lv_anon_rules_v3');
-          localStorage.removeItem('lv_anon_overrides_v3');
-          localStorage.removeItem('lv_anon_source_v3');
-          localStorage.removeItem('lv_anon_ts');
-          this.rules = []; this.overrides = [];
-          this.sourceHtml = ''; this.sourceText = '';
-          return true;
-        }
-      }
-      return false;
-    } catch (e) { return false; }
+    try { PII_KEYS.forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    return false;
   }
 
   updateOutput() {
@@ -159,7 +152,7 @@ class AnonymizerUI {
   forgetAll() {
     this.sourceText = ''; this.sourceHtml = ''; this.anonPlain = ''; this.restoredPlain = '';
     this.rules = []; this.candidates = []; this.overrides = []; this.lastSelection = '';
-    try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); localStorage.removeItem('lv_anon_source_v3'); } catch (e) {}
+    try { PII_KEYS.forEach(k => { piiStore().removeItem(k); localStorage.removeItem(k); }); } catch (e) {}
     const src = document.getElementById('anonSource'); if (src) src.innerHTML = '';
     const ai = document.getElementById('aiResponse'); if (ai) ai.value = '';
     const ro = document.getElementById('restoredOutput'); if (ro) ro.textContent = '';
@@ -423,14 +416,8 @@ class AnonymizerUI {
   }
 
   guessCategory(text) {
-    // Réutilise le moteur de détection sur le passage sélectionné → bonne catégorie (nom, date, RAMQ, courriel…)
-    const t = (text || '').trim();
-    const ents = window.AnonymizerCore.detectEntities(t) || [];
-    if (ents.length) return ents.sort((a, b) => b.value.length - a.value.length)[0].category;
-    if (/\d/.test(t)) return 'id';
-    // Mot capitalisé seul → nom de famille (un seul faux), 2+ mots → nom complet.
-    if (/^[A-ZÀ-Ÿ]/.test(t)) return /\s/.test(t) ? 'name' : 'lastName';
-    return 'other';
+    // Source unique dans le moteur (entreprise, province, entité détectée, nom court même en minuscules).
+    return window.AnonymizerCore.guessSelectionCategory(text);
   }
 
   toggleAnonMode() {
@@ -827,7 +814,7 @@ class AnonymizerUI {
     // « Réinitialiser le masquage » : efface l'anonymisation mais GARDE le texte (≠ « Oublier mes données »).
     on('btnResetAll', 'click', () => {
       this.rules = []; this.candidates = []; this.lastSelection = ''; this.overrides = [];
-      try { localStorage.removeItem('lv_anon_rules_v3'); localStorage.removeItem('lv_anon_overrides_v3'); } catch (e) {}
+      try { piiStore().removeItem('lv_anon_rules_v3'); piiStore().removeItem('lv_anon_overrides_v3'); } catch (e) {}
       this.renderAnnotated();
       this.updateOutput();
       this.toast('Masquage réinitialisé – votre texte est conservé.', 'info');

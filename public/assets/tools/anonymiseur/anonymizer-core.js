@@ -27,6 +27,10 @@ const FAKE_DATA = {
     'Candiac', 'Varennes', 'Deux-Montagnes', 'Beauharnois', 'Marieville', 'Baie-Comeau', 'Amos',
     'Cowansville', 'Gaspé', 'Matane', 'Sainte-Agathe-des-Monts'
   ],
+  // PROVINCES : les 10 provinces et 3 territoires du Canada. Catégorie distincte de « city » : une
+  // province remplacée doit rester une province (jamais une ville). « Québec » n'est PAS détecté
+  // automatiquement comme province (ambigu ville/province) : sélection manuelle seulement.
+  provinces: ['Québec', 'Ontario', 'Manitoba', 'Saskatchewan', 'Alberta', 'Colombie-Britannique', 'Nouveau-Brunswick', 'Nouvelle-Écosse', 'Île-du-Prince-Édouard', 'Terre-Neuve-et-Labrador', 'Yukon', 'Territoires du Nord-Ouest', 'Nunavut'],
   // Domaines RÉSERVÉS À LA DOCUMENTATION/AUX EXEMPLES par la RFC 2606 (example.com/.net/.org) :
   // jamais attribuables à une vraie boîte courriel, contrairement aux anciens domaines listés ici
   // (gmail.com, hotmail.com, yahoo.ca, videotron.ca, bell.net sont de VRAIS domaines actifs — un
@@ -173,6 +177,13 @@ function detectEntities(text) {
   while ((m = titled.exec(text))) {
     if (m[2]) push(`${m[1]} ${m[2]}`, 'name', 'Nom complet', 0.85);
     else if (!STOPWORDS.has(normalize(m[1]))) push(m[1], 'lastName', 'Nom de famille', 0.8);
+  }
+  // 1bis. Nom en MINUSCULES juste après un titre de civilité abrégé (« m. tremblay », « mme gagnon »,
+  //    « dr roy »). Prudent : un SEUL mot (≥ 3 lettres, hors mots courants) et « me » exige le point,
+  //    sinon le pronom « me » ferait des faux positifs. Aucune détection large de minuscules ailleurs.
+  const titledLower = /\b(?:[Mm]\.|[Mm]me\.?|[Mm]lle\.?|[Dd]re?\.?|[Mm]e\.)[^\S\r\n]+([a-zà-ÿ][a-zà-ÿ'’\-]{2,})/g;
+  while ((m = titledLower.exec(text))) {
+    if (!STOPWORDS.has(normalize(m[1]))) push(m[1], 'lastName', 'Nom de famille', 0.7);
   }
   // 3. RAMQ
   const ramq = /\b[A-ZÀ-Ÿ]{4}\s?\d{4}\s?\d{2}\s?\d{2}\b/g;
@@ -527,6 +538,7 @@ function generateFake(category, original) {
       return original.replace(/\d+/g, (grp) => grp.replace(/\d/g, () => Math.floor(Math.random() * 10).toString()));
     }
     case 'city': return tirerSubstitutDistinct(FAKE_DATA.cities, original);
+    case 'province': return tirerSubstitutDistinct(FAKE_DATA.provinces, original);
     case 'email': {
       return `${getRandomItem(FAKE_DATA.firstNamesM).toLowerCase()}.${getRandomItem(FAKE_DATA.lastNames).toLowerCase()}@${getRandomItem(FAKE_DATA.domains)}`;
     }
@@ -634,7 +646,7 @@ function uniqueFake(category, original, used) {
 function tokenLabel(category) {
   const labelMap = {
     name: 'PERSONNE', firstName: 'PERSONNE', lastName: 'PERSONNE',
-    dossier: 'DOSSIER', address: 'ADRESSE', email: 'COURRIEL', city: 'VILLE',
+    dossier: 'DOSSIER', address: 'ADRESSE', email: 'COURRIEL', city: 'VILLE', province: 'PROVINCE',
     phone: 'TEL', amount: 'MONTANT', date: 'DATE'
   };
   return labelMap[category] || 'ORG';
@@ -892,6 +904,28 @@ function detecterFuitesResiduelles(texteAnonymise, regles) {
   return resultat;
 }
 
-const AnonymizerCore = { detectEntities, generateFake, buildRules, anonymize, restore, relinkEmails, detecterFuitesResiduelles, buildAccentInsensitiveBoundedRegex, buildAccentInsensitiveUnboundedRegex };
+// Catégorie d'un passage SÉLECTIONNÉ À LA MAIN (source unique pour l'UI, testable en Node).
+// Ordre : entreprise > province > entité détectée > chiffres > nom court (même en minuscules,
+// puisque la personne l'a explicitement choisi) > autre. N'altère pas detectEntities (auto prudent).
+const ORG_SUFFIXES_RE = /(?:^|[\s,])(?:inc|ltée|ltee|ltd|enr|cie|co|s\.e\.n\.c\.r\.l|s\.e\.n\.c|senc|srl|s\.a\.r\.l)\.?$/i;
+const ORG_GENERIC_WORDS = new Set(['boulangerie', 'restaurant', 'clinique', 'garage', 'depanneur', 'epicerie', 'pharmacie', 'entreprise', 'societe', 'compagnie', 'cabinet', 'studio', 'agence', 'groupe', 'centre', 'boutique', 'cafe', 'bistro', 'librairie']);
+function guessSelectionCategory(text) {
+  const t = String(text || '').trim();
+  if (!t) return 'other';
+  const norm = normaliserMot(t);
+  const premierMot = normaliserMot(t.split(/\s+/)[0]);
+  if (ORG_SUFFIXES_RE.test(t) || (t.split(/\s+/).length > 1 && ORG_GENERIC_WORDS.has(premierMot))) return 'organization';
+  const provNorm = FAKE_DATA.provinces.filter((p) => p !== 'Québec').map(normaliserMot);
+  if (provNorm.includes(norm) || /^province\s+(?:de\s+|du\s+|d)\S/.test(norm)) return 'province';
+  const ents = detectEntities(t) || [];
+  if (ents.length) return ents.slice().sort((a, b) => b.value.length - a.value.length)[0].category;
+  if (/\d/.test(t)) return 'id';
+  if (/^[A-ZÀ-Ÿ]/.test(t)) return /\s/.test(t) ? 'name' : 'lastName';
+  // 1 à 3 mots de lettres seulement : un nom, même en minuscules (sélection explicite).
+  if (/^[a-zà-ÿ'’\-]+(?:\s+[a-zà-ÿ'’\-]+){0,2}$/i.test(t)) return /\s/.test(t) ? 'name' : 'lastName';
+  return 'other';
+}
+
+const AnonymizerCore = { guessSelectionCategory, detectEntities, generateFake, buildRules, anonymize, restore, relinkEmails, detecterFuitesResiduelles, buildAccentInsensitiveBoundedRegex, buildAccentInsensitiveUnboundedRegex };
 if (typeof module !== 'undefined' && module.exports) module.exports = AnonymizerCore;
 if (typeof window !== 'undefined') window.AnonymizerCore = AnonymizerCore;
