@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.341.0] - 2026-10-12
+
+### Ajouté
+- **Boutique : support de la vente mondiale.** `SHOP_SHIPPING_COUNTRIES='*'` lève la restriction de pays au paiement et accepte toute destination que Gelato peut livrer (défaut inchangé : Canada seul). La livraison reste un devis réel par destination et le garde-fou de marge s'applique, donc aucune commande déficitaire ne passe. Activation différée à l'ouverture de la boutique.
+
+### Modifié
+- **Panier : l'aperçu de taxe est honnête.** Les montants TPS et TVQ affichés sont maintenant calculés par le même moteur que le paiement (`TaxCalculator`, un seul arrondi), et le bloc est libellé « Taxes estimées (Québec) » avec une note disant que le montant exact selon la province et la livraison est calculé au paiement. Auparavant l'aperçu appliquait les taux du Québec à toute province et arrondissait deux fois, ce qui pouvait différer du montant réellement facturé. Le montant facturé, lui, était déjà correct et n'a pas changé.
+- **Articles : pub de la barre latérale.** L'unité AdSense passe au-dessus du bloc « Articles récents » (sa place prévue), et son cadre réservé se replie quand aucune annonce n'est servie, au lieu de laisser un grand rectangle blanc.
+
+### Corrigé
+- **Pied de page : puces de la colonne « Communauté ».** Les liens d'administration (Administration, Modération) étaient hors de la liste, d'où une puce vide orpheline et une puce incohérente. Ils sont remis dans la liste : plus de puce parasite.
+
+### Interne
+- **Boutique : fabrique `GelatoHttpClient`.** L'en-tête d'authentification Gelato, reconstruit à sept endroits, est centralisé dans une fabrique unique par API (DRY), sans aucun changement de comportement (mêmes hôtes, mêmes en-têtes).
+
 ## [1.340.0] - 2026-10-12
 
 ### Ajouté
