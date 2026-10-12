@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.342.4] - 2026-10-12
+
+### Corrigé
+- **Boutique : l'annulation d'une commande par l'administration rembourse enfin et stoppe la fabrication.** Auparavant, « Annuler » changeait seulement le statut local, sans rien faire chez Gelato ni Stripe. La séquence est désormais : on annule d'abord la commande chez Gelato (le physique), puis seulement si c'est confirmé on rembourse le paiement Stripe, et le statut ne passe à « remboursée » qu'après un remboursement abouti. Tout échec externe laisse la commande strictement inchangée (jamais remboursée sans annulation confirmée, jamais marquée sans preuve). Les commandes déjà expédiées, livrées, traitées ou remboursées, et les envois Gelato d'issue incertaine, sont refusés d'emblée. Le remboursement Stripe est idempotent : un rejeu ne crée jamais un second remboursement.
+
+### Interne
+- **Boutique : durcissements de la zone argent (revue adversariale).** (1) L'annulation exige l'annulation Gelato confirmée dès qu'une commande Gelato existe, quel que soit son état de suivi (fail-closed). (2) Le garde-fou de marge refuse toute commande si la devise de vente n'est pas le dollar canadien, seule devise que le calcul de coût (USD vers CAD) et les taxes canadiennes savent traiter. (3) Le devis d'expédition écarte toute méthode qui déclarerait une devise autre que celle de la boutique, pour ne jamais mêler deux devises dans le calcul de marge. (4) Un remboursement Stripe au statut « échoué » ou « annulé » n'est plus pris pour un succès. Devise réellement facturée vérifiée en production : coûts de production en USD (convertis en CAD avec un plancher de taux), expédition en CAD, règlement du compte en EUR absorbé par les planchers de taux et de marge. Nouveaux tests Pest sur l'annulation/remboursement et sur le garde-fou de marge.
+
 ## [1.342.3] - 2026-10-12
 
 ### Interne

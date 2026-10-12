@@ -47,6 +47,16 @@ final class MarginGuard
      */
     public function evaluate(array $cartItems, float $total, float $taxAmount, float $shippingCost): array
     {
+        // Fail-closed devise : ce garde-fou ne sait convertir QUE le coût USD vers CAD (ExchangeRateService) et ne
+        // raisonne qu'en dollars canadiens; le transport et le total sont attendus en CAD. Toute autre devise de vente
+        // rendrait le coût incomparable au total et pourrait laisser passer une vente à perte. Jamais de vente sans
+        // garantie de marge : on bloque plutôt que de deviner.
+        if (strtoupper((string) config('shop.currency', 'CAD')) !== 'CAD') {
+            Log::error('Shop MarginGuard : devise de vente non supportée (CAD requis)', ['currency' => config('shop.currency')]);
+
+            return ['ok' => false, 'net' => 0.0, 'cost' => 0.0, 'reason' => 'devise de vente non supportée (seul CAD est garanti)'];
+        }
+
         $rate = ExchangeRateService::rate();
         $cost = 0.0;
 

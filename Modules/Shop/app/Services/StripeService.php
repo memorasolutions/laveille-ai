@@ -188,7 +188,13 @@ class StripeService
         event(new ShopOrderPaid($order));
     }
 
-    public function refund(string $paymentIntentId, ?int $amountCents = null): bool
+    /**
+     * Rembourse un paiement Stripe (total par défaut). Idempotent si une clé est fournie : un double clic
+     * rejoue la MÊME requête chez Stripe, qui renvoie le remboursement existant au lieu d'en créer un second.
+     *
+     * @return array{ok: bool, error: ?string, refund_id: ?string}
+     */
+    public function refund(string $paymentIntentId, ?int $amountCents = null, ?string $idempotencyKey = null): array
     {
         try {
             $data = ['payment_intent' => $paymentIntentId];
@@ -197,12 +203,36 @@ class StripeService
                 $data['amount'] = $amountCents;
             }
 
-            return $this->client()
-                ->post("{$this->apiUrl}/refunds", $data)
-                ->successful();
-        } catch (\Exception $e) {
-            Log::error('Stripe refund: ' . $e->getMessage());
-            return false;
+            // Idempotence TOUJOURS active : à défaut de clé explicite, une clé déterministe dérivée du paiement (et du
+            // montant pour un remboursement partiel) garantit qu'un rejeu ne crée jamais un SECOND remboursement.
+            $key = ($idempotencyKey !== null && $idempotencyKey !== '')
+                ? $idempotencyKey
+                : 'refund_'.$paymentIntentId.($amountCents !== null ? '_'.$amountCents : '');
+            $response = $this->client()
+                ->withHeaders(['Idempotency-Key' => $key])
+                ->post("{$this->apiUrl}/refunds", $data);
+
+            if ($response->successful()) {
+                // HTTP 2xx ne suffit pas : Stripe renvoie un statut de remboursement. 'failed'/'canceled' = NON abouti,
+                // ne jamais marquer la commande remboursée dans ce cas. 'succeeded' et 'pending' sont des issues valides.
+                $status = (string) ($response->json('status') ?? '');
+                if (in_array($status, ['failed', 'canceled'], true)) {
+                    Log::error('Stripe refund abouti en échec', ['payment_intent' => $paymentIntentId, 'status' => $status]);
+
+                    return ['ok' => false, 'error' => 'statut de remboursement '.$status, 'refund_id' => $response->json('id')];
+                }
+
+                return ['ok' => true, 'error' => null, 'refund_id' => $response->json('id')];
+            }
+
+            $detail = 'HTTP '.$response->status().' '.mb_substr($response->body(), 0, 500);
+            Log::error('Stripe refund refusé', ['payment_intent' => $paymentIntentId, 'detail' => $detail]);
+
+            return ['ok' => false, 'error' => $detail, 'refund_id' => null];
+        } catch (\Throwable $e) {
+            Log::error('Stripe refund: '.$e->getMessage(), ['payment_intent' => $paymentIntentId]);
+
+            return ['ok' => false, 'error' => $e->getMessage(), 'refund_id' => null];
         }
     }
 

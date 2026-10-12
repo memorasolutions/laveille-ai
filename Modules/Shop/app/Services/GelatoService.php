@@ -282,6 +282,39 @@ class GelatoService
         }
     }
 
+    /**
+     * Annule une commande Gelato (POST /v4/orders/{id}:cancel). Résultat EXPLICITE, jamais un booléen muet.
+     * - 'cancelled'       : 2xx, Gelato confirme l'annulation.
+     * - 'not_cancellable' : refus métier démontrable (400/409/422 : commande déjà passée en production ou état incompatible).
+     * - 'error'           : tout le reste (réseau, 401/403/404/408/429/5xx...) : on ne PEUT PAS prouver que c'est un refus
+     *                       métier, donc l'appelant doit traiter comme « annulation non confirmée » et NE RIEN rembourser.
+     *
+     * @return array{status: 'cancelled'|'not_cancellable'|'error', detail: ?string}
+     */
+    public function cancelOrder(string $gelatoOrderId): array
+    {
+        try {
+            $response = $this->orderClient()->post('/v4/orders/'.rawurlencode($gelatoOrderId).':cancel');
+        } catch (\Throwable $e) {
+            Log::error('Gelato cancelOrder: '.$e->getMessage(), ['gelato_order_id' => $gelatoOrderId]);
+
+            return ['status' => 'error', 'detail' => $e->getMessage()];
+        }
+
+        if ($response->successful()) {
+            return ['status' => 'cancelled', 'detail' => null];
+        }
+
+        $code = $response->status();
+        $detail = 'HTTP '.$code.' '.mb_substr($response->body(), 0, 300);
+        Log::warning('Gelato cancelOrder non-succès', ['gelato_order_id' => $gelatoOrderId, 'detail' => $detail]);
+
+        return [
+            'status' => in_array($code, [400, 409, 422], true) ? 'not_cancellable' : 'error',
+            'detail' => $detail,
+        ];
+    }
+
     public function getShippingMethods(string $country = 'CA'): array
     {
         try {
@@ -364,10 +397,20 @@ class GelatoService
             // On additionne donc, pour une même méthode (uid), les frais de TOUS les devis; une méthode absente d'un seul d'entre
             // eux n'est pas offerte (jamais sous-facturer). Aucune méthode commune => refus (null), le client ne passe pas.
             $quotes = array_values(array_filter((array) ($data['quotes'] ?? []), 'is_array'));
+            $wantCurrency = strtoupper((string) config('shop.currency', 'CAD'));
             $byUid = [];
             foreach ($quotes as $i => $quote) {
                 foreach ($quote['shipmentMethods'] ?? [] as $method) {
                     $uid = (string) ($method['shipmentMethodUid'] ?? '');
+                    // Fail-closed devise : le prix de la méthode entre TEL QUEL dans le garde-fou de marge, en CAD. Une
+                    // méthode qui déclare EXPLICITEMENT une autre devise est écartée (jamais additionnée à un coût produit
+                    // déjà converti en CAD); une devise absente est tolérée (on demande CAD et l'API répond en CAD, mesuré
+                    // le 2026-10-12). La boutique ne livre qu'au Canada.
+                    $cur = strtoupper((string) ($method['currency'] ?? ''));
+                    if ($cur !== '' && $cur !== $wantCurrency) {
+                        Log::warning('Gelato getQuote : méthode écartée, devise inattendue', ['uid' => $uid, 'currency' => $cur, 'attendu' => $wantCurrency]);
+                        continue;
+                    }
                     if ($uid === '' || isset($byUid[$uid][$i])) {
                         continue;
                     }
