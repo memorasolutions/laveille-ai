@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.342.1] - 2026-10-12
+
+### Interne
+- **Connexion : test de bout en bout du forçage OTP en contexte SSO.** Ajout d'un test qui exerce le FLUX RÉEL en deux requêtes (une route lève `AuthenticationException` depuis une URL contenant `/oauth/authorize`, le gestionnaire pose `url.intended` via `redirect()->guest()`, puis `GET /login` renvoie vers `/magic-link`), là où le test unitaire posait `url.intended` à la main. Le comportement a par ailleurs été confirmé en production sur v1.342.0 (navigateur réel : `/oauth/authorize` → `/login` → `/magic-link`). Aucun changement de code applicatif.
+
 ## [1.342.0] - 2026-10-12
 
 ### Ajouté
