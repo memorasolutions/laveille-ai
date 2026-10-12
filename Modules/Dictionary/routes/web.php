@@ -35,6 +35,10 @@ Route::middleware('web')->group(function () {
     // français, qui reste un alias auto-lié (panel : DeepSeek et Gemini 3.1 Pro convergent).
     Route::redirect('/glossaire/debridage-dia', '/glossaire/jailbreak', 301);
     Route::redirect('/glossaire/systeme-multiagent', '/glossaire/systeme-multi-agents', 301);
+    // 2026-10-12 : termes français sans fiche propre, cibles vérifiées 200 en prod. Les fiches
+    // existent sous leur nom anglais (token, embeddings) ; les URL françaises tombaient en 404.
+    Route::redirect('/glossaire/jeton', '/glossaire/token', 301);
+    Route::redirect('/glossaire/vecteur', '/glossaire/embeddings', 301);
     Route::get('/glossaire/{slug}', [PublicDictionaryController::class, 'show'])->name('dictionary.show')->middleware('cacheResponse:3600');
 
     // Ticket #2531 (étape 4) : page de couverture d'un terme - liste TOUTES ses actualités liées.
