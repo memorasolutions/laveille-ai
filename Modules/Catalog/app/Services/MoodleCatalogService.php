@@ -70,10 +70,20 @@ class MoodleCatalogService
                     continue;
                 }
 
+                $price = null;
+                foreach ($course['customfields'] ?? [] as $field) {
+                    if (($field['shortname'] ?? null) === 'prix') {
+                        $value = (string) ($field['value'] ?? '');
+                        $price = trim($value) === '' ? null : $value;
+                        break;
+                    }
+                }
+
                 $groups[$categoryId]['courses'][] = [
                     'id' => $id,
                     'fullname' => $this->publicText((string) ($course['fullname'] ?? '')),
                     'summary' => $this->publicText((string) ($course['summary'] ?? '')),
+                    'price' => $price,
                     'image_local' => $this->cachedImage($course),
                     'course_url' => $this->courseUrl($id),
                 ];

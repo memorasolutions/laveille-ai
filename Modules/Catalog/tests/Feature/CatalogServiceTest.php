@@ -39,7 +39,7 @@ beforeEach(function () {
     ];
     $this->courses = [
         ['id' => 1, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Site'],
-        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation publique', 'summary' => '<p>Présentation</p>', 'overviewfiles' => [['fileurl' => 'https://moodle.example.test/webservice/pluginfile.php/2/image.png?download=1']]],
+        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation publique', 'customfields' => [['shortname' => 'prix', 'value' => '49 $']], 'summary' => '<p>Présentation</p>', 'overviewfiles' => [['fileurl' => 'https://moodle.example.test/webservice/pluginfile.php/2/image.png?download=1']]],
         ['id' => 3, 'categoryid' => 20, 'visible' => 0, 'fullname' => 'Formation masquée'],
     ];
     $this->image = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=');
@@ -64,6 +64,7 @@ it('exclut le cours site et les cours masqués', function () {
     expect($groups)->toHaveCount(1)
         ->and($groups[0]['category'])->toBe('Productivité')
         ->and(array_column($groups[0]['courses'], 'id'))->toBe([2])
+        ->and($groups[0]['courses'][0]['price'])->toBe('49 $')
         ->and($groups[0]['courses'][0]['course_url'])->toBe('https://moodle.example.test/course/view.php?id=2');
     Http::assertSentCount(3);
     Http::assertSent(fn (Request $request) => ($request['moodlewsrestformat'] ?? null) === 'json'
@@ -81,6 +82,7 @@ it('regroupe dynamiquement plusieurs catégories et conserve le cache', function
     expect(array_column($groups, 'category'))->toBe(['Productivité', 'Cybersécurité'])
         ->and(array_column($groups[0]['courses'], 'id'))->toBe([2])
         ->and(array_column($groups[1]['courses'], 'id'))->toBe([4])
+        ->and($groups[1]['courses'][0]['price'])->toBeNull()
         ->and($service->getCatalogue())->toBe($groups);
     Http::assertSentCount(3);
 });
@@ -201,7 +203,7 @@ it('ne transmet pas le jeton à un hôte tiers pour une image', function () {
     Http::assertSentCount(2);
 });
 
-it('rend le catalogue sans jeton avec grille plate ou sections et message vide', function () {
+it('rend une grille unique avec filtres, prix et repli sans JavaScript', function () {
     $disk = Storage::disk('public');
     $disk->put('catalog-test-views/layouts/master.blade.php', "@stack('styles') @yield('breadcrumb') @yield('content')");
     $disk->put('catalog-test-views/partials/breadcrumb.blade.php', '{{ $breadcrumbTitle }}');
@@ -218,16 +220,33 @@ it('rend le catalogue sans jeton avec grille plate ou sections et message vide',
     Cache::forget('catalog.courses');
     $this->courses[] = ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Autre formation'];
     $html = view('catalog::public.index', ['categories' => $service->getCatalogue()])->render();
-    expect($html)->toContain('<h2>Productivité</h2>', '<h2>Cybersécurité</h2>');
+    expect($html)->toContain('49 $', 'Gratuit')->not->toContain('<h2>Productivité</h2>', '<h2>Cybersécurité</h2>');
 
     $document = new DOMDocument();
     @$document->loadHTML('<?xml encoding="UTF-8">'.$html);
     $xpath = new DOMXPath($document);
+    $grid = '//div[contains(concat(" ", normalize-space(@class), " "), " grid ")]';
+    $filters = '//div[@class="catalog-filters"]';
+    expect($xpath->query($grid)->length)->toBe(1)
+        ->and($xpath->query($grid.'/article')->length)->toBe(2)
+        ->and($xpath->query('//article')->length)->toBe(2)
+        ->and($xpath->query('//article[@hidden or @x-cloak or @style]')->length)->toBe(0)
+        ->and($xpath->query($filters.'[@x-cloak]')->length)->toBe(1)
+        ->and($xpath->query($filters.'/button')->length)->toBe(3)
+        ->and($xpath->query($filters.'/button[@aria-pressed="true"]')->length)->toBe(1);
+    foreach (['all' => 'Toutes', 'Productivité' => 'Productivité', 'Cybersécurité' => 'Cybersécurité'] as $filter => $label) {
+        $button = $xpath->query($filters.'/button[@type="button" and @data-filter="'.$filter.'"]');
+        expect($button->length)->toBe(1)
+            ->and(trim($button->item(0)->textContent))->toBe($label)
+            ->and($button->item(0)->getAttribute('aria-pressed'))->toBe($filter === 'all' ? 'true' : 'false');
+    }
     foreach ([2 => 'Formation publique', 4 => 'Autre formation'] as $id => $fullname) {
         $url = 'https://moodle.example.test/course/view.php?id='.$id;
         $card = '//article[.//a[@href="'.$url.'"]]';
         $thumbnail = $card.'/a[@class="catalog-thumb-link" and @href="'.$url.'"]';
         expect($xpath->query($card)->length)->toBe(1)
+            ->and($xpath->query($card)->item(0)->getAttribute('data-category'))->toBe($id === 2 ? 'Productivité' : 'Cybersécurité')
+            ->and($xpath->query($card.'//span[@class="catalog-price"]')->item(0)->textContent)->toBe($id === 2 ? '49 $' : 'Gratuit')
             ->and($xpath->query($thumbnail)->length)->toBe(1)
             ->and($xpath->query($thumbnail)->item(0)->getAttribute('aria-label'))->toBe('Voir la formation : '.$fullname)
             ->and($xpath->query($thumbnail.'[@aria-hidden="true" or @tabindex="-1"]')->length)->toBe(0)
@@ -244,6 +263,32 @@ it('rend le catalogue sans jeton avec grille plate ou sections et message vide',
     $html = view('catalog::public.index', ['categories' => $service->getCatalogue()])->render();
     expect($html)->toContain('Les formations seront bientôt disponibles.')->not->toContain('catalog-test-token');
 });
+
+it('conserve le prix verbatim et normalise seulement les valeurs vides', function (?string $value, ?string $expected) {
+    $this->courses[1]['customfields'] = [
+        ['shortname' => 'autre', 'value' => 'Ignoré'],
+        ['shortname' => 'prix', 'value' => $value],
+    ];
+    ($this->fakeCatalogue)();
+
+    $groups = app(MoodleCatalogService::class)->getCatalogue();
+    expect($groups[0]['courses'][0]['price'])->toBe($expected);
+
+    $disk = Storage::disk('public');
+    $disk->put('catalog-test-views/layouts/master.blade.php', "@stack('styles') @yield('content')");
+    $disk->put('catalog-test-views/partials/breadcrumb.blade.php', '{{ $breadcrumbTitle }}');
+    view()->prependNamespace('fronttheme', $disk->path('catalog-test-views'));
+    view()->addNamespace('catalog', __DIR__.'/../../resources/views');
+    $html = view('catalog::public.index', ['categories' => $groups])->render();
+
+    expect($html)->toContain('<span class="catalog-price">'.e($expected ?? 'Gratuit').'</span>');
+})->with([
+    'nul' => [null, null],
+    'vide' => ['', null],
+    'espaces' => ['   ', null],
+    'zéro' => ['0', '0'],
+    'texte exact' => [' 49 $ & taxes <incluses> ', ' 49 $ & taxes <incluses> '],
+]);
 
 it('isole les observateurs HTTP puis restaure leur état après une exception', function () {
     $hub = \Sentry\SentrySdk::getCurrentHub();

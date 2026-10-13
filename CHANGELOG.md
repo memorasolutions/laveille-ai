@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.345.0] - 2026-10-13
+
+### Ajouté
+- **Vitrine `/cours`Â : grille unique filtrable + badge de prix par cours.** Toutes les vignettes sont désormais affichées dans une seule grille; les catégories deviennent des boutons de FILTRE («Â ToutesÂ » + une par catégorie) plutôt que des sections séparées, de sorte que le visiteur voit l'ensemble du catalogue d'un coup d'oeil et restreint à une catégorie s'il le souhaite. Le filtrage est côté client (Alpine), accessible au clavier (boutons `aria-pressed`, groupe étiqueté), et se dégrade proprement sans JavaScriptÂ : la barre de filtres est masquée (`x-cloak`) et toutes les cartes restent visibles. Chaque carte porte un **badge de prix**Â : «Â GratuitÂ » tant qu'aucun prix n'est fixé, sinon le montant exact tel que saisi côté Moodle.
+- **Statut payant/gratuit synchronisé avec Moodle (source de vérité).** Le service de catalogue lit le champ personnalisé `prix` (shortname `prix`) exposé par le service web Moodle (`customfields`) et l'affiche verbatim; une valeur vide est normalisée en «Â GratuitÂ ». Le prix affiché sur la vitrine reflète donc toujours ce qui est saisi dans Moodle, rafraîchi à chaque relecture du catalogue (cache court). Aucune donnée en dur, aucune écriture.
+
 ## [1.344.0] - 2026-10-13
 
 ### Ajouté
