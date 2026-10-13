@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.346.2] - 2026-10-13
+
+### Corrigé
+- **Annuaire, fiche LucidNest : section « Les moins » mise à jour et statut de cycle de vie corrigé.** La fiche décrivait une plateforme « en bêta ouverte », « sans application native » et dont l'OCR serait « en pilote » : ces mentions ne correspondaient plus à la réalité du produit (plateforme en version A1 en service, application web progressive (PWA) installable, produit surtout textuel pour lequel l'OCR n'est pas pertinent). Les « moins » deviennent deux mentions honnêtes et exactes (jeune plateforme en développement actif; PWA installable plutôt qu'application native dans les magasins), et le `lifecycle_status` passe de `beta` à `active`. Correction appliquée par une migration réversible qui met à jour l'enregistrement en base, sans toucher à la fiche d'origine.
+
 ## [1.346.1] - 2026-10-13
 
 ### Modifié
