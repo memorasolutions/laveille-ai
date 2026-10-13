@@ -72,7 +72,7 @@
                             </a>
                             <div class="catalog-card-body p-5">
                                 <span class="catalog-badge">{{ $group['category'] }}</span>
-                                <span class="catalog-price">{{ ($course['price'] ?? '') === '' ? __('Gratuit') : $course['price'] }}</span>
+                                <span class="catalog-price">{{ $course['price_display'] }}</span>
                                 <h2 class="catalog-card-title">{{ $course['fullname'] }}</h2>
                                 <p>{{ \Illuminate\Support\Str::limit(strip_tags($course['summary']), 140) }}</p>
                                 <a href="{{ $course['course_url'] }}" aria-label="{{ __('Voir la formation').' : '.$course['fullname'] }}">{{ __('Voir la formation') }}</a>

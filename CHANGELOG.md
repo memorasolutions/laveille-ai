@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.345.1] - 2026-10-13
+
+### Corrigé
+- **Badge de prix /coursÂ : le nombre nu de Moodle est formaté en dollars québécois.** Le champ `prix` de Moodle stocke désormais un nombre nu en CAD (convention arrêtée avec l'académie, pour qu'il alimente aussi un futur paiement Stripe sans reparsage). Le badge formate ce nombre à l'affichage - «Â 199Â $Â », «Â 1 500Â $Â », «Â 199,00Â $Â » avec une espace insécable avant le symbole - au lieu de l'afficher tel quel; un champ vide reste «Â GratuitÂ », et une valeur non numérique est affichée telle quelle par prudence. La valeur brute est conservée à part (clé `price`) pour la vente à venir; la vitrine ne stocke aucun prix, Moodle demeure la seule source.
+
 ## [1.345.0] - 2026-10-13
 
 ### Ajouté

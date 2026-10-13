@@ -84,6 +84,7 @@ class MoodleCatalogService
                     'fullname' => $this->publicText((string) ($course['fullname'] ?? '')),
                     'summary' => $this->publicText((string) ($course['summary'] ?? '')),
                     'price' => $price,
+                    'price_display' => $this->formatPrice($price),
                     'image_local' => $this->cachedImage($course),
                     'course_url' => $this->courseUrl($id),
                 ];
@@ -95,6 +96,24 @@ class MoodleCatalogService
 
             return [];
         }
+    }
+
+    private function formatPrice(?string $raw): string
+    {
+        $v = trim((string) $raw);
+        if ($v === '') {
+            return __('Gratuit');
+        }
+
+        $n = str_replace(',', '.', $v);
+        if (! is_numeric($n)) {
+            return $v;
+        }
+
+        $f = (float) $n;
+        $formatted = number_format($f, $f !== floor($f) || str_contains($n, '.') ? 2 : 0, ',', "\u{00A0}");
+
+        return $formatted."\u{00A0}$";
     }
 
     protected function webService(string $function): array

@@ -264,7 +264,7 @@ it('rend une grille unique avec filtres, prix et repli sans JavaScript', functio
     expect($html)->toContain('Les formations seront bientôt disponibles.')->not->toContain('catalog-test-token');
 });
 
-it('conserve le prix verbatim et normalise seulement les valeurs vides', function (?string $value, ?string $expected) {
+it('formate le prix affiché et conserve le prix brut sauf les valeurs vides', function (?string $value, ?string $expected, ?string $display) {
     $this->courses[1]['customfields'] = [
         ['shortname' => 'autre', 'value' => 'Ignoré'],
         ['shortname' => 'prix', 'value' => $value],
@@ -272,7 +272,8 @@ it('conserve le prix verbatim et normalise seulement les valeurs vides', functio
     ($this->fakeCatalogue)();
 
     $groups = app(MoodleCatalogService::class)->getCatalogue();
-    expect($groups[0]['courses'][0]['price'])->toBe($expected);
+    expect($groups[0]['courses'][0]['price'])->toBe($expected)
+        ->and($groups[0]['courses'][0]['price_display'])->toBe($display ?? __('Gratuit'));
 
     $disk = Storage::disk('public');
     $disk->put('catalog-test-views/layouts/master.blade.php', "@stack('styles') @yield('content')");
@@ -281,13 +282,20 @@ it('conserve le prix verbatim et normalise seulement les valeurs vides', functio
     view()->addNamespace('catalog', __DIR__.'/../../resources/views');
     $html = view('catalog::public.index', ['categories' => $groups])->render();
 
-    expect($html)->toContain('<span class="catalog-price">'.e($expected ?? 'Gratuit').'</span>');
+    expect($html)->toContain('<span class="catalog-price">'.e($display ?? __('Gratuit')).'</span>');
 })->with([
-    'nul' => [null, null],
-    'vide' => ['', null],
-    'espaces' => ['   ', null],
-    'zéro' => ['0', '0'],
-    'texte exact' => [' 49 $ & taxes <incluses> ', ' 49 $ & taxes <incluses> '],
+    'nul' => [null, null, null],
+    'vide' => ['', null, null],
+    'espaces' => ['   ', null, null],
+    'zéro' => ['0', '0', "0\u{00A0}$"],
+    'entier' => ['199', '199', "199\u{00A0}$"],
+    'décimales explicites' => ['199.00', '199.00', "199,00\u{00A0}$"],
+    'milliers' => ['1500', '1500', "1\u{00A0}500\u{00A0}$"],
+    'fraction' => ['199.95', '199.95', "199,95\u{00A0}$"],
+    'virgule' => ['199,95', '199,95', "199,95\u{00A0}$"],
+    'nombre avec espaces' => [' 199 ', ' 199 ', "199\u{00A0}$"],
+    'sur demande' => ['sur demande', 'sur demande', 'sur demande'],
+    'texte exact' => [' 49 $ & taxes <incluses> ', ' 49 $ & taxes <incluses> ', '49 $ & taxes <incluses>'],
 ]);
 
 it('isole les observateurs HTTP puis restaure leur état après une exception', function () {
