@@ -11,4 +11,9 @@ return [
     'moodle_base_url' => env('MOODLE_BASE_URL', 'https://laveille.ai/formations'),
     'cache_ttl' => (int) env('CATALOG_CACHE_TTL', 1800),
     'http_timeout' => (int) env('CATALOG_HTTP_TIMEOUT', 15),
+
+    // Vitrine en noindex tant que les cours sont des démos (pré-lancement). Basculer à false
+    // dans le .env de production (CATALOG_NOINDEX=false) quand de vrais cours remplaceront les
+    // démos : /cours redeviendra alors indexable et un atout de référencement.
+    'noindex' => filter_var(env('CATALOG_NOINDEX', true), FILTER_VALIDATE_BOOLEAN),
 ];

@@ -39,13 +39,18 @@ beforeEach(function () {
     ];
     $this->courses = [
         ['id' => 1, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Site'],
-        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation publique', 'summary' => '<p>Présentation</p>'],
+        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation publique', 'summary' => '<p>Présentation</p>', 'overviewfiles' => [['fileurl' => 'https://moodle.example.test/webservice/pluginfile.php/2/image.png?download=1']]],
         ['id' => 3, 'categoryid' => 20, 'visible' => 0, 'fullname' => 'Formation masquée'],
     ];
+    $this->image = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=');
     $this->fakeCatalogue = function () {
-        Http::fake(fn (Request $request) => Http::response(
-            $request['wsfunction'] === 'core_course_get_categories' ? $this->categories : $this->courses,
-        ));
+        Http::fake(fn (Request $request) => str_contains($request->url(), 'pluginfile.php')
+            ? Http::response($this->image, 200, ['Content-Type' => 'image/png'])
+            : Http::response(match ($request['wsfunction']) {
+                'core_course_get_categories' => $this->categories,
+                'core_course_get_courses_by_field' => ['courses' => $this->courses, 'warnings' => []],
+                default => throw new RuntimeException('Fonction Moodle inattendue.'),
+            }));
     };
 });
 
@@ -60,9 +65,10 @@ it('exclut le cours site et les cours masqués', function () {
         ->and($groups[0]['category'])->toBe('Productivité')
         ->and(array_column($groups[0]['courses'], 'id'))->toBe([2])
         ->and($groups[0]['courses'][0]['course_url'])->toBe('https://moodle.example.test/course/view.php?id=2');
-    Http::assertSentCount(2);
-    Http::assertSent(fn (Request $request) => $request['moodlewsrestformat'] === 'json'
-        && $request['wstoken'] === 'catalog-test-token');
+    Http::assertSentCount(3);
+    Http::assertSent(fn (Request $request) => ($request['moodlewsrestformat'] ?? null) === 'json'
+        && $request['wstoken'] === 'catalog-test-token'
+        && $request['wsfunction'] === 'core_course_get_courses_by_field');
 });
 
 it('regroupe dynamiquement plusieurs catégories et conserve le cache', function () {
@@ -76,7 +82,7 @@ it('regroupe dynamiquement plusieurs catégories et conserve le cache', function
         ->and(array_column($groups[0]['courses'], 'id'))->toBe([2])
         ->and(array_column($groups[1]['courses'], 'id'))->toBe([4])
         ->and($service->getCatalogue())->toBe($groups);
-    Http::assertSentCount(2);
+    Http::assertSentCount(3);
 });
 
 it('ignore les catégories masquées', function () {
@@ -112,7 +118,7 @@ it('absorbe les erreurs HTTP sur chacun des deux appels', function (string $func
 
     expect(app(MoodleCatalogService::class)->getCatalogue())->toBe([]);
     Log::shouldHaveReceived('warning')->once()->with('Lecture du catalogue Moodle impossible.');
-})->with(['core_course_get_categories', 'core_course_get_courses']);
+})->with(['core_course_get_categories', 'core_course_get_courses_by_field']);
 
 it('absorbe les exceptions réseau sans journaliser leur contenu', function () {
     Log::spy();
@@ -128,12 +134,32 @@ it('absorbe les erreurs Moodle renvoyées avec un statut HTTP 200', function () 
     expect(app(MoodleCatalogService::class)->getCatalogue())->toBe([]);
 });
 
+it('rejette une réponse de cours sans tableau courses', function (array $data) {
+    Log::spy();
+    Http::fake(fn (Request $request) => Http::response(match ($request['wsfunction']) {
+        'core_course_get_categories' => $this->categories,
+        'core_course_get_courses_by_field' => $data,
+        default => throw new RuntimeException('Fonction Moodle inattendue.'),
+    }));
+
+    expect(app(MoodleCatalogService::class)->getCatalogue())->toBe([]);
+    Log::shouldHaveReceived('warning')->once()->with('Lecture du catalogue Moodle impossible.');
+})->with([
+    'liste plate' => [[['id' => 2, 'categoryid' => 10, 'visible' => 1]]],
+    'champ absent' => [['warnings' => []]],
+    'champ invalide' => [['courses' => 'invalide', 'warnings' => []]],
+]);
+
 it('proxifie une image une seule fois et ne retourne aucun jeton', function () {
-    $image = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=');
+    $image = $this->image;
     $this->courses[1]['overviewfiles'] = [['fileurl' => 'https://moodle.example.test/webservice/pluginfile.php/2/image.png?download=1']];
     Http::fake(fn (Request $request) => str_contains($request->url(), 'pluginfile.php')
         ? Http::response($image, 200, ['Content-Type' => 'image/png'])
-        : Http::response($request['wsfunction'] === 'core_course_get_categories' ? $this->categories : $this->courses));
+        : Http::response(match ($request['wsfunction']) {
+            'core_course_get_categories' => $this->categories,
+            'core_course_get_courses_by_field' => ['courses' => $this->courses, 'warnings' => []],
+            default => throw new RuntimeException('Fonction Moodle inattendue.'),
+        }));
     $service = app(MoodleCatalogService::class);
 
     $groups = $service->getCatalogue();
@@ -153,7 +179,11 @@ it('utilise le repli pour une image indisponible ou une réponse non image', fun
     $this->courses[1]['overviewfiles'] = [['fileurl' => 'https://moodle.example.test/image.png']];
     Http::fake(fn (Request $request) => str_contains($request->url(), 'image.png')
         ? Http::response('catalog-test-token', $status)
-        : Http::response($request['wsfunction'] === 'core_course_get_categories' ? $this->categories : $this->courses));
+        : Http::response(match ($request['wsfunction']) {
+            'core_course_get_categories' => $this->categories,
+            'core_course_get_courses_by_field' => ['courses' => $this->courses, 'warnings' => []],
+            default => throw new RuntimeException('Fonction Moodle inattendue.'),
+        }));
 
     $groups = app(MoodleCatalogService::class)->getCatalogue();
 
@@ -189,6 +219,26 @@ it('rend le catalogue sans jeton avec grille plate ou sections et message vide',
     $this->courses[] = ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Autre formation'];
     $html = view('catalog::public.index', ['categories' => $service->getCatalogue()])->render();
     expect($html)->toContain('<h2>Productivité</h2>', '<h2>Cybersécurité</h2>');
+
+    $document = new DOMDocument();
+    @$document->loadHTML('<?xml encoding="UTF-8">'.$html);
+    $xpath = new DOMXPath($document);
+    foreach ([2 => 'Formation publique', 4 => 'Autre formation'] as $id => $fullname) {
+        $url = 'https://moodle.example.test/course/view.php?id='.$id;
+        $card = '//article[.//a[@href="'.$url.'"]]';
+        $thumbnail = $card.'/a[@class="catalog-thumb-link" and @href="'.$url.'"]';
+        expect($xpath->query($card)->length)->toBe(1)
+            ->and($xpath->query($thumbnail)->length)->toBe(1)
+            ->and($xpath->query($thumbnail)->item(0)->getAttribute('aria-label'))->toBe('Voir la formation : '.$fullname)
+            ->and($xpath->query($thumbnail.'[@aria-hidden="true" or @tabindex="-1"]')->length)->toBe(0)
+            ->and($xpath->query($card.'/div/a[@href="'.$url.'" and normalize-space(.)="Voir la formation"]')->length)->toBe(1)
+            ->and($xpath->query($thumbnail.'//a')->length)->toBe(0);
+        if ($id === 2) {
+            expect($xpath->query($thumbnail.'/img[@src="'.asset('storage/catalog/course-2.png').'"]')->length)->toBe(1);
+        } else {
+            expect($xpath->query($thumbnail.'/div[@class="catalog-placeholder"]/svg[@aria-hidden="true"]')->length)->toBe(1);
+        }
+    }
 
     config(['catalog.moodle_ws_token' => '']);
     $html = view('catalog::public.index', ['categories' => $service->getCatalogue()])->render();

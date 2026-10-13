@@ -50,7 +50,7 @@ class MoodleCatalogService
             }
 
             $categories = $this->webService('core_course_get_categories');
-            $courses = $this->webService('core_course_get_courses');
+            $courses = $this->coursesByField();
             $groups = [];
 
             foreach ($categories as $category) {
@@ -101,6 +101,22 @@ class MoodleCatalogService
         }
 
         return $data;
+    }
+
+    protected function coursesByField(): array
+    {
+        $response = $this->request((string) config('catalog.moodle_ws_url'), [
+            'wstoken' => config('catalog.moodle_ws_token'),
+            'wsfunction' => 'core_course_get_courses_by_field',
+            'moodlewsrestformat' => 'json',
+        ]);
+        $data = $response->json();
+
+        if (! $response->successful() || ! is_array($data) || ! is_array($data['courses'] ?? null)) {
+            throw new RuntimeException('Réponse Moodle indisponible.');
+        }
+
+        return $data['courses'];
     }
 
     protected function request(string $url, array $query): Response

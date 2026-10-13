@@ -3,6 +3,10 @@
 
 @section('title', __('Nos formations').' - '.config('app.name'))
 
+@if(config('catalog.noindex'))
+    @section('page_noindex', true)
+@endif
+
 @section('breadcrumb')
     @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Nos formations')])
 @endsection
@@ -15,6 +19,7 @@
     .catalog .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
     .catalog article { background: #fff; border: 1px solid #f3f4f6; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px #0000000d; transition: box-shadow .2s; }
     .catalog article:hover { box-shadow: 0 4px 6px #0000001a; }
+    .catalog .catalog-thumb-link { display: block; }
     .catalog .catalog-image { width: 100%; height: 192px; object-fit: cover; }
     .catalog .catalog-placeholder { height: 192px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #134e4a, #115e59); color: #fff; }
     .catalog .catalog-placeholder svg { width: 64px; height: 64px; }
@@ -45,15 +50,17 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         @foreach($group['courses'] as $course)
                             <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
-                                @if($course['image_local'])
-                                    <img src="{{ $course['image_local'] }}" alt="{{ $course['fullname'] }}" class="catalog-image w-full h-48 object-cover" loading="lazy">
-                                @else
-                                    <div class="catalog-placeholder" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                            <path d="M3 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-3H3V4Zm18 0h-6a3 3 0 0 0-3 3v14a4 4 0 0 1 4-3h5V4Z" />
-                                        </svg>
-                                    </div>
-                                @endif
+                                <a href="{{ $course['course_url'] }}" class="catalog-thumb-link" aria-label="{{ __('Voir la formation').' : '.$course['fullname'] }}">
+                                    @if($course['image_local'])
+                                        <img src="{{ $course['image_local'] }}" alt="{{ $course['fullname'] }}" class="catalog-image w-full h-48 object-cover" loading="lazy">
+                                    @else
+                                        <div class="catalog-placeholder">
+                                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <path d="M3 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-3H3V4Zm18 0h-6a3 3 0 0 0-3 3v14a4 4 0 0 1 4-3h5V4Z" />
+                                            </svg>
+                                        </div>
+                                    @endif
+                                </a>
                                 <div class="catalog-card-body p-5">
                                     <span class="catalog-badge">{{ $group['category'] }}</span>
                                     @if(count($categories) > 1)
@@ -62,7 +69,7 @@
                                         <h2 class="catalog-card-title">{{ $course['fullname'] }}</h2>
                                     @endif
                                     <p>{{ \Illuminate\Support\Str::limit(strip_tags($course['summary']), 140) }}</p>
-                                    <a href="{{ $course['course_url'] }}" aria-label="{{ __('Voir la formation').' : '.$course['fullname'] }}">{{ __('Voir la formation') }}</a>
+                                    <a href="{{ $course['course_url'] }}" aria-label="{{ __('Voir la formation').' : '.$course['fullname'] }}">{{ __('Voir la formation') }}</a>
                                 </div>
                             </article>
                         @endforeach

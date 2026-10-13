@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.344.0] - 2026-10-13
+
+### Ajouté
+- **Vitrine `/cours` : vraies vignettes de cours, cliquables en tout temps.** Chaque carte affiche désormais l'image de couverture du cours tirée de Moodle, et la vignette - image ou repli visuel - est un lien cliquable vers la formation en tout temps, pas seulement la mention « Voir la formation ». Le service de catalogue appelle maintenant `core_course_get_courses_by_field`, qui renvoie les fichiers d'aperçu `overviewfiles`, au lieu de `core_course_get_courses` qui ne les renvoyait pas : c'est ce qui rendait les vignettes invisibles. L'image est téléchargée et mise en cache localement, le jeton du service web n'étant jamais exposé au visiteur.
+
+### Interne
+- **Vitrine `/cours` en noindex pendant le pré-lancement.** Tant que le catalogue montre des cours de démonstration, la page est servie en `noindex, follow` pour ne pas être indexée par les moteurs, à l'image de tout `/formations` déjà en pré-lancement. Comportement piloté par une configuration réversible (`CATALOG_NOINDEX`, activée par défaut) : il suffira de la désactiver dans le `.env` de production quand de vrais cours remplaceront les démos pour que `/cours` redevienne indexable et un atout de référencement.
+
 ## [1.343.0] - 2026-10-13
 
 ### Ajouté
