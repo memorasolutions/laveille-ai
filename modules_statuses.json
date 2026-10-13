@@ -57,5 +57,5 @@
     "Signature": true,
     "Analytics": true,
     "Idp": true,
-    "Catalog": false
+    "Catalog": true
 }

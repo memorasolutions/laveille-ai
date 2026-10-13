@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.343.0] - 2026-10-13
+
+### Ajouté
+- **Vitrine publique des cours de l'académie (`/cours`).** Le module `Catalog` (lecture seule du service web REST de Moodle) est activé. La page `/cours` affiche le catalogue des formations de l'académie laveille.ai, en cartes groupées par catégorie, avec un cache court. Aucune écriture, aucune donnée d'apprenant : la page lit les catégories et les cours publics via un compte de service Moodle à portée limitée (`svc_laveille`). Le jeton du service web vit dans 1Password et dans le `.env` de production, jamais dans le dépôt. Le module était livré mais désactivé depuis la v1.342.2 faute du jeton; il est désormais branché et la vitrine est en ligne. Intégration validée de bout en bout avant activation : `core_webservice_get_site_info`, `core_course_get_categories` et `core_course_get_courses` répondent sans exception.
+
 ## [1.342.6] - 2026-10-13
 
 ### Interne
