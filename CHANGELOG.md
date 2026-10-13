@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.346.5] - 2026-10-13
+
+### Corrigé
+- **Annuaire, fiche LucidNest : le « moins » sur la PWA ne compare plus avec les magasins d'applications.** La formulation « plutôt qu'en application native dans les magasins » pouvait laisser croire que l'application devrait se trouver dans un magasin d'applications. Elle devient « Offerte en application web progressive (PWA) : elle s'installe et s'utilise directement depuis le navigateur, sur mobile comme sur ordinateur », qui garde le terme PWA et l'explique brièvement. Migration réversible; aucune autre donnée de la fiche ne change.
+
 ## [1.346.4] - 2026-10-13
 
 ### Corrigé
