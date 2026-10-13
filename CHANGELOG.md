@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.346.4] - 2026-10-13
+
+### Corrigé
+- **Annuaire, fiche LucidNest : le vocabulaire s'aligne sur le nouveau positionnement du produit.** La fiche décrivait LucidNest avec le terme clinique « TDAH » (dans la description, le résumé, les cas d'usage, les « plus », la FAQ et le public cible). Le frontend de lucidnest.io ne porte plus cette mention : le produit se présente désormais comme l'outil des « cerveaux-éclairs » qui pensent vite, à la pensée non linéaire. La fiche adopte ce même vocabulaire, plus positif, partout où « TDAH » apparaissait, sans rien retirer au sens inclusif (la FAQ reste « aucun diagnostic ni étiquette n'est demandé, l'outil reste ouvert à tous »). Correction par une migration réversible; aucune autre donnée de la fiche ne change.
+
 ## [1.346.3] - 2026-10-13
 
 ### Corrigé
