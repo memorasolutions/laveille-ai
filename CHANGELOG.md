@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.342.5] - 2026-10-12
+
+### Interne
+- **Boutique : durcissements d'accès avant l'ouverture publique.** (1) Les routes de l'éditeur client (`Modules/Shop/routes/editor.php`) passent désormais par le garde `FounderOnly`, exactement comme les routes publiques et admin de la boutique : un éditeur activé n'est plus accessible à tous pendant que la boutique est fermée (drapeau `shop.founder_only`), il s'aligne sur l'ouverture de la boutique. (2) La route de passage de commande (`POST /commander`) reçoit une limite de débit (`throttle:10,1`, soit au plus 10 tentatives par minute et par adresse), au même titre que le suivi de commande et l'éditeur, pour freiner un abus automatisé du tunnel de paiement. Aucun changement de comportement pour un client normal. Suite Shop vérifiée au complet (199 tests, 1304 assertions) : la limite de débit ne gêne aucun parcours de commande légitime.
+
 ## [1.342.4] - 2026-10-12
 
 ### Corrigé

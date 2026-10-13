@@ -9,13 +9,16 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Shop\Gelato\Editor\GelatoEditor;
 use Modules\Shop\Http\Controllers\GelatoEditorController;
+use Modules\Shop\Http\Middleware\FounderOnly;
 use Modules\Shop\Http\Middleware\ShopMaintenanceMode;
 
 if (! GelatoEditor::enabled()) {
     return;
 }
 
-Route::middleware(['web', ShopMaintenanceMode::class])
+// FounderOnly aligne l'éditeur sur la boutique : fermé tant que la boutique l'est, ouvert quand elle ouvre
+// (shop.founder_only). Sans ça, un éditeur activé resterait accessible à tous pendant que la boutique est fermée.
+Route::middleware(['web', FounderOnly::class, ShopMaintenanceMode::class])
     ->prefix(config('shop.routes.prefix', 'boutique').'/editeur')
     ->as('shop.editor.')
     ->group(function () {
