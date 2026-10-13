@@ -57,6 +57,7 @@ class MoodleCatalogService
                 if ((int) ($category['visible'] ?? 0) === 1) {
                     $groups[(int) $category['id']] = [
                         'category' => $this->publicText((string) $category['name']),
+                        'slug' => $this->categorySlug($category),
                         'courses' => [],
                     ];
                 }
@@ -96,6 +97,30 @@ class MoodleCatalogService
 
             return [];
         }
+    }
+
+    /**
+     * Slug de thème stable d'une catégorie Moodle, pour le pré-filtre ?theme=<slug> de /cours
+     * (méga-menu « Cours par thèmes » de l'académie). Dérivé de l'idnumber Moodle en retirant le
+     * préfixe « thm- » (thm-ia -> ia) ; repli sur le nom slugifié, puis sur « cat-<id> » si vide.
+     * Déterministe et sans dépendance : un slug inconnu côté /cours retombe proprement sur la
+     * grille complète (aucune casse).
+     */
+    private function categorySlug(array $category): string
+    {
+        $idnumber = trim((string) ($category['idnumber'] ?? ''));
+
+        if (str_starts_with($idnumber, 'thm-')) {
+            $base = substr($idnumber, 4);
+        } elseif ($idnumber !== '') {
+            $base = $idnumber;
+        } else {
+            $base = (string) ($category['name'] ?? '');
+        }
+
+        $slug = \Illuminate\Support\Str::slug($this->publicText($base));
+
+        return $slug !== '' ? $slug : 'cat-'.((int) ($category['id'] ?? 0));
     }
 
     private function formatPrice(?string $raw): string

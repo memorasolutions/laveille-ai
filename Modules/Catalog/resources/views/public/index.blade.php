@@ -41,7 +41,7 @@
 @endpush
 
 @section('content')
-<div class="catalog" x-data="{ filter: 'all' }">
+<div class="catalog" x-data="{ filter: '{{ $activeTheme ?? 'all' }}' }">
     <div class="container">
         <h1>{{ __('Nos formations') }}</h1>
         @if(empty($categories))
@@ -51,14 +51,14 @@
                 <button type="button" class="catalog-filter" data-filter="all" aria-pressed="true"
                         x-bind:aria-pressed="filter === 'all'" x-on:click="filter = $el.dataset.filter">{{ __('Toutes') }}</button>
                 @foreach($categories as $group)
-                    <button type="button" class="catalog-filter" data-filter="{{ $group['category'] }}" aria-pressed="false"
+                    <button type="button" class="catalog-filter" data-filter="{{ $group['slug'] }}" aria-pressed="false"
                             x-bind:aria-pressed="filter === $el.dataset.filter" x-on:click="filter = $el.dataset.filter">{{ $group['category'] }}</button>
                 @endforeach
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($categories as $group)
                     @foreach($group['courses'] as $course)
-                        <article data-category="{{ $group['category'] }}" x-show="filter === 'all' || filter === $el.dataset.category" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+                        <article data-category="{{ $group['slug'] }}" x-show="filter === 'all' || filter === $el.dataset.category" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
                             <a href="{{ $course['course_url'] }}" class="catalog-thumb-link" aria-label="{{ __('Voir la formation').' : '.$course['fullname'] }}">
                                 @if($course['image_local'])
                                     <img src="{{ $course['image_local'] }}" alt="{{ $course['fullname'] }}" class="catalog-image w-full h-48 object-cover" loading="lazy">

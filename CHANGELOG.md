@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.346.0] - 2026-10-13
+
+### Ajouté
+- **Vitrine `/cours` : lien profond par thème (`?theme=<slug>`).** La page `/cours` accepte désormais un paramètre `?theme=<slug>` (ex. `?theme=ia`, `?theme=cyber`, `?theme=prod`, `?theme=mkt`) qui pré-sélectionne le filtre de catégorie à l'ouverture de la grille. Le slug est dérivé de l'`idnumber` de la catégorie Moodle en retirant le préfixe `thm-` (repli : nom slugifié). Un slug inconnu ou absent retombe proprement sur la grille complète, sans filtre - aucune casse. Cela alimente le méga-menu « Cours par thèmes » de l'académie : chaque thème y pointe vers sa vitrine laveille pré-filtrée. Le filtrage reste côté client (Alpine), accessible au clavier, et se dégrade sans JavaScript (toutes les cartes visibles).
+
 ## [1.345.3] - 2026-10-13
 
 ### Corrigé

@@ -234,7 +234,7 @@ it('rend une grille unique avec filtres, prix et repli sans JavaScript', functio
         ->and($xpath->query($filters.'[@x-cloak]')->length)->toBe(1)
         ->and($xpath->query($filters.'/button')->length)->toBe(3)
         ->and($xpath->query($filters.'/button[@aria-pressed="true"]')->length)->toBe(1);
-    foreach (['all' => 'Toutes', 'Productivité' => 'Productivité', 'Cybersécurité' => 'Cybersécurité'] as $filter => $label) {
+    foreach (['all' => 'Toutes', 'productivite' => 'Productivité', 'cybersecurite' => 'Cybersécurité'] as $filter => $label) {
         $button = $xpath->query($filters.'/button[@type="button" and @data-filter="'.$filter.'"]');
         expect($button->length)->toBe(1)
             ->and(trim($button->item(0)->textContent))->toBe($label)
@@ -245,7 +245,7 @@ it('rend une grille unique avec filtres, prix et repli sans JavaScript', functio
         $card = '//article[.//a[@href="'.$url.'"]]';
         $thumbnail = $card.'/a[@class="catalog-thumb-link" and @href="'.$url.'"]';
         expect($xpath->query($card)->length)->toBe(1)
-            ->and($xpath->query($card)->item(0)->getAttribute('data-category'))->toBe($id === 2 ? 'Productivité' : 'Cybersécurité')
+            ->and($xpath->query($card)->item(0)->getAttribute('data-category'))->toBe($id === 2 ? 'productivite' : 'cybersecurite')
             ->and($xpath->query($card.'//span[@class="catalog-price"]')->item(0)->textContent)->toBe($id === 2 ? '49 $' : 'Gratuit')
             ->and($xpath->query($thumbnail)->length)->toBe(1)
             ->and($xpath->query($thumbnail)->item(0)->getAttribute('aria-label'))->toBe('Voir la formation : '.$fullname)
@@ -262,6 +262,48 @@ it('rend une grille unique avec filtres, prix et repli sans JavaScript', functio
     config(['catalog.moodle_ws_token' => '']);
     $html = view('catalog::public.index', ['categories' => $service->getCatalogue()])->render();
     expect($html)->toContain('Les formations seront bientôt disponibles.')->not->toContain('catalog-test-token');
+});
+
+it('derive le slug de theme depuis idnumber thm- puis repli sur le nom', function () {
+    $this->categories = [
+        ['id' => 10, 'name' => 'Intelligence artificielle', 'idnumber' => 'thm-ia', 'visible' => 1],
+        ['id' => 20, 'name' => 'Productivité', 'visible' => 1],
+    ];
+    $this->courses = [
+        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Cours IA'],
+        ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Cours Prod'],
+    ];
+    ($this->fakeCatalogue)();
+
+    $slugs = array_column(app(MoodleCatalogService::class)->getCatalogue(), 'slug', 'category');
+
+    expect($slugs['Intelligence artificielle'])->toBe('ia')
+        ->and($slugs['Productivité'])->toBe('productivite');
+});
+
+it('pre-selectionne le filtre quand un theme actif est fourni (pre-filtre ?theme=)', function () {
+    $disk = Storage::disk('public');
+    $disk->put('catalog-test-views/layouts/master.blade.php', "@stack('styles') @yield('breadcrumb') @yield('content')");
+    $disk->put('catalog-test-views/partials/breadcrumb.blade.php', '{{ $breadcrumbTitle }}');
+    view()->prependNamespace('fronttheme', $disk->path('catalog-test-views'));
+    view()->addNamespace('catalog', __DIR__.'/../../resources/views');
+    $this->categories = [
+        ['id' => 10, 'name' => 'Intelligence artificielle', 'idnumber' => 'thm-ia', 'visible' => 1],
+        ['id' => 20, 'name' => 'Cybersécurité', 'idnumber' => 'thm-cyber', 'visible' => 1],
+    ];
+    $this->courses = [
+        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Cours IA'],
+        ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Cours Cyber'],
+    ];
+    ($this->fakeCatalogue)();
+    $categories = app(MoodleCatalogService::class)->getCatalogue();
+
+    $htmlTheme = view('catalog::public.index', ['categories' => $categories, 'activeTheme' => 'ia'])->render();
+    $htmlDefaut = view('catalog::public.index', ['categories' => $categories])->render();
+
+    expect($htmlTheme)->toContain("filter: 'ia'")
+        ->and($htmlTheme)->toContain('data-filter="ia"', 'data-filter="cyber"')
+        ->and($htmlDefaut)->toContain("filter: 'all'");
 });
 
 it('formate le prix affiché et conserve le prix brut sauf les valeurs vides', function (?string $value, ?string $expected, ?string $display) {
