@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.346.1] - 2026-10-13
+
+### Modifié
+- **Vitrine `/cours` : cartes de cours plus compactes.** Les cartes prenaient trop de place pour leur contenu. Vignette ramenée de 192 px à 150 px de hauteur (et le repli sans image de même, avec son icône de 64 px à 48 px); rembourrage du corps de carte resserré (20 px -> 14 px/16 px); titre en 17 px au lieu de 20 px et limité à deux lignes (`line-clamp`); résumé en 14 px, aussi limité à deux lignes; espace entre les cartes réduit de 24 px à 18 px; filtres, pastille de prix et badge de catégorie resserrés. Aucune capacité nouvelle, aucun changement de données : seule la densité visuelle de la grille change. La grille reste responsive (1 colonne mobile, 2 tablette, 3 bureau), accessible au clavier et se dégrade sans JavaScript.
+
 ## [1.346.0] - 2026-10-13
 
 ### Ajouté

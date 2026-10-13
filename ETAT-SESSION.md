@@ -1,33 +1,28 @@
 # État de session - La veille de Stef v2
 
-> Fichier UNIQUE de reprise (réécrit, jamais empilé). Dernière mise à jour : 2026-10-09, ~16h30 Québec (20:30 UTC).
+Dernière mise à jour : 13 octobre 2026, ~10h15 Québec (14:15 UTC). Production en **v1.346.0** (CI + Deploy verts, servie et vérifiée en prod).
 
-> ▶️ SESSION ACTIVE le 2026-10-09, MODE AUTONOME (go fondateur : poursuivre jusqu'à 100 % sans s'arrêter à chaque todo). Déploiement boutique v1.325.0 VÉRIFIÉ en prod. En cours : désactivation ancienne académie (#3007).
+## Où on en est (livré et prouvé en prod)
 
-## 1. Où on en est (terminé et PROUVÉ)
+- **Fiche actu « Muse Wonder » (74322) PUBLIÉE ET PROUVÉE** (13 oct ~10h35 Québec, 14:35 UTC) : https://laveille.ai/actualites/meta-annonce-muse-wonder-et-dit-avoir-rattrape-les-meilleurs-en-ia-le-premier-test-independant-nuance (HTTP 200, 46 occurrences « Muse Wonder », présente dans le fil /actualites). Image = caricature Gemini (deux coureurs, sarcelle/orange). Gate image = mon contrôle structuré + 1 oracle frais Claude, propres sur les 6 critères (ni texte, ni logo, ni enfant, caricature évidente); 2e oracle de famille navigateur ARRÊTÉ (justifié : zéro facteur de risque, navigateur partagé gardé libre, Perplexity HS). og:image = .jpg 1200×630 servi, webp de page servi, crédit « Illustration : caricature générée par IA (Google Gemini) ».
+- **Fiche actu « Torvalds + Claude Code » (74352) PUBLIÉE ET PROUVÉE** (13 oct ~11h45 Québec, 15:45 UTC) : https://laveille.ai/actualites/linus-torvalds-qui-reduisait-lia-a-90-de-marketing-publie-un-patch-du-noyau-linux-ecrit-avec-claude-code (HTTP 200, og:image .jpg 1200x630, webp+jpg servis, dans le fil). Source primaire = message de commit de Torvalds cité par Phoronix (git.kernel.org bloqué par Anubis, signalé dans niveau_preuve=mixte). Gate exigeant : 3 passes de procureur (2 blocages réels corrigés : dates au jour non prouvées, cadrage « renie l'IA » exagéré, puis la revue faussement attribuée à l'humain alors que Claude Code l'a faite sous direction), 7 paires de preuve à extraits exacts. Image = caricature générique (développeur rasé, non identifiable, qui supervise un robot ; écrans et papiers vierges), 2 regards image propres après durcissement du prompt. Titre : « Torvalds, critique du battage sur l'IA, teste Claude Code dans le noyau ».
+- **`/cours?theme=<slug>` (#3090, v1.346.0).** Lien profond par thème pour le méga-menu de l'académie : ?theme=ia/cyber/prod/mkt pré-sélectionne le filtre de la grille; slug inconnu = grille complète (repli propre, zéro casse). Slug dérivé de l'idnumber Moodle thm-. PROUVÉ par curl en prod (theme=ia→filter:'ia', etc.; version servie 1.346.0) + 32 tests Catalog verts (2 neufs). Pair prévenu, il câble ses 4 liens.
+- **Plan « 2 plateformes = 1 » FIGÉ avec le pair Moodle** : provisionnement (enrôlement manuel après paiement, clé idnumber, idempotent), rien de live avant l'EFVP, certificats = customcert natif + lien WS. Doc pair : docs/ARCHITECTURE-2-PLATEFORMES.md.
+- Antérieur (toujours en prod) : vitrine /cours complète (v1.343→345.3), Perplexity reconnecté.
 
-- **Boutique prix zéro-perte + taxes provinciales : DÉPLOYÉE ET VÉRIFIÉE (v1.325.0).** #3005 + #3006 clos.
-  - CI run `37978710306` = success ; « Deploy to cPanel » run `37979102178` = success. Prod sert `?v=1.325.0`. `/boutique` anonyme = HTTP 503 (gate founder-only intacte). Accueil = 200 (zéro casse). Git `origin` = `forge` = `81e2365fc`.
-  - Gate adversarial pré-déploiement : 4 findings Codex corrigés + 2e passe Sonnet nette + suite Shop verte.
-  - RESTE (bloqué) : validation VISUELLE de la vitrine (prix/taxes affichés) = #2988, exige une session super-admin connectée (identifiants fondateur).
-- **Centralisation vente de cours : ARCHITECTURE FIGÉE avec le peer Moodle.** Journal `_sso-academie/JOURNAL-DEMANDES.md` (HORS dépôt), D-10 à D-12. Convergence 2 sessions + 3 oracles. laveille = HUB (catalogue cours clé idnumber, 1 compte, registre de droits, caisse, taxes catégorie formation DISTINCTE, reçus, identité Passport) ; Moodle = livraison pure. Garde-fous détaillés dans #3003.
-- **Règle fondateur 2026-10-09** : « toujours communiquer avec le Claude du Moodle » (mémoire projet) ; « continuer en autonome jusqu'à 100 % » (réaffirmé, mémoire `continuer-autonome-sans-checkpoint`).
+## Ce qui est en cours
 
-## 2. Ce qui est EN COURS (ordre logique décidé par Claude)
+- **/cours : cartes de cours plus compactes (#3091, demande fondateur du 13 oct)** : édition Blade/CSS faite (image 150px au lieu de 192, padding réduit, titre + résumé clampés à 2 lignes, gap 18px). RESTE à déployer puis vérifier visuellement desktop + mobile.
+- **File /actu2 restante — Perplexity FONCTIONNE de nouveau** (testé le 13 oct, le défi Cloudflare est levé) : #3068 (Les Affaires Bitcoin), #3073 (Mistral visual grounding), #3076 (TVA prédiction), #3077 (Unlimited OCR, source HF). #2924 (FTC) à re-vérifier dès le 14 oct.
+- **EFVP Loi 25 SSO + vente de cours (#3004)** : brouillon 0.1 rédigé (docs/legal/EFVP-sso-moodle-vente-cours.md), insécables OQLF posés. En attente de RÉVISION du fondateur/RPRP. Constat central : SSO et Moodle co-hébergés (gmemora) = aucun destinataire hors Québec nouveau; paiement confiné à Stripe (déjà inventorié).
+- File /actu2 restante : #3073 (Mistral visual grounding, recherche source en cours), #3076 (TVA prédiction), #3077 (Unlimited OCR, vérifier source HF), #3068 (Les Affaires Bitcoin).
 
-- **#3007 (`/academie` → redirection + désactivation module Academy)** : IN PROGRESS. Sous-agent de cartographie lancé (couplage CORE, données à préserver, autoload des modules désactivés). ⚠️ Retrait COMPLET du code BLOQUÉ : `app/Models/User.php` importe un trait du module → le retirer casserait l'auth. Donc désactivation publique + redirection seulement, trait conservé ; chiffrer le découplage pour un retrait futur. Zéro casse, préserver inscriptions/progression/attestations.
-- **#3002 (socle SSO IdP Passport, réversible OFF)** : à construire ENSUITE (boutique déployée = feu vert que j'avais donné au peer). Reste `IDP_ENABLED=false`, aucun changement de comportement prod, gate adversarial avant déploiement. Au livrable : signal au journal → le peer branche `auth_oauth2`.
-- **#3003 (vente de cours)** : archi figée ; implémentation gatée (socle + formations prêtes + go + EFVP + recette). AVANT implémentation : club des sages NAVIGATEUR + recherche fiscale Perplexity (était en timeout, à refaire).
-- **#3008 (compte test @memora.ca)** : ⚠️ zone argent — tester un vrai checkout = vraie charge Stripe sauf mode test. À séquencer prudemment (mode test Stripe requis), possiblement un vrai blocage à remonter.
+## Ce qui bloque et attend une réponse du fondateur
 
-## 3. Ce qui BLOQUE en attendant le fondateur
+- RÉVISION du brouillon EFVP (#3004) → débloque #3002 (SSO), #3003 (vente Stripe), #3086 (page détail /cours/{slug} + Acheter).
+- Décisions : #3070/#3071 (steer éditorial Les Affaires), #2988 (ouverture boutique Gelato), #2990 (acquitter garde-crontab gmemora).
+- Daté : #2924 FTC (dès le 14 oct = demain), #2931 (15 oct), #2977 (20 oct), #3001 (~avril 2027).
 
-- **#2988** validation visuelle vitrine : session super-admin connectée requise.
-- **Q10 AdSense auto** : accès à sa session Google AdSense.
-- **Décisions non bloquantes (défaut sûr appliqué)** : TVP C.-B./SK/MB ; vente aux États-Unis ; politique de remboursement.
-- **#2924** (FTC, 14 oct), **#2931** (Reddit, 15 oct), **#2977** (actu2, 20 oct) : en attente de DATE.
+## Prochaine action proposée
 
-## 4. Sauvegarde / versioning / hygiène
-
-- v1.325.0 sur `origin` + `forge` (SHA `81e2365fc`), rollback = `git revert`. Boutique `SHOP_FOUNDER_ONLY` : aucun risque public.
-- À faire au prochain passage serveur : vérifier qu'aucun cron TEMPORAIRE de mes sessions ne traîne (rappel fondateur) ; ne toucher qu'aux crons du projet laveille (Q12).
+Déployer #3091 (cartes /cours compactes, v1.346.1) : push origin + forge, attendre CI + Deploy verts, puis vérifier /cours au navigateur (bureau + mobile), purger les caches si l'ancien CSS est servi. Ensuite, enchaîner la file /actu2 (#3068, #3073, #3076, #3077). HEAD avant push = **457e7bace** (v1.346.0). Aucun cron temporaire. Runner prod _a2run.php + payloads dans storage/app à NETTOYER en fin de session.
