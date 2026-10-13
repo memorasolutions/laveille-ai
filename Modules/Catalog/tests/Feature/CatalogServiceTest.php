@@ -72,6 +72,42 @@ it('exclut le cours site et les cours masqués', function () {
         && $request['wsfunction'] === 'core_course_get_courses_by_field');
 });
 
+it('exclut une catégorie privée désignée par son idnumber', function () {
+    config(['catalog.excluded_category_idnumbers' => ['prive']]);
+    // Catégorie « Formations privées » visible=1 (les inscrits gardent l'accès) mais exclue du
+    // catalogue public par son idnumber, avec un cours visible dedans : il ne doit pas apparaître.
+    $this->categories[] = ['id' => 30, 'name' => 'Formations privées', 'idnumber' => 'PRIVE', 'visible' => 1];
+    $this->courses[] = ['id' => 5, 'categoryid' => 30, 'visible' => 1, 'fullname' => 'Formation CSSBE'];
+    ($this->fakeCatalogue)();
+
+    $groups = app(MoodleCatalogService::class)->getCatalogue();
+
+    expect(array_column($groups, 'category'))->not->toContain('Formations privées')
+        ->and(json_encode($groups))->not->toContain('Formation CSSBE')
+        ->and(array_column($groups[0]['courses'], 'id'))->toBe([2]);
+});
+
+it('retire un cours dont le champ catalogue vaut faux même en catégorie publique', function (string $valeur) {
+    $this->courses[] = ['id' => 6, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation CSSBE',
+        'customfields' => [['shortname' => 'catalogue', 'value' => $valeur]]];
+    ($this->fakeCatalogue)();
+
+    $groups = app(MoodleCatalogService::class)->getCatalogue();
+
+    expect(json_encode($groups))->not->toContain('Formation CSSBE')
+        ->and(array_column($groups[0]['courses'], 'id'))->toBe([2]);
+})->with(['0', 'non', 'NON', 'false', 'off', ' No ']);
+
+it('conserve un cours dont le champ catalogue vaut vrai ou vide', function (string $valeur) {
+    $this->courses[] = ['id' => 7, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation publique bis',
+        'customfields' => [['shortname' => 'catalogue', 'value' => $valeur]]];
+    ($this->fakeCatalogue)();
+
+    $groups = app(MoodleCatalogService::class)->getCatalogue();
+
+    expect(array_column($groups[0]['courses'], 'id'))->toBe([2, 7]);
+})->with(['1', 'oui', 'true', '']);
+
 it('regroupe dynamiquement plusieurs catégories et conserve le cache', function () {
     $this->courses[] = ['id' => 4, 'category' => 20, 'visible' => 1, 'fullname' => 'Autre formation'];
     ($this->fakeCatalogue)();

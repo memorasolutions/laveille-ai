@@ -12,6 +12,17 @@ return [
     'cache_ttl' => (int) env('CATALOG_CACHE_TTL', 1800),
     'http_timeout' => (int) env('CATALOG_HTTP_TIMEOUT', 15),
 
+    // Catégories Moodle exclues de la vitrine publique /cours, désignées par leur idnumber (liste
+    // séparée par des virgules dans le .env). Sert aux cours PRIVÉS (ex. une formation réservée à
+    // des inscrits) : la catégorie reste visible=1 côté Moodle - pour que les inscrits gardent
+    // l'accès, une catégorie masquée forçant visible=0 le leur retirerait - mais ses cours
+    // n'apparaissent jamais dans le catalogue public. Défaut « prive » : il suffit de créer une
+    // catégorie « Formations privées » avec l'idnumber « prive » pour l'exclure.
+    'excluded_category_idnumbers' => array_values(array_filter(array_map(
+        fn ($v) => strtolower(trim((string) $v)),
+        explode(',', (string) env('CATALOG_EXCLUDED_CATEGORY_IDNUMBERS', 'prive'))
+    ), fn ($v) => $v !== '')),
+
     // Vitrine en noindex tant que les cours sont des démos (pré-lancement). Basculer à false
     // dans le .env de production (CATALOG_NOINDEX=false) quand de vrais cours remplaceront les
     // démos : /cours redeviendra alors indexable et un atout de référencement.

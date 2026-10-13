@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.348.0] - 2026-10-13
+
+### Ajouté
+- **Vitrine /cours : un cours peut rester privé (réservé aux inscrits) sans apparaître au catalogue public.** Deux mécanismes, tous deux réversibles et sans effet tant qu'ils ne sont pas utilisés : une catégorie Moodle désignée par son idnumber (défaut « prive ») est entièrement exclue de la vitrine /cours, et un cours portant un champ personnalisé « catalogue » à une valeur fausse en est retiré même s'il vit dans une catégorie publique. Le cours reste visible côté Moodle, pour que les participants inscrits gardent l'accès (une catégorie masquée, elle, forcerait le cours invisible et retirerait cet accès). Utile pour une formation privée réservée à un groupe. Aucune donnée existante ne change.
+
 ## [1.347.0] - 2026-10-13
 
 ### Ajouté

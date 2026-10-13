@@ -52,9 +52,12 @@ class MoodleCatalogService
             $categories = $this->webService('core_course_get_categories');
             $courses = $this->coursesByField();
             $groups = [];
+            $excludedCategories = (array) config('catalog.excluded_category_idnumbers', []);
 
             foreach ($categories as $category) {
-                if ((int) ($category['visible'] ?? 0) === 1) {
+                $idnumber = strtolower(trim((string) ($category['idnumber'] ?? '')));
+
+                if ((int) ($category['visible'] ?? 0) === 1 && ! in_array($idnumber, $excludedCategories, true)) {
                     $groups[(int) $category['id']] = [
                         'category' => $this->publicText((string) $category['name']),
                         'slug' => $this->categorySlug($category),
@@ -72,12 +75,23 @@ class MoodleCatalogService
                 }
 
                 $price = null;
+                $optedOut = false;
                 foreach ($course['customfields'] ?? [] as $field) {
-                    if (($field['shortname'] ?? null) === 'prix') {
+                    $shortname = $field['shortname'] ?? null;
+                    if ($shortname === 'prix') {
                         $value = (string) ($field['value'] ?? '');
                         $price = trim($value) === '' ? null : $value;
-                        break;
+                    } elseif ($shortname === 'catalogue'
+                        && in_array(strtolower(trim((string) ($field['value'] ?? ''))), ['0', 'non', 'no', 'false', 'off'], true)) {
+                        // Opt-out par cours (défense en profondeur) : un champ personnalisé « catalogue »
+                        // à une valeur fausse retire le cours de la vitrine publique, même s'il vit dans
+                        // une catégorie publique. Inerte tant que ce champ n'existe pas côté Moodle.
+                        $optedOut = true;
                     }
+                }
+
+                if ($optedOut) {
+                    continue;
                 }
 
                 $groups[$categoryId]['courses'][] = [
