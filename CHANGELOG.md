@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.345.2] - 2026-10-13
+
+### Modifié
+- **Badge de prix /cours repositionné en pastille sur la vignette, comme l'académie Moodle.** Le badge de prix (ou « Gratuit ») s'affiche désormais en superposition dans le coin supérieur gauche de l'image du cours, en pastille verte arrondie, au lieu d'une étiquette sous l'image. La vitrine s'aligne ainsi sur la présentation de la page « Cours disponibles » de Moodle. La vignette reste entièrement cliquable sous la pastille (événements de pointeur désactivés sur le badge), et le badge de catégorie demeure dans le corps de la carte.
+
 ## [1.345.1] - 2026-10-13
 
 ### Corrigé

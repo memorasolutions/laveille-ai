@@ -18,8 +18,8 @@
     .catalog .catalog-filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }
     .catalog .catalog-filters[x-cloak] { display: none !important; }
     .catalog .catalog-filter { border: 1px solid #134e4a; border-radius: 6px; padding: 8px 16px; background: #fff; color: #134e4a; cursor: pointer; }
-    .catalog .catalog-filter[aria-pressed="true"], .catalog .catalog-price { background: #134e4a; color: #fff; }
-    .catalog .catalog-price { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 14px; }
+    .catalog .catalog-filter[aria-pressed="true"] { background: #134e4a; color: #fff; }
+    .catalog .catalog-price { position: absolute; top: 12px; left: 12px; z-index: 2; pointer-events: none; padding: 6px 14px; border-radius: 999px; background: #e7f6ec; color: #0f5132; font-size: 14px; font-weight: 600; box-shadow: 0 1px 3px #00000026; }
     .catalog .grid { margin-top: 24px; }
     .catalog .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
     .catalog article { background: #fff; border: 1px solid #f3f4f6; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px #0000000d; transition: box-shadow .2s; }
