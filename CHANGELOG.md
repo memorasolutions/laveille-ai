@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.346.3] - 2026-10-13
+
+### Corrigé
+- **Annuaire, fiche LucidNest : un « plus » inexact corrigé.** Le « plus » « Conçu et hébergé au Québec » était faux sur l'hébergement : LucidNest n'est pas hébergé au Québec (l'hébergement est assuré par une entreprise canadienne), il est conçu par une entreprise du Québec et conforme à la Loi 25. Le « plus » devient « Conçu par une entreprise du Québec » (la conformité Loi 25 reste portée par le « plus » Données sous contrôle). Correction par une migration réversible; la description et la FAQ, déjà exactes, ne changent pas.
+
 ## [1.346.2] - 2026-10-13
 
 ### Corrigé
