@@ -22,7 +22,7 @@
     .catalog .catalog-price { position: absolute; top: 12px; left: 12px; z-index: 2; pointer-events: none; padding: 6px 14px; border-radius: 999px; background: #e7f6ec; color: #0f5132; font-size: 14px; font-weight: 600; box-shadow: 0 1px 3px #00000026; }
     .catalog .grid { margin-top: 24px; }
     .catalog .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
-    .catalog article { background: #fff; border: 1px solid #f3f4f6; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px #0000000d; transition: box-shadow .2s; }
+    .catalog article { position: relative; background: #fff; border: 1px solid #f3f4f6; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px #0000000d; transition: box-shadow .2s; }
     .catalog article:hover { box-shadow: 0 4px 6px #0000001a; }
     .catalog .catalog-thumb-link { display: block; }
     .catalog .catalog-image { width: 100%; height: 192px; object-fit: cover; }

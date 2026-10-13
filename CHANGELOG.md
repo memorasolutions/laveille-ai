@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.345.3] - 2026-10-13
+
+### Corrigé
+- **Badge de prix /cours : la pastille est maintenant ancrée au coin de la vignette, et non de la page.** La version 1.345.2 plaçait la pastille en positionnement absolu sans conteneur positionné sur la carte, si bien qu'elle flottait dans le coin de la page au lieu de la vignette du cours. Ajout de `position: relative` sur la carte du cours; la pastille se cale désormais dans le coin supérieur gauche de l'image, comme prévu.
+
 ## [1.345.2] - 2026-10-13
 
 ### Modifié
