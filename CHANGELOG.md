@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.342.6] - 2026-10-13
+
+### Interne
+- **Tests de régression des routes publiques de partage des mots-croisés.** Les routes publiques de partage et de viralité des mots-croisés (`GET /jeumc/{identifier}`, `POST /user/mots-croises/{publicId}/toggle-public`) n'avaient aucun test de régression, alors que leur jumeau du constructeur de prompts en portait onze. Ajout de `Modules/Tools/tests/Feature/PublicCrosswordControllerTest.php` (8 tests, 26 assertions), calqué sur `PublicPromptControllerTest`. Couverture : une grille publique s'affiche, une grille privée, inexistante ou supprimée (suppression logique) renvoie vers l'outil, l'identifiant public redirige en 301 vers le lien personnalisé, et la bascule de visibilité est permise au propriétaire, refusée à un tiers (404, IDOR) et exige l'authentification (401). Aucun changement de code applicatif. Ces tests prouvent que le comportement de confidentialité et d'isolation est déjà correct et le verrouillent contre une régression future.
+
 ## [1.342.5] - 2026-10-12
 
 ### Interne
