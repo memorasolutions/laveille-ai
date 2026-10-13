@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.347.0] - 2026-10-13
+
+### Ajouté
+- **Glossaire : nouvelle fiche « PWA » (application web progressive).** Elle explique ce qu'est une PWA, soit un site web qui s'installe et s'utilise comme une application, y compris hors ligne, directement depuis le navigateur, sans magasin d'applications, et d'où vient le terme (proposé en 2015 par Frances Berriman et Alex Russell). La fiche alimente l'auto-lien du site : le mot « PWA » renvoie désormais à sa définition. Migration réversible, image dédiée, trois sources vérifiées (MDN, web.dev, billet d'origine).
+
 ## [1.346.5] - 2026-10-13
 
 ### Corrigé
