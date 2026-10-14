@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.351.2] - 2026-10-14
+
+### Corrigé
+- **Formulaire de demande de cours : une régression du correctif 1.351.1 refermée (2e passe adversariale).** La préservation de l'horodatage après une erreur de validation rouvrait le réaffichage à une entrée tableau malveillante (`form_rendered_at[]=1`), qui aurait déclenché une erreur au rendu. Le champ est désormais forcé en entier (`(int)`), sémantiquement juste puisque c'est toujours un horodatage. Aucun changement visible pour un visiteur légitime.
+
 ## [1.351.1] - 2026-10-14
 
 ### Corrigé

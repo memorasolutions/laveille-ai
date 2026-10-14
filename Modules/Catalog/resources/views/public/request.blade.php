@@ -65,7 +65,9 @@
 
                 {{-- Pot de miel + piège temporel (anti-robot). Invisibles pour un humain. --}}
                 <x-core::honeypot />
-                <input type="hidden" name="form_rendered_at" value="{{ old('form_rendered_at', time()) }}">
+                {{-- (int) : si un robot renvoie un tableau (form_rendered_at[]=1), old() le restituerait
+                     et e() lèverait une erreur au réaffichage ; le cast le ramène à un entier sûr. --}}
+                <input type="hidden" name="form_rendered_at" value="{{ (int) old('form_rendered_at', time()) }}">
 
                 <div class="two">
                     <div class="field">
