@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.4] - 2026-10-14
+
+### Corrigé
+- **Courriel « Votre code de connexion » : la version TEXTE BRUT est maintenant propre.** Les lecteurs en texte seul (montres connectées, lecteurs d'écran, certains filtres antipourriels) voyaient dans ce courriel des artefacts techniques : des commentaires HTML d'attribution (`<!-- Author... -->`) et du Markdown non interprété (`# Bonjour,`, `**` autour du code). Deux correctifs : les gabarits de courriel du thème (`vendor/mail`) utilisent désormais des commentaires Blade (aucune sortie) au lieu de commentaires HTML, et le courriel du code de connexion passe par une vue dédiée qui affiche « Bonjour, » et le code sans titre Markdown ni gras — le code seul sur sa ligne, dans un encadré en HTML. Aucun changement pour la version HTML déjà lue par la plupart des clients. Aucune donnée ne change.
+
 ## [1.350.3] - 2026-10-14
 
 ### Ajouté

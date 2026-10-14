@@ -1,4 +1,4 @@
-<!-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca -->
+{{-- Author: MEMORA solutions, https://memora.solutions ; info@memora.ca --}}
 @props(['url'])
 <tr>
 <td class="header">
