@@ -35,7 +35,10 @@ use Modules\Auth\Livewire\ResetPassword;
 use Modules\Auth\Livewire\TwoFactorChallenge;
 use Modules\Auth\Services\AuthService;
 
-Route::middleware(['guest', 'throttle:10,1'])->group(function () {
+// GET d'affichage des pages d'authentification : throttle par IP, GÉNÉREUX (rendus sans mutation).
+// 30/min laisse passer une classe entière derrière une même IP d'organisme (NAT) sans bloquer les
+// chargements de page ; la vraie protection de connexion vit dans le limiteur `login` (tentatives).
+Route::middleware(['guest', 'throttle:30,1'])->group(function () {
     Route::get('/login', Login::class)->name('login')->middleware(ForceOtpInSsoContext::class);
     Route::get('/register', Register::class)->name('register');
     Route::get('/forgot-password', ForgotPassword::class)->name('password.request');
@@ -43,24 +46,28 @@ Route::middleware(['guest', 'throttle:10,1'])->group(function () {
 });
 
 // MagicLink - connexion sans mot de passe avec code 6 caractères
-// GET d'affichage : throttle GÉNÉREUX 20/min (UX fluide pour l'humain, bloque l'énumération
-// de masse via ?email= sur /magic-link/verify — cf. QC code-reviewer-fr 2026-06-01)
-Route::middleware(['guest', 'throttle:20,1'])->group(function () {
+// GET d'affichage : limiteur `magic-link-page` (clé ISOLÉE par IP, 60/min). Sans clé propre, ces
+// GET partageraient le compteur sha1(domaine|IP) de toutes les routes invité et une classe entière
+// épuiserait le seuil du login (mesuré en formation CSSBE le 2026-10-14).
+Route::middleware(['guest', 'throttle:magic-link-page'])->group(function () {
     Route::get('/magic-link', [MagicLinkController::class, 'showRequestForm'])->name('magic-link.request');
     Route::get('/magic-link/verify', [MagicLinkController::class, 'showVerifyForm'])->name('magic-link.verify');
 });
 
-// POST sensibles : throttle strict maintenu (double protection : middleware + RateLimiter par email)
-Route::middleware(['guest', 'throttle:5,1'])->group(function () {
-    Route::post('/magic-link', [MagicLinkController::class, 'sendLink'])->name('magic-link.send');
-    Route::post('/magic-link/verify', [MagicLinkController::class, 'verify'])->name('magic-link.confirm');
+// POST sensibles : limiteurs nommés keyés par COURRIEL d'abord (plafond IP généreux en garde),
+// pour qu'une classe derrière la MÊME IP d'organisme ne se bloque pas mutuellement à la connexion.
+// La protection anti-force-brute du code et anti-envoi de masse reste par courriel. Remplace l'ancien
+// throttle:5,1 keyé (domaine|IP), partagé, qui renvoyait un 429 dès le 1er POST (mesuré 2026-10-14).
+Route::middleware(['guest'])->group(function () {
+    Route::post('/magic-link', [MagicLinkController::class, 'sendLink'])->name('magic-link.send')->middleware('throttle:magic-link-send');
+    Route::post('/magic-link/verify', [MagicLinkController::class, 'verify'])->name('magic-link.confirm')->middleware('throttle:magic-link-verify');
     Route::post('/magic-link/sms', [MagicLinkController::class, 'sendSms'])->name('magic-link.sms')->middleware('throttle:3,1');
 });
 
-// API magic-link JSON (pour auth inline sans redirection)
-Route::middleware(['web', 'throttle:5,1'])->group(function () {
-    Route::post('/api/magic-link/send', [MagicLinkController::class, 'sendLinkApi'])->name('magic-link.api.send');
-    Route::post('/api/magic-link/verify', [MagicLinkController::class, 'verifyApi'])->name('magic-link.api.verify');
+// API magic-link JSON (pour auth inline sans redirection) : mêmes limiteurs nommés que le flux web.
+Route::middleware(['web'])->group(function () {
+    Route::post('/api/magic-link/send', [MagicLinkController::class, 'sendLinkApi'])->name('magic-link.api.send')->middleware('throttle:magic-link-send');
+    Route::post('/api/magic-link/verify', [MagicLinkController::class, 'verifyApi'])->name('magic-link.api.verify')->middleware('throttle:magic-link-verify');
 });
 
 // Route 2FA : accessible sans auth (l'utilisateur est temporairement déconnecté)

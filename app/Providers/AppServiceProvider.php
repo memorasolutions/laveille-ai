@@ -268,5 +268,38 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('newsletter', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
+
+        // Connexion sans mot de passe (OTP). La cle primaire est le COURRIEL, pas l'IP : une classe
+        // entiere derriere la MEME IP d'organisme (NAT) doit pouvoir se connecter sans se bloquer
+        // mutuellement. Le plafond par IP reste present comme garde anti-abus, mais assez large pour
+        // une dizaine de personnes simultanees. Mesure du 2026-10-14 : le middleware throttle:5,1,
+        // keye par (domaine|IP) et partage entre toutes les routes invite, renvoyait un 429 des le
+        // premier POST de verification en contexte de formation (plusieurs postes, meme sortie NAT).
+        RateLimiter::for('magic-link-send', function (Request $request) {
+            $email = hash('sha256', strtolower((string) $request->input('email')));
+
+            return [
+                Limit::perMinute(5)->by('mls-email:'.$email),
+                Limit::perMinute(15)->by('mls-ip:'.$request->ip()),
+            ];
+        });
+
+        RateLimiter::for('magic-link-verify', function (Request $request) {
+            $email = hash('sha256', strtolower((string) $request->input('email')));
+
+            return [
+                Limit::perMinute(6)->by('mlv-email:'.$email),
+                Limit::perMinute(40)->by('mlv-ip:'.$request->ip()),
+            ];
+        });
+
+        // Pages d'affichage du flux OTP (formulaire de demande et de saisie du code). Cle ISOLEE
+        // par IP (prefixe propre) : sans elle, ces GET partagent le compteur sha1(domaine|IP) de
+        // toutes les routes invite, si bien qu'une classe entiere qui charge les pages epuise le
+        // meme seuil que le login. Plafond large : ce sont des rendus sans mutation, l'enumeration
+        // via ?email= ne revele que la presence d'un bouton SMS.
+        RateLimiter::for('magic-link-page', function (Request $request) {
+            return Limit::perMinute(60)->by('mlp-ip:'.$request->ip());
+        });
     }
 }

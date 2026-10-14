@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.1] - 2026-10-14
+
+### Corrigé
+- **Connexion sans mot de passe : une classe entière derrière une même adresse IP ne se bloque plus mutuellement.** La limitation de débit des routes de connexion par code (envoi et vérification) était keyée par adresse IP et partagée entre toutes les routes d'invité, si bien que plusieurs personnes derrière la même sortie réseau d'un organisme (NAT) épuisaient ensemble le seuil et recevaient un « Trop de requêtes » (429) dès les premières connexions. La limitation est désormais keyée d'abord par COURRIEL (chaque personne a son propre quota), avec un plafond par IP volontairement large comme garde anti-abus, et les pages d'affichage du flux ont leur propre compteur isolé. La protection anti-force-brute du code à 6 chiffres et anti-envoi de masse reste entière (par courriel). Aucune donnée existante ne change.
+
 ## [1.350.0] - 2026-10-13
 
 ### Ajouté
