@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.6] - 2026-10-14
+
+### Corrigé
+- **En-tête des courriels (version texte) : espace insécable avant les deux-points.** La première ligne de la partie texte de tous les courriels affichait « laveille.ai: https://laveille.ai » sans espace avant le deux-points ; elle respecte maintenant la norme québécoise avec une espace insécable (« laveille.ai : https://… »). Correctif typographique dans le gabarit partagé `vendor/mail/text/header`. Aucun comportement ne change.
+
 ## [1.350.5] - 2026-10-14
 
 ### Modifié
