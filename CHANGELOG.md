@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.5] - 2026-10-14
+
+### Modifié
+- **Logo de courriel : « .ai » rapproché de « laveille ».** Le logo officiel laissait un espace large entre le mot « laveille » et le « .ai » (le point orange et « ai » paraissaient détachés). Une version resserrée a été produite pour les en-têtes de courriels de marque, où « laveille.ai » se lit d'un seul tenant. Nouveau fichier source `/images/logo-email.svg` et PNG transparent `/images/logo-email-color.png` (même adresse qu'avant). Le logo du site (en-tête) n'est pas touché et conserve l'espacement officiel. Aucun comportement du site ne change.
+
 ## [1.350.4] - 2026-10-14
 
 ### Corrigé
