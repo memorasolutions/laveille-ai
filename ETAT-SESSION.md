@@ -1,6 +1,6 @@
 # État de session - La veille de Stef v2
 
-Dernière mise à jour : 13 octobre 2026, 20h42 Québec (00:42 UTC le 14 oct). Production en **v1.349.0** (bug de confidentialité #3098 LIVRÉ ET PROUVÉ en prod) ; **v1.350.0 en cours de déploiement** (anonymiseur bugs 2 et 3 de #3098 : courriel faux cohérent + identifiants indirects).
+Dernière mise à jour : 13 octobre 2026, 20h49 Québec (00:49 UTC le 14 oct). Production en **v1.350.0 LIVRÉE ET PROUVÉE EN PROD** - les trois bugs de #3098 de l'anonymiseur sont corrigés et servis (bug 1 confidentialité en v1.349.0, bugs 2 et 3 en v1.350.0). **#3098 est CLOS.**
 
 ## Où on en est (livré et prouvé en prod)
 
@@ -16,16 +16,14 @@ Dernière mise à jour : 13 octobre 2026, 20h42 Québec (00:42 UTC le 14 oct). P
 
 ## Ce qui est en cours
 
-- **#3098 anonymiseur (GO direct de Stéphane 2026-10-13) - bug 1 CONFIDENTIALITÉ LIVRÉ, en déploiement v1.349.0.** Prénom en minuscules après un mot de relation (« son conjoint marc ») maintenant détecté (étape 2d du moteur) ; 49 tests neufs verts, suite JS complète verte, revue adversariale Codex (2 défauts trouvés et corrigés : verbe « dort » pris pour un prénom, et doublon « Sophie » quand le nom complet est déjà capté). Reste à prouver en prod après le déploiement.
-- **Bugs 2 et 3 de #3098 à faire ensuite (train 2, même session)** : (2) pseudo incohérent nom↔courriel (courriel à initiale + prénom composé concaténé) ; (3) identifiants indirects non couverts (numéro d'employé, identifiant client, permis préfixé d'une lettre) - repros reproduits par sonde, le pair a confirmé qu'ils font foi (il n'a pas mesuré lui-même). UX constructeur de prompts/anonymiseur : #3054 a déjà livré 6 corrections UX le 2026-10-12 ; le pair n'a pas de liste UX neuve à me donner.
+- Rien de bloquant côté développement. #3098 est clos (voir ci-dessous). Les items ouverts restants dépendent du fondateur ou sont datés dans le futur (section « Ce qui bloque »).
 
 ## Ce qui bloque et attend une réponse du fondateur
 
-- **#3098 (DATÉ, formation CSSBE jeudi 15 oct 18h00 Québec)** : un pair a livré des critiques UX du constructeur de prompts + anonymiseur, et des BUGS mesurés de l'anonymiseur — dont un défaut de confidentialité (prénom en minuscules « marc » non détecté ni signalé). J'attends le GO + la portée du fondateur avant toute modif. Recommandation : prioriser le bug de confidentialité avant la formation.
 - **#3073** : enrichir ou non la fiche ML4 en ligne avec l'angle visual grounding (optionnel).
 - **#3097** : go/no-go QuizDock (ma reco = non pour l'instant ; panel complet 6 oracles possible si reconsidération vers GO).
 - Standing : EFVP Loi 25 SSO + vente de cours (#3004) → débloque #3002/#3003/#3086. Daté : #2924 FTC (dès le 14 oct), #2931 (15 oct), #2977 (20 oct), #3001 (~avril 2027).
 
 ## Prochaine action proposée
 
-Attendre le GO du fondateur sur #3098 (urgent, échéance jeudi 15 oct) et sur les décisions ci-dessus. Pair Moodle : archi certificats FIGÉE et conforme à ma position (laveille seule surface, Moodle émet, WS lecture seule) ; 4 items pour moi APRÈS go-live SSO + EFVP, rien maintenant. Runner prod `_a2run.php` + payloads/images 75515/75520 + a2img_75520 dans storage/app à NETTOYER en fin de file /actu2 (storage/app ~786 items, housekeeping non exposé au web). HEAD = e898652b4.
+#3098 est CLOS et prouvé en prod (v1.350.0) à temps pour la formation CSSBE du jeudi 15 oct. Rien d'urgent ne reste. En attente des décisions du fondateur sur les items optionnels/datés (section « Ce qui bloque »). Pair Moodle : archi certificats FIGÉE et conforme à ma position (laveille seule surface, Moodle émet, WS lecture seule) ; 4 items pour moi APRÈS go-live SSO + EFVP, rien maintenant. Runner prod `_a2run.php` + payloads/images 75515/75520 + a2img_75520 dans storage/app à NETTOYER en fin de file /actu2 (storage/app ~786 items, housekeeping non exposé au web). HEAD = c072e0a07 (v1.350.0), poussé origin + forge.
