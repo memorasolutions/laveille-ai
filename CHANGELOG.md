@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.351.0] - 2026-10-14
+
+### Ajouté
+- **Formulaire public « demander un cours personnalisé » sur la vitrine /cours.** Un visiteur peut maintenant décrire une formation sur mesure (nom, courriel, organisation facultative, sujet, durée en heures, nombre de participants, niveau, message) depuis `/cours/demande` ; le fondateur reçoit la demande par courriel transactionnel (mailer `workspace`, jamais Brevo), avec le visiteur en `Reply-To`. Un bouton d'appel à l'action « Demander un cours personnalisé » apparaît au bas de `/cours`, même quand le catalogue est encore vide. Conforme à la Loi 25 : finalité annoncée, consentement explicite obligatoire, aucune donnée vendue ni partagée, conservation limitée au suivi. Anti-pourriel en couches réutilisant l'infrastructure du formulaire de contact (DRY) : pot de miel, piège temporel, URL dans le nom, excès de liens, courriel jetable, Turnstile (dormant tant que la clé n'est pas fournie, jamais bloquant), plus un limiteur de débit sur la route ; une soumission suspecte est mise en quarantaine (consultable) plutôt que rejetée en silence. Module activable ou désactivable sans casse par `CATALOG_REQUEST_ENABLED` (à false, la page répond 404 et le bouton disparaît). Couvert par 10 tests. Aucune donnée existante n'est touchée ; migration réversible (table `course_requests`).
+
 ## [1.350.10] - 2026-10-14
 
 ### Corrigé

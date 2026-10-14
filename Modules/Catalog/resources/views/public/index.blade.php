@@ -38,6 +38,11 @@
     .catalog a:focus-visible, .catalog button:focus-visible { outline: 3px solid #134e4a; outline-offset: 4px; }
     @media (min-width: 768px) { .catalog .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (min-width: 1024px) { .catalog .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    .catalog .catalog-cta { margin-top: 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 14px; padding: 22px 24px; }
+    .catalog .catalog-cta h2 { margin: 0 0 4px; font-size: 20px; }
+    .catalog .catalog-cta p { margin: 0; font-size: 15px; max-width: 560px; }
+    .catalog .catalog-cta-btn { flex: 0 0 auto; background: #134e4a; color: #fff; border-radius: 8px; padding: 12px 22px; font-size: 16px; font-weight: 600; text-decoration: none; min-height: 48px; display: inline-flex; align-items: center; }
+    .catalog .catalog-cta-btn:hover { background: #0f3d3a; color: #fff; }
 </style>
 @endpush
 
@@ -81,6 +86,16 @@
                         </article>
                     @endforeach
                 @endforeach
+            </div>
+        @endif
+
+        @if(config('catalog.request_enabled'))
+            <div class="catalog-cta">
+                <div>
+                    <h2>{{ __('Vous ne trouvez pas votre sujet?') }}</h2>
+                    <p>{{ __('Nous concevons des formations sur mesure pour votre équipe, selon vos besoins et votre horaire.') }}</p>
+                </div>
+                <a href="{{ route('catalog.request') }}" class="catalog-cta-btn">{{ __('Demander un cours personnalisé') }}</a>
             </div>
         @endif
     </div>

@@ -27,4 +27,8 @@ return [
     // dans le .env de production (CATALOG_NOINDEX=false) quand de vrais cours remplaceront les
     // démos : /cours redeviendra alors indexable et un atout de référencement.
     'noindex' => filter_var(env('CATALOG_NOINDEX', true), FILTER_VALIDATE_BOOLEAN),
+
+    // Formulaire public « demander un cours personnalisé » (vitrine /cours). Activable/désactivable
+    // sans casse : à false, la route /cours/demande n'est pas déclarée (404) et aucun lien ne s'affiche.
+    'request_enabled' => filter_var(env('CATALOG_REQUEST_ENABLED', true), FILTER_VALIDATE_BOOLEAN),
 ];
