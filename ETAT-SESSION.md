@@ -1,6 +1,6 @@
 # État de session - La veille de Stef v2
 
-Dernière mise à jour : 13 octobre 2026, ~17h40 Québec (21:40 UTC). Production en **v1.348.0** (CI + déploiements verts, servie et vérifiée en prod).
+Dernière mise à jour : 13 octobre 2026, 20h22 Québec (00:22 UTC le 14 oct). Production en **v1.348.0** ; **v1.349.0 en cours de déploiement** (anonymiseur : détection du prénom en minuscules après un mot de relation, correctif de confidentialité #3098).
 
 ## Où on en est (livré et prouvé en prod)
 
@@ -16,7 +16,8 @@ Dernière mise à jour : 13 octobre 2026, ~17h40 Québec (21:40 UTC). Production
 
 ## Ce qui est en cours
 
-- Rien d'actif (aucun sous-agent ni sondage en cours). Tout le travail lancé est atterri.
+- **#3098 anonymiseur (GO direct de Stéphane 2026-10-13) - bug 1 CONFIDENTIALITÉ LIVRÉ, en déploiement v1.349.0.** Prénom en minuscules après un mot de relation (« son conjoint marc ») maintenant détecté (étape 2d du moteur) ; 49 tests neufs verts, suite JS complète verte, revue adversariale Codex (2 défauts trouvés et corrigés : verbe « dort » pris pour un prénom, et doublon « Sophie » quand le nom complet est déjà capté). Reste à prouver en prod après le déploiement.
+- **Bugs 2 et 3 de #3098 à faire ensuite (train 2, même session)** : (2) pseudo incohérent nom↔courriel (courriel à initiale + prénom composé concaténé) ; (3) identifiants indirects non couverts (numéro d'employé, identifiant client, permis préfixé d'une lettre) - repros reproduits par sonde, le pair a confirmé qu'ils font foi (il n'a pas mesuré lui-même). UX constructeur de prompts/anonymiseur : #3054 a déjà livré 6 corrections UX le 2026-10-12 ; le pair n'a pas de liste UX neuve à me donner.
 
 ## Ce qui bloque et attend une réponse du fondateur
 

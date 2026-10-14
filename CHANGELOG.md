@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.349.0] - 2026-10-13
+
+### Ajouté
+- **Anonymiseur : détection d'un prénom écrit en MINUSCULES quand il suit un mot de relation.** Un prénom comme « marc » dans « son conjoint marc », « ma collègue julie » ou « mon fils thomas » n'était ni détecté ni signalé, parce que toute la détection de noms exigeait une majuscule initiale ou un titre de civilité. Un prénom réel laissé en clair dans le texte envoyé à une IA est la pire défaillance possible pour un outil de confidentialité : invisible pour la personne qui copie le texte « anonymisé ». La détection se déclenche seulement après un mot de relation (conjoint, fils, fille, collègue, voisin, patron, ami...) et écarte les mots courants (verbes, adjectifs), les villes connues et les formes élidées, pour éviter les faux positifs. Correctif de confidentialité, sans effet sur les autres détections. Verrouillé par 49 tests neufs.
+
 ## [1.348.0] - 2026-10-13
 
 ### Ajouté

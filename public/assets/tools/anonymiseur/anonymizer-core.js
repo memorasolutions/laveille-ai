@@ -390,6 +390,46 @@ function detectEntities(text) {
     if (!w1Ignore) push(m[1], 'lastName', 'Nom de famille', 0.75);
     if (!w2Ignore) push(m[2], 'firstName', 'Prénom', 0.75);
   }
+  // 2d. CONFIDENTIALITÉ — prénom en MINUSCULES introduit par un déterminant + un nom de relation
+  // (« son conjoint marc », « ma collègue julie », « mon fils thomas »). Toute la détection de noms
+  // ci-dessus exige une majuscule initiale (\p{Lu}) ou un titre de civilité : un prénom réel écrit
+  // en minuscules, très courant dans une note rapide, restait donc NON détecté ET NON signalé — la
+  // pire fuite possible pour un outil de confidentialité (invisible pour qui copie le texte
+  // « anonymisé »). Haute précision : on ne retient un mot minuscule QUE s'il suit un nom de
+  // relation, et jamais s'il est un mot courant (verbe/adjectif/mot-outil), une ville connue, ou une
+  // forme élidée (« d'enfance », « l'autre »). La liste de relations porte ses variantes accentuées
+  // ET non accentuées pour matcher la saisie réelle. normaliserMot/estMotIgnore/VILLES_CONNUES
+  // (déjà en portée) sont réutilisés tels quels, jamais dupliqués (DRY).
+  const relationContext = /(?<![\p{L}])(?:mon|ma|mes|ton|ta|tes|son|sa|ses|notre|nos|votre|vos|leur|leurs|le|la|les|l['’]|un|une)\s+(?:conjoint|conjointe|mari|epoux|époux|epouse|épouse|femme|copain|copine|chum|blonde|fiance|fiancé|fiancee|fiancée|partenaire|amoureux|amoureuse|ex|fils|fille|enfant|frere|frère|soeur|sœur|mere|mère|pere|père|maman|papa|parent|parents|grand-pere|grand-père|grand-mere|grand-mère|oncle|tante|cousin|cousine|neveu|niece|nièce|beau-frere|beau-frère|belle-soeur|belle-sœur|beau-pere|beau-père|belle-mere|belle-mère|gendre|bru|filleul|filleule|parrain|marraine|ami|amie|voisin|voisine|collegue|collègue|patron|patronne|employe|employé|employee|employée|gerant|gérant|gerante|gérante|associe|associé|associee|associée|client|cliente|locataire|proprietaire|propriétaire)[\s,]+([\p{L}][\p{L}'’\-]{1,})/giu;
+  const MOTS_SUIVANT_RELATION_IGNORES = new Set([
+    // Verbes et auxiliaires fréquents qui suivent un nom de relation.
+    'est', 'était', 'sera', 'a', 'avait', 'aura', 'va', 'vient', 'venait', 'part', 'partait', 'arrive', 'arrivait', 'travaille', 'travaillait', 'habite', 'habitait', 'reste', 'restait', 'revient', 'répond', 'dit', 'disait', 'pense', 'veut', 'voulait', 'doit', 'devait', 'peut', 'pouvait', 'fait', 'faisait', 'aime', 'adore', 'déteste', 'cherche', 'trouve', 'sait', 'connaît', 'appelle', 'écrit', 'gère', 'dirige', 'reçoit', 'prend', 'met', 'voit', 'sort', 'rentre', 'vit', 'demeure', 'gagne', 'joue', 'étudie', 'enseigne', 'conduit', 'achète', 'vend', 'signe', 'confirme', 'refuse', 'accepte', 'demande',
+    // Adjectifs et qualificatifs.
+    'aîné', 'aînée', 'cadet', 'cadette', 'unique', 'adoptif', 'adoptive', 'préféré', 'préférée', 'actuel', 'actuelle', 'principal', 'principale', 'direct', 'directe', 'proche', 'proches', 'fidèle', 'idéal', 'idéale', 'commun', 'commune', 'nouveau', 'nouvelle', 'ancien', 'ancienne', 'futur', 'future', 'jumeau', 'jumelle', 'légitime', 'respectif', 'immédiat', 'immédiate', 'éloigné', 'éloignée', 'biologique', 'maternel', 'paternel', 'cher', 'chère', 'décédé', 'défunt', 'présent', 'absent', 'malade', 'enceinte', 'retraité', 'veuf', 'veuve', 'célibataire', 'marié', 'mariée', 'divorcé', 'divorcée', 'majeur', 'mineur',
+    // Mots-outils (prépositions, conjonctions, pronoms, adverbes).
+    'de', 'du', 'des', 'd', 'et', 'ou', 'mais', 'car', 'donc', 'qui', 'que', 'dont', 'où', 'aussi', 'très', 'plus', 'moins', 'si', 'ni', 'bien', 'mal', 'ici', 'là', 'encore', 'toujours', 'jamais', 'déjà', 'hier', 'demain', 'ce', 'cet', 'cette', 'ces', 'chez', 'pour', 'avec', 'sans', 'dans', 'sur', 'sous', 'par', 'en', 'au', 'aux', 'à', 'comme', 'quand', 'pendant', 'depuis', 'selon', 'vers', 'entre', 'contre', 'même', 'tout', 'tous', 'toute', 'toutes', 'non', 'oui', 'ne', 'pas', 'rien', 'personne', 'chacun', 'quelque', 'plusieurs', 'beaucoup', 'peu', 'trop', 'assez', 'environ', 'me', 'te', 'se', 'nous', 'vous', 'lui', 'leur', 'y',
+    // Verbes du quotidien (3e pers.) + états/participes/adjectifs qui suivent couramment un nom de
+    // relation (complète les verbes ci-dessus). Un verbe RARE non listé entraîne un sur-masquage
+    // (le mot est remplacé par un faux prénom), jamais une fuite : le sens penche vers la prudence,
+    // conforme à la doctrine de l'outil (mieux vaut sur-masquer que laisser fuir un nom réel).
+    'dort', 'mange', 'boit', 'lit', 'parle', 'rit', 'pleure', 'crie', 'chante', 'danse', 'court', 'marche', 'nage', 'cuisine', 'jardine', 'bricole', 'voyage', 'déménage', 'divorce', 'fume', 'ronfle', 'sourit', 'rêve', 'tombe', 'monte', 'descend', 'passe', 'écoute', 'regarde', 'attend', 'patiente', 'hésite', 'insiste', 'râle', 'soupire', 'grandit', 'vieillit', 'guérit', 'souffre', 'tousse', 'déjeune', 'dîne', 'soupe', 'magasine', 'nettoie', 'lave', 'range', 'paie', 'loue', 'emménage', 'bosse', 'flâne', 'semble', 'paraît', 'devient', 'repart', 'rappelle', 'téléphone', 'texte',
+    'parti', 'partie', 'sorti', 'sortie', 'venu', 'venue', 'rentré', 'rentrée', 'fatigué', 'fatiguée', 'occupé', 'occupée', 'disponible', 'content', 'contente', 'heureux', 'heureuse', 'triste', 'inquiet', 'inquiète', 'fier', 'fière', 'âgé', 'âgée', 'jeune', 'vieux', 'vieille', 'gentil', 'gentille', 'sympa', 'génial', 'géniale', 'adorable'
+  ].map(normaliserMot));
+  while ((m = relationContext.exec(text))) {
+    const candidat = m[1];
+    const n = normaliserMot(candidat);
+    if (n.length < 2) continue;
+    // Fragment DÉJÀ couvert par un nom complet détecté plus haut (« Sophie » dans « Sophie
+    // Durand ») : ne pas le re-pousser, ce serait un doublon — l'étape 15 applique déjà cette même
+    // précaution pour préserver la cohérence courriel. On GARDE en revanche un prénom capitalisé
+    // ISOLÉ (« Mon conjoint Marc est parti. ») que les étapes 2/2b ne captent pas faute d'un 2e mot.
+    if (entities.some((e) => e.category === 'name' && e.value.split(/[\s'’\-]+/).map(normaliserMot).includes(n))) continue;
+    if (/^(?:d|l|j|n|m|t|s|c|qu)['’]/i.test(candidat)) continue; // forme élidée (« d'enfance ») : jamais un prénom
+    if (estMotIgnore(candidat, STOPWORDS)) continue;
+    if (MOTS_SUIVANT_RELATION_IGNORES.has(n)) continue;
+    if (VILLES_CONNUES.has(n)) continue;
+    push(candidat, 'firstName', 'Prénom', 0.72);
+  }
   // 15. Prénoms / noms de famille VRAIMENT ISOLÉS des noms complets déjà détectés — couvre le mode
   //     jetons et les occurrences seules (« Geneviève » seul après « Geneviève Côté-Pelletier »).
   //     On ne pousse une composante que si elle apparaît HORS du nom complet ET HORS d'un courriel,
