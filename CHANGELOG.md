@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.351.1] - 2026-10-14
+
+### Corrigé
+- **Formulaire de demande de cours : durcissements après revue adversariale.** Sept correctifs sur la fonctionnalité livrée en 1.351.0, aucun changement visible pour un visiteur légitime. (1) Loi 25 : le texte de consentement ne promet plus une suppression automatique qui n'était pas implémentée ; il énonce la finalité, la non-vente, le droit de retrait en tout temps (info@memora.ca) et la conservation de données techniques (adresse IP) à des fins de sécurité. (2) Une demande légitime n'est plus jamais perdue en silence : un échec d'écriture en base OU d'envoi du courriel est désormais journalisé, et la perte des deux à la fois est tracée en CRITIQUE (plus de faux succès muet). (3) Module désactivé : un POST, même invalide, répond 404 AVANT la validation (et non un 422), via le garde dans la requête de formulaire. (4) Piège temporel durci : une valeur nulle ou négative de l'horodatage (ex. « 0 ») est désormais traitée comme un robot. (5) L'horodatage du formulaire est préservé après une erreur de validation : corriger et renvoyer en moins de trois secondes ne met plus une vraie personne en quarantaine. (6) Défense en profondeur contre l'injection d'en-tête courriel : les sauts de ligne sont retirés du nom et du sujet avant l'en-tête. Couvert par 14 tests (4 nouveaux). Aucune donnée existante n'est touchée.
+
 ## [1.351.0] - 2026-10-14
 
 ### Ajouté

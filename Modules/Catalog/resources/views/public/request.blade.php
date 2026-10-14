@@ -65,7 +65,7 @@
 
                 {{-- Pot de miel + piège temporel (anti-robot). Invisibles pour un humain. --}}
                 <x-core::honeypot />
-                <input type="hidden" name="form_rendered_at" value="{{ time() }}">
+                <input type="hidden" name="form_rendered_at" value="{{ old('form_rendered_at', time()) }}">
 
                 <div class="two">
                     <div class="field">
@@ -131,7 +131,7 @@
 
                 <div class="consent">
                     <input type="checkbox" id="consentement" name="consentement" value="1" required @checked(old('consentement'))>
-                    <label for="consentement">{{ __('J\'accepte que MEMORA solutions utilise mon nom et mon courriel dans le seul but de répondre à cette demande de formation. Ces renseignements ne sont ni vendus ni partagés, et sont conservés le temps nécessaire au suivi, puis supprimés.') }}</label>
+                    <label for="consentement">{{ __('J\'accepte que MEMORA solutions utilise mon nom et mon courriel dans le seul but de répondre à cette demande de formation. Ces renseignements ne sont ni vendus ni partagés et sont conservés le temps nécessaire au suivi de ma demande; je peux en demander le retrait en tout temps en écrivant à info@memora.ca. Des données techniques (adresse IP) peuvent aussi être conservées à des fins de sécurité.') }}</label>
                 </div>
                 @error('consentement') <div class="err" style="margin-top:-12px;margin-bottom:14px;">{{ $message }}</div> @enderror
 

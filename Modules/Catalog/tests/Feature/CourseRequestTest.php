@@ -159,6 +159,8 @@ it('met en quarantaine (timetrap) un form_rendered_at absent ou non numérique (
     'absent' => '__absent__',
     'chaîne vide' => '',
     'texte' => 'abc',
+    'zéro' => '0',
+    'négatif' => '-10',
 ]);
 
 it('met en quarantaine (disposable_email) un courriel jetable, sans courriel', function () {
@@ -200,4 +202,31 @@ it('renvoie 404 quand le module est désactivé (drapeau catalog.request_enabled
 
     expect(fn () => (new CourseRequestController)->create())
         ->toThrow(NotFoundHttpException::class);
+});
+
+it('renvoie 404 sur un POST (même invalide) quand le module est désactivé, AVANT la validation', function () {
+    config(['catalog.request_enabled' => false]);
+
+    // Une charge VOLONTAIREMENT invalide (message trop court) : le garde doit répondre 404 avant
+    // la validation, et non un 422. Le garde vit dans StoreCourseRequest::prepareForValidation().
+    expect(fn () => submitCourseRequest(coursePayload(['message' => 'x'])))
+        ->toThrow(NotFoundHttpException::class);
+});
+
+it('assainit les sauts de ligne dans le sujet avant l\'en-tête courriel (défense CR/LF)', function () {
+    // Tentative d'injection d'en-tête via un CR/LF dans le sujet. Le courriel doit partir (en-tête
+    // assaini), et le sujet envoyé ne doit contenir AUCUN retour à la ligne (pas d'en-tête parasite).
+    $response = submitCourseRequest(coursePayload([
+        'sujet' => "Formation IA\r\nBcc: pirate.example.net",
+    ]));
+
+    expect($response->getSession()->get('success'))->not->toBeNull();
+
+    $subjects = courseSentSubjects();
+    expect($subjects)->toHaveCount(1);
+    expect($subjects[0])->not->toContain("\n");
+    expect($subjects[0])->not->toContain("\r");
+
+    $req = CourseRequest::query()->latest('id')->first();
+    expect($req->status)->toBe('new');
 });

@@ -16,6 +16,16 @@ class StoreCourseRequest extends FormRequest
     }
 
     /**
+     * Le drapeau du module est appliqué AVANT la validation : module désactivé = 404 propre,
+     * et non un 422 de validation. La config n'étant pas fusionnée au mappage des routes, le
+     * garde vit ici (au moment de la requête, config disponible) plutôt que dans le fichier de routes.
+     */
+    protected function prepareForValidation(): void
+    {
+        abort_unless((bool) config('catalog.request_enabled', true), 404);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function rules(): array
