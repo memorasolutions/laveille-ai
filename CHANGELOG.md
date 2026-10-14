@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.7] - 2026-10-14
+
+### Ajouté
+- **Logo de courriel : variante opaque sur fond blanc, lisible en mode sombre.** La version transparente du logo de courriel devient presque invisible dans les clients en mode sombre (Gmail, Outlook, Apple Mail assombrissent la carte sans recolorer l'image, si bien que « laveille » disparaît). Une variante opaque, le même logo resserré aplati sur fond blanc, est ajoutée à `/images/logo-email-color-opaque.png` ; elle reste lisible quel que soit le thème. La version transparente reste disponible pour les en-têtes sur fond déjà blanc. Aucun comportement du site ne change.
+
 ## [1.350.6] - 2026-10-14
 
 ### Corrigé
