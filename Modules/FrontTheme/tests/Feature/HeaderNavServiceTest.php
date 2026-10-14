@@ -93,6 +93,23 @@ it("expose le repli mobile trié par rang, sans entrée absente de ce repli", fu
     expect($labels)->not->toContain('Code QR')->not->toContain('Grilles partagées');
 });
 
+it("masque la Boutique du méga-menu au public tant qu'elle est réservée au fondateur (#3114)", function () {
+    $labelsReference = fn () => array_column(noeud($this->service->tree(), 'apprendre')['children'][1]['items'], 'label');
+
+    // Boutique publique : l'item est présent pour tout le monde.
+    config(['shop.maintenance' => false, 'shop.founder_only' => false]);
+    expect($labelsReference())->toContain('Boutique');
+
+    // Réservée au fondateur + visiteur anonyme : l'item disparaît (ne pas pointer le public vers un 404,
+    // et ne pas l'exposer non plus via /api/header-nav côté Moodle).
+    config(['shop.founder_only' => true]);
+    expect($labelsReference())->not->toContain('Boutique');
+
+    // Maintenance : caché aussi.
+    config(['shop.founder_only' => false, 'shop.maintenance' => true]);
+    expect($labelsReference())->not->toContain('Boutique');
+});
+
 it('fournit les liens légaux du pied de page', function () {
     $legal = $this->service->toApi()['footer']['legal'];
 

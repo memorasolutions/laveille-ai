@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.9] - 2026-10-14
+
+### Corrigé
+- **Méga-menu « Apprendre » : la Boutique ne s'affiche plus au public tant qu'elle est réservée au fondateur.** La même fuite que le mini-panier existait dans le menu principal : l'item « Boutique » du groupe « Référence » était gardé par le seul mode maintenance, donc visible de tous (et exposé par `/api/header-nav`, consommé par l'académie Moodle) alors que la boutique est réservée au fondateur. Il suit désormais la source unique `ShopAccess::uiVisible()` : caché au public et dans l'API tant que `SHOP_FOUNDER_ONLY`, visible pour le super-admin, et pour tout le monde le jour où la boutique s'ouvre. Complète le correctif 1.350.8 (mini-panier et menu profil). Garde `class_exists` pour ne jamais casser la navigation si le module Shop est désactivé. Test de régression ajouté. Aucune donnée ne change.
+
 ## [1.350.8] - 2026-10-14
 
 ### Corrigé

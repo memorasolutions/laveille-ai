@@ -277,7 +277,13 @@ class HeaderNavService
         if (Route::has('acronyms.index')) {
             $reference[] = $this->item(__('Acronymes éducation'), route('acronyms.index'), $acronymsCount.' '.__('acronymes du Québec'), 'ti-text', ['🔤', __('Acronymes'), 4], ['🔤', __('Acronymes'), 4]);
         }
-        if (Route::has('shop.index') && ! config('shop.maintenance', false)) {
+        // Boutique dans le méga-menu : même source unique que le mini-panier (ShopAccess), pour ne
+        // PAS l'afficher au public tant que SHOP_FOUNDER_ONLY (seul le super-admin la voit). Cet arbre
+        // alimente aussi /api/header-nav (Moodle) : sans utilisateur authentifié, founder_only => caché.
+        // class_exists : un module Shop désactivé ne doit jamais casser la construction de la nav.
+        if (Route::has('shop.index')
+            && class_exists(\Modules\Shop\Support\ShopAccess::class)
+            && \Modules\Shop\Support\ShopAccess::uiVisible()) {
             $reference[] = $this->item(__('Boutique'), route('shop.index'), __('Merch IA et technologie'), 'ti-shopping-cart', ['🛍️', __('Boutique'), 6], ['🛍️', __('Boutique'), 6], true);
         }
 
