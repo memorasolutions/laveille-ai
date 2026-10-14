@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.3] - 2026-10-14
+
+### Ajouté
+- **Logo de courriel couleur à fond transparent, servi à une adresse stable** (`/images/logo-email-color.png`). Le mot-symbole complet « laveille.ai » en couleur, rastérisé depuis le logo officiel du site, pour les en-têtes de courriels de marque (les clients comme Outlook et Gmail rendent mal le SVG, d'où le PNG). Il complète la version blanche existante (`/images/logo-horizontal-white.png`), destinée aux en-têtes sur fond foncé. Aucun comportement du site ne change.
+
 ## [1.350.2] - 2026-10-14
 
 ### Corrigé
