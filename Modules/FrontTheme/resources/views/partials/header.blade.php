@@ -69,10 +69,14 @@
                                 ><i class="fi flaticon-magnifiying-glass"></i></button>
                             </div>
                         </div>
-                        {{-- Mini-cart (conditionnel — module Shop activé ET boutique pas en maintenance) --}}
-                        @unless(config('shop.maintenance', false))
+                        {{-- Mini-panier : visible uniquement quand l'INTERFACE boutique l'est (source unique
+                             ShopAccess — caché au public tant que SHOP_FOUNDER_ONLY, seul le super-admin le voit,
+                             jamais en maintenance). Évite d'afficher un panier vers une page 404/503.
+                             class_exists : un module Shop désactivé/retiré ne doit JAMAIS casser l'en-tête
+                             (portabilité CORE, même garde que Ads/SEO/Community dans les vues du thème). --}}
+                        @if(class_exists(\Modules\Shop\Support\ShopAccess::class) && \Modules\Shop\Support\ShopAccess::uiVisible())
                             @includeIf('shop::partials.mini-cart')
-                        @endunless
+                        @endif
                         {{-- Menu utilisateur connecté --}}
                         @auth
                         <div x-data="{ open: false }" style="display:inline-block;position:relative;margin-right:8px;vertical-align:middle;">

@@ -18,6 +18,12 @@
     $variant = $variant ?? 'sidebar';
     $unreadNotifications = $unreadNotifications ?? (auth()->check() ? auth()->user()->unreadNotifications()->count() : 0);
 
+    // Interface boutique visible pour l'utilisateur courant ? Source unique ShopAccess, évaluée une
+    // seule fois. class_exists : un module Shop désactivé/retiré ne doit JAMAIS casser le menu profil
+    // (portabilité CORE, même garde que les classes de module ailleurs dans le thème).
+    $shopUiVisible = class_exists(\Modules\Shop\Support\ShopAccess::class)
+        && \Modules\Shop\Support\ShopAccess::uiVisible();
+
     $groups = [
         'apercu' => [
             'label' => __('Vue d\'ensemble'),
@@ -69,11 +75,21 @@
                 ['route' => 'user.prompts.index', 'label' => __('Mes prompts'), 'icon' => 'fa-magic', 'emoji' => '✨', 'active_patterns' => ['user.prompts.index']],
             ],
         ],
+        'boutique' => [
+            'label' => __('Boutique'),
+            'links' => [
+                // Boutique + panier : visibles seulement quand l'interface boutique l'est
+                // (source unique ShopAccess). Tant que SHOP_FOUNDER_ONLY, seul le super-admin les voit ;
+                // le jour où la boutique s'ouvre au public, ces liens apparaissent pour tout le monde.
+                ['route' => 'shop.index', 'label' => __('Boutique'), 'icon' => 'fa-shopping-bag', 'emoji' => '🛍️', 'active_patterns' => ['shop.index'], 'show' => $shopUiVisible],
+                ['route' => 'shop.cart', 'label' => __('Mon panier'), 'icon' => 'fa-shopping-cart', 'emoji' => '🛒', 'active_patterns' => ['shop.cart'], 'show' => $shopUiVisible],
+            ],
+        ],
         'compte' => [
             'label' => __('Mon compte'),
             'links' => [
                 ['route' => 'user.profile', 'label' => __('Mon profil'), 'icon' => 'fa-user', 'emoji' => '👤', 'active_patterns' => ['user.profile']],
-                ['route' => 'shop.my-orders', 'label' => __('Mes commandes'), 'icon' => 'fa-shopping-bag', 'emoji' => '🛒', 'active_patterns' => ['shop.my-orders'], 'show' => ! config('shop.maintenance', false)],
+                ['route' => 'shop.my-orders', 'label' => __('Mes commandes'), 'icon' => 'fa-shopping-bag', 'emoji' => '🛒', 'active_patterns' => ['shop.my-orders'], 'show' => $shopUiVisible],
                 ['route' => 'user.notifications', 'label' => __('Notifications'), 'icon' => 'fa-bell', 'emoji' => '🔔', 'active_patterns' => ['user.notifications'], 'badge' => true],
             ],
         ],

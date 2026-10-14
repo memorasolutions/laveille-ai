@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.8] - 2026-10-14
+
+### Corrigé
+- **Menus : les liens de la boutique (Boutique, panier, « Mes commandes ») ne s'affichent qu'au fondateur tant que la boutique n'est pas publique.** Tant que la boutique est réservée au fondateur (`SHOP_FOUNDER_ONLY`), deux éléments restaient visibles de tous les visiteurs alors que leur cible répond 404 : le mini-panier de l'en-tête et le lien « Mes commandes » du menu profil (gardés par le seul mode maintenance, pas par la réservation au fondateur). Une source unique de vérité (`Modules\Shop\Support\ShopAccess::uiVisible()`), alignée sur les deux gardes de route existantes (maintenance 503, réservé au fondateur 404), décide désormais de l'affichage : rien n'apparaît pour le public, tout apparaît pour le super-admin, et le jour où la boutique s'ouvre, les liens apparaissent pour tout le monde sans autre changement. Le menu profil gagne aussi un groupe « Boutique » (Boutique + panier) soumis à la même règle. L'Académie reste gardée par ses rôles, inchangée. Couvert par 5 tests. Aucune donnée ne change.
+
 ## [1.350.7] - 2026-10-14
 
 ### Ajouté
