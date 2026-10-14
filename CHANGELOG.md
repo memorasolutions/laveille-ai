@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.350.0] - 2026-10-13
+
+### Ajouté
+- **Anonymiseur : détection d'identifiants indirects ancrés sur un mot-clé.** Un numéro d'employé, de client, de membre ou de compte, un permis de conduire préfixé d'une lettre (« T1234-567890-12 ») et une plaque d'immatriculation sont désormais repérés quand un mot-clé de contexte les introduit (« numéro d'employé », « plaque d'immatriculation »...). L'ancrage sur le mot-clé évite d'anonymiser un nombre ordinaire sans rapport.
+
+### Corrigé
+- **Anonymiseur : le faux courriel suit maintenant le faux nom.** Un courriel réduit à une initiale (« m.tremblay@ ») reçoit l'initiale du faux prénom, et un prénom composé écrit collé dans l'adresse (« marieclaude.tremblay@ ») reçoit le même faux prénom que le nom affiché, au lieu d'un prénom différent. Aucune donnée existante ne change ; purement l'apparence des faux.
+
 ## [1.349.0] - 2026-10-13
 
 ### Ajouté

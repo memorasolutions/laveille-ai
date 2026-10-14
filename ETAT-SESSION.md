@@ -1,6 +1,6 @@
 # État de session - La veille de Stef v2
 
-Dernière mise à jour : 13 octobre 2026, 20h22 Québec (00:22 UTC le 14 oct). Production en **v1.348.0** ; **v1.349.0 en cours de déploiement** (anonymiseur : détection du prénom en minuscules après un mot de relation, correctif de confidentialité #3098).
+Dernière mise à jour : 13 octobre 2026, 20h42 Québec (00:42 UTC le 14 oct). Production en **v1.349.0** (bug de confidentialité #3098 LIVRÉ ET PROUVÉ en prod) ; **v1.350.0 en cours de déploiement** (anonymiseur bugs 2 et 3 de #3098 : courriel faux cohérent + identifiants indirects).
 
 ## Où on en est (livré et prouvé en prod)
 

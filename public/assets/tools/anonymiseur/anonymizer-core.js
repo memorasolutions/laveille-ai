@@ -273,6 +273,33 @@ function detectEntities(text) {
   // capté par l'étape 3 déjà exécutée — le Set `seen` empêche tout double-comptage du même texte).
   const codeInterne = /\b[A-ZÀ-Ÿ]{2,4}\d{4,8}\b/g;
   while ((m = codeInterne.exec(text))) push(m[0], 'dossier', 'Numéro de dossier', 0.75);
+  // 9c. IDENTIFIANTS INDIRECTS ancrés sur un mot-clé (#3098) - numéros qui identifient une personne
+  // sans la nommer, que les étapes ci-dessus manquaient. TOUS exigent un mot-clé de contexte : un
+  // nombre nu, sans contexte, n'est jamais capté ici (faux positif évité). Catégorie 'id' :
+  // generateFake('id') randomise chiffres ET lettres en gardant le format.
+  // (a) Numéro / identifiant de {employé, client, membre, compte, usager, commande, facture,
+  //     contrat, dossier, abonné, adhérent, assuré}. Le connecteur borné (≤ 15 car. non
+  //     chiffre/non majuscule) tolère « est », « : », « no » entre le rôle et le code.
+  // Frontière de fin de rôle par lookahead (?![A-Za-zÀ-ÿ]) plutôt que \b : \b échoue après un mot
+  // finissant par un accent (« employé » - « é » n'est pas un \w). Connecteur [^\d\n]{0,15}? (lazy,
+  // lettres autorisées) plutôt que [^\dA-ZÀ-Ÿ]… : avec le drapeau i, cette dernière exclut AUSSI les
+  // minuscules (A-Z couvre a-z en casse-insensible), donc elle ne pouvait pas franchir « est ».
+  const idCtx = /(?:num[ée]ro|n[°o]\.?|identifiant|r[ée]f[ée]rence|matricule|code|carte|dossier)\s+(?:d['’]|de\s+l['’]|de\s+|du\s+)?(?:employ[ée]e?|client|cliente|membre|usager|usag[èe]re|compte|commande|facture|contrat|dossier|abonn[ée]e?|adh[ée]rent|assur[ée]e?)(?![A-Za-zÀ-ÿ])[^\d\n]{0,15}?([A-ZÀ-Ÿ]{0,6}-?\d[\w-]*)/giu;
+  // >= 2 chiffres exigés : un code identifiant en a toujours (« 4471 », « CLI-88412 »), ce qui écarte
+  // la description « numéro de client comporte 8 chiffres » -> « 8 » (mesure Codex, #3098).
+  while ((m = idCtx.exec(text))) { if (((m[1].match(/\d/g) || []).length) >= 2) push(m[1].trim(), 'id', 'Identifiant', 0.85); }
+  // (b) Permis de conduire préfixé d'une LETTRE (format québécois L1234-123456-12) : l'étape 5
+  //     ci-dessus n'attrape que des chiffres purs après « permis » et manquait cette forme.
+  //     Connecteur en classes BORNÉES (jamais des \s* adjacents) pour éviter un backtracking
+  //     catastrophique sur une longue suite d'espaces (ReDoS mesuré par Codex, #3098).
+  const permisConduire = /permis(?:\s+de\s+conduire)?[\s:#]{0,3}(?:n[°o]\.?[\s:#]{0,3})?([A-ZÀ-Ÿ]\d{3,4}[\s-]?\d{5,6}[\s-]?\d{2})/giu;
+  while ((m = permisConduire.exec(text))) push(m[1].trim(), 'id', 'Permis de conduire', 0.9);
+  // (c) Plaque d'immatriculation (mot-clé « plaque » / « immatricul… » obligatoire). Format
+  //     québécois = 2 blocs de 3 caractères alphanumériques (« F12 ABC », « 123 ABC ») ; on exige
+  //     3+3 ET au moins une lettre ET un chiffre, pour écarter « plaque de 20 cm » et « plaque
+  //     tournante » (mesures Codex). Connecteur borné (pas de \s* adjacents) : pas de ReDoS.
+  const plaque = /(?:plaque(?:\s+d['’]immatriculation)?|immatricul\w*)[\s:#]{0,3}([A-ZÀ-Ÿ0-9]{3}[\s-]?[A-ZÀ-Ÿ0-9]{3})\b/giu;
+  while ((m = plaque.exec(text))) { if (/\d/.test(m[1]) && /[A-Za-zÀ-ÿ]/.test(m[1])) push(m[1].trim(), 'id', 'Plaque d’immatriculation', 0.85); }
   // 10. Montant
   const amount = /\$\s*\d+(?:[ ,]\d{3})*(?:[.,]\d{2})?\s*(?:CAD|cad)?/g;
   while ((m = amount.exec(text))) push(m[0], 'amount', 'Montant', 0.95);
@@ -462,7 +489,16 @@ function detectEntities(text) {
   const MOTS_LOCAUX_COURRIEL_IGNORES = ['info', 'contact', 'contacts', 'admin', 'administration', 'support', 'ventes', 'vente', 'rh', 'secretariat', 'secretaire', 'accueil', 'service', 'services', 'communication', 'communications', 'marketing', 'facturation', 'comptabilite', 'direction', 'noreply', 'webmaster', 'postmaster', 'general', 'commercial', 'reception', 'urgence', 'urgences'];
   const fragmentsNomsConnus = new Set();
   entities.filter((e) => ['name', 'firstName', 'lastName'].includes(e.category)).forEach((e) => {
-    String(e.value).split(/[\s-]+/).forEach((w) => { if (normalize(w).length >= 2) fragmentsNomsConnus.add(normalize(w)); });
+    // Pour chaque SEGMENT séparé par une espace, on ajoute ses parties (coupées sur le trait
+    // d'union) ET sa forme CONCATÉNÉE : « Marie-Claude » donne « marie », « claude » ET
+    // « marieclaude ». Sans le concaténé, un courriel « marieclaude.tremblay@ » ne reconnaissait
+    // pas « marieclaude » comme un fragment déjà connu et en faisait un prénom SÉPARÉ au faux
+    // divergent de celui du nom affiché (incohérence #3098 bug 2b).
+    String(e.value).split(/\s+/).forEach((seg) => {
+      seg.split(/-+/).forEach((w) => { if (normalize(w).length >= 2) fragmentsNomsConnus.add(normalize(w)); });
+      const concat = normalize(seg.replace(/-+/g, ''));
+      if (concat.length >= 2) fragmentsNomsConnus.add(concat);
+    });
   });
   for (const ent of entities.filter((e) => e.category === 'email')) {
     const at = ent.value.indexOf('@');
@@ -890,12 +926,27 @@ function relinkEmails(rules) {
   if (!Array.isArray(rules) || !rules.length) return rules;
   const norm = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const map = new Map(); // jeton réel (prénom/nom + sous-composantes de noms composés) → faux jeton
+  // Carte des INITIALES : un courriel réduit à une initiale (« m.tremblay@ ») doit suivre l'initiale
+  // du faux prénom. On ne retient une initiale que si elle est NON AMBIGUË (un seul vrai prénom la
+  // porte) : sinon on stocke null et on n'y touche pas. Corrige #3098 bug 2a.
+  const initialMap = new Map();
+  const noteInitiale = (reelPrenom, fauxPrenom) => {
+    const rl = norm(reelPrenom)[0], fk = norm(fauxPrenom);
+    if (!rl || !fk) return;
+    initialMap.set(rl, initialMap.has(rl) && initialMap.get(rl) !== fk ? null : fk);
+  };
   for (const r of rules) {
     if (r.category === 'firstName' || r.category === 'lastName') {
       for (const part of String(r.original).split(/[\s\-]+/)) { if (norm(part).length >= 2) map.set(norm(part), r.replacement); }
+      const entier = norm(String(r.original)).replace(/[\s-]+/g, ''); if (entier.length >= 2 && !map.has(entier)) map.set(entier, r.replacement); // forme concaténée (« marieclaude »), PREMIER gagne (évite une collision entre deux personnes)
+      if (r.category === 'firstName') noteInitiale(r.original, r.replacement);
     } else if (r.category === 'name') {
       const o = String(r.original).split(/\s+/), f = String(r.replacement || '').split(/\s+/);
-      o.forEach((w, i) => { if (f[i]) { for (const sub of String(w).split(/[\s\-]+/)) { if (norm(sub).length >= 2) map.set(norm(sub), f[i]); } } });
+      o.forEach((w, i) => { if (f[i]) {
+        for (const sub of String(w).split(/-+/)) { if (norm(sub).length >= 2) map.set(norm(sub), f[i]); }
+        const entier = norm(w).replace(/-+/g, ''); if (entier.length >= 2 && !map.has(entier)) map.set(entier, f[i]); // « Marie-Claude » → « marieclaude », PREMIER gagne (pas de collision entre deux personnes)
+      } });
+      if (o[0] && f[0]) noteInitiale(o[0], f[0]);
     }
   }
   if (!map.size) return rules;
@@ -910,6 +961,8 @@ function relinkEmails(rules) {
     const newLocal = local.split(/([._+\-])/).map((tok) => {
       const f = map.get(norm(tok));
       if (f) { changed = true; return norm(f).replace(/\s+/g, ''); } // faux jeton sans accent/espace (courriel valide)
+      const nt = norm(tok);
+      if (nt.length === 1 && initialMap.get(nt)) { changed = true; return initialMap.get(nt)[0]; } // initiale → initiale du faux prénom
       return tok;
     }).join('');
     if (!changed) continue;
