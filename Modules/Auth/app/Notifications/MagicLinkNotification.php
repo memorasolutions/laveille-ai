@@ -55,12 +55,12 @@ class MagicLinkNotification extends TemplatedNotification
     {
         return (new MailMessage)
             ->subject('Votre code de connexion')
-            ->greeting('Bonjour !')
-            ->line('Votre code de connexion est :')
+            ->greeting('Bonjour,')
+            ->line("Votre code de connexion est\u{A0}:")
             ->line('**'.$this->token.'**')
             ->line('Ce code expire dans 15 minutes.')
-            ->line('💡 Astuce : ajoutez info@laveille.ai à vos contacts (Gmail) ou à vos expéditeurs fiables (Outlook/Microsoft) pour ne jamais manquer un code dans vos pourriels.')
-            ->line('Si vous n\'avez pas demandé ce code, ignorez cet email.')
+            ->line("💡 Astuce\u{A0}: ajoutez info@laveille.ai à vos contacts (Gmail) ou à vos expéditeurs fiables (Outlook/Microsoft) pour ne jamais manquer un code dans vos pourriels.")
+            ->line('Si vous n\'avez pas demandé ce code, ignorez ce courriel.')
             ->salutation('L\'équipe');
     }
 }

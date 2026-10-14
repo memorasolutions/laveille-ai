@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.2] - 2026-10-14
+
+### Corrigé
+- **Courriel « Votre code de connexion » : typographie québécoise et vocabulaire.** Le courriel transactionnel reçu à chaque connexion sans mot de passe disait « Bonjour ! » (le québécois ne met pas d'espace avant le point d'exclamation) ; il dit maintenant « Bonjour, ». Une espace insécable a été ajoutée avant les deux-points (« Votre code de connexion est : » et « 💡 Astuce : »), et « ignorez cet email » devient « ignorez ce courriel ». Correction appliquée au gabarit de repli et au gabarit de base. Aucune donnée ne change.
+
 ## [1.350.1] - 2026-10-14
 
 ### Corrigé
