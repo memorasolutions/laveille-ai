@@ -58,7 +58,10 @@
                             @if(Route::has('tools.index'))
                                 <li><a href="{{ route('tools.index') }}">{{ __('Outils gratuits') }}</a></li>
                             @endif
-                            @if(Route::has('shop.index') && ! config('shop.maintenance', false))
+                            {{-- Boutique : même source unique ShopAccess que l'en-tête et le méga-menu.
+                                 Cachée au public tant que SHOP_FOUNDER_ONLY (seul le super-admin la voit),
+                                 visible de tous le jour de l'ouverture. class_exists : jamais de casse si Shop désactivé. --}}
+                            @if(Route::has('shop.index') && class_exists(\Modules\Shop\Support\ShopAccess::class) && \Modules\Shop\Support\ShopAccess::uiVisible())
                                 <li><a href="{{ route('shop.index') }}">{{ __('Boutique') }}</a></li>
                             @endif
                             @if(Route::has('shorturl.create'))

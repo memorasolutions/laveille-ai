@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.350.10] - 2026-10-14
+
+### Corrigé
+- **Pied de page : le lien « Boutique » ne s'affiche plus au public tant qu'elle est réservée au fondateur.** Dernière occurrence de la même fuite (en-tête 1.350.8, méga-menu 1.350.9) : le lien « Boutique » de la colonne du pied de page restait gardé par le seul mode maintenance. Il suit désormais `ShopAccess::uiVisible()`, comme partout ailleurs. Vérifié en production : l'accueil anonyme ne sert plus aucun lien vers `/boutique`. Garde `class_exists` conservée. Aucune donnée ne change.
+
 ## [1.350.9] - 2026-10-14
 
 ### Corrigé
