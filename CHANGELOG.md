@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.351.3] - 2026-10-15
+
+### Corrigé
+- **Formulaire de demande de cours : la case de consentement s'affichait hors du cadre.** Le thème porte une règle globale qui transforme chaque case à cocher en case « maison » (position absolue, apparence masquée) ; faute de l'écraser, la case native du consentement se détachait tout à gauche, hors du conteneur et de son libellé. Un override local (même remède que le modal d'infolettre) ramène la case native dans le flux, alignée avec son texte. Correctif purement visuel, aucun comportement ne change.
+
 ## [1.351.2] - 2026-10-14
 
 ### Corrigé

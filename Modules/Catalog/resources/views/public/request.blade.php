@@ -28,7 +28,15 @@
     .courroi .two { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 640px) { .courroi .two { grid-template-columns: 1fr 1fr; } }
     .courroi .consent { display: flex; gap: 10px; align-items: flex-start; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px; padding: 12px 14px; margin: 4px 0 18px; }
-    .courroi .consent input { width: 20px; height: 20px; margin-top: 2px; flex: 0 0 auto; }
+    /* Le thème porte une regle globale qui transforme input[type=checkbox] en case custom
+       (position absolue / appearance none / opacity 0) ; sans l'ecraser, la case native se
+       detache a gauche, hors du cadre. On force la case native dans le flux du conteneur,
+       meme remede que le modal infolettre (newsletter-modal). */
+    .courroi .consent input[type="checkbox"] {
+        position: static !important; appearance: auto !important; -webkit-appearance: checkbox !important;
+        opacity: 1 !important; width: 20px !important; height: 20px !important; min-width: 20px;
+        margin: 2px 0 0 !important; flex: 0 0 auto;
+    }
     .courroi .consent label { font-weight: 400; font-size: 13px; color: #334155; margin: 0; }
     .courroi .btn-send { background: #134e4a; color: #fff; border: none; border-radius: 8px; padding: 12px 22px; font-size: 16px; font-weight: 600; cursor: pointer; min-height: 48px; }
     .courroi .btn-send:hover { background: #0f3d3a; }
