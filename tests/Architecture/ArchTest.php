@@ -62,6 +62,10 @@ arch()->preset()->security()->ignoring([
     // changement entre deux synchros catalogue Gelato). Pas un secret, pas une signature - compare
     // a une empreinte stockee pour savoir s'il faut re-publier; somme rapide, hors champ de la regle.
     'Modules\Shop\Services\GelatoSyncService',
+    // Boutique : sha1 du CHEMIN d'une image Gelato pour en faire un NOM DE FICHIER local stable
+    // (auto-hebergement des mockups). Pas un secret, pas une signature - derive un nom de fichier
+    // deterministe a partir d'une URL publique; somme rapide, hors champ de la regle.
+    'Modules\Shop\Services\ProductImageStore',
     'Modules\Academy\Services\CertificateService',
     // Rate-limit key uniquement (PAS le jeton du lien magique lui-même, généré ailleurs) :
     'Modules\Auth\Http\Controllers\MagicLinkController',
