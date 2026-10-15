@@ -54,6 +54,14 @@ class GelatoSyncService
     /** @var array<int, array> ambiguïtés relevées par le dernier transformToLocalVariants (variantes retirées de la vente) */
     public array $lastAmbiguities = [];
 
+    /** Dépôt d'images auto-hébergées (résolu paresseusement pour ne pas changer la construction du service). */
+    private ?ProductImageStore $imageStore = null;
+
+    private function imageStore(): ProductImageStore
+    {
+        return $this->imageStore ??= app(ProductImageStore::class);
+    }
+
     public function isConfigured(): bool
     {
         return ! empty(config('shop.gelato.api_key')) && ! empty(config('shop.gelato.store_id'));
@@ -659,18 +667,46 @@ class GelatoSyncService
         usort($sizes, fn ($a, $b) => $this->sizeRank($a) <=> $this->sizeRank($b));
 
         // Empreinte stable du contenu synchronisé (calculée AVANT toute fusion locale d'images).
+        // On EXCLUT les images : les URL de mockup Gelato sont des URL S3 pré-signées qui changent
+        // à chaque appel d'API (signature différente). Les garder dans l'empreinte la rendrait
+        // instable et déclencherait une re-synchro à chaque passage, pour une image identique.
         $hashed = array_map(function ($v) {
-            unset($v['_old_images']);
+            unset($v['_old_images'], $v['images']);
 
             return $v;
         }, $variants);
-        $hash = sha1(json_encode([$title, $gelato['description'] ?? '', $hashed, $map, $sizes, $sellable, $unpriced, $ambiguities]));
-
-        // Images propres au produit local conservées si elles existent (gérées dans l'admin).
-        foreach ($variants as &$variant) {
-            if (! empty($variant['_old_images'])) {
-                $variant['images'] = $variant['_old_images'];
+        // Empreinte d'image STABLE : le CHEMIN des URL Gelato (sans la query signée, qui tourne à
+        // chaque appel d'API). Insensible à la rotation de signature (pas de re-synchro inutile),
+        // mais sensible à un VRAI changement d'image (chemin différent -> l'update se déclenche).
+        $stableImagePath = static function ($u): string {
+            $u = is_string($u) ? $u : '';
+            if ($u === '' || str_starts_with($u, '/storage/')) {
+                return $u;
             }
+
+            return (string) (parse_url($u, PHP_URL_PATH) ?: $u);
+        };
+        $imageFingerprint = [];
+        foreach ($variants as $v) {
+            foreach (($v['images'] ?? []) as $u) {
+                $imageFingerprint[] = $stableImagePath($u);
+            }
+        }
+        $imageFingerprint[] = $stableImagePath($gelato['previewUrl'] ?? '');
+        sort($imageFingerprint);
+        $hash = sha1(json_encode([$title, $gelato['description'] ?? '', $hashed, $map, $sizes, $sellable, $unpriced, $ambiguities, $imageFingerprint]));
+
+        // Images de variante : on AUTO-HÉBERGE toute image (les mockups Gelato sont des URL S3
+        // pré-signées qui expirent en 24 h). On conserve une image déjà LOCALE en base (gérée dans
+        // l'admin, ou déjà localisée lors d'une synchro précédente), SINON on localise le mockup
+        // frais fourni par Gelato. localize() laisse passer un chemin /storage/ sans rien refaire.
+        foreach ($variants as &$variant) {
+            $oldLocal = array_values(array_filter(
+                $variant['_old_images'] ?? [],
+                static fn ($u) => is_string($u) && str_starts_with($u, '/storage/')
+            ));
+            $source = $oldLocal !== [] ? $oldLocal : ($variant['images'] ?? []);
+            $variant['images'] = $this->imageStore()->localizeMany($source);
             unset($variant['_old_images']);
         }
         unset($variant);
@@ -682,7 +718,11 @@ class GelatoSyncService
             $say('[AMBIGU]', "{$title} : ".count($ambiguities).' variante(s) indécidable(s) retirée(s) de la vente');
         }
 
-        $previewUrl = $gelato['previewUrl'] ?? ($variants[0]['images'][0] ?? null);
+        // Image principale du produit : on AUTO-HÉBERGE le preview Gelato (URL S3 pré-signée qui
+        // expire en 24 h), sinon on retombe sur la 1re image de variante (déjà localisée ci-dessus).
+        $previewUrl = $this->imageStore()->localize(
+            $gelato['previewUrl'] ?? ($variants[0]['images'][0] ?? null)
+        );
 
         if (! $product) {
             // Publié seulement si vendable, autopublication ET chaque taille offerte a un prix RÉEL (jamais 0 ni arbitraire).
@@ -734,7 +774,29 @@ class GelatoSyncService
         $markerMissing = ($metadata['gelato_store_product_id'] ?? null) !== $gelatoId
             || $product->gelato_store_product_id !== $gelatoId;
 
-        if (! $force && ! $markerMissing && ! $republish && ! $retire && $previousHash === $hash) {
+        // Une image encore DISTANTE en base (ancienne URL Gelato signée, désormais expirée) n'est
+        // jamais « inchangée » : on re-traite le produit jusqu'à ce que TOUTES ses images soient
+        // auto-hébergées (/storage/), même si rien d'autre n'a bougé - ainsi une localisation ratée
+        // (réseau) est retentée au prochain passage, au lieu de laisser une image cassée en base.
+        $hasRemoteImage = static function (?Product $p): bool {
+            if ($p === null) {
+                return false;
+            }
+            $urls = $p->images ?? [];
+            foreach (($p->variants ?? []) as $v) {
+                $urls = array_merge($urls, $v['images'] ?? []);
+            }
+            foreach ($urls as $u) {
+                if (is_string($u) && str_starts_with($u, 'http')) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+        $needsImageHeal = $hasRemoteImage($product);
+
+        if (! $force && ! $markerMissing && ! $republish && ! $retire && ! $needsImageHeal && $previousHash === $hash) {
             $say('[INCHANGÉ]', "{$title} : ".count($variants).' couleurs');
 
             return 'unchanged';
@@ -769,8 +831,18 @@ class GelatoSyncService
         if ($basePrice > 0 && $firstBySize !== []) {
             $update['price'] = $basePrice;
         }
-        if (empty($product->images) && $previewUrl) {
-            $update['images'] = [$previewUrl];
+        // Image principale : si elle est déjà locale, on n'y touche pas (image gérée dans l'admin,
+        // ou déjà auto-hébergée). Sinon (absente ou encore distante), on tente de localiser l'image
+        // ACTUELLE - ce qui PRÉSERVE une image valide posée dans l'admin en l'auto-hébergeant - et à
+        // défaut (ancienne URL Gelato expirée -> échec de téléchargement) on retombe sur le preview
+        // Gelato frais, lui-même déjà localisé plus haut.
+        $currentImage = (string) ($product->images[0] ?? '');
+        if ($currentImage === '' || ! Str::startsWith($currentImage, '/storage/')) {
+            $local = $currentImage !== '' ? $this->imageStore()->localize($currentImage) : null;
+            $local ??= $previewUrl;
+            if ($local) {
+                $update['images'] = [$local];
+            }
         }
         if ($republish) {
             $update['status'] = 'published';

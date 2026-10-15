@@ -56,6 +56,9 @@ function gcsFake(array $details, array $costBySize = ['S' => 10.0, 'M' => 10.0, 
     foreach ($details as $d) {
         $fake['ecommerce.gelatoapis.com/v1/stores/*/products/'.$d['id']] = Http::response($d);
     }
+    // Images de mockup Gelato (previewUrl / productImages) : octets factices avec un type image,
+    // pour que l'auto-hébergement (ProductImageStore) réussisse sans appel réseau réel.
+    $fake['img.test/*'] = Http::response("\xFF\xD8\xFFimage-factice", 200, ['Content-Type' => 'image/jpeg']);
     // Les URL spécifiques d'abord, la liste (motif plus large) ensuite.
     $ordered = array_merge(array_slice($fake, 2), array_slice($fake, 0, 2));
     Http::fake($ordered);
@@ -67,6 +70,9 @@ beforeEach(function () {
         'shop.gelato_sync_autopublish' => true,
     ]);
     \Illuminate\Support\Facades\Cache::put('exchange_rate_usd_cad', 1.40, 3600);
+    // La synchro AUTO-HÉBERGE désormais les images Gelato (ProductImageStore) : disque public
+    // simulé pour que les écritures restent en mémoire, jamais sur le vrai storage.
+    \Illuminate\Support\Facades\Storage::fake('public');
 });
 
 test('la synchro crée un produit avec store_variant_map COMPLET, marqueur, prix et publication', function () {
@@ -178,4 +184,78 @@ test('le bouton admin déclenche la synchro et affiche le résultat', function (
     expect(Product::count())->toBe(1);
 
     $this->actingAs($user)->get('/admin/shop/products')->assertOk()->assertSee('Synchroniser maintenant');
+});
+
+test("l'image du produit est AUTO-HÉBERGÉE (/storage/ local), jamais l'URL Gelato signée qui expire", function () {
+    gcsFake([gcsDetail()]); // previewUrl = https://img.test/p.png simule une URL S3 pré-signée éphémère
+
+    app(GelatoSyncService::class)->syncStore();
+
+    $p = Product::firstOrFail();
+    expect($p->images)->toHaveCount(1)
+        ->and($p->images[0])->toStartWith('/storage/shop/products/')
+        ->and($p->images[0])->not->toContain('img.test'); // l'URL distante n'a PAS survécu
+
+    // Le fichier a réellement été déposé sur le disque public (simulé).
+    $rel = ltrim(str_replace('/storage/', '', $p->images[0]), '/');
+    \Illuminate\Support\Facades\Storage::disk('public')->assertExists($rel);
+});
+
+test("aucune URL d'image DISTANTE ne survit à la synchro (produit ET variantes)", function () {
+    $detail = gcsDetail();
+    // Gelato fournit un mockup de variante (URL éphémère) pour la 1re variante noire.
+    $detail['productImages'] = [
+        ['fileUrl' => 'https://img.test/black-mockup.png', 'productVariantIds' => ['var-black-S'], 'isPrimary' => false],
+    ];
+    gcsFake([$detail]);
+
+    app(GelatoSyncService::class)->syncStore();
+
+    $p = Product::firstOrFail();
+    $toutes = collect($p->images);
+    foreach ($p->variants as $v) {
+        $toutes = $toutes->merge($v['images'] ?? []);
+    }
+    expect($toutes)->not->toBeEmpty();
+    foreach ($toutes as $img) {
+        expect($img)->toStartWith('/storage/')
+            ->and(str_starts_with($img, 'http'))->toBeFalse();
+    }
+});
+
+test("une image distante héritée (URL Gelato expirée en base) est remplacée par une copie locale au --force", function () {
+    // Produit préexistant portant encore l'ANCIENNE URL Gelato signée, désormais expirée (cas prod réel).
+    $old = Product::create([
+        'name' => 'T-shirt La veille.ai', 'slug' => 'tshirt-heritage',
+        'price' => 20.0, 'category' => 't-shirts', 'status' => 'published',
+        'images' => ['https://old.gelato/expired-signed.png'],
+        'variants' => [],
+        'gelato_store_product_id' => 'sp-1',
+        'metadata' => ['gelato_store_product_id' => 'sp-1'],
+    ]);
+
+    gcsFake([gcsDetail('sp-1')]);
+    app(GelatoSyncService::class)->syncStore(['force' => true]);
+
+    $old->refresh();
+    expect($old->images[0])->toStartWith('/storage/shop/products/')
+        ->and($old->images[0])->not->toContain('old.gelato');
+});
+
+test("une image admin DISTANTE encore valide est PRÉSERVÉE (auto-hébergée), pas écrasée par le preview Gelato", function () {
+    $admin = Product::create([
+        'name' => 'T-shirt La veille.ai', 'slug' => 'tshirt-admin-img',
+        'price' => 20.0, 'category' => 't-shirts', 'status' => 'published',
+        'images' => ['https://img.test/custom-admin.png'], // image posée dans l'admin, encore valide
+        'variants' => [],
+        'gelato_store_product_id' => 'sp-1',
+        'metadata' => ['gelato_store_product_id' => 'sp-1'],
+    ]);
+
+    gcsFake([gcsDetail('sp-1')]); // previewUrl Gelato = https://img.test/p.png
+    app(GelatoSyncService::class)->syncStore(['force' => true]);
+
+    $admin->refresh();
+    // L'image admin a été localisée (dérivée de SON chemin), PAS remplacée par le preview Gelato (/p.png).
+    expect($admin->images[0])->toBe('/storage/shop/products/'.sha1('/custom-admin.png').'.jpg');
 });

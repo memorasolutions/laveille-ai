@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.351.5] - 2026-10-15
+
+### Corrigé
+- **Boutique : les images de produit étaient toutes cassées (page produit, carte de la vitrine, og:image), pour toutes les couleurs.** Cause racine : la synchro Gelato stockait l'URL d'aperçu renvoyée par Gelato, qui est une URL Amazon S3 PRÉ-SIGNÉE valable 24 heures seulement (signée à neuf à chaque appel d'API). Une fois en base, elle expirait le lendemain et toutes les images du produit tombaient en erreur 403. Le correctif TÉLÉCHARGE désormais l'image au moment de la synchro (pendant que l'URL signée est encore valide) et l'AUTO-HÉBERGE localement (`/storage/shop/products/...`), un chemin stable qui n'expire jamais. Vaut pour TOUS les produits, présents et à venir : le correctif vit dans la synchro, pas dans une retouche ponctuelle. Une re-synchro remplace automatiquement une ancienne URL expirée par la copie locale, et un produit qui porte encore une image distante n'est jamais considéré « inchangé » tant qu'elle n'est pas auto-hébergée (une localisation ratée est retentée). Une image posée dans l'administration est préservée (auto-hébergée elle aussi), jamais écrasée. L'empreinte de synchro ignore la signature S3 (qui tourne à chaque appel) mais reste sensible à un vrai changement d'image. Nouveau service `ProductImageStore` (téléchargement + dépôt sur le disque public, mêmes garde-fous que le service d'images des actualités). Couvert par 4 nouveaux tests (11 au total sur la synchro, 207 tests Shop verts). Revue adversariale croisée. Aucune donnée existante touchée.
+
 ## [1.351.4] - 2026-10-15
 
 ### Corrigé
