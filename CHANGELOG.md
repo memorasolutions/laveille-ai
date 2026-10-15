@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.355.1] - 2026-10-15
+
+### Modifié
+- **Module boutique (Shop) rendu exportable vers d'autres projets Laravel (empaquetage, sans changement de comportement).** Ajout d'un README d'installation (installation, variables d'environnement, dépendances réelles, désactivation propre, points de couplage à adapter avant export) et de deux étiquettes de publication dans le fournisseur de services (`shop-config`, `shop-migrations`), strictement additives : aucune logique de prix, de taxe ou de marge n'est touchée. 208 tests de la boutique au vert. Zone argent : la carte des couplages restants (gabarits, courriels, données d'amorçage) est documentée dans le README, non arrachée.
+
+### Documentation (hors application)
+- **ÉFVP Loi 25 du flux SSO et de la vente de cours portée à la version 0.3** (`docs/legal/`, document interne, aucun flux live) : révision adversariale ancrée sur le texte de loi (P-39.1 à jour au 10 juin 2026, Règlement sur les incidents A-2.1 r. 3.1). Alignement du jeu de revendications SSO sur le code réel (sept émises, cinq retenues, `name` et `picture` à retirer avant allumage), jonction d'un compte créé par achat avec l'identité SSO, inventaire du courriel OTP hors Québec (Postmark), paramètres de confidentialité par défaut (art. 9.1), cotation des scénarios et conditions de suivi 6.11 à 6.16. L'adoption reste une décision du RPRP et du fondateur : aucun flux n'est allumé.
+
 ## [1.355.0] - 2026-10-15
 
 ### Ajouté

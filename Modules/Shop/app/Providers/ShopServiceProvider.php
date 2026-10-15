@@ -34,6 +34,8 @@ class ShopServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+        // Publication optionnelle (exportabilité) : php artisan vendor:publish --tag=shop-migrations
+        $this->publishes([module_path($this->name, 'database/migrations') => database_path('migrations')], $this->nameLower.'-migrations');
 
         // FounderOnly doit trancher (404) AVANT 'auth', sinon un invité est redirigé vers le login
         // au lieu de voir une boutique « inexistante ». Reste après StartSession (user lisible).
@@ -126,7 +128,7 @@ class ShopServiceProvider extends ServiceProvider
 
                     $key = ($config === 'config.php') ? $this->nameLower : implode('.', $normalized);
 
-                    $this->publishes([$file->getPathname() => config_path($config)], 'config');
+                    $this->publishes([$file->getPathname() => config_path($config)], ['config', $this->nameLower.'-config']);
                     $this->merge_config_from($file->getPathname(), $key);
                 }
             }
