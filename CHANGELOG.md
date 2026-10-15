@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.354.2] - 2026-10-15
+
+### Corrigé
+- **Le menu d'actions « ⋮ » s'ouvre de nouveau au CLIC.** Sur les pages à menu kebab (Mes journaux, Mes liens courts, et toutes les pages d'administration, car c'est un composant partagé), un clic sur le bouton « ⋮ » n'ouvrait rien; le menu n'apparaissait qu'en déplaçant la souris hors du bouton. Cause : le gestionnaire de fermeture au clic extérieur (`click.outside`) était posé sur le bouton déclencheur lui-même, en conflit avec le clic d'ouverture. Déplacé sur la racine du composant, patron Alpine standard. Correctif unique qui répare d'un coup TOUS les menus « ⋮ » du site (un seul composant partagé, DRY).
+
 ## [1.354.1] - 2026-10-15
 
 ### Modifié

@@ -98,6 +98,7 @@
             return `position: fixed; top: ${this.top}px; left: ${this.left}px; min-width: 180px; max-height: 70vh; overflow-y: auto; background: #fff; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid #e5e7eb; padding: 4px 0; z-index: 1080;`;
         }
      }"
+     @click.outside="open = false"
      @keydown.escape.window="if (open) { open = false; $refs.trigger.focus(); }"
      @scroll.window="open = false"
      class="position-relative" style="display: inline-block;">
@@ -109,7 +110,7 @@
          menu, qui l'utilisent déjà) sur un fond REMPLI (pas juste un contour) en gris clair, avec une
          couleur d'icône #374151 (~10.7:1 sur blanc, largement AAA) - style entièrement autoporté en
          ligne, indépendant de toute classe Bootstrap/override de page pour un rendu identique partout. --}}
-    <button x-ref="trigger" @click="open = !open; positionMenu()" @click.outside="open = false"
+    <button x-ref="trigger" @click="open = !open; positionMenu()"
             style="border-radius: 8px; padding: 0; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; background: #F3F4F6; border: 1px solid #D1D5DB; color: #374151; cursor: pointer;"
             onmouseover="this.style.background='#E5E7EB'" onmouseout="this.style.background='#F3F4F6'"
             aria-label="{{ __('Actions') }}" aria-haspopup="true" :aria-expanded="open">
