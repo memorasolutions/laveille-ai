@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.351.4] - 2026-10-15
+
+### Corrigé
+- **Formulaire de demande de cours : la case de consentement restait invisible malgré le correctif 1.351.3.** La vraie cause n'était pas une position absolue mais un `display: none` que le thème applique à chaque case à cocher pour en dessiner une « maison » via un pseudo-élément du libellé (un « ✔ » qui, lui, flottait hors du cadre). L'override de 1.351.3 remettait l'apparence et la position de la case native, mais pas son `display` : elle restait donc masquée. Le correctif ajoute `display: inline-block` à la case native (même remède complet que le modal d'infolettre, qui lui portait déjà cette propriété) et neutralise la fausse case du thème pour ne pas en afficher deux. Correctif purement visuel, aucun comportement ne change.
+
 ## [1.351.3] - 2026-10-15
 
 ### Corrigé
