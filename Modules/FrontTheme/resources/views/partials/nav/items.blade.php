@@ -5,6 +5,6 @@
     @if(isset($node['children']))
         @include('fronttheme::partials.nav.mega-panel', ['node' => $node])
     @else
-        <li><a href="{{ $node['url'] }}">{{ $node['label'] }}</a></li>
+        <li><a href="{{ $node['url'] }}">{{ $node['label'] }}@isset($node['badge'])<span class="nav-badge">{{ $node['badge'] }}</span>@endisset</a></li>
     @endif
 @endforeach

@@ -79,8 +79,23 @@ class HeaderNavService
 
         $nodes[] = $this->learnPanel($dictionaryCount, $acronymsCount);
 
-        if (Route::has('academy.index') && ! config('academy.under_construction')) {
-            $nodes[] = ['id' => 'academie', 'label' => __('Académie'), 'url' => route('academy.index')];
+        // Académie : porte d'entrée PUBLIQUE vers la vitrine /cours (découverte), visible de TOUS,
+        // avec pastille « Nouveau » (demande fondateur 2026-10-15 relayée par la session Moodle ;
+        // supersède la décision #48 et le gating #3114 pour l'Académie - la Boutique, elle, reste
+        // réservée au fondateur). On pointe vers catalog.cours (page publique), jamais vers
+        // /academie ni /formations (mur de connexion OTP), pour ne pas transformer la découverte en
+        // porte fermée. L'item n'apparaît que si la vitrine existe (module Catalog activé) : il
+        // reste donc désactivable sans casse.
+        if (Route::has('catalog.cours')) {
+            $nodes[] = [
+                'id' => 'academie',
+                'label' => __('Académie'),
+                'url' => route('catalog.cours'),
+                'badge' => __('Nouveau'),
+                // Clé 'sidebar' indispensable pour que l'item apparaisse AUSSI dans le menu mobile
+                // (hamburger) : sans elle, partials/nav/sidebar.blade.php ignore un nœud simple.
+                'sidebar' => ['title' => __('Académie'), 'emoji' => '', 'label' => __('Toutes les formations')],
+            ];
         }
 
         if (Route::has('books.index') && ! config('books.under_construction')) {
@@ -388,6 +403,12 @@ class HeaderNavService
     private function apiNode(array $node): array
     {
         $out = ['label' => $node['label'], 'url' => $node['url']];
+
+        // Pastille optionnelle (ex. « Nouveau ») : exposée au consommateur (Moodle) pour la parité
+        // d'affichage. Absente par défaut pour ne pas alourdir le contrat.
+        if (isset($node['badge'])) {
+            $out['badge'] = $node['badge'];
+        }
 
         if (isset($node['children'])) {
             $out['children'] = array_map(fn (array $group) => [

@@ -50,18 +50,37 @@
     .catalog .catalog-mycourses { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; background: #134e4a; color: #fff; text-decoration: none; border-radius: 8px; padding: 10px 18px; font-size: 15px; font-weight: 600; min-height: 44px; }
     .catalog .catalog-mycourses:hover { background: #0f3d3a; color: #fff; text-decoration: none; }
     .catalog .catalog-mycourses svg { width: 18px; height: 18px; flex: 0 0 auto; }
+    /* Bandeau d'accueil "jeune académie qui s'ouvre" (ouverture publique, #3127, 2026-10-15).
+       Fond teal de la charte, texte clair; la pastille orange #C2410C passe le contraste AA avec le blanc. */
+    .catalog .catalog-welcome { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; background: linear-gradient(135deg, #0f3d3a 0%, #134e4a 55%, #115e59 100%); color: #fff; border-radius: 16px; padding: 26px 28px; }
+    .catalog .catalog-welcome-copy { flex: 1 1 320px; min-width: 0; }
+    .catalog .catalog-welcome-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; background: #C2410C; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .catalog .catalog-welcome-title { color: #fff; margin: 12px 0 10px; font-size: 26px; line-height: 1.2; }
+    .catalog .catalog-welcome-lead { color: #ecfdf5; font-size: 16px; line-height: 1.55; margin: 0 0 10px; max-width: 640px; }
+    .catalog .catalog-welcome-note { color: #d1faf4; font-size: 14.5px; line-height: 1.5; margin: 0; max-width: 640px; }
+    .catalog .catalog-welcome .catalog-mycourses { background: #fff; color: #134e4a; }
+    .catalog .catalog-welcome .catalog-mycourses:hover { background: #ecfdf5; color: #0f3d3a; }
+    .catalog .catalog-intro { margin: 24px 0 0; font-size: 16px; font-weight: 600; color: #134e4a; }
+    .catalog .catalog-soon { border-style: dashed; border-color: #99f6e4; background: #f0fdfa; }
+    .catalog .catalog-soon .catalog-placeholder { background: linear-gradient(135deg, #99f6e4, #5eead4); color: #0f3d3a; }
+    @media (min-width: 768px) { .catalog .catalog-welcome { padding: 32px 36px; } .catalog .catalog-welcome-title { font-size: 30px; } }
 </style>
 @endpush
 
 @section('content')
 <div class="catalog" x-data="{ filter: '{{ $activeTheme ?? 'all' }}' }">
     <div class="container">
-        <div class="catalog-head">
-            <h1>{{ __('Nos formations') }}</h1>
+        {{-- Bandeau d'accueil : l'Académie vient d'ouvrir au public (ouverture décidée le 2026-10-15,
+             supersède #48). Ton chaleureux, "jeune académie qui s'enrichit". Le raccourci "Mes cours"
+             reste réservé aux personnes connectées (SSO silencieux vers le tableau de bord Moodle). --}}
+        <div class="catalog-welcome">
+            <div class="catalog-welcome-copy">
+                <span class="catalog-welcome-badge">{{ __('Nouveau') }}</span>
+                <h1 class="catalog-welcome-title">{{ __("Bienvenue dans l'Académie") }}</h1>
+                <p class="catalog-welcome-lead">{{ __("Notre académie vient tout juste d'ouvrir. Vous y trouverez des formations courtes et concrètes pour mettre l'intelligence artificielle au service de votre travail de tous les jours - sans jargon, droit au but.") }}</p>
+                <p class="catalog-welcome-note">{{ __("C'est un tout nouveau coin du site, et il s'enrichit vite. De nouvelles formations s'ajoutent régulièrement. Revenez bientôt, il y en aura davantage à chaque visite.") }}</p>
+            </div>
             @auth
-                {{-- Raccourci vers le tableau de bord de l'académie (Moodle sous laveille.ai/formations).
-                     Visible SEULEMENT si connecté : le SSO OAuth2 est silencieux, un simple lien suffit
-                     (l'utilisateur arrive déjà connecté). D-20261015-01, voie (a). --}}
                 <a href="{{ rtrim((string) config('catalog.moodle_base_url'), '/').'/my' }}" class="catalog-mycourses">
                     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                         <rect x="3" y="4" width="18" height="14" rx="2" />
@@ -72,8 +91,10 @@
             @endauth
         </div>
         @if(empty($categories))
-            <p>{{ __('Les formations seront bientôt disponibles.') }}</p>
+            <p class="catalog-intro">{{ __('Les formations seront bientôt disponibles.') }}</p>
         @else
+            <p class="catalog-intro">{{ __('Pour commencer, voici un premier aperçu.') }}</p>
+            @php $catalogTotal = collect($categories)->sum(fn ($g) => count($g['courses'] ?? [])); @endphp
             <div class="catalog-filters" role="group" aria-label="{{ __('Filtrer par catégorie') }}" x-cloak>
                 <button type="button" class="catalog-filter" data-filter="all" aria-pressed="true"
                         x-bind:aria-pressed="filter === 'all'" x-on:click="filter = $el.dataset.filter">{{ __('Toutes') }}</button>
@@ -107,6 +128,24 @@
                         </article>
                     @endforeach
                 @endforeach
+                {{-- Carte teaser : tant que l'offre est jeune (un seul cours public), on signale que
+                     d'autres formations arrivent pour que la grille ne paraisse pas vide. Visible
+                     seulement en vue "Toutes" pour ne pas parasiter un filtre de catégorie. --}}
+                @if(($catalogTotal ?? 0) < 2)
+                    <article class="catalog-soon" x-show="filter === 'all'">
+                        <div class="catalog-placeholder">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="9" />
+                                <path d="M12 7.5v5l3.2 1.9" />
+                            </svg>
+                        </div>
+                        <div class="catalog-card-body p-5">
+                            <span class="catalog-badge">{{ __('Bientôt') }}</span>
+                            <h2 class="catalog-card-title">{{ __("D'autres formations arrivent") }}</h2>
+                            <p>{{ __('De nouvelles formations IA, courtes et concrètes, sont en préparation. Revenez bientôt.') }}</p>
+                        </div>
+                    </article>
+                @endif
             </div>
         @endif
 

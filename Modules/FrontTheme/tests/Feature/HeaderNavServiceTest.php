@@ -75,11 +75,24 @@ it("sépare Apprendre en contenu éditorial et référence, sans CTA", function 
     expect($apprendre)->not->toHaveKey('cta');
 });
 
-it("masque Académie et Livres tant que leur porte est fermée", function () {
+it("masque Livres tant que sa porte est fermée, mais ouvre l'Académie au public (#3127)", function () {
+    // L'Académie n'est plus gatée par academy.under_construction : c'est désormais une porte
+    // PUBLIQUE vers la vitrine /cours (ouverture 2026-10-15, supersède #48). On force malgré tout
+    // le drapeau historique à true pour prouver le découplage.
     config(['academy.under_construction' => true, 'books.under_construction' => true]);
-    $ids = array_column($this->service->tree(), 'id');
+    $arbre = $this->service->tree();
+    $ids = array_column($arbre, 'id');
 
-    expect($ids)->not->toContain('academie')->not->toContain('livres');
+    // Livres reste gaté par son propre drapeau de porte.
+    expect($ids)->not->toContain('livres');
+
+    // Académie : présente, pointe vers /cours, porte la pastille « Nouveau » et une clé sidebar
+    // (indispensable à son affichage dans le menu mobile).
+    $academie = noeud($arbre, 'academie');
+    expect($academie)->not->toBeNull();
+    expect($academie['url'])->toBe(route('catalog.cours'));
+    expect($academie['badge'])->toBe('Nouveau');
+    expect($academie)->toHaveKey('sidebar');
 });
 
 it("expose le repli mobile trié par rang, sans entrée absente de ce repli", function () {

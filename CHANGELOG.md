@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.354.0] - 2026-10-15
+
+### Ajouté
+- **L'Académie s'ouvre au public dans le menu, avec un accueil qui dit "c'est tout nouveau".** Jusqu'ici, le lien Académie du menu ne s'affichait pas pour le public (décision 2026-10-15 superséder) et il visait l'espace Moodle gaté. Désormais l'item "Académie" est visible de TOUS, porte une pastille orange "Nouveau" (desktop ET menu mobile), et mène à la vitrine publique /cours plutôt qu'au mur de connexion /formations. Au clic, le visiteur arrive sur un bandeau d'accueil chaleureux qui assume la jeunesse de l'offre (titre "Bienvenue dans l'Académie", invitation à revenir pour de nouvelles formations), puis une grille qui, tant qu'il y a peu de cours, ajoute une carte "D'autres formations arrivent" pour ne pas paraître vide. Le raccourci "Mes cours" reste réservé aux personnes connectées. La Boutique, elle, demeure réservée au super-administrateur (le gating #3114 ne visait qu'elle). Tout reste désactivable sans casse, car l'item n'apparaît que si la vitrine /cours existe (module Catalog activé). Copie de la voix laveille fournie par la session Moodle. Tests de navigation mis à jour (l'Académie est découplée de son ancien drapeau de construction).
+
 ## [1.353.0] - 2026-10-15
 
 ### Ajouté

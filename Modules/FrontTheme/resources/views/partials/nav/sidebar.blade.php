@@ -16,7 +16,7 @@
     <div class="widget link-widget">
         <div class="widget-title"><h3>{{ $node['sidebar']['title'] }}</h3></div>
         <ul>
-            <li><a href="{{ $node['url'] }}">{{ $node['sidebar']['emoji'] !== '' ? $node['sidebar']['emoji'].' ' : '' }}{{ $node['sidebar']['label'] }}</a></li>
+            <li><a href="{{ $node['url'] }}">{{ $node['sidebar']['emoji'] !== '' ? $node['sidebar']['emoji'].' ' : '' }}{{ $node['sidebar']['label'] }}@isset($node['badge'])<span class="nav-badge">{{ $node['badge'] }}</span>@endisset</a></li>
         </ul>
     </div>
     @endif
