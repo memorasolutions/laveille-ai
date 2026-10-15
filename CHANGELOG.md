@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.355.0] - 2026-10-15
+
+### Ajouté
+- **Vitrine /cours : la case "Vitrine" de chaque cours Moodle contrôle enfin ce qui est public (opt-in "fail-closed").** Jusqu'ici, un cours apparaissait au catalogue public dès lors que sa catégorie était publique et qu'il n'était pas explicitement retiré (filtre "opt-out"). Ce modèle a laissé fuiter un cours privé ("Accompagnement individuel - cohorte pilote") sur /cours. Désormais, un cours n'apparaît QUE si sa case personnalisée "Vitrine (afficher dans le catalogue public)" est cochée côté Moodle : tout cours dont la case n'est pas cochée - y compris tout futur cours privé - reste hors du catalogue par défaut, sans qu'on ait à exclure sa catégorie à la main. Le service lit la valeur brute du champ (`valueraw` 0/1, fiable et indépendant de la langue) en priorité, avec un repli tolérant sur la valeur affichée; tout ce qui n'est pas clairement "vrai" est traité comme faux. L'opt-out d'urgence `catalogue` et l'exclusion de catégories par idnumber restent en place comme défense en profondeur. Le champ "Vitrine" existait (créé côté académie) mais était inopérant : il devient opératoire, d'où le palier mineur. 51 tests verts (169 assertions), dont 4 cas neufs dédiés à l'opt-in (sans champ, case fausse, case vraie, priorité de la valeur brute sur une valeur affichée non reconnue). Coordination continue avec la session Moodle, qui tient à jour la case sur chaque cours réellement public.
+
 ## [1.354.2] - 2026-10-15
 
 ### Corrigé

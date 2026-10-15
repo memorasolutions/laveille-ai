@@ -39,7 +39,7 @@ beforeEach(function () {
     ];
     $this->courses = [
         ['id' => 1, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Site'],
-        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation publique', 'customfields' => [['shortname' => 'prix', 'value' => '49 $']], 'summary' => '<p>Présentation</p>', 'overviewfiles' => [['fileurl' => 'https://moodle.example.test/webservice/pluginfile.php/2/image.png?download=1']]],
+        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation publique', 'customfields' => [['shortname' => 'prix', 'value' => '49 $'], ['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1]], 'summary' => '<p>Présentation</p>', 'overviewfiles' => [['fileurl' => 'https://moodle.example.test/webservice/pluginfile.php/2/image.png?download=1']]],
         ['id' => 3, 'categoryid' => 20, 'visible' => 0, 'fullname' => 'Formation masquée'],
     ];
     $this->image = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=');
@@ -77,7 +77,7 @@ it('exclut une catégorie privée désignée par son idnumber', function () {
     // Catégorie « Formations privées » visible=1 (les inscrits gardent l'accès) mais exclue du
     // catalogue public par son idnumber, avec un cours visible dedans : il ne doit pas apparaître.
     $this->categories[] = ['id' => 30, 'name' => 'Formations privées', 'idnumber' => 'PRIVE', 'visible' => 1];
-    $this->courses[] = ['id' => 5, 'categoryid' => 30, 'visible' => 1, 'fullname' => 'Formation CSSBE'];
+    $this->courses[] = ['id' => 5, 'categoryid' => 30, 'visible' => 1, 'fullname' => 'Formation CSSBE', 'customfields' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1]]];
     ($this->fakeCatalogue)();
 
     $groups = app(MoodleCatalogService::class)->getCatalogue();
@@ -89,7 +89,7 @@ it('exclut une catégorie privée désignée par son idnumber', function () {
 
 it('retire un cours dont le champ catalogue vaut faux même en catégorie publique', function (string $valeur) {
     $this->courses[] = ['id' => 6, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation CSSBE',
-        'customfields' => [['shortname' => 'catalogue', 'value' => $valeur]]];
+        'customfields' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1], ['shortname' => 'catalogue', 'value' => $valeur]]];
     ($this->fakeCatalogue)();
 
     $groups = app(MoodleCatalogService::class)->getCatalogue();
@@ -100,7 +100,7 @@ it('retire un cours dont le champ catalogue vaut faux même en catégorie publiq
 
 it('conserve un cours dont le champ catalogue vaut vrai ou vide', function (string $valeur) {
     $this->courses[] = ['id' => 7, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation publique bis',
-        'customfields' => [['shortname' => 'catalogue', 'value' => $valeur]]];
+        'customfields' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1], ['shortname' => 'catalogue', 'value' => $valeur]]];
     ($this->fakeCatalogue)();
 
     $groups = app(MoodleCatalogService::class)->getCatalogue();
@@ -108,8 +108,52 @@ it('conserve un cours dont le champ catalogue vaut vrai ou vide', function (stri
     expect(array_column($groups[0]['courses'], 'id'))->toBe([2, 7]);
 })->with(['1', 'oui', 'true', '']);
 
+it('masque un cours sans champ vitrine (opt-in fail-closed)', function () {
+    $this->courses[] = ['id' => 8, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation sans vitrine',
+        'customfields' => [['shortname' => 'prix', 'value' => '99 $']]];
+    ($this->fakeCatalogue)();
+
+    $groups = app(MoodleCatalogService::class)->getCatalogue();
+
+    expect(json_encode($groups))->not->toContain('Formation sans vitrine')
+        ->and(array_column($groups[0]['courses'], 'id'))->toBe([2]);
+});
+
+it('masque un cours dont la case vitrine est fausse', function (array $champ) {
+    $this->courses[] = ['id' => 8, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation vitrine fausse',
+        'customfields' => [$champ]];
+    ($this->fakeCatalogue)();
+
+    $groups = app(MoodleCatalogService::class)->getCatalogue();
+
+    expect(json_encode($groups))->not->toContain('Formation vitrine fausse')
+        ->and(array_column($groups[0]['courses'], 'id'))->toBe([2]);
+})->with([
+    'valueraw 0' => [['shortname' => 'vitrine', 'value' => 'Non', 'valueraw' => 0]],
+    'value Non sans valueraw' => [['shortname' => 'vitrine', 'value' => 'Non']],
+    'valueraw et value vides' => [['shortname' => 'vitrine', 'value' => '', 'valueraw' => '']],
+    // valueraw présent fait autorité : même un value affiché « Oui » ne doit pas rouvrir la vitrine.
+    'valueraw vide prime sur value Oui' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => '']],
+    'valueraw 0 prime sur value Oui' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 0]],
+]);
+
+it('affiche un cours dont la case vitrine est vraie (valueraw prioritaire sur value localise)', function (array $champ) {
+    $this->courses[] = ['id' => 8, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Formation vitrine vraie',
+        'customfields' => [$champ]];
+    ($this->fakeCatalogue)();
+
+    $groups = app(MoodleCatalogService::class)->getCatalogue();
+
+    expect(array_column($groups[0]['courses'], 'id'))->toBe([2, 8]);
+})->with([
+    'valueraw 1 + value Oui' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1]],
+    'value Oui sans valueraw' => [['shortname' => 'vitrine', 'value' => 'Oui']],
+    'value 1 sans valueraw' => [['shortname' => 'vitrine', 'value' => '1']],
+    'valueraw 1 malgre value non reconnu' => [['shortname' => 'vitrine', 'value' => 'Sim', 'valueraw' => 1]],
+]);
+
 it('regroupe dynamiquement plusieurs catégories et conserve le cache', function () {
-    $this->courses[] = ['id' => 4, 'category' => 20, 'visible' => 1, 'fullname' => 'Autre formation'];
+    $this->courses[] = ['id' => 4, 'category' => 20, 'visible' => 1, 'fullname' => 'Autre formation', 'customfields' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1]]];
     ($this->fakeCatalogue)();
     $service = app(MoodleCatalogService::class);
 
@@ -254,7 +298,7 @@ it('rend une grille unique avec filtres, prix et repli sans JavaScript', functio
         ->not->toContain('catalog-test-token', '<h2>Productivité</h2>', 'Formation masquée');
 
     Cache::forget('catalog.courses');
-    $this->courses[] = ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Autre formation'];
+    $this->courses[] = ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Autre formation', 'customfields' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1]]];
     $html = view('catalog::public.index', ['categories' => $service->getCatalogue()])->render();
     expect($html)->toContain('49 $', 'Gratuit')->not->toContain('<h2>Productivité</h2>', '<h2>Cybersécurité</h2>');
 
@@ -306,8 +350,8 @@ it('derive le slug de theme depuis idnumber thm- puis repli sur le nom', functio
         ['id' => 20, 'name' => 'Productivité', 'visible' => 1],
     ];
     $this->courses = [
-        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Cours IA'],
-        ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Cours Prod'],
+        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Cours IA', 'customfields' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1]]],
+        ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Cours Prod', 'customfields' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1]]],
     ];
     ($this->fakeCatalogue)();
 
@@ -328,8 +372,8 @@ it('pre-selectionne le filtre quand un theme actif est fourni (pre-filtre ?theme
         ['id' => 20, 'name' => 'Cybersécurité', 'idnumber' => 'thm-cyber', 'visible' => 1],
     ];
     $this->courses = [
-        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Cours IA'],
-        ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Cours Cyber'],
+        ['id' => 2, 'categoryid' => 10, 'visible' => 1, 'fullname' => 'Cours IA', 'customfields' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1]]],
+        ['id' => 4, 'categoryid' => 20, 'visible' => 1, 'fullname' => 'Cours Cyber', 'customfields' => [['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1]]],
     ];
     ($this->fakeCatalogue)();
     $categories = app(MoodleCatalogService::class)->getCatalogue();
@@ -345,6 +389,7 @@ it('pre-selectionne le filtre quand un theme actif est fourni (pre-filtre ?theme
 it('formate le prix affiché et conserve le prix brut sauf les valeurs vides', function (?string $value, ?string $expected, ?string $display) {
     $this->courses[1]['customfields'] = [
         ['shortname' => 'autre', 'value' => 'Ignoré'],
+        ['shortname' => 'vitrine', 'value' => 'Oui', 'valueraw' => 1],
         ['shortname' => 'prix', 'value' => $value],
     ];
     ($this->fakeCatalogue)();

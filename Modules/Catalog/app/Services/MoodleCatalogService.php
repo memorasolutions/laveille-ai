@@ -76,21 +76,28 @@ class MoodleCatalogService
 
                 $price = null;
                 $optedOut = false;
+                $inVitrine = false;
                 foreach ($course['customfields'] ?? [] as $field) {
                     $shortname = $field['shortname'] ?? null;
                     if ($shortname === 'prix') {
                         $value = (string) ($field['value'] ?? '');
                         $price = trim($value) === '' ? null : $value;
+                    } elseif ($shortname === 'vitrine') {
+                        // OPT-IN : un cours n'apparaît au catalogue public QUE si sa case « vitrine »
+                        // est cochée côté Moodle. C'est un filtre « fail-closed » : tout cours dont
+                        // la case n'est pas cochée (y compris tout futur cours privé) reste hors du
+                        // catalogue sans qu'on ait à exclure sa catégorie à la main.
+                        $inVitrine = $this->checkboxIsTrue($field);
                     } elseif ($shortname === 'catalogue'
                         && in_array(strtolower(trim((string) ($field['value'] ?? ''))), ['0', 'non', 'no', 'false', 'off'], true)) {
-                        // Opt-out par cours (défense en profondeur) : un champ personnalisé « catalogue »
-                        // à une valeur fausse retire le cours de la vitrine publique, même s'il vit dans
-                        // une catégorie publique. Inerte tant que ce champ n'existe pas côté Moodle.
+                        // Opt-out d'urgence (défense en profondeur) : un champ « catalogue » à une
+                        // valeur fausse retire le cours même s'il est par ailleurs en vitrine.
                         $optedOut = true;
                     }
                 }
 
-                if ($optedOut) {
+                // Fail-closed : hors vitrine OU explicitement retiré => jamais au catalogue public.
+                if (! $inVitrine || $optedOut) {
                     continue;
                 }
 
@@ -153,6 +160,25 @@ class MoodleCatalogService
         $formatted = number_format($f, $f !== floor($f) || str_contains($n, '.') ? 2 : 0, ',', "\u{00A0}");
 
         return $formatted."\u{00A0}$";
+    }
+
+    /**
+     * Un champ personnalisé Moodle de type « case à cocher », exporté par le web service, porte
+     * `valueraw` (0 ou 1, fiable et indépendant de la langue) ET `value` (« Oui »/« Non », traduit
+     * selon la locale de l'instance). On se fie d'abord à `valueraw`; à défaut seulement, on retombe
+     * sur `value` avec une liste blanche. Fail-closed : tout ce qui n'est pas clairement vrai est faux.
+     */
+    private function checkboxIsTrue(array $field): bool
+    {
+        // Le web service Moodle fournit TOUJOURS `valueraw` pour un champ de type case à cocher :
+        // dès que la clé est présente, elle fait seule autorité (une valeur vide ou 0 = faux), pour
+        // qu'une valeur affichée contradictoire (« Oui » traduit) ne puisse jamais rouvrir la vitrine.
+        if (array_key_exists('valueraw', $field)) {
+            return in_array(strtolower(trim((string) ($field['valueraw'] ?? ''))), ['1', 'true', 'yes'], true);
+        }
+
+        // Repli pour une source sans `valueraw` (hors Moodle) : liste blanche tolérante sur la valeur affichée.
+        return in_array(strtolower(trim((string) ($field['value'] ?? ''))), ['1', 'true', 'yes', 'oui', 'on'], true);
     }
 
     protected function webService(string $function): array
