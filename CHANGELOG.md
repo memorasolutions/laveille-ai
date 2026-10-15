@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.354.1] - 2026-10-15
+
+### Modifié
+- **Veille actu2 : trois sources d'actualité ajoutées pour mieux couvrir le terrain, après un audit par le club des sages.** Un audit de complétude a relevé des trous réels : la techno francophone québécoise grand public, et les contrepoids journalistiques d'enquête. Trois flux RSS, chacun vérifié vivant avant d'être ajouté (zéro-casse, leçon des ajouts du 5 octobre), rejoignent la collecte automatique : `La Presse` (techno), `404 Media` (enquête) et `The Logic` (affaires-techno canadien). Les sources sans flux RSS exploitable (laboratoires chinois en direct, sécurité et agents, sources gouvernementales québécoises, Hugging Face Hub, dépôts GitHub) restent en vérification ciblée dans l'outil de veille plutôt qu'en ingestion continue, pour ne pas noyer la file de composition. Migration idempotente et réversible; rien d'autre n'est touché.
+
 ## [1.354.0] - 2026-10-15
 
 ### Ajouté
