@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.352.0] - 2026-10-15
+
+### Ajouté
+- **Navigation « mariée » entre la vitrine des formations et l'académie.** Deux liens neufs rapprochent `/cours` et l'académie Moodle. (1) Sur les sous-pages de `/cours` (la demande de cours personnalisé, et toute future page `/cours/*`), le fil d'Ariane affiche désormais « Accueil › Nos formations › … » avec « Nos formations » CLIQUABLE vers `/cours` (le niveau intermédiaire manquait). (2) Sur `/cours`, un raccourci « Mes cours » mène au tableau de bord de l'académie (`/formations/my`), visible UNIQUEMENT pour un visiteur connecté — un anonyme ne le voit pas (il tomberait sinon sur une connexion brutale), et comme le SSO est silencieux, un utilisateur déjà connecté arrive directement dans son tableau de bord, sans jeton ni étape supplémentaire. Cible configurable (`catalog.moodle_base_url`). Couvert par 3 tests de régression (fil cliquable, lien présent connecté, lien absent anonyme).
+
 ## [1.351.5] - 2026-10-15
 
 ### Corrigé

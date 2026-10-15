@@ -40,6 +40,10 @@
                                             __('Actualités') => Route::has('news.index') ? route('news.index') : null,
                                             __('Dossiers thématiques') => Route::has('news.dossiers') ? route('news.dossiers') : null,
                                             __('Livres') => Route::has('books.index') ? route('books.index') : null,
+                                            // Vitrine des formations (/cours). Rend "Nos formations" cliquable comme
+                                            // niveau intermediaire du fil sur les sous-pages /cours/* (ex. la demande
+                                            // de cours personnalise) - D-20261015-01, marier laveille et l'academie.
+                                            __('Nos formations') => Route::has('catalog.cours') ? route('catalog.cours') : null,
                                             __('Boutique') => Route::has('shop.index') ? route('shop.index') : null,
                                             __("L'IA pour les PME") => Route::has('pillar.ia-pme') ? route('pillar.ia-pme') : null,
                                             __("L'IA en éducation") => Route::has('pillar.ia-education') ? route('pillar.ia-education') : null,

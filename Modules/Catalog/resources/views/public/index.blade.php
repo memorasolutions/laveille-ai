@@ -43,13 +43,34 @@
     .catalog .catalog-cta p { margin: 0; font-size: 15px; max-width: 560px; }
     .catalog .catalog-cta-btn { flex: 0 0 auto; background: #134e4a; color: #fff; border-radius: 8px; padding: 12px 22px; font-size: 16px; font-weight: 600; text-decoration: none; min-height: 48px; display: inline-flex; align-items: center; }
     .catalog .catalog-cta-btn:hover { background: #0f3d3a; color: #fff; }
+    /* En-tete : titre a gauche, raccourci "Mes cours" a droite (visible seulement si connecte,
+       vers le tableau de bord de l'academie) - D-20261015-01, marier laveille et l'academie. */
+    .catalog .catalog-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .catalog .catalog-head h1 { margin: 0; }
+    .catalog .catalog-mycourses { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; background: #134e4a; color: #fff; text-decoration: none; border-radius: 8px; padding: 10px 18px; font-size: 15px; font-weight: 600; min-height: 44px; }
+    .catalog .catalog-mycourses:hover { background: #0f3d3a; color: #fff; text-decoration: none; }
+    .catalog .catalog-mycourses svg { width: 18px; height: 18px; flex: 0 0 auto; }
 </style>
 @endpush
 
 @section('content')
 <div class="catalog" x-data="{ filter: '{{ $activeTheme ?? 'all' }}' }">
     <div class="container">
-        <h1>{{ __('Nos formations') }}</h1>
+        <div class="catalog-head">
+            <h1>{{ __('Nos formations') }}</h1>
+            @auth
+                {{-- Raccourci vers le tableau de bord de l'académie (Moodle sous laveille.ai/formations).
+                     Visible SEULEMENT si connecté : le SSO OAuth2 est silencieux, un simple lien suffit
+                     (l'utilisateur arrive déjà connecté). D-20261015-01, voie (a). --}}
+                <a href="{{ rtrim((string) config('catalog.moodle_base_url'), '/').'/my' }}" class="catalog-mycourses">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <rect x="3" y="4" width="18" height="14" rx="2" />
+                        <path d="M3 9h18M8 20h8" />
+                    </svg>
+                    {{ __('Mes cours') }}
+                </a>
+            @endauth
+        </div>
         @if(empty($categories))
             <p>{{ __('Les formations seront bientôt disponibles.') }}</p>
         @else

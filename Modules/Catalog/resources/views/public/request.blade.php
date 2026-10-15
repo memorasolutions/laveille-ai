@@ -6,7 +6,10 @@
 @section('page_noindex', true)
 
 @section('breadcrumb')
-    @include('fronttheme::partials.breadcrumb', ['breadcrumbTitle' => __('Demander un cours personnalisé')])
+    @include('fronttheme::partials.breadcrumb', [
+        'breadcrumbTitle' => __('Demander un cours personnalisé'),
+        'breadcrumbItems' => [__('Nos formations'), __('Demander un cours personnalisé')],
+    ])
 @endsection
 
 @push('styles')
