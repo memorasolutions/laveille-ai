@@ -76,6 +76,9 @@
         get currentVariant() { return this.hasColors ? this.allVariants[this.selectedVariantIndex] : null; },
         get images() { return this.hasColors && this.currentVariant?.images?.length ? this.currentVariant.images : this.fallbackImages; },
         get currentPrice() { return this.currentVariant?.size_prices?.[this.selectedSize] ? parseFloat(this.currentVariant.size_prices[this.selectedSize]) : this.basePrice; },
+        productName: {{ json_encode($product->name) }},
+        get currentColorLabel() { return this.currentVariant?.label || ''; },
+        get imageAlt() { return this.currentColorLabel ? this.productName + ' - ' + this.currentColorLabel : this.productName; },
         get availableSizes() { return this.currentVariant?.size_prices ? Object.keys(this.currentVariant.size_prices) : []; },
         selectColor(index) { this.selectedVariantIndex = index; this.activeImage = 0; },
         selectSize(size) { this.selectedSize = size; },
@@ -86,13 +89,20 @@
         <div class="col-md-6 sp-gallery-col">
             <template x-if="images.length > 0">
                 <div>
-                    <img :src="images[activeImage]" alt="{{ $product->name }}" class="sp-gallery-main">
+                    <img :src="images[activeImage]" :alt="imageAlt" class="sp-gallery-main">
 
                     {{-- Miniatures --}}
                     <template x-if="images.length > 1">
                         <div class="sp-gallery-thumbs">
                             <template x-for="(image, index) in images" :key="index">
-                                <img :src="image" :alt="'{{ $product->name }}'" @click="activeImage = index" :class="'sp-gallery-thumb' + (activeImage === index ? ' active' : '')">
+                                {{-- Miniature activable au clavier (Entrée ou Espace) --}}
+                                <img :src="image" alt="" role="button" tabindex="0"
+                                    :aria-label="'{{ __('Image') }} ' + (index + 1) + ' / ' + images.length"
+                                    :aria-pressed="activeImage === index ? 'true' : 'false'"
+                                    @click="activeImage = index"
+                                    @keydown.enter.prevent="activeImage = index"
+                                    @keydown.space.prevent="activeImage = index"
+                                    :class="'sp-gallery-thumb' + (activeImage === index ? ' active' : '')">
                             </template>
                         </div>
                     </template>
@@ -104,7 +114,8 @@
                 </div>
             </template>
             <template x-if="images.length === 0">
-                <div class="sp-gallery-fallback">{{ substr($product->name, 0, 1) }}</div>
+                {{-- État neutre : aucune image pour la couleur ni de repli --}}
+                <div class="sp-gallery-fallback" role="img" aria-label="{{ $product->name }}">{{ substr($product->name, 0, 1) }}</div>
             </template>
         </div>
 
@@ -150,7 +161,7 @@
                 {{-- Sélecteur variante (couleur ou taille) --}}
                 @if($hasColorVariants)
                     <div class="sp-variant-group">
-                        <label class="sp-form-label">{{ __('Couleur') }}</label>
+                        <label class="sp-form-label">{{ __('Couleur') }}&nbsp;: <span x-text="currentColorLabel"></span></label>
                         <div class="sp-variant-options">
                             <template x-for="(variant, index) in allVariants" :key="variant.gelato_uid">
                                 <button type="button" @click="selectColor(index)"

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.353.0] - 2026-10-15
+
+### Ajouté
+- **Boutique, page produit, l'aperçu dit maintenant clairement quelle couleur est sélectionnée.** Trois ajouts à la galerie, qui suivent la couleur choisie en tout temps. D'abord, le nom de la couleur s'affiche à côté des pastilles (le libellé Couleur suivi du nom de la variante, par exemple Noir), lié à la variante courante — avant, un visiteur voyait une pastille sans connaître le nom exact de la couleur commandée. Ensuite, le texte alternatif de l'image principale devient dynamique (nom du produit et couleur) au lieu d'être figé sur le seul nom du produit. Enfin, les miniatures sont désormais activables au clavier (Entrée ou Espace) avec un libellé accessible, et un repli neutre protège l'affichage quand une couleur n'a pas encore d'image. Aucune logique de prix ni de sélection de variante n'est touchée.
+- **Nuance honnête, non masquée.** L'image de l'aperçu ne reflète pas encore la vraie couleur du t-shirt Gildan 5000 pour les 8 couleurs autres que le blanc. Mesuré à la source, le produit Gelato ne possède comme image enregistrée que le mockup blanc plus un aperçu générique. Relier le design aux 9 couleurs dans l'éditeur Gelato applique bien le logo (une commande d'un t-shirt coloré porte le logo) mais ne crée pas d'image de produit par couleur côté boutique. Les vraies photos par couleur restent à produire (Gelato Mockup Studio ou génération dédiée), décision en cours. Le nom de couleur et la pastille lèvent entre-temps toute ambiguïté sur la couleur commandée. La boutique reste restreinte au super-administrateur, donc aucun client public n'est concerné.
+
 ## [1.352.0] - 2026-10-15
 
 ### Ajouté
