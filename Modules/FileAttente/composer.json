@@ -1,0 +1,28 @@
+{
+    "name": "memora/file-attente",
+    "description": "File d'attente par code QR",
+    "authors": [
+        {
+            "name": "MEMORA solutions",
+            "email": "info@memora.ca"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\FileAttente\\": "app/",
+            "Modules\\FileAttente\\Database\\Factories\\": "database/factories/",
+            "Modules\\FileAttente\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\FileAttente\\Tests\\": "tests/"
+        }
+    }
+}

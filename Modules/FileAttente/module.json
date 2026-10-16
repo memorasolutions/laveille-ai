@@ -1,0 +1,11 @@
+{
+    "name": "FileAttente",
+    "alias": "file-attente",
+    "description": "Outil gratuit de file d'attente par code QR (laveille.ai)",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\FileAttente\\Providers\\FileAttenteServiceProvider"
+    ],
+    "files": []
+}

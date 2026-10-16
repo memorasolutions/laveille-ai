@@ -1,0 +1,163 @@
+<?php
+
+/**
+ * @author  MEMORA solutions <info@memora.ca> (https://memora.solutions)
+ */
+
+declare(strict_types=1);
+
+// Typographie québécoise : espace insécable littérale avant les deux-points.
+return [
+    'app_title' => 'File d’attente',
+    'tool' => [
+        'name' => 'File d’attente par code QR',
+        'description' => 'Anime une file d’attente par scan de code QR, sans compte : cartes à imprimer, écran à projeter, gestion en direct.',
+    ],
+
+    'construction' => [
+        'title' => 'Bientôt disponible',
+        'heading' => 'Bientôt disponible',
+        'body' => 'Cet outil est en préparation. Reviens bientôt.',
+    ],
+
+    'create' => [
+        'title' => 'File d’attente par code QR : créer un tableau',
+        'heading' => 'File d’attente par code QR',
+        'intro' => 'Colle les noms (un par ligne). Tu obtiens des cartes QR à imprimer, une page d’affichage à projeter et une page pour gérer la file. Aucun compte requis.',
+        'title_label' => 'Titre (facultatif)',
+        'names_label' => 'Noms, un par ligne (maximum :max, :len caractères chacun)',
+        'mask_label' => 'Ce que l’affichage public montre',
+        'mask_initial' => 'Prénom et initiale (Marie T.)',
+        'mask_pseudo' => 'Un pseudonyme (Castor, Renard...)',
+        'mask_numero' => 'Un numéro (N° 3)',
+        'mask_help' => 'Le nom complet n’apparaît jamais sur la page publique. Si les personnes sont mineures, choisis le pseudonyme ou le numéro.',
+        'scan_label' => 'Comment les personnes s’enregistrent',
+        'scan_borne' => 'Borne : la caméra de l’écran projeté lit les cartes (aucun téléphone requis)',
+        'scan_telephone' => 'Téléphone : chaque personne scanne sa carte',
+        'self_leave' => 'Permettre à chaque personne de quitter la file elle-même',
+        'responsibility' => 'L’organisation qui saisit les noms en est responsable. Le tableau et tous les noms sont supprimés automatiquement après :hours h, ou tout de suite avec "Terminer et supprimer".',
+        'submit' => 'Créer le tableau',
+    ],
+
+    'errors' => [
+        'names_required' => 'Ajoute au moins un nom.',
+        'name_too_long' => 'Un nom dépasse :max caractères : "…:sample…"',
+        'too_many' => 'Maximum :max personnes par tableau (tu en as :count).',
+        'quota' => 'Tu as atteint la limite de :max tableaux créés par heure. Réessaie un peu plus tard.',
+        'too_many_in_board' => 'Trop de participants pour un même tableau.',
+        'empty_name' => 'Le nom est vide.',
+        'self_leave_disabled' => 'Le retrait volontaire est désactivé pour ce tableau.',
+        'token_unrecoverable' => 'Jeton non récupérable pour ce participant.',
+    ],
+
+    'created' => [
+        'title' => 'Tableau créé',
+        'heading' => 'Ton tableau est prêt',
+        'warning' => 'Garde ces liens maintenant. Ils ne sont affichés qu’une seule fois : ils ne sont pas récupérables ensuite.',
+        'manage_heading' => '1. Gérer la file (à garder pour toi)',
+        'manage_open' => 'Ouvrir la gestion',
+        'display_heading' => '2. Afficher (à projeter)',
+        'display_open' => 'Ouvrir l’affichage',
+        'cards_heading' => '3. Cartes QR (:count)',
+        'cards_help' => 'PDF privé à imprimer et découper : il montre les vrais noms, ne le projette pas.',
+        'export_pdf' => 'Exporter le PDF',
+        'copy' => 'Copier',
+        'copy_aria' => 'Copier le lien dans le presse-papiers',
+        'js' => [
+            'copied' => 'Lien copié.',
+            'failed' => 'Copie impossible : sélectionne le lien et copie-le à la main.',
+        ],
+    ],
+
+    'manage' => [
+        'title' => 'Gérer la file',
+        'call_next' => 'Appeler le suivant',
+        'export_pdf' => 'Exporter le PDF',
+        'in_queue' => 'Dans la file',
+        'drag_help' => 'Glisse une personne pour la déplacer, ou utilise les flèches.',
+        'nobody' => 'Personne dans la file pour le moment.',
+        'add_heading' => 'Ajouter une personne',
+        'name_label' => 'Nom',
+        'name_placeholder' => 'Nom de la personne',
+        'add' => 'Ajouter',
+        'pending_heading' => 'Pas encore arrivés',
+        'links_heading' => 'Liens',
+        'links_help' => 'Cette page de gestion :',
+        'display_link_label' => 'Afficher (projection) :',
+        'display_copy' => 'Copier le lien',
+        'display_copy_aria' => 'Copier le lien d’affichage dans le presse-papiers',
+        'display_copied' => 'Lien copié.',
+        'display_copy_failed' => 'Copie impossible : sélectionne le lien et copie-le à la main.',
+        'display_link_unavailable' => 'Lien d’affichage indisponible, recrée le tableau.',
+        'end_heading' => 'Terminer',
+        'end_button' => 'Terminer et supprimer',
+        'end_warning' => 'Tous les noms et le tableau seront supprimés immédiatement. C’est définitif.',
+        'end_confirm' => 'Oui, supprimer maintenant',
+        'cancel' => 'Annuler',
+        'terminated' => 'Le tableau et tous les noms ont été supprimés.',
+        'js' => [
+            'stale' => 'La file a changé entre-temps, réessaie.',
+            'network' => 'Erreur réseau, réessaie.',
+            'gone' => 'Ce tableau n’existe plus.',
+            'called_badge' => 'appelé',
+            'up' => 'Monter :name',
+            'down' => 'Descendre :name',
+            'arrive' => 'Arrivé',
+            'arrive_aria' => 'Ajouter :name à la file',
+            'remove' => 'Retirer',
+            'remove_aria' => 'Retirer :name',
+            'drop_last' => 'Déposer ici pour mettre en dernier',
+            'nobody_to_call' => 'Personne à appeler.',
+            'called' => 'Appelé : :name',
+            'undo' => 'Annuler',
+            'undo_aria' => 'Annuler l’appel',
+        ],
+    ],
+
+    'display' => [
+        'default_title' => 'File d’attente',
+        'in_queue' => 'Dans la file',
+        'nobody' => 'Personne dans la file pour le moment.',
+        'over' => 'Ce tableau est terminé.',
+        'kiosk_heading' => 'Borne : présente ta carte devant la caméra',
+        'cam_off' => 'La caméra est éteinte.',
+        'cam_on' => 'Activer la caméra',
+        'js' => [
+            'your_turn' => 'C’est ton tour',
+            'waiting_one' => ':count personne en attente',
+            'waiting_many' => ':count personnes en attente',
+            'cam_asking' => 'Demande d’accès à la caméra…',
+            'unsupported' => 'Ce navigateur ne supporte pas la détection (utilise un navigateur récent ou le mode téléphone).',
+            'no_camera' => 'Caméra indisponible (la page doit être en HTTPS).',
+            'cam_active' => 'Caméra active, présente une carte.',
+            'welcome' => 'Bienvenue, :label!',
+            'unknown_card' => 'Carte non reconnue.',
+            'network' => 'Erreur réseau, réessaie.',
+            'denied' => 'Accès refusé : autorise la caméra dans le navigateur.',
+        ],
+    ],
+
+    'scan' => [
+        'title' => 'Ma place dans la file',
+        'card_of' => 'Carte de :',
+        'your_turn' => 'C’est ton tour!',
+        'in_list' => 'Tu es dans la file',
+        'place' => 'Place :position',
+        'ahead_one' => ':count personne devant toi',
+        'ahead_many' => ':count personnes devant toi',
+        'next' => 'tu es le suivant',
+        'removed' => 'Tu n’es plus dans la file',
+        'not_yet' => 'Tu n’es pas encore dans la file',
+        'join' => 'Rejoindre la file',
+        'rejoin' => 'Rejoindre à nouveau la file',
+        'leave' => 'Quitter la file',
+        'no_change' => 'Scanner cette carte ne change rien tant que tu n’appuies pas sur un bouton.',
+        'over' => 'Ce tableau est terminé.',
+    ],
+
+    'pdf' => [
+        'note' => 'Carte privée : à remettre à chaque personne. Découper selon les pointillés. Page :page / :total.',
+        'qr_alt' => 'Code QR',
+        'number' => 'N° :n',
+    ],
+];

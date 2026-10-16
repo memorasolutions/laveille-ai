@@ -57,5 +57,6 @@
     "Signature": true,
     "Analytics": true,
     "Idp": true,
-    "Catalog": true
+    "Catalog": true,
+    "FileAttente": true
 }

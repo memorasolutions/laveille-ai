@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.356.0] - 2026-10-16
+
+### Ajouté
+- **Nouvel outil gratuit "File d'attente par code QR" (module FileAttente), livré EN CONSTRUCTION et accessible au seul super-administrateur.** Un animateur inscrit des noms (un par ligne), exporte un PDF des codes QR (un nom sous chaque code), et chaque personne scanne son code pour rejoindre une file ordonnée par l'arrivée. La page de gestion réordonne par glisser-déposer, retire, marque "arrivé" et "appelle le suivant"; un écran de projection pleine largeur se met à jour seul (noms en grand, personne appelée affichée en très grand); un mode borne scanne les cartes avec la caméra de l'appareil de projection (BarcodeDetector natif). Vie privée d'abord : sur la projection publique les noms sont masqués par défaut (prénom + initiale, pseudonyme ou numéro), jetons hachés en base (plus un jeton chiffré réversible pour réimprimer le PDF et retrouver le lien d'affichage), en-têtes noindex et no-referrer, purge automatique après 24 h. Module exportable, AUCUNE dépendance nouvelle (POST classiques + fetch versionné + glisser-déposer et BarcodeDetector natifs, ni Livewire ni jsQR). Garde "en construction" (FILEATTENTE_UNDER_CONSTRUCTION, activée par défaut) : le public reçoit une page "bientôt disponible" (503) et la carte /outils lui est masquée; seul le super-administrateur accède à l'outil, pour le valider en production avant l'ouverture publique. 47 tests (742 assertions), typographie québécoise, attribution MEMORA.
+
 ## [1.355.1] - 2026-10-15
 
 ### Modifié
