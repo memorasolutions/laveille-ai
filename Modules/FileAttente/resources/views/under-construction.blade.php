@@ -6,11 +6,12 @@
 @include('fileattente::partials.styles')
 @endpush
 @section('title', __('fileattente::ui.construction.title'))
+@section('breadcrumb')
+@include('fileattente::partials.breadcrumb', ['crumb' => __('fileattente::ui.tool.name')])
+@endsection
 @section('content')
-<div class="fa fa-wrap">
-<h1>{{ __('fileattente::ui.construction.heading') }}</h1>
-<div class="card" role="status">
-  <p style="margin:0">{{ __('fileattente::ui.construction.body') }}</p>
-</div>
-</div>
+@include('fileattente::partials.page-open')
+<h1 class="h2 mb-2" style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark);">{{ __('fileattente::ui.construction.heading') }}</h1>
+<div class="alert alert-info" role="status">{{ __('fileattente::ui.construction.body') }}</div>
+@include('fileattente::partials.page-close')
 @endsection

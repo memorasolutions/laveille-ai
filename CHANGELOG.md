@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.356.2] - 2026-10-16
+
+### Corrigé
+- **Outil "File d'attente par code QR" : l'interface respecte maintenant la charte des autres outils.** Les pages création, gérer, scan et "bientôt disponible" reprennent les composants du thème comme les mots-croisés, le constructeur de prompts ou le générateur d'équipes : patron wpo-blog-single-section > container > row > card > card-body, fil d'Ariane "Outils" du thème, boutons ".ct-btn" (la vraie classe de la charte, pas Bootstrap), champs form-control / form-select / form-check, messages .alert. Le style maison ".fa" ne subsiste que pour ce qui n'a pas d'équivalent (la file en direct, les poignées de glisser, le bandeau "appelé"), et avec les couleurs du thème (#064E5A). L'écran de projection garde son plein écran sombre. Le module reste exportable (repli autonome lisible si le thème est absent). 47 tests verts (732 assertions). Preuve : les pages portent les mêmes marqueurs de charte que les outils de référence.
+
 ## [1.356.1] - 2026-10-16
 
 ### Corrigé

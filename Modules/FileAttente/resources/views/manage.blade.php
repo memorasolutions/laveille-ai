@@ -6,56 +6,59 @@
 @include('fileattente::partials.styles')
 @endpush
 @section('title', __('fileattente::ui.manage.title'))
+@section('breadcrumb')
+@include('fileattente::partials.breadcrumb', ['crumb' => __('fileattente::ui.tool.name')])
+@endsection
 @section('content')
-<div class="fa fa-wrap">
-<h1>{{ $board->title ?: __('fileattente::ui.manage.title') }}</h1>
-@if (session('fa_error'))<div class="err" role="alert">{{ session('fa_error') }}</div>@endif
-@if ($errors->any())<div class="err" role="alert">@foreach ($errors->all() as $e)<div>{{ $e }}</div>@endforeach</div>@endif
-<div id="fa-banner" class="err" style="display:none" role="alert"></div>
-<div id="fa-undo" class="ok" style="display:none" role="status"></div>
+@include('fileattente::partials.page-open')
+<h1 class="h2 mb-2" style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark);">{{ $board->title ?: __('fileattente::ui.manage.title') }}</h1>
+@if (session('fa_error'))<div class="alert alert-danger" role="alert">{{ session('fa_error') }}</div>@endif
+@if ($errors->any())<div class="alert alert-danger" role="alert">@foreach ($errors->all() as $e)<div>{{ $e }}</div>@endforeach</div>@endif
+<div id="fa-banner" class="alert alert-danger" style="display:none" role="alert"></div>
+<div id="fa-undo" class="alert alert-success" style="display:none" role="status"></div>
 
-<div class="row">
-  <button class="btn" type="button" id="fa-next">{{ __('fileattente::ui.manage.call_next') }}</button>
-  <a class="btn alt" href="{{ route('fileattente.pdf', $token) }}">{{ __('fileattente::ui.manage.export_pdf') }}</a>
+<div class="d-flex flex-wrap gap-2 align-items-center">
+  <button class="ct-btn ct-btn-primary" type="button" id="fa-next">{{ __('fileattente::ui.manage.call_next') }}</button>
+  <a class="ct-btn ct-btn-outline" href="{{ route('fileattente.pdf', $token) }}">{{ __('fileattente::ui.manage.export_pdf') }}</a>
 </div>
 
-<h2>{{ __('fileattente::ui.manage.in_queue') }}</h2>
-<p class="muted">{{ __('fileattente::ui.manage.drag_help') }}</p>
+<h2 class="h5 mt-4 mb-2" style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark);">{{ __('fileattente::ui.manage.in_queue') }}</h2>
+<p class="text-muted small">{{ __('fileattente::ui.manage.drag_help') }}</p>
 <ul class="q" id="fa-list"></ul>
-<p id="fa-empty" class="muted" style="display:none">{{ __('fileattente::ui.manage.nobody') }}</p>
+<p id="fa-empty" class="text-muted small" style="display:none">{{ __('fileattente::ui.manage.nobody') }}</p>
 
-<h2>{{ __('fileattente::ui.manage.add_heading') }}</h2>
-<form method="POST" action="{{ route('fileattente.add', $token) }}" class="row">@csrf
-  <label for="name" class="sr-only" style="position:absolute;left:-9999px">{{ __('fileattente::ui.manage.name_label') }}</label>
-  <input type="text" id="name" name="name" maxlength="{{ config('file-attente.max_name_len') }}" required placeholder="{{ __('fileattente::ui.manage.name_placeholder') }}" style="flex:1;min-width:12rem">
-  <button class="btn alt" type="submit">{{ __('fileattente::ui.manage.add') }}</button>
+<h2 class="h5 mt-4 mb-2" style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark);">{{ __('fileattente::ui.manage.add_heading') }}</h2>
+<form method="POST" action="{{ route('fileattente.add', $token) }}" class="d-flex flex-wrap gap-2 align-items-center">@csrf
+  <label for="name" class="visually-hidden">{{ __('fileattente::ui.manage.name_label') }}</label>
+  <input type="text" id="name" name="name" class="form-control flex-fill" maxlength="{{ config('file-attente.max_name_len') }}" required placeholder="{{ __('fileattente::ui.manage.name_placeholder') }}" style="min-width:12rem">
+  <button class="ct-btn ct-btn-outline" type="submit">{{ __('fileattente::ui.manage.add') }}</button>
 </form>
 
-<h2>{{ __('fileattente::ui.manage.pending_heading') }}</h2>
+<h2 class="h5 mt-4 mb-2" style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark);">{{ __('fileattente::ui.manage.pending_heading') }}</h2>
 <ul class="q" id="fa-pending"></ul>
 
-<h2>{{ __('fileattente::ui.manage.links_heading') }}</h2>
-<p class="muted">{{ __('fileattente::ui.manage.links_help') }} <code class="url">{{ route('fileattente.manage', $token) }}</code></p>
+<h2 class="h5 mt-4 mb-2" style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark);">{{ __('fileattente::ui.manage.links_heading') }}</h2>
+<p class="text-muted small">{{ __('fileattente::ui.manage.links_help') }} <code class="url">{{ route('fileattente.manage', $token) }}</code></p>
 @if ($displayUrl)
-<p class="muted">{{ __('fileattente::ui.manage.display_link_label') }} <code class="url" id="fa-display-url">{{ $displayUrl }}</code></p>
-<div class="row">
-  <button class="btn alt" type="button" id="fa-copy-display" data-copied="{{ __('fileattente::ui.manage.display_copied') }}" data-failed="{{ __('fileattente::ui.manage.display_copy_failed') }}" aria-label="{{ __('fileattente::ui.manage.display_copy_aria') }}">{{ __('fileattente::ui.manage.display_copy') }}</button>
-  <span id="fa-copy-status" class="muted" role="status" aria-live="polite"></span>
+<p class="text-muted small">{{ __('fileattente::ui.manage.display_link_label') }} <code class="url" id="fa-display-url">{{ $displayUrl }}</code></p>
+<div class="d-flex flex-wrap gap-2 align-items-center">
+  <button class="ct-btn ct-btn-outline" type="button" id="fa-copy-display" data-copied="{{ __('fileattente::ui.manage.display_copied') }}" data-failed="{{ __('fileattente::ui.manage.display_copy_failed') }}" aria-label="{{ __('fileattente::ui.manage.display_copy_aria') }}">{{ __('fileattente::ui.manage.display_copy') }}</button>
+  <span id="fa-copy-status" class="text-muted small" role="status" aria-live="polite"></span>
 </div>
 @else
-<p class="err" role="status">{{ __('fileattente::ui.manage.display_link_unavailable') }}</p>
+<p class="alert alert-danger" role="status">{{ __('fileattente::ui.manage.display_link_unavailable') }}</p>
 @endif
 
-<h2>{{ __('fileattente::ui.manage.end_heading') }}</h2>
+<h2 class="h5 mt-4 mb-2" style="font-family: var(--f-heading); font-weight: 700; color: var(--c-dark);">{{ __('fileattente::ui.manage.end_heading') }}</h2>
 <div id="fa-end">
-  <button class="btn warn" type="button" id="fa-end-1">{{ __('fileattente::ui.manage.end_button') }}</button>
+  <button class="ct-btn ct-btn-outline-danger" type="button" id="fa-end-1">{{ __('fileattente::ui.manage.end_button') }}</button>
 </div>
 <form method="POST" action="{{ route('fileattente.terminate', $token) }}" id="fa-end-2" style="display:none">@csrf
-  <p class="err" role="alert">{{ __('fileattente::ui.manage.end_warning') }}</p>
-  <button class="btn warn" type="submit">{{ __('fileattente::ui.manage.end_confirm') }}</button>
-  <button class="btn alt" type="button" id="fa-end-cancel">{{ __('fileattente::ui.manage.cancel') }}</button>
+  <p class="alert alert-danger" role="alert">{{ __('fileattente::ui.manage.end_warning') }}</p>
+  <button class="ct-btn ct-btn-danger" type="submit">{{ __('fileattente::ui.manage.end_confirm') }}</button>
+  <button class="ct-btn ct-btn-outline" type="button" id="fa-end-cancel">{{ __('fileattente::ui.manage.cancel') }}</button>
 </form>
-</div>
+@include('fileattente::partials.page-close')
 @endsection
 @push('scripts')
 @include('fileattente::partials.poll')
@@ -74,7 +77,7 @@
 
   function fmt(s,r){Object.keys(r).forEach(function(x){s=s.split(':'+x).join(r[x]);});return s;}
   function warn(t){banner.textContent=t;banner.style.display='block';setTimeout(function(){banner.style.display='none';},5000);}
-  function btn(txt,label,cls,fn){var b=document.createElement('button');b.type='button';b.className='btn sm '+cls;b.textContent=txt;b.setAttribute('aria-label',label);b.addEventListener('click',fn);return b;}
+  function btn(txt,label,cls,fn){var b=document.createElement('button');b.type='button';b.className='ct-btn ct-btn-sm '+cls;b.textContent=txt;b.setAttribute('aria-label',label);b.addEventListener('click',fn);return b;}
 
   function move(id,afterKey){
     faPost(U.reorder,{id:id,afterSortKey:afterKey,expectedVersion:state.version}).then(function(r){
@@ -105,24 +108,24 @@
       if(it.label!==it.full_name){ // pas de « X (X) » quand le libellé masqué est identique au nom
         var lab=document.createElement('span');lab.className='muted';lab.textContent=' ('+it.label+')';n.appendChild(lab);
       }
-      if(it.status==='called'){var bd=document.createElement('span');bd.className='badge';bd.textContent=' '+L.called_badge;n.appendChild(document.createTextNode(' '));n.appendChild(bd);}
+      if(it.status==='called'){var bd=document.createElement('span');bd.className='badge-called';bd.textContent=' '+L.called_badge;n.appendChild(document.createTextNode(' '));n.appendChild(bd);}
       li.appendChild(gr);li.appendChild(p);li.appendChild(n);
-      li.appendChild(btn('▲',fmt(L.up,{name:it.full_name}),'alt',function(){
+      li.appendChild(btn('▲',fmt(L.up,{name:it.full_name}),'ct-btn-outline',function(){
         if(i===0){return;}
         var rest=d.items.filter(function(x){return x.id!==it.id;});move(it.id,keyBefore(rest,i-1));
       }));
-      li.appendChild(btn('▼',fmt(L.down,{name:it.full_name}),'alt',function(){
+      li.appendChild(btn('▼',fmt(L.down,{name:it.full_name}),'ct-btn-outline',function(){
         if(i>=d.items.length-1){return;}
         move(it.id,d.items[i+1].sort_key);
       }));
-      li.appendChild(btn(L.remove,fmt(L.remove_aria,{name:it.full_name}),'warn',function(){
+      li.appendChild(btn(L.remove,fmt(L.remove_aria,{name:it.full_name}),'ct-btn-outline-danger',function(){
         faPost(U.remove(it.id),{}).then(function(){poller.refresh();});
       }));
       list.appendChild(li);
     });
     // zone de dépôt « en dernier »
     if(d.items.length>1){
-      var end=document.createElement('li');end.className='muted';end.textContent=L.drop_last;
+      var end=document.createElement('li');end.className='text-muted small';end.textContent=L.drop_last;
       end.addEventListener('dragover',function(e){e.preventDefault();end.classList.add('over');});
       end.addEventListener('dragleave',function(){end.classList.remove('over');});
       end.addEventListener('drop',function(e){e.preventDefault();end.classList.remove('over');
@@ -134,10 +137,10 @@
     d.pending.forEach(function(it){
       var li=document.createElement('li');var n=document.createElement('span');n.className='grow';
       n.textContent=it.full_name+(it.label!==it.full_name?' ('+it.label+')':'');li.appendChild(n);
-      li.appendChild(btn(L.arrive,fmt(L.arrive_aria,{name:it.full_name}),'',function(){
+      li.appendChild(btn(L.arrive,fmt(L.arrive_aria,{name:it.full_name}),'ct-btn-primary',function(){
         faPost(U.arrive(it.id),{}).then(function(){poller.refresh();}).catch(function(){warn(L.network);});
       }));
-      li.appendChild(btn(L.remove,fmt(L.remove_aria,{name:it.full_name}),'warn',function(){
+      li.appendChild(btn(L.remove,fmt(L.remove_aria,{name:it.full_name}),'ct-btn-outline-danger',function(){
         faPost(U.remove(it.id),{}).then(function(){poller.refresh();}).catch(function(){warn(L.network);});
       }));
       pend.appendChild(li);
@@ -153,7 +156,7 @@
       if(!j.called){warn(L.nobody_to_call);return;}
       clearTimeout(undoTimer);undo.textContent='';
       undo.appendChild(document.createTextNode(fmt(L.called,{name:j.called.full_name})+' '));
-      undo.appendChild(btn(L.undo,L.undo_aria,'alt',function(){
+      undo.appendChild(btn(L.undo,L.undo_aria,'ct-btn-outline',function(){
         faPost(U.undo(j.called.id),{}).then(function(){undo.style.display='none';poller.refresh();});
       }));
       undo.style.display='block';undoTimer=setTimeout(function(){undo.style.display='none';},5000);

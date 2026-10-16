@@ -2,7 +2,7 @@
 @section('title', $board->title ?: __('fileattente::ui.display.default_title'))
 @section('dark', '1')
 @push('styles')
-@include('fileattente::partials.styles')
+@include('fileattente::partials.styles-projection')
 @endpush
 @section('main_class', 'wide')
 @push('head')

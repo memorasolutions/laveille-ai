@@ -114,8 +114,8 @@ it('page créée : bandeau d info (pas rouge) et un bouton Copier par lien', fun
     $res = $this->post('/outils/file-attente', ['names' => "Marie Tremblay\nJean Roy", 'mask_mode' => 'initial', 'scan_mode' => 'borne'])->assertOk();
     $html = $res->getContent();
     expect(substr_count($html, 'data-copy='))->toBe(2)
-        ->and($html)->toContain('class="info"')
-        ->and($html)->not->toContain('class="err"');
+        ->and($html)->toContain('alert alert-info')
+        ->and($html)->not->toContain('class="alert alert-danger"');
 });
 
 it('scan : le rappel « ne change rien » disparaît une fois la personne dans la file', function (): void {

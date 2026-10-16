@@ -9,6 +9,7 @@ declare(strict_types=1);
 // Typographie québécoise : espace insécable littérale avant les deux-points.
 return [
     'app_title' => 'File d’attente',
+    'breadcrumb_tools' => 'Outils',
     'tool' => [
         'name' => 'File d’attente par code QR',
         'description' => 'Anime une file d’attente par scan de code QR, sans compte : cartes à imprimer, écran à projeter, gestion en direct.',

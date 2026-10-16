@@ -6,13 +6,16 @@
 @include('fileattente::partials.styles')
 @endpush
 @section('title', __('fileattente::ui.scan.title'))
+@section('breadcrumb')
+@include('fileattente::partials.breadcrumb', ['crumb' => __('fileattente::ui.tool.name')])
+@endsection
 @section('content')
-<div class="fa fa-wrap">
+@include('fileattente::partials.page-open')
 @php $st = $state['status']; @endphp
-<h1>{{ $board->title ?: __('fileattente::ui.app_title') }}</h1>
-<p class="muted">{{ __('fileattente::ui.scan.card_of') }} <strong>{{ $state['label'] }}</strong></p>
+<h1 class="h2 mb-2" style="font-family: var(--f-heading); font-weight: 800; color: var(--c-dark);">{{ $board->title ?: __('fileattente::ui.app_title') }}</h1>
+<p class="text-muted mb-3">{{ __('fileattente::ui.scan.card_of') }} <strong>{{ $state['label'] }}</strong></p>
 
-<div id="fa-state" class="card" role="status" aria-live="polite">
+<div id="fa-state" class="alert alert-info" role="status" aria-live="polite">
 @if ($st === 'called')
   <h2 style="font-size:2rem;margin:0">{{ __('fileattente::ui.scan.your_turn') }}</h2>
 @elseif ($st === 'in_list')
@@ -27,17 +30,17 @@
 
 @if (in_array($st, ['pending', 'removed'], true))
 <form method="POST" action="{{ route('fileattente.join', $token) }}">@csrf
-  <button class="btn" type="submit">{{ __($st === 'removed' ? 'fileattente::ui.scan.rejoin' : 'fileattente::ui.scan.join') }}</button>
+  <button class="ct-btn ct-btn-primary" type="submit">{{ __($st === 'removed' ? 'fileattente::ui.scan.rejoin' : 'fileattente::ui.scan.join') }}</button>
 </form>
 @elseif ($state['allow_self_leave'])
 <form method="POST" action="{{ route('fileattente.leave', $token) }}">@csrf
-  <button class="btn alt" type="submit">{{ __('fileattente::ui.scan.leave') }}</button>
+  <button class="ct-btn ct-btn-outline" type="submit">{{ __('fileattente::ui.scan.leave') }}</button>
 </form>
 @endif
 @if (in_array($st, ['pending', 'removed'], true))
-<p class="muted">{{ __('fileattente::ui.scan.no_change') }}</p>
+<p class="text-muted mb-3">{{ __('fileattente::ui.scan.no_change') }}</p>
 @endif
-</div>
+@include('fileattente::partials.page-close')
 @endsection
 @push('scripts')
 @include('fileattente::partials.poll')

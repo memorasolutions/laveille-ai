@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 return [
     'app_title' => 'Waiting queue',
+    'breadcrumb_tools' => 'Tools',
     'tool' => [
         'name' => 'QR code waiting queue',
         'description' => 'Run a waiting queue with QR code scans, no account needed: printable cards, a screen to project, live management.',
