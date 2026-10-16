@@ -1,6 +1,13 @@
-@extends('fileattente::layout')
+@extends($faLayout)
+@section('page_noindex', '1')
+@section('no_ads', '1')
+@section('suppress_auto_ads', '1')
+@push('styles')
+@include('fileattente::partials.styles')
+@endpush
 @section('title', __('fileattente::ui.created.title'))
 @section('content')
+<div class="fa fa-wrap">
 <h1>{{ __('fileattente::ui.created.heading') }}</h1>
 <div class="info" role="status">{{ __('fileattente::ui.created.warning') }}</div>
 
@@ -20,6 +27,7 @@
   <p class="row"><a class="btn warn" href="{{ $pdfUrl }}">{{ __('fileattente::ui.created.export_pdf') }}</a></p>
 </div>
 <p id="fa-copy-status" class="muted" role="status" aria-live="polite"></p>
+</div>
 @endsection
 @push('scripts')
 <script>

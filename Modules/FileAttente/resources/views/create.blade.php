@@ -1,6 +1,13 @@
-@extends('fileattente::layout')
+@extends($faLayout)
+@section('page_noindex', '1')
+@section('no_ads', '1')
+@section('suppress_auto_ads', '1')
+@push('styles')
+@include('fileattente::partials.styles')
+@endpush
 @section('title', __('fileattente::ui.create.title'))
 @section('content')
+<div class="fa fa-wrap">
 <h1>{{ __('fileattente::ui.create.heading') }}</h1>
 <p>{{ __('fileattente::ui.create.intro') }}</p>
 
@@ -34,4 +41,5 @@
 <p class="muted">{{ __('fileattente::ui.create.responsibility', ['hours' => config('file-attente.purge_hours')]) }}</p>
 <p><button class="btn" type="submit">{{ __('fileattente::ui.create.submit') }}</button></p>
 </form>
+</div>
 @endsection

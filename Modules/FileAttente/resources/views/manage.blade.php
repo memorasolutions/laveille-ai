@@ -1,6 +1,13 @@
-@extends('fileattente::layout')
+@extends($faLayout)
+@section('page_noindex', '1')
+@section('no_ads', '1')
+@section('suppress_auto_ads', '1')
+@push('styles')
+@include('fileattente::partials.styles')
+@endpush
 @section('title', __('fileattente::ui.manage.title'))
 @section('content')
+<div class="fa fa-wrap">
 <h1>{{ $board->title ?: __('fileattente::ui.manage.title') }}</h1>
 @if (session('fa_error'))<div class="err" role="alert">{{ session('fa_error') }}</div>@endif
 @if ($errors->any())<div class="err" role="alert">@foreach ($errors->all() as $e)<div>{{ $e }}</div>@endforeach</div>@endif
@@ -48,6 +55,7 @@
   <button class="btn warn" type="submit">{{ __('fileattente::ui.manage.end_confirm') }}</button>
   <button class="btn alt" type="button" id="fa-end-cancel">{{ __('fileattente::ui.manage.cancel') }}</button>
 </form>
+</div>
 @endsection
 @push('scripts')
 @include('fileattente::partials.poll')

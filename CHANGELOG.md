@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.356.1] - 2026-10-16
+
+### Corrigé
+- **Outil "File d'attente par code QR" : les pages s'affichent maintenant DANS le site (en-tête, menu, pied de page), au lieu d'une page nue.** Les pages création, gérer, scan et "bientôt disponible" étendent le gabarit du site (fronttheme) comme les autres outils; seul l'écran de projection reste en plein écran. Le module reste exportable (repli automatique sur son gabarit autonome si le thème du site est absent). Le CSS du module est préfixé ".fa" pour ne pas écraser le thème.
+- **Sécurité : fermeture d'une fuite de jeton.** En passant au gabarit du site, les balises canonical, og:url et hreflang (qui reprennent l'URL courante) auraient embarqué le jeton secret des pages /outils/file-attente/g/{jeton} (gestion) et /f/{jeton} (scan) dans le HTML, exposé aux robots d'aperçu de liens. Ces balises sont désormais omises sur ces routes à jeton (même correctif que pour Decido). Vérifié en local : 0 balise à jeton sur /g et /f, canonical intact sur les pages normales. 47 tests verts (728 assertions).
+
 ## [1.356.0] - 2026-10-16
 
 ### Ajouté

@@ -1,6 +1,9 @@
 @extends('fileattente::layout')
 @section('title', $board->title ?: __('fileattente::ui.display.default_title'))
 @section('dark', '1')
+@push('styles')
+@include('fileattente::partials.styles')
+@endpush
 @section('main_class', 'wide')
 @push('head')
 <style>

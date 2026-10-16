@@ -59,12 +59,12 @@ it('en construction : le public reçoit 503 partout (création, gestion, afficha
         ->and($r['participants'][0]['participant']->refresh()->status)->toBe(Participant::PENDING);
 });
 
-it('en construction : la page 503 garde l entête de marque et les en-têtes de vie privée', function (): void {
-    config(['file-attente.under_construction' => true, 'file-attente.brand.name' => 'Acme Atelier']);
+it('en construction : la page 503 garde le message et les en-têtes de vie privée', function (): void {
+    config(['file-attente.under_construction' => true]);
     $this->get('/outils/file-attente')->assertStatus(503)
-        ->assertSee('Acme Atelier')
+        ->assertSee('Bientôt disponible')
         ->assertHeader('Referrer-Policy', 'no-referrer')
-        ->assertSee('noindex', false);
+        ->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
 });
 
 it('en construction : la carte /outils est absente pour le public, présente pour le super-admin', function (): void {
@@ -84,27 +84,29 @@ it('en construction : le super-admin utilise tout le module', function (): void 
     $this->get('/outils/file-attente/g/'.$r['manage_token'])->assertOk();
 });
 
-it('entête de marque : pilotée par la config sur toutes les pages, jamais codée en dur', function (): void {
+it('entête de marque : pilotée par la config, jamais codée en dur (projection plein écran + repli autonome)', function (): void {
     config(['file-attente.brand.name' => 'Acme Atelier', 'file-attente.brand.url' => 'https://acme.test', 'file-attente.brand.logo' => '/x/acme.svg', 'file-attente.brand.logo_light' => '/x/acme.svg']);
     $r = fa_fin_board();
 
-    $pages = [
+    // La projection garde le gabarit autonome (plein écran) AVEC la barre de marque ; les autres pages
+    // s'affichent dans le gabarit du site (qui porte déjà l'identité du site) et gardent le noindex HTTP.
+    $res = $this->get('/outils/file-attente/a/'.$r['display_token']);
+    $res->assertOk()->assertSee('Acme Atelier')->assertSee('https://acme.test', false)->assertSee('/x/acme.svg', false);
+    expect($res->getContent())->not->toContain('logo-eye')->and($res->getContent())->toContain('noindex');
+
+    foreach ([
         $this->get('/outils/file-attente'),
         $this->get('/outils/file-attente/g/'.$r['manage_token']),
-        $this->get('/outils/file-attente/a/'.$r['display_token']),
         $this->get('/f/'.$r['participants'][0]['token']),
         $this->post('/outils/file-attente', ['names' => 'Zoé Roy', 'mask_mode' => 'initial', 'scan_mode' => 'borne']),
-    ];
-    foreach ($pages as $res) {
-        $res->assertOk()->assertSee('Acme Atelier')->assertSee('https://acme.test', false)->assertSee('/x/acme.svg', false);
-        expect($res->getContent())->not->toContain('logo-eye')->and($res->getContent())->toContain('noindex');
+    ] as $page) {
+        $page->assertOk()->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
     }
 });
 
-it('entête de marque : nom par défaut = app.name, logo clair sur l affichage sombre', function (): void {
+it('entête de marque : logo clair sur l affichage sombre de la projection', function (): void {
     config(['app.name' => 'Mon Site', 'file-attente.brand.name' => null]);
     $r = fa_fin_board();
-    $this->get('/outils/file-attente')->assertOk()->assertSee('Mon Site')->assertSee('/images/logo-eye.svg', false);
     $this->get('/outils/file-attente/a/'.$r['display_token'])->assertOk()->assertSee('/images/logo-eye-white.svg', false);
 });
 

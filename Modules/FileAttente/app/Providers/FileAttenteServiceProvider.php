@@ -36,6 +36,7 @@ class FileAttenteServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(module_path($this->name, 'resources/lang'), 'fileattente');
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
 
+        $this->registerLayout();
         $this->registerToolCard();
         $this->registerPurge();
     }
@@ -43,6 +44,18 @@ class FileAttenteServiceProvider extends ServiceProvider
     public function provides(): array
     {
         return [];
+    }
+
+    /**
+     * Gabarit des pages : celui du site quand le thème est présent (les pages s'affichent DANS le site),
+     * sinon le gabarit autonome du module (export sans FrontTheme). La projection (display) reste
+     * volontairement sur le gabarit autonome : un écran projeté ne porte pas le menu du site.
+     */
+    private function registerLayout(): void
+    {
+        View::composer('fileattente::*', function ($view): void {
+            $view->with('faLayout', function_exists('fronttheme_layout') ? fronttheme_layout() : 'fileattente::layout');
+        });
     }
 
     /**

@@ -1,6 +1,13 @@
-@extends('fileattente::layout')
+@extends($faLayout)
+@section('page_noindex', '1')
+@section('no_ads', '1')
+@section('suppress_auto_ads', '1')
+@push('styles')
+@include('fileattente::partials.styles')
+@endpush
 @section('title', __('fileattente::ui.scan.title'))
 @section('content')
+<div class="fa fa-wrap">
 @php $st = $state['status']; @endphp
 <h1>{{ $board->title ?: __('fileattente::ui.app_title') }}</h1>
 <p class="muted">{{ __('fileattente::ui.scan.card_of') }} <strong>{{ $state['label'] }}</strong></p>
@@ -30,6 +37,7 @@
 @if (in_array($st, ['pending', 'removed'], true))
 <p class="muted">{{ __('fileattente::ui.scan.no_change') }}</p>
 @endif
+</div>
 @endsection
 @push('scripts')
 @include('fileattente::partials.poll')

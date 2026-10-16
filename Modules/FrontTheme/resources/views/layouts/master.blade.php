@@ -152,7 +152,7 @@
          cette route précise, on omet purement et simplement og:url/canonical/hreflang plutôt que
          de leur substituer une valeur alternative (une page déjà noindex n'a aucune raison
          fonctionnelle de s'auto-canonicaliser ni de s'annoncer aux crawlers social/SEO). --}}
-    @unless(request()->is('decido/*/gerer*'))
+    @unless(request()->is('decido/*/gerer*', 'outils/file-attente/g/*', 'f/*'))
     <meta property="og:url" content="{{ url()->current() }}">
     @endunless
     @hasSection('og_image')
@@ -176,7 +176,7 @@
     <meta name="twitter:title" content="@yield('title', config('app.name'))">
     <meta name="twitter:description" content="@yield('meta_description', \Modules\Settings\Facades\Settings::get('seo.meta_description', 'Votre source d\'information sur l\'intelligence artificielle et les technologies au Québec.'))">
     {{-- Round 26 (skill /100) : voir commentaire og:url ci-dessus - même fuite, même correctif. --}}
-    @unless(request()->is('decido/*/gerer*'))
+    @unless(request()->is('decido/*/gerer*', 'outils/file-attente/g/*', 'f/*'))
     <link rel="canonical" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="fr-CA" href="{{ url()->current() }}">
     <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
