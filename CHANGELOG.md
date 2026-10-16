@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.357.2] - 2026-10-16
+
+### Modifié
+- **Outil "File d'attente par code QR" : logo de laveille plus grand sur l'écran de projection et sur la feuille QR imprimable.** Sur l'écran projeté de la file, le logo de l'en-tête passe de 18 px à 48 px et le nom de marque devient plus lisible du fond d'une salle. La feuille QR imprimée (PDF) porte maintenant un bandeau de marque en tête de chaque page (logo oeil + "La veille.ai" en teal, filet de séparation) et une ligne de référence en pied ("Généré avec La veille.ai - laveille.ai"). Le tout est piloté par la configuration du module (`file-attente.brand.*`), donc réutilisable tel quel dans un autre projet. Aucune donnée touchée, rendu PDF vérifié visuellement.
+
 ## [1.357.1] - 2026-10-16
 
 ### Corrigé

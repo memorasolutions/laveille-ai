@@ -8,7 +8,7 @@
 @endphp
 <header class="brand" role="banner">
   <a href="{{ $brandUrl }}" rel="noopener">
-    @if ($brandLogo)<img src="{{ $brandLogo }}" alt="" width="24" height="24">@endif
+    @if ($brandLogo)<img src="{{ $brandLogo }}" alt="" style="height:40px;width:auto;vertical-align:middle">@endif
     <span>{{ $brandName }}</span>
   </a>
 </header>

@@ -160,5 +160,6 @@ return [
         'note' => 'Private card: hand one to each person. Cut along the dotted lines. Page :page / :total.',
         'qr_alt' => 'QR code',
         'number' => 'No. :n',
+        'ref' => 'Generated with :brand - :url',
     ],
 ];

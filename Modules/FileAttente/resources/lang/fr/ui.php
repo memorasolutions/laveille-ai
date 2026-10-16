@@ -161,5 +161,6 @@ return [
         'note' => 'Carte privée : à remettre à chaque personne. Découper selon les pointillés. Page :page / :total.',
         'qr_alt' => 'Code QR',
         'number' => 'N° :n',
+        'ref' => 'Généré avec :brand - :url',
     ],
 ];

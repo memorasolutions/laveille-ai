@@ -11,8 +11,8 @@
 html,body{min-height:100%}
 body.fa-dark{background:#032E36;color:#fff}
 .fa-dark .brand{background:transparent;border-bottom:2px solid #064E5A}
-.fa-dark .brand a{max-width:none;margin:0;padding:.3rem 1rem;color:#CFE8EC;font-size:.8rem;font-weight:600}
-.fa-dark .brand img{height:18px}
+.fa-dark .brand a{max-width:none;margin:0;padding:.45rem 1rem;color:#CFE8EC;font-size:1.15rem;font-weight:700;display:inline-flex;align-items:center;gap:.55rem}
+.fa-dark .brand img{height:48px;width:auto}
 main.wide{max-width:none;margin:0;padding:1rem clamp(1rem,3vw,3rem) 2.5rem}
 .fa-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem 2rem;flex-wrap:wrap;margin:0 0 1rem}
 .fa-dark h1{color:#fff;font-size:clamp(1.75rem,3.6vw,3.5rem);line-height:1.1;margin:0}
