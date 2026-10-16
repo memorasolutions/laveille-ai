@@ -92,6 +92,19 @@
                 this.top = openUp ? Math.max(8, btnRect.top - menuRect.height - 4) : Math.min(btnRect.bottom + 4, window.innerHeight - 8);
                 const leftIfRightAligned = btnRect.right - menuRect.width;
                 this.left = leftIfRightAligned >= 8 ? leftIfRightAligned : Math.max(8, Math.min(btnRect.left, window.innerWidth - menuRect.width - 8));
+                const wantedTop = this.top, wantedLeft = this.left;
+                /* Correction d'ancêtre transformé : un parent avec transform/filter/will-change (ex. carte
+                   dont le :hover fait translateY) devient le bloc conteneur d'un `position: fixed`, donc
+                   le menu s'ouvrait décalé hors écran PENDANT le survol et n'apparaissait qu'à la sortie
+                   de la souris. On mesure l'écart réel après rendu et on le résorbe, à LA SOURCE. */
+                this.$nextTick(() => {
+                    const r = menu.getBoundingClientRect();
+                    const dTop = wantedTop - r.top, dLeft = wantedLeft - r.left;
+                    if (Math.abs(dTop) > 0.5 || Math.abs(dLeft) > 0.5) {
+                        this.top += dTop;
+                        this.left += dLeft;
+                    }
+                });
             });
         },
         menuStyle() {

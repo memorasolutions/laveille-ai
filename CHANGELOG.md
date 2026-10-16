@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.357.1] - 2026-10-16
+
+### Corrigé
+- **Menu d'actions (kebab ⋮) mal positionné sur les cartes avec effet de survol.** Le menu partagé (core::components.action-menu) est en `position: fixed`; un parent dont le `:hover` appliquait un `transform` (ex. les cartes de /mes-journaux) devenait le bloc conteneur du menu, qui s'ouvrait alors décalé hors écran pendant le survol et ne réapparaissait qu'au retrait de la souris - d'où l'impression qu'il s'ouvrait « à la sortie » au lieu du clic. Corrigé à LA SOURCE : après le positionnement, le composant mesure l'écart réel et le résorbe (couvre tout ancêtre transform/filter/will-change), et le `transform` au survol des cartes de journal est retiré (l'ombre reste). Tous les autres menus du site s'ouvraient déjà correctement au clic. 8 tests du composant + 111 tests FrontTheme verts.
+
 ## [1.357.0] - 2026-10-16
 
 ### Ajouté

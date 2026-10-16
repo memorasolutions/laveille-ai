@@ -15,9 +15,9 @@
     .journal-index-title { font-size: clamp(1.6rem, 1.3rem + 1vw, 2.1rem); font-weight: 800; letter-spacing: -0.01em; }
     .journal-card {
         background: #fff; border: 1px solid #EEF0F2 !important; border-radius: 14px;
-        transition: box-shadow .15s ease, transform .15s ease;
+        transition: box-shadow .15s ease;
     }
-    .journal-card:hover { box-shadow: 0 10px 24px -12px rgba(6,78,90,0.16); transform: translateY(-1px); }
+    .journal-card:hover { box-shadow: 0 10px 24px -12px rgba(6,78,90,0.16); }
 </style>
 @endpush
 
