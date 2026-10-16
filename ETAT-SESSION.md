@@ -1,25 +1,25 @@
 # État de session - La veille de Stef v2
 
-Dernière mise à jour : 15 octobre 2026, 19h02 Québec (23:02 UTC). Production en **v1.355.0** (déployée et PROUVÉE).
+Dernière mise à jour : 15 octobre 2026, 19h28 Québec (23:28 UTC). Production en **v1.355.1** (déployée et PROUVÉE).
 
 ## Où on en est (livré et prouvé)
 
-- **v1.355.0 DÉPLOYÉE ET SERVIE EN PROD.** CI run 38813706953 succès + "Deploy to cPanel via rsync/SSH" run 38814139806 succès (22:01 UTC). Preuve servie : pied de page et actifs cache-bustés portent `v1.355.0`, /cours répond 200.
-- **#3130 (FUITE LOI 25 : cours privé 32 exposé sur /cours) → COLMATÉ ET PROUVÉ EN LIVE.** Mitigation immédiate par exclusion des catégories privées (`CATALOG_EXCLUDED_CATEGORY_IDNUMBERS` dans le `.env` prod, config non cachée donc effet immédiat), backup `.env.bak-leak-cat-20261015-173928`.
-- **#3133 (durcissement : /cours en OPT-IN fail-closed sur la case `vitrine`) → CODÉ, TESTÉ, DÉPLOYÉ (v1.355.0).** Un cours n'apparaît QUE si `vitrine` (valueraw=1) est coché; `valueraw` fait seul autorité dès que la clé existe. 53 tests Pest + 31 tests arch verts. Revue adversariale Codex : aucune fuite pour un export Moodle cohérent. Effet VISIBLE sur /cours = dépend de la pose de `vitrine` côté Moodle par le pair + purge de ses caches.
-- **Hygiène crons prod : PROPRE.** Les 92 crons sont tous des tâches de production légitimes (laveille, lucidnest, planifize, monate, clinique, writeafrica, lfc, tvhr9, sauvegardes Softaculous, Moodle, SSL). AUCUN cron temporaire de mes sessions. L'entrée `Command:?` est l'artefact d'API cPanel connu, à NE PAS supprimer.
+- **v1.355.1 DÉPLOYÉE ET SERVIE EN PROD.** CI run 38823079980 + Deploy run 38823414424 verts; pied de page et actifs cache-bustés servent `v1.355.1`, /cours répond 200. Commit 62679b0bb, poussé origin + forge.
+- **#2989 module boutique Shop EXPORTABLE → LIVRÉ.** README-INSTALL.md (installation, variables d'env, dépendances, désactivation, 18 points de couplage à adapter), ShopServiceProvider additif (tags shop-config + shop-migrations), 208 tests Pest verts. Zone argent intacte. Découplage fin = options documentées pour l'export réel (phase 3).
+- **v1.355.0 (hier soir) : fuite Loi 25 #3130 colmatée + /cours opt-in fail-closed #3133** restent en place et prouvées.
+- **Hygiène crons prod : PROPRE** (92 crons tous légitimes, aucun temporaire de mes sessions; `Command:?` = artefact cPanel, intact).
 
 ## Ce qui est en cours
 
-- **#3004 EFVP Loi 25 (SSO + vente de cours) → v0.2 RÉDIGÉE, passe adversariale en cours.** Enrichie des sections manquantes : avis au point de collecte (art. 8), durée de conservation (art. 23), mesures de sécurité (art. 10), procédure d'incident + registre (art. 3.5 à 3.8), correction de la clé de rattachement SSO (claim `sub`, 4.8). Typographie OQLF propre. Passe Codex = 27 constats + 1 risque. Triage légal délégué à un sous-agent frais (vrai / sur-interprétation / décision fondateur) → produira la v0.3. Fichier : `docs/legal/EFVP-sso-moodle-vente-cours.md`.
-- **#2989 (module boutique Shop exportable) → packaging en cours** (sous-agent, additif : README d'installation, publication config/migrations, rapport de couplage). Zone argent, mandat zéro casse.
+- **#3004 ÉFVP Loi 25 (SSO + vente) → v0.3 livrée, committée, déployée** (dans le dépôt, AUCUN flux live). Révision adversariale double : Codex (27 constats) puis triage légal (modèle fort) ancré sur le corpus de loi (P-39.1, Règlement incidents). 24/27 retenus, 3 rejetés sur le fond, + 3 trous trouvés dans le CODE réel : 7 revendications SSO émises au lieu de 3 (`name`/`picture` à retirer avant allumage), code OTP routé hors Québec par Postmark (non inventorié), art. 9.1 absent. ADOPTÉE par le fondateur/RPRP le 16 octobre 2026, sous réserve des conditions de suivi 6.3 à 6.16 (AUCUN flux live avant qu'elles soient satisfaites et prouvées + 1er cours réel + coordination pair). Décision Postmark (16 oct) : CONSERVÉ pour le seul OTP, reste la documentation dans l'ÉFVP de base (#3136). Fichier : `docs/legal/EFVP-sso-moodle-vente-cours.md`.
 
 ## Ce qui bloque et attend une action du fondateur
 
-- **Décision d'adoption de l'EFVP (#3004 → débloque #3002 SSO, #3086 vente, #3135)** : l'adoption et la décision du RPRP relèvent du fondateur (section 8.1 de l'EFVP). Claude prépare et recommande; il n'auto-adopte pas et n'allume aucun flux live.
-- **Grappe navigateur (#2799, #3126, #3129, #3131, images, AdSense)** : BLOQUÉE car le Chrome du fondateur est OUVERT pendant `ia-sync` (Perplexity `logged_in:false`, Google non connecté). Déblocage : fermer ton Chrome, je relance `ia-sync`.
+- **Adoption de l'ÉFVP (#3004 → débloque #3002 SSO, #3086 vente, #3135)** : l'adoption et la décision du RPRP te reviennent (section 8.1 de l'ÉFVP). Claude prépare et recommande; n'auto-adopte pas, n'allume aucun flux. Avis juridique externe recommandé sur deux points (Postmark art. 17, qualification art. 12).
+- **#3136 Postmark dans l'ÉFVP de base** : préparation mienne possible; la décision d'adéquation art. 17 (ou router l'OTP au Canada) te revient.
+- **Grappe navigateur (#2799, #3126, #3129, #3131, images, AdSense)** : BLOQUÉE tant que ton Chrome est ouvert pendant `ia-sync` (Perplexity et Google non connectés). Déblocage : fermer ton Chrome, je relance `ia-sync`.
 - **#3124 boutique aperçu couleur** : décision prise, bloqué sur connexion Gelato au navigateur.
 
 ## Prochaine action proposée
 
-À la réponse du triage légal : appliquer l'EFVP v0.3, commiter (EFVP + README Shop) origin + forge, puis présenter au fondateur les décisions irréductibles de la section 8.1. HEAD = a2cada8f6 (v1.355.0), déployé origin + forge. Deux sous-agents actifs (triage légal, packaging Shop).
+En autonomie, le gros de ce qui restait sans te dépendre est livré (EFVP v0.3, module Shop exportable, hygiène, déploiement prouvé). Ce qui reste est soit ta décision (adoption ÉFVP, Postmark, navigateur), soit gaté par le pair Moodle (3043, 3044, 3065, 3115, 3116, 3122, 3134, 3135). HEAD = 62679b0bb (v1.355.1), origin + forge. Deux sous-agents terminés, aucun cron temporaire, aucun résidu.

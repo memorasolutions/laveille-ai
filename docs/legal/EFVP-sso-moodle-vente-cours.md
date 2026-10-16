@@ -2,9 +2,9 @@
 
 ## Projet : authentification unique (SSO) laveille.ai -> académie Moodle et vente de cours en ligne
 
-> **Brouillon de travail 0.3 préparé sous l'autorité du RPRP le 13 octobre 2026, enrichi le 15 octobre 2026 (v0.2), puis révisé le 15 octobre 2026 contre le texte de loi (v0.3). Ne constitue pas un avis juridique et n'a fait l'objet d'aucune validation juridique professionnelle externe.**
+> **Brouillon de travail 0.3 préparé sous l'autorité du RPRP le 13 octobre 2026, enrichi le 15 octobre 2026 (v0.2), puis révisé le 15 octobre 2026 contre le texte de loi (v0.3). Ne constitue pas un avis juridique et n'a fait l'objet d'aucune validation juridique professionnelle externe. ADOPTÉE par le RPRP le 16 octobre 2026, sous réserve des conditions de suivi 6.3 à 6.16.**
 > **Document interne et confidentiel - Ne pas publier.**
-> **Gate : aucun flux de ce projet n'est câblé en production tant que la présente ÉFVP n'a pas été révisée et que le RPRP n'a pas rendu sa décision. Le code d'intégration reste réversible et désactivé par défaut d'ici là.**
+> **Gate : l'ÉFVP est ADOPTÉE par le RPRP le 16 octobre 2026. Aucun flux n'est néanmoins câblé en production tant que les conditions de suivi 6.3 à 6.16 ne sont pas satisfaites et PROUVÉES, et tant que la coordination avec l'académie et le premier cours réel ne sont pas prêts. Le code d'intégration reste réversible et désactivé par défaut d'ici là.**
 
 ## 1. Fiche de contrôle
 
@@ -16,9 +16,9 @@
 | Objet | Fédération d'identité par SSO (OAuth2/OpenID) de laveille.ai vers l'académie Moodle, et flux de vente de cours (paiement Stripe puis inscription au cours) |
 | Date de l'évaluation | 13 octobre 2026 (enrichie puis révisée le 15 octobre 2026) |
 | Version | 0.3 |
-| Statut | brouillon de travail, en attente de révision du RPRP |
+| Statut | adoptée sous conditions; aucun flux live avant satisfaction prouvée des conditions 6.3 à 6.16 |
 | Classification | Interne et confidentiel |
-| Décision | Aucune décision rendue; projet gelé en attente de révision |
+| Décision | ADOPTÉE par le RPRP le 16 octobre 2026, sous réserve des conditions de suivi 6.3 à 6.16 à satisfaire et PROUVER avant tout allumage |
 | Prochaine révision planifiée | Avant tout premier allumage réel du SSO ou de la vente |
 | Déclencheur de révision | Activation du SSO, activation de la vente, changement de fournisseur de paiement, changement de fournisseur de courriel, changement d'hébergement de l'académie |
 
@@ -169,7 +169,7 @@ Mesuré avec l'académie le 2026-10-15 : Moodle (auth_oauth2) lie le compte de 
 
 ### 4.9 Courriels transactionnels et journaux
 
-**Courriels de laveille.** Le code de connexion à usage unique (OTP), préalable obligé à toute session SSO, est envoyé par Postmark (ActiveCampaign, États-Unis) depuis le 2 octobre 2026, avec repli vers le SMTP Google Workspace (`Modules/Auth/app/Http/Controllers/MagicLinkController.php`). Postmark reçoit l'adresse de courriel, le code et l'horodatage. **Postmark n'est inventorié dans aucune ÉFVP** : l'ÉFVP de base (version 0.4, 7 août 2026) ne connaît que Workspace. L'affirmation de la version 0.2 selon laquelle le SSO n'introduit aucun destinataire hors Québec nouveau est remplacée par : le SSO n'introduit aucun destinataire nouveau PAR LUI-MÊME, mais son préalable de connexion repose sur un destinataire hors Québec non encore évalué. Une section Postmark est ajoutée à l'ÉFVP de base (art. 17 et 18.3; DPA Postmark; lieu de traitement) et la décision d'adéquation est rendue par le RPRP avant l'allumage du SSO (condition 6.14).
+**Courriels de laveille.** Le code de connexion à usage unique (OTP), préalable obligé à toute session SSO, est envoyé par Postmark (ActiveCampaign, États-Unis) depuis le 2 octobre 2026, avec repli vers le SMTP Google Workspace (`Modules/Auth/app/Http/Controllers/MagicLinkController.php`). Postmark reçoit l'adresse de courriel, le code et l'horodatage. **Postmark n'est inventorié dans aucune ÉFVP** : l'ÉFVP de base (version 0.4, 7 août 2026) ne connaît que Workspace. L'affirmation de la version 0.2 selon laquelle le SSO n'introduit aucun destinataire hors Québec nouveau est remplacée par : le SSO n'introduit aucun destinataire nouveau PAR LUI-MÊME, mais son préalable de connexion repose sur un destinataire hors Québec non encore évalué. Décision du fondateur du 16 octobre 2026 : Postmark est CONSERVÉ, pour le seul envoi du code OTP. Une section Postmark est donc ajoutée à l'ÉFVP de base pour documenter ce destinataire hors Québec (art. 17 et 18.3; engagement contractuel Postmark; lieu de traitement; transparence au point de collecte); la décision d'adéquation est tranchée en faveur du maintien, et la condition 6.14 porte désormais sur la DOCUMENTATION, non sur une décision à rendre.
 
 **Courriels de l'académie.** Moodle envoie des courriels de création de compte, de confirmation de liaison (4.8) et d'inscription : le serveur d'envoi qu'il utilise est identifié par la session de l'académie et rattaché à une section de l'ÉFVP de base avant allumage (6.14); leur contenu est minimisé (aucun code, aucun montant).
 
@@ -208,7 +208,7 @@ Le projet, tel que cadré, maintient les deux traitements nouveaux (identité et
 11. Spécifier avec l'académie, tester et consigner avec preuve datée la jonction compte-créé-par-achat / identité SSO pour les trois cas de la section 4.8, avant tout allumage.
 12. Vérifier et consigner avant allumage, avec preuve : profil d'identité Moodle en lecture seule (4.1); méthode d'inscription manuelle seule sur tout cours payant (4.2); idempotence de l'octroi, déduplication par `event.id`, idempotence de l'inscription (4.2); traitement d'un remboursement ou d'une contestation (4.2); liste exacte des champs transmis à Stripe et à Moodle.
 13. Vérifier avant allumage que l'apprenant peut obtenir ses renseignements recueillis auprès de lui dans un format structuré et couramment utilisé, depuis laveille (exportation de compte) et depuis Moodle (exportation native des données personnelles), art. 3.3, al. 3 et art. 27, al. 3.
-14. Avant l'allumage du SSO : ajouter Postmark à l'ÉFVP de base et obtenir la décision d'adéquation du RPRP; identifier le serveur d'envoi des courriels de Moodle et le rattacher à une section de l'ÉFVP de base.
+14. Avant l'allumage du SSO : documenter Postmark dans l'ÉFVP de base comme destinataire hors Québec du seul code OTP (décision du fondateur du 16 octobre 2026 : Postmark conservé; art. 17/18.3); identifier le serveur d'envoi des courriels de Moodle et le rattacher à une section de l'ÉFVP de base.
 15. Avant la décision du RPRP, puis à chaque révision, exécuter et annexer avec preuve datée une vérification de concordance entre le système réellement déployé et la présente ÉFVP : revendications réellement émises par `/api/oauth/userinfo` (config `idp.claims` et test), champs réellement transmis à Stripe (session de paiement) et à Moodle (appels de service web), réglages réels de l'émetteur auth_oauth2 (`requireconfirmation`, correspondance des champs) et de customcert (vérification), serveur d'envoi réel des courriels. Première exécution le 15 octobre 2026 : écart trouvé sur les revendications (sept émises, trois déclarées), corrigé par la condition 6.3. Une ÉFVP n'est approuvée que sur l'état mesuré, jamais sur l'état décrit.
 16. Configurer et vérifier, avec preuve, les paramètres par défaut de la puce 4.6 "art. 9.1" avant allumage; tout assouplissement est une décision du RPRP.
 
@@ -226,9 +226,9 @@ Le projet, tel que cadré, maintient les deux traitements nouveaux (identité et
 
 ### 8.1 Décisions qui relèvent du fondateur (hors du pouvoir de Claude)
 
-1. **Adoption de la présente ÉFVP et décision du RPRP** : rendre la décision (go/no-go/go sous conditions). Aucun flux live tant que cette décision n'est pas rendue (gate de l'en-tête). Claude prépare et recommande; il n'auto-adopte pas et n'allume pas le SSO.
+1. **Adoption de la présente ÉFVP et décision du RPRP** : DÉCISION RENDUE le 16 octobre 2026 : ÉFVP ADOPTÉE sous conditions. Aucun flux live tant que les conditions 6.3 à 6.16 ne sont pas satisfaites et prouvées, ni avant la coordination avec l'académie et le premier cours réel. Claude prépare et prouve les conditions; il n'allume pas le SSO de lui-même.
 2. **Validation juridique professionnelle externe** : recommandée en priorité sur deux points que l'écriture ne peut pas fermer : la décision d'adéquation de l'art. 17 pour Postmark (4.9), et la qualification "utilisation au sein de l'entreprise" de l'art. 12, al. 2, par. 4° retenue en section 3, qui allège le régime de consentement et doit être confirmée par un juriste.
-3. **Fournisseur du code OTP (4.9)** : rendre la décision d'adéquation de l'art. 17 pour Postmark (É.-U.), OU router l'OTP par un fournisseur au Canada. Les deux engagent l'entreprise.
+3. **Fournisseur du code OTP (4.9)** : TRANCHÉ le 16 octobre 2026 : Postmark est conservé pour le seul code OTP. Reste la documentation de ce destinataire dans l'ÉFVP de base (préparation par Claude, suivi #3136).
 4. **Durées de conservation chiffrées (4.5, 6.10)** : pièces Stripe (délai fiscal à confirmer avec la comptabilité), inactivité des comptes, certificats, journaux. Chaque chiffre engage l'entreprise devant un apprenant et devant la Commission.
 5. **Avatar dans l'académie (4.1)** : la minimisation retire `picture` et `name` par défaut; si le fondateur veut l'avatar dans Moodle, le tableau 4.1 reçoit une ligne de plus avec sa finalité, au lieu du retrait.
 6. **Confirmation par courriel à la première connexion (`requireconfirmation`, 4.8)** : l'exiger ajoute une friction mais protège contre le cas (c) de rattachement erroné. Choix produit à arrêter avec la session de l'académie (coordination, jamais chacun de son côté).
@@ -243,6 +243,7 @@ Le projet, tel que cadré, maintient les deux traitements nouveaux (identité et
 | 0.1 | 13 octobre 2026 | RPRP (brouillon préparé par processus d'analyse multi-modèles, sans avis juridique) | Création : cadrage du projet SSO + vente, analyse des flux nouveaux, gate d'allumage |
 | 0.2 | 15 octobre 2026 | RPRP (enrichissement par processus d'analyse multi-modèles, sans avis juridique) | Ajout de l'avis au point de collecte (art. 8), de la durée de conservation (art. 23), des mesures de sécurité (art. 10), de la procédure d'incident et du registre (art. 3.5 à 3.8); correction de la clé de rattachement SSO (claim sub, et non le courriel); décisions du fondateur isolées en 8.1 |
 | 0.3 | 15 octobre 2026 | RPRP (révision adversariale par processus d'analyse multi-modèles, sans avis juridique) | Alignement du jeu de revendications sur le code réel (7 émises, 5 retenues, 2 à retirer); jonction achat-SSO (4.8); Postmark et courriels de l'académie (4.9); art. 3.3 al. 2-3, 4, 5, 9.1, 12 al. 2 par. 4°; références exactes du registre d'incidents (Règlement, art. 7 et 8); cotation des scénarios; conditions 6.11 à 6.16 |
+| (décision) | 16 octobre 2026 | Fondateur / RPRP | ÉFVP ADOPTÉE sous réserve des conditions 6.3 à 6.16; Postmark CONSERVÉ pour le seul code OTP (documentation à ajouter à l'ÉFVP de base, #3136) |
 
 ## Références
 
