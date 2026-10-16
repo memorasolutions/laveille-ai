@@ -53,3 +53,44 @@
 <button class="ct-btn ct-btn-primary" type="submit">{{ __('fileattente::ui.create.submit') }}</button>
 @include('fileattente::partials.page-close')
 @endsection
+@push('scripts')
+<script>
+/* @author MEMORA solutions
+ * Brouillon du formulaire : sauvegardé dans le navigateur (localStorage) et restauré au rafraîchissement.
+ * Les valeurs old() de Laravel (erreur de validation) ont toujours priorité : rien n'est restauré si une erreur est affichée. */
+(function(){
+  var KEY='fileattente:create-draft',F=['title','names','mask_mode','scan_mode'],C='allow_self_leave';
+  function el(id){return document.getElementById(id);}
+  function lire(){try{var r=window.localStorage.getItem(KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+  function ecrire(){
+    try{
+      var d={};
+      F.forEach(function(id){var e=el(id);if(e){d[id]=e.value;}});
+      var c=el(C);if(c){d[C]=c.checked;}
+      window.localStorage.setItem(KEY,JSON.stringify(d));
+    }catch(e){}
+  }
+  function restaurer(){
+    /* Si une erreur de validation est affichée, les valeurs old() de Laravel priment, on ne touche à rien.
+     * Sinon (chargement frais), on remet le brouillon tel quel - vaut pour les champs texte ET les menus
+     * (un <select> n'a pas de defaultValue en DOM, on fixe donc directement sa valeur). */
+    if(document.querySelector('.alert-danger')){return;}
+    var d=lire();if(!d||typeof d!=='object'){return;}
+    F.forEach(function(id){
+      var e=el(id);
+      if(e&&typeof d[id]==='string'&&d[id]!==''){e.value=d[id];}
+    });
+    var c=el(C);if(c&&typeof d[C]==='boolean'){c.checked=d[C];}
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    try{
+      restaurer();
+      F.concat([C]).forEach(function(id){
+        var e=el(id);if(!e){return;}
+        e.addEventListener('input',ecrire);e.addEventListener('change',ecrire);
+      });
+    }catch(e){}
+  });
+})();
+</script>
+@endpush

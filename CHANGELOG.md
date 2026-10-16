@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.357.0] - 2026-10-16
+
+### Ajouté
+- **Outil "File d'attente par code QR" : la page de création garde ta saisie au rafraîchissement, comme les autres outils.** Le titre, la liste de noms, les deux modes et la case "quitter soi-même" sont sauvegardés dans ton navigateur (localStorage) et remis en place si tu rafraîchis la page (F5). Les valeurs renvoyées par le serveur après une erreur de validation gardent la priorité. Le brouillon est effacé dès que le tableau est créé, pour ne pas laisser une liste de noms sur un poste partagé. Aucune donnée ne quitte le navigateur. 47 tests verts (736 assertions).
+
 ## [1.356.3] - 2026-10-16
 
 ### Corrigé

@@ -48,3 +48,10 @@
 })();
 </script>
 @endpush
+@push('scripts')
+<script>
+/* @author MEMORA solutions
+ * Le tableau est persisté côté serveur : le brouillon du formulaire est effacé du navigateur. */
+try{window.localStorage.removeItem('fileattente:create-draft');}catch(e){}
+</script>
+@endpush
