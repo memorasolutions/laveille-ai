@@ -2,6 +2,7 @@
 @section('page_noindex', '1')
 @section('no_ads', '1')
 @section('suppress_auto_ads', '1')
+@section('no_newsletter', '1')
 @push('styles')
 @include('fileattente::partials.styles')
 @endpush

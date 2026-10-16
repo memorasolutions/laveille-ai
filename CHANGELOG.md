@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.356.3] - 2026-10-16
+
+### Corrigé
+- **Outil "File d'attente par code QR" : le choix "Comment les personnes rejoignent la file" est maintenant expliqué.** Le libellé employait le mot "s'enregistrer", ce qui prêtait à confusion. Il est reformulé et accompagné d'un texte d'aide qui décrit les deux modes en clair : Borne (un seul appareil au comptoir, ou l'écran projeté, sert de point de scan et chacun présente sa carte à la caméra, sans téléphone) et Téléphone (chaque personne scanne sa propre carte avec son téléphone).
+- **Correctif : plus d'erreur console "invalid form control not focusable" sur les pages de l'outil.** Ces pages héritaient de la modale d'infolettre du site, dont les champs courriel et consentement (obligatoires) restaient cachés, ce que le navigateur signalait à chaque validation. Un drapeau "no_newsletter" retire désormais la modale et la barre d'infolettre des pages de l'outil (pages utilitaires, sans sollicitation marketing), comme les publicités y sont déjà retirées. Aucun impact ailleurs sur le site. 47 tests verts (736 assertions).
+
 ## [1.356.2] - 2026-10-16
 
 ### Corrigé

@@ -290,7 +290,9 @@
 <body>
 <a href="#main-content" class="skip-link" aria-label="Skip to main content – Aller au contenu principal">{{ __('Aller au contenu principal') }}</a>
 
+@unless(\Illuminate\Support\Facades\View::hasSection('no_newsletter'))
 @include('fronttheme::partials.newsletter-sticky-bar')
+@endunless
 
     <!-- start page-wrapper -->
     <div class="page-wrapper">
@@ -389,7 +391,9 @@
         @if($showNewsletterScrollTrigger)
             @include('fronttheme::partials.newsletter-scroll-trigger')
         @endif
+        @unless(\Illuminate\Support\Facades\View::hasSection('no_newsletter'))
         @include('fronttheme::partials.newsletter-modal')
+        @endunless
         @include('fronttheme::partials.auth-modal')
         @auth
             @if(class_exists(\Nwidart\Modules\Facades\Module::class) && \Nwidart\Modules\Facades\Module::find('Core')?->isEnabled())

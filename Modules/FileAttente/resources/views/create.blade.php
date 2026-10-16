@@ -2,6 +2,7 @@
 @section('page_noindex', '1')
 @section('no_ads', '1')
 @section('suppress_auto_ads', '1')
+@section('no_newsletter', '1')
 @push('styles')
 @include('fileattente::partials.styles')
 @endpush
@@ -42,6 +43,7 @@
     <option value="borne" @selected(old('scan_mode', 'borne') === 'borne')>{{ __('fileattente::ui.create.scan_borne') }}</option>
     <option value="telephone" @selected(old('scan_mode') === 'telephone')>{{ __('fileattente::ui.create.scan_telephone') }}</option>
   </select>
+  <div class="form-text">{{ __('fileattente::ui.create.scan_help') }}</div>
 </div>
 <div class="form-check mb-3">
   <input class="form-check-input" type="checkbox" id="allow_self_leave" name="allow_self_leave" value="1" @checked(old('allow_self_leave', '1'))>
