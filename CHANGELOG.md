@@ -1,6 +1,12 @@
 # Changelog
 
-## [1.357.2] - 2026-10-16
+## [1.358.0] - 2026-10-16
+
+### Ajouté
+- **Outil "Signature de courriel" : avis de confidentialité au bas de la signature, activé par défaut.** Une nouvelle case (cochée d'office) ajoute en pied de signature un avis de confidentialité au texte modifiable, en petit texte gris discret. Le texte par défaut est fourni ("Avis de confidentialité : ce courriel... destiné exclusivement à son ou ses destinataires..."). L'utilisateur peut le modifier ou retirer l'avis. Présent dans l'aperçu, le code HTML copié et l'export. Aucun impact sur les signatures existantes (un avis vide n'affiche rien).
+
+### Modifié
+- **Outil "Signature de courriel" : vrais logos de marque pour les réseaux sociaux (fini les émojis).** Les icônes LinkedIn, Facebook, Instagram, X, YouTube et Site web étaient des émojis (💼 📘 📸 ▶️ 🌐), qui s'affichent différemment d'un appareil à l'autre et ne sont pas les vrais logos. Elles sont remplacées par de vrais logos de marque (PNG hébergés sur laveille.ai, servis par adresse absolue pour rester visibles dans Gmail et Outlook, qui bloquent souvent le SVG). Icônes décoratives (le nom du réseau suit le logo), moteur de rendu PHP et son jumeau JavaScript mis à jour ensemble. 107 tests de rendu verts.
 
 ### Modifié
 - **Outil "File d'attente par code QR" : logo de laveille plus grand sur l'écran de projection et sur la feuille QR imprimable.** Sur l'écran projeté de la file, le logo de l'en-tête passe de 18 px à 48 px et le nom de marque devient plus lisible du fond d'une salle. La feuille QR imprimée (PDF) porte maintenant un bandeau de marque en tête de chaque page (logo oeil + "La veille.ai" en teal, filet de séparation) et une ligne de référence en pied ("Généré avec La veille.ai - laveille.ai"). Le tout est piloté par la configuration du module (`file-attente.brand.*`), donc réutilisable tel quel dans un autre projet. Aucune donnée touchée, rendu PDF vérifié visuellement.

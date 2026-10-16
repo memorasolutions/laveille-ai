@@ -230,13 +230,13 @@ test('le gabarit social met en avant les réseaux sociaux (icônes agrandies, li
         'first_name' => 'Marie', 'last_name' => 'Tremblay', 'email' => 'marie@example.com',
     ] + $links, 'minimal');
 
-    // RENFORCÉ AU LOT 3 (2026-09-25) : la QC visuelle a jugé le rendu du LOT 2 (icône 18px sur la
-    // même ligne unique que le rendu minimal) trop proche de `minimal`. La taille passe à 20px et
-    // la structure change (voir test dédié ci-dessous) - assertion mise à jour, jamais affaiblie :
-    // la valeur choisie distingue maintenant `social` à la fois de `minimal` (12px) ET de
-    // `executive` (22px, filet du nom), qu'aucun test ne confondait déjà.
-    expect($htmlSocial)->toContain('font-size:20px')
-        ->and($htmlMinimal)->not->toContain('font-size:20px');
+    // RENFORCÉ AU LOT 3 (2026-09-25) puis MIS À JOUR 2026-10-16 : les icônes de réseaux sont
+    // désormais de vrais logos de marque (PNG hébergés, demande fondateur), plus des émojis dans un
+    // <span> agrandi. Le gabarit `social` met l'icône EN AVANT à 22px (via width/height de l'<img>),
+    // là où `minimal` la rend à 16px - assertion mise à jour, jamais affaiblie : elle distingue
+    // toujours `social` de `minimal`, sur le mécanisme réel (taille de l'image).
+    expect($htmlSocial)->toContain('width="22" height="22"')
+        ->and($htmlMinimal)->not->toContain('width="22"');
 });
 
 test('LOT 3 - le gabarit social rend CHAQUE réseau sur SA PROPRE ligne (changement de structure), minimal garde une seule ligne', function (): void {
@@ -570,15 +570,18 @@ test('LOT 4 - logo_bas groupe le logo et les réseaux tout en bas (après le nom
     $posName = strpos($html, 'Marie Tremblay');
     $posMentions = strpos($html, 'Membre de l&#039;Ordre');
     $posReseaux = strpos($html, 'LinkedIn');
-    $posImage = strpos($html, '<img');
+    // MIS À JOUR 2026-10-16 : on vise le LOGO téléversé (logo.png), pas '<img' : les icônes de
+    // réseaux sont maintenant elles aussi des <img> (vrais logos de marque) rendues AVANT le libellé
+    // texte, donc le premier '<img' serait l'icône sociale, pas le logo que ce test veut situer.
+    $posLogo = strpos($html, 'logo.png');
 
     expect($posName)->not->toBeFalse()->and($posMentions)->not->toBeFalse()
-        ->and($posReseaux)->not->toBeFalse()->and($posImage)->not->toBeFalse();
+        ->and($posReseaux)->not->toBeFalse()->and($posLogo)->not->toBeFalse();
 
     // Ordre : nom, mentions, PUIS réseaux et logo groupés tout en bas.
     expect($posName)->toBeLessThan($posMentions)
         ->and($posMentions)->toBeLessThan($posReseaux)
-        ->and($posReseaux)->toBeLessThan($posImage);
+        ->and($posReseaux)->toBeLessThan($posLogo);
 });
 
 test('LOT 4 - logo_bas SANS logo téléversé ne casse pas (masquage propre, réseaux seuls en bas)', function (): void {
@@ -587,9 +590,12 @@ test('LOT 4 - logo_bas SANS logo téléversé ne casse pas (masquage propre, ré
         'social_links' => [['platform' => 'linkedin', 'url' => 'https://linkedin.com/in/marie']],
     ], 'logo_bas');
 
+    // MIS À JOUR 2026-10-16 : « aucun <img » n'est plus vrai (les icônes de réseaux sont maintenant
+    // de vrais logos de marque en <img>). On vérifie ce que ce test visait vraiment - masquage
+    // propre du LOGO absent : les SEULS <img> présents sont des icônes de réseaux, aucun logo cassé.
     expect($html)->toContain('Marie Tremblay')
         ->and($html)->toContain('LinkedIn')
-        ->and($html)->not->toContain('<img');
+        ->and(substr_count($html, '<img'))->toBe(substr_count($html, '/images/signature/social/'));
 });
 
 test('LOT 4 - photo_centree centre le contenu (text-align:center) et l\'image (margin:0 auto), vertical garde un rendu à gauche', function (): void {

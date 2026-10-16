@@ -35,8 +35,18 @@
         Tahoma: "Tahoma, Geneva, sans-serif"
     };
 
-    var SOCIAL_ICONS = { linkedin: '💼', facebook: '📘', instagram: '📸', x: '✖️', youtube: '▶️', website: '🌐' };
+    // Vrais logos de marque : PNG hébergés, servis par URL ABSOLUE (une signature est collée dans
+    // un client de courriel tiers; Gmail/Outlook bloquent souvent le SVG inline, le PNG hébergé est
+    // universel). Jumeau exact de SignatureRenderer (SOCIAL_ICON_PLATFORMS + socialIconImg).
+    var SOCIAL_ICON_PLATFORMS = ['linkedin', 'facebook', 'instagram', 'x', 'youtube', 'website'];
     var SOCIAL_LABELS = { linkedin: 'LinkedIn', facebook: 'Facebook', instagram: 'Instagram', x: 'X', youtube: 'YouTube', website: 'Site web' };
+
+    function socialIconImg(platform, px) {
+        if (SOCIAL_ICON_PLATFORMS.indexOf(platform) === -1) { platform = 'website'; }
+        var base = (window.location && window.location.origin) ? window.location.origin : 'https://laveille.ai';
+        // alt="" : icône DÉCORATIVE, le libellé texte du réseau la suit (évite « LinkedIn LinkedIn »).
+        return '<img src="' + base + '/images/signature/social/' + platform + '.png" width="' + px + '" height="' + px + '" alt="" style="vertical-align:middle;border:0;outline:none;text-decoration:none;">';
+    }
 
     // LOT 3 - jumeau exact de SignatureRenderer::FONT_SCALE_FACTORS/PORTRAIT_SHAPES.
     var FONT_SCALE_FACTORS = { petite: 0.9, moyenne: 1.0, grande: 1.15 };
@@ -98,7 +108,10 @@
             font_scale: typeof content.font_scale === 'string' && FONT_SCALE_FACTORS.hasOwnProperty(content.font_scale) ? content.font_scale : 'moyenne',
             // Mention laveille.ai (commentaire HTML invisible) - activée par défaut, seule la
             // valeur EXPLICITEMENT false la retire (jumeau de SignatureRenderer::normalize()).
-            show_attribution: content.show_attribution !== false
+            show_attribution: content.show_attribution !== false,
+            // Avis de confidentialité (demande fondateur 2026-10-16) - jumeau de normalize() PHP.
+            confidentiality_enabled: content.confidentiality_enabled !== false,
+            confidentiality_text: String(content.confidentiality_text || '').trim()
         };
     }
 
@@ -158,19 +171,17 @@
 
         if (!emphasis) {
             var parts = links.map(function (l) {
-                var icon = SOCIAL_ICONS[l.platform] || '🔗';
                 var label = SOCIAL_LABELS[l.platform] || esc(l.platform);
-                return '<a href="' + esc(l.url) + '" style="color:#374151;text-decoration:none;font-family:' + fontStack + ';font-size:' + scalePx('12px', fontScale) + ';">' + icon + ' ' + label + '</a>';
+                return '<a href="' + esc(l.url) + '" style="color:#374151;text-decoration:none;font-family:' + fontStack + ';font-size:' + scalePx('12px', fontScale) + ';">' + socialIconImg(l.platform, Math.round(16 * fontScale)) + ' ' + label + '</a>';
             });
             return '<tr><td style="padding-top:6px;">' + parts.join(' &nbsp;·&nbsp; ') + '</td></tr>';
         }
 
         var accentSafe = esc(accent || '#064E5A');
         return links.map(function (l, index) {
-            var icon = SOCIAL_ICONS[l.platform] || '🔗';
             var label = SOCIAL_LABELS[l.platform] || esc(l.platform);
             var cellStyle = index === 0 ? 'padding-top:10px;border-top:1px solid ' + accentSafe + ';' : 'padding-top:6px;';
-            return '<tr><td style="' + cellStyle + '"><a href="' + esc(l.url) + '" style="color:#374151;text-decoration:none;font-family:' + fontStack + ';font-size:' + scalePx('13px', fontScale) + ';"><span style="font-size:' + scalePx('20px', fontScale) + ';">' + icon + '</span> ' + label + '</a></td></tr>';
+            return '<tr><td style="' + cellStyle + '"><a href="' + esc(l.url) + '" style="color:#374151;text-decoration:none;font-family:' + fontStack + ';font-size:' + scalePx('13px', fontScale) + ';">' + socialIconImg(l.platform, Math.round(22 * fontScale)) + ' ' + label + '</a></td></tr>';
         }).join('');
     }
 
@@ -246,6 +257,16 @@
     // Jumeau exact de SignatureRenderer::blocAttribution().
     function blocAttribution(fontStack, fontScale) {
         return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;border-collapse:collapse;margin-top:8px;"><tr><td style="font-family:' + fontStack + ';font-size:' + scalePx('11px', fontScale) + ';color:#6b7280;">Créé gratuitement avec <a href="https://laveille.ai/outils/signature-courriel" style="color:#6b7280;text-decoration:underline;">laveille.ai</a></td></tr></table>';
+    }
+
+    // Avis de confidentialité au pied de la signature (demande fondateur 2026-10-16) : petit texte
+    // gris discret, un bloc par paragraphe (séparés par une ligne vide). Jumeau exact de
+    // SignatureRenderer::blocConfidentialite().
+    function blocConfidentialite(text, fontStack, fontScale) {
+        var paras = String(text || '').split(/\n{2,}/).map(function (p) { return p.trim(); }).filter(function (p) { return p !== ''; });
+        if (paras.length === 0) { return ''; }
+        var inner = paras.map(function (p) { return '<div style="margin:0 0 4px 0;">' + esc(p).replace(/\n/g, '<br>') + '</div>'; }).join('');
+        return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;border-collapse:collapse;margin-top:10px;"><tr><td style="font-family:' + fontStack + ';font-size:' + scalePx('10px', fontScale) + ';line-height:1.4;color:#6b7280;">' + inner + '</td></tr></table>';
     }
 
     function blocColonneTexte(f, accent, fontStack, nameSize, socialEmphasis, nameDivider, fontScale) {
@@ -386,6 +407,12 @@
         // cliquable en plus de son corps habituel - voir SignatureRenderer::render().
         if (def.banner_role) {
             body += blocBanniere(images[def.banner_role], f, f.cta_url);
+        }
+
+        // Avis de confidentialité (demande fondateur 2026-10-16) - affiché quand activé ET non vide,
+        // juste au-dessus de la mention laveille.ai. Jumeau exact de SignatureRenderer::render().
+        if (f.confidentiality_enabled && f.confidentiality_text) {
+            body += blocConfidentialite(f.confidentiality_text, fontStack, fontScale);
         }
 
         // Mention VISIBLE de laveille.ai au bas de la signature - AFFICHÉE par défaut, RETIRABLE

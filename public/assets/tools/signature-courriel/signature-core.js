@@ -19,6 +19,11 @@ var SIG_GALLERY_CATEGORY_LABELS = {
     banniere: 'Bannière', reseaux: 'Réseaux sociaux'
 };
 
+// Avis de confidentialité : TEXTE par défaut, SOURCE UNIQUE (demande fondateur 2026-10-16).
+// Insécable ( ) avant les deux-points, apostrophe typographique (’). Le renderer ne porte
+// PAS ce défaut : un rendu serveur sans texte n'affiche rien, ce qui protège les signatures d'avant.
+var DEFAULT_CONFIDENTIALITY_TEXT = 'Avis de confidentialité : Ce courriel, ainsi que tout fichier joint, est destiné exclusivement à son ou ses destinataires et peut contenir des renseignements confidentiels, privilégiés ou protégés.\n\nSi vous l’avez reçu par erreur ou si vous n’en êtes pas le destinataire visé, veuillez en aviser immédiatement l’expéditeur, puis supprimer ce courriel et toute copie, sans en lire, reproduire, transmettre, divulguer ni utiliser le contenu.\n\nMerci de votre collaboration.';
+
 function signatureAssistant(config) {
     return {
         template: config.initialTemplate || 'minimal',
@@ -30,7 +35,11 @@ function signatureAssistant(config) {
             // pas changés (voir SignatureRenderer::normalize()).
             pronouns: '', portrait_shape: 'carre', font_scale: 'moyenne',
             // Mention laveille.ai en commentaire HTML - ACTIVÉE par défaut, la case peut la retirer.
-            show_attribution: true
+            show_attribution: true,
+            // Avis de confidentialité au pied de la signature - ACTIVÉ par défaut (demande fondateur
+            // 2026-10-16), texte éditable (défaut = DEFAULT_CONFIDENTIALITY_TEXT, source unique).
+            confidentiality_enabled: true,
+            confidentiality_text: DEFAULT_CONFIDENTIALITY_TEXT
         }, config.initialContent || {}),
         images: Object.assign({ logo: null, portrait: null, banniere: null }, config.initialImages || {}),
         templates: config.templates || [

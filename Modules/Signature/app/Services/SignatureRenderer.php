@@ -99,14 +99,11 @@ final class SignatureRenderer
     // contient JAMAIS la suite « -- » (interdite dans un commentaire HTML) ni de tiret cadratin.
     private const ATTRIBUTION_COMMENT = "<!-- Signature créée gratuitement avec laveille.ai, https://laveille.ai/outils/signature-courriel -->\n";
 
-    private const SOCIAL_ICONS = [
-        'linkedin' => '💼',
-        'facebook' => '📘',
-        'instagram' => '📸',
-        'x' => '✖️',
-        'youtube' => '▶️',
-        'website' => '🌐',
-    ];
+    // Vrais logos de marque : PNG hébergés sur le site, servis par URL ABSOLUE. Une signature vit
+    // dans un client de courriel tiers (Gmail, Outlook), et ces clients bloquent souvent le SVG
+    // inline - le PNG hébergé est le seul format universel. Jumeau exact de signature-render.js
+    // (SOCIAL_ICON_PLATFORMS). Fichiers : public/images/signature/social/{plateforme}.png.
+    private const SOCIAL_ICON_PLATFORMS = ['linkedin', 'facebook', 'instagram', 'x', 'youtube', 'website'];
 
     private const SOCIAL_LABELS = [
         'linkedin' => 'LinkedIn',
@@ -145,6 +142,12 @@ final class SignatureRenderer
         // (voir docblock de SignatureTemplateRegistry).
         if (! empty($def['banner_role'])) {
             $body .= self::blocBanniere($images[$def['banner_role']] ?? null, $f);
+        }
+
+        // Avis de confidentialité (demande fondateur 2026-10-16) - affiché quand activé ET non vide,
+        // juste au-dessus de la mention laveille.ai. Jumeau exact de renderSignature().
+        if ($f['confidentiality_enabled'] && $f['confidentiality_text'] !== '') {
+            $body .= self::blocConfidentialite($f['confidentiality_text'], $fontStack, $fontScale);
         }
 
         // Mention VISIBLE de laveille.ai au bas de la signature - AFFICHÉE par défaut, RETIRABLE
@@ -224,6 +227,12 @@ final class SignatureRenderer
             // Mention laveille.ai (commentaire HTML) - activée par défaut, seule une valeur
             // explicitement fausse la retire (jumeau de normalize() dans signature-render.js).
             'show_attribution' => filter_var($content['show_attribution'] ?? true, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true,
+            // Avis de confidentialité (demande fondateur 2026-10-16) - activé par défaut, texte
+            // éditable. Jumeau de normalize() dans signature-render.js. Le TEXTE par défaut vit côté
+            // éditeur (signature-core.js), jamais ici : un rendu serveur sans texte n'affiche rien,
+            // ce qui protège les signatures créées AVANT cette fonctionnalité.
+            'confidentiality_enabled' => filter_var($content['confidentiality_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true,
+            'confidentiality_text' => trim((string) ($content['confidentiality_text'] ?? '')),
         ];
     }
 
@@ -532,14 +541,13 @@ final class SignatureRenderer
             $parts = [];
             foreach ($links as $link) {
                 $platform = (string) ($link['platform'] ?? 'website');
-                $icon = self::SOCIAL_ICONS[$platform] ?? '🔗';
                 $label = self::SOCIAL_LABELS[$platform] ?? self::e($platform);
                 $parts[] = sprintf(
                     '<a href="%s" style="color:#374151;text-decoration:none;font-family:%s;font-size:%s;">%s %s</a>',
                     self::e($link['url']),
                     $fontStack,
                     self::scalePx('12px', $fontScale),
-                    $icon,
+                    self::socialIconImg($platform, (int) round(16 * $fontScale)),
                     $label
                 );
             }
@@ -551,24 +559,68 @@ final class SignatureRenderer
         $rows = '';
         foreach ($links as $index => $link) {
             $platform = (string) ($link['platform'] ?? 'website');
-            $icon = self::SOCIAL_ICONS[$platform] ?? '🔗';
             $label = self::SOCIAL_LABELS[$platform] ?? self::e($platform);
             $cellStyle = $index === 0
                 ? 'padding-top:10px;border-top:1px solid '.$accentSafe.';'
                 : 'padding-top:6px;';
             $rows .= sprintf(
-                '<tr><td style="%s"><a href="%s" style="color:#374151;text-decoration:none;font-family:%s;font-size:%s;"><span style="font-size:%s;">%s</span> %s</a></td></tr>',
+                '<tr><td style="%s"><a href="%s" style="color:#374151;text-decoration:none;font-family:%s;font-size:%s;">%s %s</a></td></tr>',
                 $cellStyle,
                 self::e($link['url']),
                 $fontStack,
                 self::scalePx('13px', $fontScale),
-                self::scalePx('20px', $fontScale),
-                $icon,
+                self::socialIconImg($platform, (int) round(22 * $fontScale)),
                 $label
             );
         }
 
         return $rows;
+    }
+
+    /**
+     * Icône de réseau social : vrai logo de marque (PNG hébergé, URL ABSOLUE pour survivre au
+     * collage dans un client de courriel tiers). Repli défensif sur le globe `website` si la
+     * plateforme est inconnue - le validateur la borne déjà à l'énumération. Jumeau exact de
+     * signature-render.js (fonction socialIconImg).
+     */
+    private static function socialIconImg(string $platform, int $px): string
+    {
+        $platform = in_array($platform, self::SOCIAL_ICON_PLATFORMS, true) ? $platform : 'website';
+        $base = rtrim((string) config('app.url'), '/');
+
+        // alt="" : l'icône est DÉCORATIVE - le libellé texte du réseau la suit immédiatement, donc
+        // un alt la ferait annoncer deux fois par un lecteur d'écran (« LinkedIn LinkedIn »).
+        return sprintf(
+            '<img src="%s/images/signature/social/%s.png" width="%d" height="%d" alt="" style="vertical-align:middle;border:0;outline:none;text-decoration:none;">',
+            self::e($base),
+            $platform,
+            $px,
+            $px
+        );
+    }
+
+    /**
+     * Avis de confidentialité au pied de la signature (demande fondateur 2026-10-16) : petit texte
+     * gris discret, un bloc par paragraphe (séparés par une ligne vide dans le texte saisi). Affiché
+     * seulement quand activé ET non vide - voir render(). Jumeau exact de blocConfidentialite() dans
+     * signature-render.js.
+     */
+    private static function blocConfidentialite(string $text, string $fontStack, float $fontScale): string
+    {
+        $paras = array_values(array_filter(
+            array_map('trim', preg_split('/\n{2,}/', $text) ?: []),
+            static fn ($p) => $p !== ''
+        ));
+        if ($paras === []) {
+            return '';
+        }
+
+        $inner = '';
+        foreach ($paras as $p) {
+            $inner .= '<div style="margin:0 0 4px 0;">'.nl2br(self::e($p)).'</div>';
+        }
+
+        return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;border-collapse:collapse;margin-top:10px;"><tr><td style="font-family:'.$fontStack.';font-size:'.self::scalePx('10px', $fontScale).';line-height:1.4;color:#6b7280;">'.$inner.'</td></tr></table>';
     }
 
     /**

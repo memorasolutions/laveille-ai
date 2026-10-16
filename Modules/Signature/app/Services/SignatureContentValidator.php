@@ -70,6 +70,10 @@ final class SignatureContentValidator
             'content.qr_enabled' => ['nullable', 'boolean'],
             // Mention laveille.ai en commentaire HTML - activée par défaut, la case peut la retirer.
             'content.show_attribution' => ['nullable', 'boolean'],
+            // Avis de confidentialité au pied de la signature (demande fondateur 2026-10-16) -
+            // activé par défaut, texte éditable (défaut côté éditeur, voir signature-core.js).
+            'content.confidentiality_enabled' => ['nullable', 'boolean'],
+            'content.confidentiality_text' => ['nullable', 'string', 'max:1000'],
             // LOT 3 (2026-09-25) - pronoms, forme du portrait, taille de police. Enum FERMÉ pour
             // les deux derniers (Rule::in), jamais une valeur libre.
             'content.pronouns' => ['nullable', 'string', 'max:30'],

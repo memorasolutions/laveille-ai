@@ -355,6 +355,21 @@
                     </div>
                     @endif
 
+                    {{-- Avis de confidentialité au pied de la signature (demande fondateur 2026-10-16).
+                         Activé PAR DÉFAUT, texte éditable, retirable. Pilote le moteur canonique partagé
+                         par l'aperçu, la copie et l'export. --}}
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="sig-confidentiality-enabled" x-model="content.confidentiality_enabled">
+                        <label class="form-check-label small" for="sig-confidentiality-enabled">
+                            {{ __('Ajouter un avis de confidentialité au bas de la signature') }}
+                        </label>
+                    </div>
+                    <div class="mb-3" x-show="content.confidentiality_enabled">
+                        <label class="form-label small" for="sig-confidentiality-text">{{ __('Texte de l\'avis de confidentialité') }}</label>
+                        <textarea id="sig-confidentiality-text" class="form-control" rows="4" maxlength="1000" x-model="content.confidentiality_text"></textarea>
+                        <p class="form-text small mb-0">{{ __('Petit texte gris, affiché au bas de la signature. Modifiable à ta guise.') }}</p>
+                    </div>
+
                     {{-- Mention laveille.ai VISIBLE au bas de la signature rendue. Affichée par défaut,
                          retirable ici. (Le commentaire HTML de mention, lui, reste toujours présent dans
                          le code source, non désactivable.) Pilote le moteur canonique (renderSignature)
